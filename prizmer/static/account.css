@@ -1,0 +1,44 @@
+#logo {
+margin-top: 5px;
+margin-bottom: 0;
+margin-left: 5px;
+width: 10%;
+}
+
+.container {
+	border: solid 1px #C6C2E5  ;
+	background-color: #E8E5FB;
+	text-align: center;
+}
+
+.block-res {
+	border: solid 1px #C6C2E5  ;
+	/*display: flex;*/
+	text-align: center;
+	
+}
+.row {
+	border: solid 1px #C6C2E5  ;
+}
+.col,.col-2,.col-3, .col-4, .col-5, .col-6,.col-7,.col-8,.col-9,.col-10, .col-11,.col-12
+{
+	border: solid 1px #C6C2E5  ;
+}
+
+.content{
+	border: solid 2px #C6C2E5;
+	border-collapse:collapse;
+	width: 90%;
+	text-align: center;
+	padding: 3px;
+}
+table, td, th
+{
+text-align: center;
+margin-top: 10px;
+margin: auto;
+width: 90%;
+border:solid 2px #C6C2E5;
+font-size: small;
+padding: 3px;
+}

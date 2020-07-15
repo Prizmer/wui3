@@ -1,0 +1,341 @@
+<script src="/static/liHighLight_30_min.js" type=text/javascript></script>
+<script>
+
+/*Для отчёта 80020*/
+function set_color(){
+var tbl = document.getElementsByName("dt_2");
+if (tbl !== null)
+{
+    var el = tbl[0].getElementsByTagName("td");
+    if (el !== null)
+    {
+        for (var i = 0; i < el.length; i++) {
+          if (el[i].className == "col_date") {
+             el[i].className += " " + "td_white";
+          }
+          else if (parseInt(el[i].innerHTML, 10) == 48) {
+            el[i].className += " " + "td_green";
+          }
+          else if(parseInt(el[i].innerHTML, 10) < 1) {
+                el[i].className += " " + "td_red";
+                 }
+          else if ((parseInt(el[i].innerHTML, 10) > 1) && (parseInt(el[i].innerHTML, 10) < 48) ) {
+                    el[i].className += " " + "td_yellow";
+                  }
+          else { el[i].className += " " + "td_else";}
+        }
+    }
+var el = tbl[0].getElementsByTagName("th");
+/*особый вид для первой колонки*/
+if (el !== null)
+    {
+    for (var i = 0; i < el.length; i++) {
+      if (el[i].innerHTML == "Дата  ") {
+         el[i].className += " " + "th_first";
+      }
+     }
+    }
+}}
+
+function set_title(){
+var tbl = document.getElementsByName("dt_2");
+if (tbl !== null)
+{
+    var el_td = tbl[0].getElementsByTagName("td");
+    var el_th = tbl[0].getElementsByTagName("th");
+    var c = el_th.length;
+    var n_row = 1;
+    var j = 0;
+    if (el_td !== null)
+        {        
+        for (var i = 0; i < el_td.length; i++) {            
+            if (i < c){
+                j = i;               
+                }
+            else
+            {                     
+                j = i - c*n_row;    
+                if ((j+1) == c) {  n_row += 1;}                               
+            }
+            if (el_td[i].innerHTML != "Дата  ") {
+                    el_td[i].setAttribute("title", el_td[i].getAttribute("title") +"  " +el_th[j].innerHTML);
+            }
+           
+        }
+}
+}
+}
+
+/*выделение ячейки*/
+function onm(td)
+{
+td.style.border="2px solid #f9f9f9";
+}
+
+function outm(td)
+{
+td.style.border="1px solid black";
+}
+
+</script>
+
+<span>Отчёт по форме 80020</span>
+<br>
+<span>Дата начала формирования отчётов {{electric_data_start}}</span>
+<br>
+<span>Дата окончания формирования отчётов {{electric_data_end}}</span>
+<br>
+<br>
+{% if data_table %}
+<span>Отправитель: <strong>{{data_table.0.0}}</strong></span>
+<br>
+<span>ИНН Отправителя: <strong>{{data_table.0.1}}</strong></span>
+<br>
+<span>Номер договора: <strong>{{data_table.0.2}}</strong><span>
+<br>
+<table id="data-table" >
+<tr>
+<th>Заводской номер</th>
+<th>Псевдоним</th>
+<th>Код ПСИ</th>
+<th>Дата последнего чтения</th>
+<th>T0 A+ нач.</th>
+<th>T0 A+ кон.</th>
+<td>Разница</td>
+<td>Сумма получасовок</td>
+<td>% Сбора Получасовок</td>
+
+</tr>
+{% for value in data_table %}
+<tr>
+<td>{{value.3}}</td>
+<td>{{value.4}}</td>
+<td>{{value.5}}</td>
+<td>{{value.6}}</td>
+<td>{{value.7}}</td>
+<td>{{value.8}}</td>
+<td>{{value.9}}</td>
+<td>{{value.10}}</td>
+<td><strong>{{value.11|floatformat}}</strong></td>
+
+</tr>
+{% endfor %}
+</table>
+{% else %}
+<span><strong>Нет данных.</strong></span>
+<br>
+{% endif %}
+<br>
+<span>Проверка наличия данных</span>
+{% if data_table_check_data_header %}
+
+<div class="div_scroll">
+<table class="table_vertical" id="data-table_2" name="dt_2" >
+<thead>
+<tr>
+{% for value in data_table_check_data_header %}
+<!-- <th class="th_vertical">{{value}} </th> -->
+   <th class="th_vertical">{{value.0}} {{value.1}} </th>
+{% endfor %}
+</tr>
+</thead>
+{% for value in data_table_check_data %}
+<tr>
+<td class="col_date">{{value.0|date:"d M Y"}}</td>
+{% if value.1  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.1}}</td> {% endif %}
+{% if value.2  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.2}}</td> {% endif %}
+{% if value.3  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.3}}</td> {% endif %}
+{% if value.4  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.4}}</td> {% endif %}
+{% if value.5  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.5}}</td> {% endif %}
+{% if value.6  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.6}}</td> {% endif %}
+{% if value.7  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.7}}</td> {% endif %}
+{% if value.8  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.8}}</td> {% endif %}
+{% if value.9  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.9}}</td> {% endif %}
+{% if value.10  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.10}}</td> {% endif %}
+{% if value.11  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.11}}</td> {% endif %}
+{% if value.12  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.12}}</td> {% endif %}
+{% if value.13  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.13}}</td> {% endif %}
+{% if value.14  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.14}}</td> {% endif %}
+{% if value.15  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.15}}</td> {% endif %}
+{% if value.16  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.16}}</td> {% endif %}
+{% if value.17  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.17}}</td> {% endif %}
+{% if value.18  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.18}}</td> {% endif %}
+{% if value.19  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.19}}</td> {% endif %}
+{% if value.20  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.20}}</td> {% endif %}
+{% if value.21  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.21}}</td> {% endif %}
+{% if value.22  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.22}}</td> {% endif %}
+{% if value.23  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.23}}</td> {% endif %}
+{% if value.24  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.24}}</td> {% endif %}
+{% if value.25  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.25}}</td> {% endif %}
+{% if value.26  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.26}}</td> {% endif %}
+{% if value.27  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.27}}</td> {% endif %}
+{% if value.28  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.28}}</td> {% endif %}
+{% if value.29  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.29}}</td> {% endif %}
+{% if value.30  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.30}}</td> {% endif %}
+{% if value.31  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.31}}</td> {% endif %}
+{% if value.32  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.32}}</td> {% endif %}
+{% if value.33  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.33}}</td> {% endif %}
+{% if value.34  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.34}}</td> {% endif %}
+{% if value.35  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.35}}</td> {% endif %}
+{% if value.36  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.36}}</td> {% endif %}
+{% if value.37  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.37}}</td> {% endif %}
+{% if value.38  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.38}}</td> {% endif %}
+{% if value.39  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.39}}</td> {% endif %}
+{% if value.40  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.40}}</td> {% endif %}
+{% if value.41  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.41}}</td> {% endif %}
+{% if value.42  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.42}}</td> {% endif %}
+{% if value.43  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.43}}</td> {% endif %}
+{% if value.44  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.44}}</td> {% endif %}
+{% if value.45  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.45}}</td> {% endif %}
+{% if value.46  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.46}}</td> {% endif %}
+{% if value.47  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.47}}</td> {% endif %}
+{% if value.48  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.48}}</td> {% endif %}
+{% if value.49  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.49}}</td> {% endif %}
+{% if value.50  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.50}}</td> {% endif %}
+{% if value.51  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.51}}</td> {% endif %}
+{% if value.52  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.52}}</td> {% endif %}
+{% if value.53  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.53}}</td> {% endif %}
+{% if value.54  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.54}}</td> {% endif %}
+{% if value.55  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.55}}</td> {% endif %}
+{% if value.56  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.56}}</td> {% endif %}
+{% if value.57  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.57}}</td> {% endif %}
+{% if value.58  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.58}}</td> {% endif %}
+{% if value.59  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.59}}</td> {% endif %}
+{% if value.60  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.60}}</td> {% endif %}
+{% if value.61  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.61}}</td> {% endif %}
+{% if value.62  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.62}}</td> {% endif %}
+{% if value.63  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.63}}</td> {% endif %}
+{% if value.64  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.64}}</td> {% endif %}
+{% if value.65  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.65}}</td> {% endif %}
+{% if value.66  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.66}}</td> {% endif %}
+{% if value.67  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.67}}</td> {% endif %}
+{% if value.68  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.68}}</td> {% endif %}
+{% if value.69  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.69}}</td> {% endif %}
+{% if value.70  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.70}}</td> {% endif %}
+{% if value.71  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.71}}</td> {% endif %}
+{% if value.72  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.72}}</td> {% endif %}
+{% if value.73  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.73}}</td> {% endif %}
+{% if value.74  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.74}}</td> {% endif %}
+{% if value.75  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.75}}</td> {% endif %}
+{% if value.76  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.76}}</td> {% endif %}
+{% if value.77  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.77}}</td> {% endif %}
+{% if value.78  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.78}}</td> {% endif %}
+{% if value.79  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.79}}</td> {% endif %}
+{% if value.80  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.80}}</td> {% endif %}
+{% if value.81  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.81}}</td> {% endif %}
+{% if value.82  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.82}}</td> {% endif %}
+{% if value.83  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.83}}</td> {% endif %}
+{% if value.84  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.84}}</td> {% endif %}
+{% if value.85  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.85}}</td> {% endif %}
+{% if value.86  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.86}}</td> {% endif %}
+{% if value.87  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.87}}</td> {% endif %}
+{% if value.88  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.88}}</td> {% endif %}
+{% if value.89  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.89}}</td> {% endif %}
+{% if value.90  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.90}}</td> {% endif %}
+{% if value.91  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.91}}</td> {% endif %}
+{% if value.92  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.92}}</td> {% endif %}
+{% if value.93  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.93}}</td> {% endif %}
+{% if value.94  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.94}}</td> {% endif %}
+{% if value.95  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.95}}</td> {% endif %}
+{% if value.96  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.96}}</td> {% endif %}
+{% if value.97  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.97}}</td> {% endif %}
+{% if value.98  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.98}}</td> {% endif %}
+{% if value.99  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.99}}</td> {% endif %}
+{% if value.100  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.100}}</td> {% endif %}
+{% if value.101  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.101}}</td> {% endif %}
+{% if value.102  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.102}}</td> {% endif %}
+{% if value.103  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.103}}</td> {% endif %}
+{% if value.104  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.104}}</td> {% endif %}
+{% if value.105  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.105}}</td> {% endif %}
+{% if value.106  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.106}}</td> {% endif %}
+{% if value.107  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.107}}</td> {% endif %}
+{% if value.108  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.108}}</td> {% endif %}
+{% if value.109  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.109}}</td> {% endif %}
+{% if value.110  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.110}}</td> {% endif %}
+{% if value.111  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.111}}</td> {% endif %}
+{% if value.112  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.112}}</td> {% endif %}
+{% if value.113  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.113}}</td> {% endif %}
+{% if value.114  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.114}}</td> {% endif %}
+{% if value.115  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.115}}</td> {% endif %}
+{% if value.116  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.116}}</td> {% endif %}
+{% if value.117  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.117}}</td> {% endif %}
+{% if value.118  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.118}}</td> {% endif %}
+{% if value.119  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.119}}</td> {% endif %}
+{% if value.120  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.120}}</td> {% endif %}
+{% if value.121  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.121}}</td> {% endif %}
+{% if value.122  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.122}}</td> {% endif %}
+{% if value.123  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.123}}</td> {% endif %}
+{% if value.124  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.124}}</td> {% endif %}
+{% if value.125  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.125}}</td> {% endif %}
+{% if value.126  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.126}}</td> {% endif %}
+{% if value.127  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.127}}</td> {% endif %}
+{% if value.128  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.128}}</td> {% endif %}
+{% if value.129  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.129}}</td> {% endif %}
+{% if value.130  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.130}}</td> {% endif %}
+{% if value.131  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.131}}</td> {% endif %}
+{% if value.132  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.132}}</td> {% endif %}
+{% if value.133  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.133}}</td> {% endif %}
+{% if value.134  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.134}}</td> {% endif %}
+{% if value.135  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.135}}</td> {% endif %}
+{% if value.136  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.136}}</td> {% endif %}
+{% if value.137  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.137}}</td> {% endif %}
+{% if value.138  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.138}}</td> {% endif %}
+{% if value.139  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.139}}</td> {% endif %}
+{% if value.140  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.140}}</td> {% endif %}
+{% if value.141  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.141}}</td> {% endif %}
+{% if value.142  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.142}}</td> {% endif %}
+{% if value.143  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.143}}</td> {% endif %}
+{% if value.144  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.144}}</td> {% endif %}
+{% if value.145  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.145}}</td> {% endif %}
+{% if value.146  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.146}}</td> {% endif %}
+{% if value.147  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.147}}</td> {% endif %}
+{% if value.148  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.148}}</td> {% endif %}
+{% if value.149  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.149}}</td> {% endif %}
+{% if value.150  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.150}}</td> {% endif %}
+{% if value.151  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.151}}</td> {% endif %}
+{% if value.152  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.152}}</td> {% endif %}
+{% if value.153  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.153}}</td> {% endif %}
+{% if value.154  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.154}}</td> {% endif %}
+{% if value.155  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.155}}</td> {% endif %}
+{% if value.156  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.156}}</td> {% endif %}
+{% if value.157  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.157}}</td> {% endif %}
+{% if value.158  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.158}}</td> {% endif %}
+{% if value.159  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.159}}</td> {% endif %}
+{% if value.160  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.160}}</td> {% endif %}
+{% if value.161  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.161}}</td> {% endif %}
+{% if value.162  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.162}}</td> {% endif %}
+{% if value.163  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.163}}</td> {% endif %}
+{% if value.164  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.164}}</td> {% endif %}
+{% if value.165  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.165}}</td> {% endif %}
+{% if value.166  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.166}}</td> {% endif %}
+{% if value.167  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.167}}</td> {% endif %}
+{% if value.168  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.168}}</td> {% endif %}
+{% if value.169  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.169}}</td> {% endif %}
+{% if value.170  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.170}}</td> {% endif %}
+{% if value.171  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.171}}</td> {% endif %}
+{% if value.172  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.172}}</td> {% endif %}
+{% if value.173  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.173}}</td> {% endif %}
+{% if value.174  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.174}}</td> {% endif %}
+{% if value.175  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.175}}</td> {% endif %}
+{% if value.176  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.176}}</td> {% endif %}
+{% if value.177  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.177}}</td> {% endif %}
+{% if value.178  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.178}}</td> {% endif %}
+{% if value.179  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.179}}</td> {% endif %}
+{% if value.180  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.180}}</td> {% endif %}
+{% if value.181  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.181}}</td> {% endif %}
+{% if value.182  != null %} <td title = {{value.0|date:"d-M-Y"}} onmouseover="onm(this)" onmouseout="outm(this)">{{value.182}}</td> {% endif %}
+</tr>
+{% endfor %}
+</table>
+<script> set_color();  set_title();</script>
+{% else %}
+<span><strong>Нет данных.</strong></span>
+
+{% endif %}
+<br>
+</div>
+
+<br>
+<br>
+<br>
+

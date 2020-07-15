@@ -1,0 +1,97 @@
+<html>
+    <head>
+    </head>
+    <body>
+<script src="/static/liHighLight.js" type=text/javascript></script>
+<span>Показания теплоэнергии на начало суток <strong>{{date_end}}</strong></span>
+<br>
+<br>
+{% if not dt_heat_pulsar and not dt_heat_sayany and not dt_heat_elf and not dt_heat_karat %}
+<span><strong>Нет данных.</strong></span>
+<br>
+{% endif%}
+
+{% if dt_heat_pulsar %}
+<table class="content" id="data-table" >
+<tr>
+<th>Счётчик</th>
+<th>Энергия, Гкал</th>
+<th>Объём, м3</th>
+<th>Tвх.,<br />°С</th>
+<th>Tвых.,<br />°С</th>
+</tr>
+{% for value in dt_heat_pulsar %}
+<tr>
+<td>{{value.4}}</td>
+<td>{{value.5}}</td>
+<td>{{value.6}}</td>
+<td>{{value.7}}</td>
+<td>{{value.8}}</td>
+
+</tr>
+{% endfor %}
+</table>
+<br>
+{% endif %}
+
+{% if dt_heat_sayany %}
+<table class="content" id="data-table" >
+<tr>
+<th>Счётчик</th>
+<th>Энергия</th>
+<th>Масса, т </th>
+<th>Tвх.</th>
+<th>Tвых.</th>
+</tr>
+{% for value in dt_heat_sayany %}
+<tr>
+<td>{{value.4}}</td>
+<td>{{value.6}}</td>
+<td>{{value.7}}</td>
+<td>{{value.8}}</td>
+<td>{{value.9}}</td>
+</tr>
+{% endfor %}
+</table>
+<br>
+{% endif %}
+
+{% if dt_heat_elf %}
+<table class="content" id="data-table" >
+<tr>
+<th>Счётчик</th>
+<th>Энергия</th>
+<th>Объём</th>
+</tr>
+{% for value in dt_heat_elf %}
+<tr>
+<td>{{value.4}}</td>
+<td>{{value.6}}</td>
+<td>{{value.7}}</td>
+</tr>
+{% endfor %}
+</table>
+<br>
+{% endif %}
+
+{% if dt_heat_karat %}
+<table class="content" id="data-table" >
+<tr>
+<th>Счётчик</th>
+<th>Энергия</th>
+<th>Объём</th>
+</tr>
+{% for value in dt_heat_karat %}
+<tr>
+<td>{{value.4}}</td>
+<td>{{value.6}}</td>
+<td>{{value.7}}</td>
+</tr>
+{% endfor %}
+</table>
+<br>
+{% endif %}
+</div>
+
+</body>
+</html>

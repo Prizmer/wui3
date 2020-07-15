@@ -1,0 +1,51 @@
+
+{% load static %} <link href="{%static "main.css"%}" rel="stylesheet"/>
+{% load static %} <script src="{%static "jquery.js" %}" type=text/javascript></script>
+{% load static %} <script src="{%static "jquery-ui/ui/jquery-ui.js" %}" type=text/javascript></script>
+{% load static %} <script src="{%static "jquery-ui/ui/i18n/jquery.ui.datepicker-ru.js" %}" type=text/javascript></script>
+
+<script src="/static/liHighLight.js" type=text/javascript></script>
+
+<br>
+<span><strong> Цифровые приборы | Замена счётчиков</strong> </span>
+<br><br>
+
+<p>
+ <div class="meters_change_block">
+ &nbsp;&nbsp;Старый номер счётчика будет удалён из БД, на его место будет записан новый счётчик. 
+<br><br>
+ <font color="000">
+        <span><strong>&nbsp;&nbsp;Старый счётчик&nbsp;</strong></span>
+		<input id="old_meter" name="old_meter" type="text" value ={{old_meter}}>
+
+		<span><strong>&nbsp;&nbsp;&nbsp;Новый счётчик&nbsp;</strong></span>
+		<input id="new_meter" name="new_meter" type="text" value={{new_meter}}>
+		<br><br>
+        &nbsp;&nbsp;<span onclick="load_service('service_change_electric')" class="button" id="change_button"><b>Заменить</b></span> 
+		<br>        
+	</font>	
+	 <br>&nbsp;&nbsp; <font color="#FF6347"> {{change_meter_status}} </font>
+	<br><br>
+    </div>
+<br>
+<div class="meters_change_block">
+ &nbsp;&nbsp;Счётчики будут поменяны местами в БД
+<br><br>
+ <font color="000">
+        <span><strong>&nbsp;&nbsp;Счётчик 1&nbsp;</strong></span>
+		<input id="meter1" name="meter1" type="text" value={{meter1}}>
+
+		<span><strong>&nbsp;&nbsp;&nbsp;Счётчик 2&nbsp;</strong></span>
+		<input id="meter2" name="meter2" type="text" value={{meter2}}>
+		<br><br>
+        &nbsp;&nbsp;<span onclick="load_service('service_replace_electric')" class="button" id="replace_button"><b>Заменить</b></span> 
+		<br>        
+	</font>	
+	 <br>&nbsp;&nbsp; <font color="#FF6347"> {{replace_meter_status}} <font>
+	<br><br>
+    </div>
+	
+</form>
+<br>
+<br>
+<br>

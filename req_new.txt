@@ -1,0 +1,9 @@
+django==3.0.8
+django-debug-toolbar==2.2
+django-excel-response==2.0.5
+django-extensions==3.0.2
+lxml==4.5.1
+openpyxl==2.4.11
+psycopg2==2.8.5
+#pytz
+simplejson==3.17.0

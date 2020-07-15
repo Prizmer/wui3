@@ -1,0 +1,85 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<title>Удельный расход</title>
+<!-- Graph plugin-->
+
+	<script type="text/javascript">
+	{% if AllData %}
+    var ctx = document.getElementById("myChart").getContext('2d');
+	var myChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+		labels:{{label|safe}},
+		datasets: {{AllData|safe}},
+    options: {
+        scales: {
+            yAxes: [{
+                ticks: {
+                    beginAtZero:true
+                }
+            }]
+        }
+    }
+	}
+});
+	{% endif %}	
+
+	</script>
+ 
+</head>
+<body>
+<br>
+<br>
+<span>Абонент: <strong>{{obj_title}}</strong></span>
+<br>
+<br>{% if AllData %}
+			<canvas id="myChart" width="300" height="100"></canvas>						
+	{% endif %}
+<br>		
+		
+
+<br>
+{% if data_table %}
+<span>Таблица значений профиля показаний за период с <strong>{{electric_data_start}}</strong> по <strong>{{electric_data_end}}  без учёта Кт</span> 
+
+<table class="content" id="data-table" >
+<tr>
+<th>Дата</th>
+<th>T0 A+, кВт*ч</th>
+<th>Расход T0 за прошедшие сутки, кВт*ч</th>
+<th>T1 A+, кВт*ч</th>
+<th>Расход T1 за прошедшие сутки, кВт*ч</th>
+<th>T2 A+, кВт*ч</th>
+<th>Расход T2 за прошедшие сутки, кВт*ч</th>
+<th>T3 A+, кВт*ч</th>
+<th>Расход T3 за прошедшие сутки, кВт*ч</th>
+<!--<th>T1 A+</th>-->
+<!--<th>T2 A+</th>-->
+<!--<th>T3 A+</th>-->
+
+
+</tr>
+{% for value in data_table %}
+<tr>
+<td>{{value.0}}</td>
+<td>{{value.5}}</td>
+<td>{{value.12|floatformat:2}}</td>
+<td>{{value.6}}</td>
+<td>{{value.13|floatformat:2}}</td>
+<td>{{value.7}}</td>
+<td>{{value.14|floatformat:2}}</td>
+<td>{{value.8}}</td>
+<td>{{value.15|floatformat:2}}</td>
+</tr>
+   {% endfor %}
+</table>
+{% else %}
+<span><strong>Нет данных.</strong></span>
+{% endif %}
+<br>
+<br>
+<br>
+</body>
+</html>

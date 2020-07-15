@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block control-block %}
+<div id="title-subsystem-icon">{% load static %}
+<img  src="{%static "images/economic-ico64.png" %}" alt="Экономический учёт"></div> 
+<h2 id="title-subsystem">Отчёты</h2>
+
+    <br>
+    <br>
+    <div>
+        <span id="title-report"><strong>Отчёты &nbsp;</strong></span>
+        <select id="choice_report">
+            <option value="0">Выберите отчёт...</option>
+            <option value="1">Потребление за период.</option>
+            <option value="2">Показания на дату.</option>
+            <option value="3">Показания за период.</option>
+            <option value="4">30-мин. срез мощности.</option>
+            <option value="6">Часовые приращения энергии</option>
+            <option value="7">Удельный расход электроэнергии</option>
+			<option value="9">9. Отчёт по всем ресурсам за период</option>
+			<option value="42">42. Отчёт по всем ресурсам на дату</option>
+			<option value="44">44. Отчёт по электричеству на дату</option>
+			<option value="46">46. Отчёт по воде на дату</option>
+			<option value="48">48. Отчёт по теплу на дату</option>
+			<option value="66">66. Отчёт по теплу и воде на дату. Эльф.</option>
+			<option value="76">76. Отчёт по всем ресурсам на дату для абонента</option> 
+			<option value="86">86. Статистика опроса по электрике</option> 
+			<option value="88">88. Статистика опроса по теплу</option> 
+			
+			<option value="90">90. Статистика опроса по воде (импульсные ПУ)</option> 
+			<option value="92">92. Статистика опроса по всем ресурсам за месяц</option> 
+			
+			<option value="89">89. Отчёт для бухгалтерии по электрике (C-300)</option>
+			<option value="93">93. Отчёт для бухгалтерии по воде (C-300)</option>
+			
+			<option value="94">94. Статистика опроса по воде (цифровые ПУ)</option> 
+
+        </select>
+        <div id ="export_report">-------</div>
+    </div>
+
+<div id="datepickerStart"><strong>Начальная дата:</strong></div>
+<div id="datepickerEnd"><span id="title-date-start"><strong>Конечная дата:</strong></span></div>
+</div>
+{% endblock %}

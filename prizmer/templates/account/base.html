@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  {% block title %}<title>Личный кабинет</title>{% endblock %}
+  <meta charset="utf-8">
+  {% load static %} <script src="{%static "jquery.js" %}" type=text/javascript></script>
+  {% load static %} <link href="{%static "bootstrap-4.3.1-dist/css/bootstrap.css"%}" rel="stylesheet" type="text/css">
+  {% load static %} <link href="{%static "account.css"%}" rel="stylesheet" type="text/css">
+  
+   {% load static %} <script src="{%static "bootstrap-4.3.1-dist/js/bootstrap.bundle.min.js"%}" type=text/javascript></script>
+ <!--  {% load static %} <script src="{%static "bootstrap-4.3.1-dist/js/bootstrap.js"%}" type=text/javascript></script> -->
+ <script type="text/javascript">
+ 
+ //Прячем календарь
+ $("#date_start").collapse('hide');
+ 
+//Устанавливаем дату на сегодня на календарях 
+function getDate() {
+  var today = new Date();
+  var dd = today.getDate();
+  var mm = today.getMonth()+1; //January is 0!
+  var yyyy = today.getFullYear();
+  if(dd<10) {      dd = '0'+dd;  } 
+  if(mm<10) {      mm = '0'+mm;  } 
+  today = yyyy + '-' + mm + '-' + dd;
+  
+  document.getElementById("date_start").value = today;
+  document.getElementById("date_end").value = today;
+}
+
+
+var refreshInfo = function(){
+    setTimeout(function() {
+    var date_start = $('#date_start').val();
+	var date_end = $('#date_end').val(); 	 
+	var period = $('#choice_date').val(); // daily or period
+	
+	$("#spiner").removeClass('d-none');
+	
+	if ($("#collapseElectric").is(":visible"))
+	{
+     $.ajax({
+        type: "GET",
+        url: "/account/electric_info",        
+        data: {date_end:date_end, date_start: date_start, period: period},
+       })
+     	 
+     .done(function( msg ) {
+        $('#electric').html(msg); // Пишем в div ответ от страницы      
+		$("#spiner").addClass('d-none');		
+        });
+	}
+	
+	if ($("#collapseHeat").is(":visible"))
+	{
+	$.ajax({
+        type: "GET",
+        url: "/account/heat_info",      		
+        data: {date_end:date_end, date_start: date_start, period: period},
+       })
+     	 
+     .done(function( msg ) {
+        $('#heat').html(msg); // Пишем в div ответ от страницы       
+		$("#spiner").addClass('d-none'); 
+        });
+	}
+	
+	if ($("#collapseWater").is(":visible"))
+	{	
+	$.ajax({
+        type: "GET",
+        url: "/account/water_info",         
+        data: {date_end:date_end, date_start: date_start, period: period},
+       })
+     	 
+     .done(function( msg ) {
+        $('#water').html(msg); // Пишем в div ответ от страницы
+        $("#spiner").addClass('d-none');		
+			  });			  
+	} 
+  });
+};
+
+ 
+ $(document).ready(function(){
+    $('#choice_date').change(function(){
+		refreshInfo();
+		console.log('refresh');
+		if ($(this).val() == "daily")
+		{ //отображаем 1 календаря
+		  $("#date_start").collapse('hide'); }	
+		else
+		{ //отображаем 2 календарь
+			$("#date_start").collapse('show');}
+    });
+});
+ 
+window.onload = function() {
+  getDate(); 
+  // При открытии скрытого элемента наступает событие, вызываем в нём обновление информации
+$('#collapseElectric').on('shown.bs.collapse', function () {
+  refreshInfo();
+})
+$('#collapseHeat').on('shown.bs.collapse', function () {
+  refreshInfo();
+})
+$('#collapseWater').on('shown.bs.collapse', function () {
+  refreshInfo();
+})
+}; 
+
+
+$(document).ready(function(){
+    $('#date_start').change(function(){
+		refreshInfo();
+		console.log('refresh');		
+    });
+});
+
+$(document).ready(function(){
+    $('#date_end').change(function(){
+		refreshInfo();
+		//console.log('refresh');		
+    });
+});
+
+ 
+ </script>
+</head>
+
+<body>
+
+  <div class="container">
+<div class="row">
+   <div class="col-sm" >
+		<div class="spinner-border d-none" id="spiner" role="status">
+		  <span class="sr-only">Загрузка...</span>
+		</div>  
+	</div>
+	<div class="col-sm-auto align-self-end order-12">
+	{{obj_name}}&nbsp;&nbsp; {{ab_name}}
+	</div>
+	<div class="col-sm-auto align-self-end order-12" >
+	Здравствуйте, {{user_name}} &nbsp;&nbsp;
+	<span> <a href="../exit"><strong>Выйти</strong> </a></span>
+	</div>
+	
+  </div>
+
+    <div class="row">
+	 <div class="col-12">
+      {% load static %} <img id="logo" src="{%static "account_prizmer_imgs/logo1.png" %}" alt="ООО Правильные Измерения">
+      </div>
+	</div>
+	<div class="row">
+	 <div class="col-12">
+       Призмер
+      </div>
+	</div>
+
+	<!-- Выбор на дату или за период -->
+ <div class="form-row justify-content-center">
+	<div class="form-group col-ms ">    
+      <select id="choice_date" class="custom-select mr-sm-2">
+        <option selected value="daily">На дату</option>
+       <!--  <option value="period">За период</option> -->
+      </select>
+    </div>
+	<!-- Даты -->	
+	 <div class="col-ms-2 " >
+      <input type="date" class="form-control collapse" id="date_start" placeholder="Дата" >
+	</div>
+	
+	 <div class="col-ms-2" >
+      <input type="date" class="form-control" id="date_end" name="date" placeholder="Дата" >
+	</div>
+</div>
+	
+	
+<!--  Ресурсы -->
+    <div class="row">
+      <div class="col-sm-4 block-res">
+      <a class="btn btn-link" data-toggle="collapse" href="#collapseElectric" role="button" aria-expanded="false" >
+      {% load static %} <img id="electric-ico" src="{%static "account_prizmer_imgs/electr-ico.png" %}" alt="Электроучёт">
+      </a>
+      </div>
+	  
+	  <div class="col-sm-4 block-res">
+      <a class="btn btn-link" data-toggle="collapse" href="#collapseHeat" role="button" aria-expanded="false" >
+       {% load static %} <img id="electric-ico" src="{%static "account_prizmer_imgs/heat-ico.png" %}" alt="Теплоучёт">
+      </a>
+	  </div>
+
+	  <div class="col-sm-4 block-res">
+      <a class="btn btn-link" data-toggle="collapse" href="#collapseWater" role="button" aria-expanded="false" >
+	  {% load static %} <img id="electric-ico" src="{%static "account_prizmer_imgs/water-ico.png" %}" alt="Водоучёт">
+      </a>
+	  </div>
+
+    </div>
+	<div class ="row">
+	 <div class="col-sm-4 block-res">
+		<div class="collapse" id="collapseElectric">
+		<div class="card card-body" id = "electric">
+			 ЭЛЕКТРИКА
+			  </div>
+			 </div>
+	</div>
+
+	<div class="col-sm-4 block-res">
+		<div class="collapse" id="collapseHeat">
+			  <div class="card card-body" id = "heat">
+			 ТЕПЛО
+			  </div>
+			 </div>
+	</div>
+
+	<div class="col-sm-4 block-res">
+		<div class="collapse" id="collapseWater">
+			  <div class="card card-body" id = "water">
+			 ВОДА
+			  </div>
+			 </div>
+	</div>
+	</div>
+  </div>
+
+</body>
+</html>

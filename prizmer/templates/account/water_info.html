@@ -1,0 +1,71 @@
+<html>
+    <head>
+    </head>
+    <body>
+<script src="/static/liHighLight.js" type=text/javascript></script>
+<span>Показания водоучёта на начало суток <strong>{{date_end}}</strong></span>
+<br>
+<br>
+{% if not dt_water_impulse and not dt_water_digital and not dt_water_elf %}
+<span><strong>Нет данных.</strong></span>
+<br>
+{% endif%}
+
+{% if dt_water_impulse %}
+<table class="content" id="data-table" >
+<tr>
+<th>Счётчик</th>
+<th>Объём, м3</th>
+
+</tr>
+{% for value in dt_water_impulse %}
+<tr>
+<td>{{value.4}}</td>
+<td>{{value.6}}</td>
+
+</tr>
+{% endfor %}
+</table>
+<br>
+{% endif %}
+
+{% if dt_water_digital %}
+<table class="content" id="data-table" >
+<tr>
+<th>Счётчик</th>
+<th>Объём, м3</th>
+
+</tr>
+{% for value in dt_water_digital %}
+<tr>
+<td>{{value.4}}</td>
+<td>{{value.6}}</td>
+
+</tr>
+{% endfor %}
+</table>
+<br>
+{% endif %}
+
+{% if dt_water_elf %}
+<table class="content" id="data-table" >
+<tr>
+<th>Счётчик</th>
+<th>Ресурс</th>
+<th>Объём, м3</th>
+</tr>
+{% for value in dt_water_elf %}
+<tr>
+<td>{{value.4}}</td>
+<td>{{value.5}}</td>
+<td>{{value.6}}</td>
+</tr>
+{% endfor %}
+</table>
+<br>
+{% endif %}
+
+</div>
+
+</body>
+</html>

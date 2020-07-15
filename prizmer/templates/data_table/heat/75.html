@@ -1,0 +1,51 @@
+<html>
+<head>
+</head>
+<body>
+<script src="/static/liHighLight.js" type=text/javascript></script>
+<span>Потребление по счётчика Карат-307 за период с <strong>{{electric_data_start}}</strong> по <strong>{{electric_data_end}}</strong></span>
+<br>
+<span>Абонент: <strong>{{obj_title}}</strong></span>
+<br>
+<br>
+<br>
+{% if data_table %} 
+<table class="content" id="data-table" >
+<tr>
+<th>Абонент</th>
+<th>Счётчик</th>
+<th>Тепловая Энергия на {{electric_data_start}}, Гкал</th>
+<th>Тепловая Энергия на {{electric_data_end}}, Гкал</th>
+<th>Потребление Энергии, Гкал</th>
+<th>Масса на {{electric_data_start}}, кг</th>
+<th>Масса на {{electric_data_end}}, кг</th>
+<th>Потребление Массы, кг</th>
+
+
+
+</tr>
+{% for value in data_table %}
+<tr>
+<td>{{value.0}}</td>
+<td>{{value.1}}</td>
+<td>{{value.2}}</td>
+<td>{{value.3}}</td>
+<td><strong>{{value.4|floatformat:2}}</strong></td>
+<td>{{value.5}}</td>
+<td>{{value.6}}</td>
+<td><strong>{{value.7|floatformat:2}}</strong></td>
+
+
+</tr>
+{% endfor %}
+</table>
+{% else %}
+<br>
+<br>
+<span><strong>Нет данных.</strong></span>
+<br>
+{% endif %}
+<br>
+<br>
+</body>
+</html>
