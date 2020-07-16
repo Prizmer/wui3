@@ -13,7 +13,7 @@ WHERE
   link_abonents_taken_params.guid_abonents = vru_no_itp.ab_guid AND
   link_abonents_taken_params.guid_taken_params = taken_params.guid AND
   daily_values.id_taken_params = taken_params.id and
-  obj_name='Корпус 2'
+  obj_name='Корпус 7'
 )
 ;
 
@@ -32,7 +32,7 @@ WHERE
   link_abonents_taken_params.guid_abonents = vru_no_itp.ab_guid AND
   link_abonents_taken_params.guid_taken_params = taken_params.guid AND
   monthly_values.id_taken_params = taken_params.id and
-  obj_name='Корпус 2'
+  obj_name='Корпус 7'
   )
   ;
 
@@ -53,7 +53,7 @@ WHERE
   link_abonents_taken_params.guid_taken_params = taken_params.guid AND
   link_balance_groups_meters.guid_meters = meters.guid AND
   balance_groups.guid = link_balance_groups_meters.guid_balance_groups and
-  obj_name='Корпус 2'
+  obj_name='Корпус 7'
   )
 ;
 
@@ -72,7 +72,7 @@ WHERE
   link_abonents_taken_params.guid_abonents = vru_no_itp.ab_guid AND
   link_abonents_taken_params.guid_taken_params = taken_params.guid AND
   link_meters_tcpip_settings.guid_meters = meters.guid  
-  and  obj_name='Корпус 2'
+  and  obj_name='Корпус 7'
   group by link_meters_tcpip_settings.guid
   )
 ;
@@ -92,46 +92,9 @@ WHERE
   link_abonents_taken_params.guid_abonents = vru_no_itp.ab_guid AND
   link_abonents_taken_params.guid_taken_params = taken_params.guid AND
   link_meters_comport_settings.guid_meters = meters.guid
-  and  obj_name='Корпус 2'
+  and  obj_name='Корпус 7'
   group by   link_meters_comport_settings.guid
   )
-;
-
-
-
-
-delete from  meters
-where  meters.guid in
-(SELECT 
-  meters.guid
-FROM 
-  public.vru_no_itp, 
-  public.taken_params, 
-  public.link_abonents_taken_params, 
-  public.meters
-WHERE 
-  taken_params.guid_meters = meters.guid AND
-  link_abonents_taken_params.guid_abonents = vru_no_itp.ab_guid AND
-  link_abonents_taken_params.guid_taken_params = taken_params.guid
-  and  obj_name='Корпус 2'
-  group by meters.guid  
-  )
-;
-
-delete from taken_params
-  where  taken_params.id in
- (SELECT 
-  taken_params.id
-FROM 
-  public.vru_no_itp, 
-  public.taken_params, 
-  public.link_abonents_taken_params
-WHERE 
-  link_abonents_taken_params.guid_abonents = vru_no_itp.ab_guid AND
-  link_abonents_taken_params.guid_taken_params = taken_params.guid
-   and  obj_name='Корпус 2'
-  group by taken_params.id 
-)
 ;
 
 
@@ -146,10 +109,11 @@ FROM
 WHERE 
   link_abonents_taken_params.guid_abonents = vru_no_itp.ab_guid AND
   link_abonents_taken_params.guid_taken_params = taken_params.guid
-  and obj_name='Корпус 2'
+  and obj_name='Корпус 7'
   group by link_abonents_taken_params.guid
 )
 ;
+
 
   delete from abonents
   where 
@@ -162,7 +126,7 @@ FROM
   public.objects
 WHERE 
   abonents.guid_objects = objects.guid AND
-  objects.name = 'Корпус 2'
+  objects.name = 'Корпус 7'
   and   abonents.guid not in
   (
   SELECT 
@@ -176,12 +140,15 @@ WHERE
   abonents.guid_objects = objects.guid AND
   link_abonents_taken_params.guid_taken_params = taken_params.guid AND
   link_abonents_taken_params.guid_abonents = abonents.guid AND
-  objects.name = 'Корпус 2'
+  objects.name = 'Корпус 7'
   group by   
   abonents.guid
   )  
     group by abonents.guid
   )
-
   ;
+
+
+
+
 
