@@ -26,6 +26,7 @@ urlpatterns = [
     url(r'^service_replace_electric/$', views.replace_electric_meters_v2, name = 'replace_electric_meters'), # поменять местами счётчики
     url(r'^service_get_info/$', views.get_info, name = 'service_get_info'), # 
     url(r'^get_electric_progruz/$', views.get_electric_progruz, name = 'get_lectric_pasport'), # прогрузочная ведомость в эксель
+    url(r'^get_electric_progruz_com/$', views.get_electric_progruz_com, name = 'get_electric_pasport_com'), # прогрузочная ведомость в эксель по com-порту
     url(r'^get_water_progruz/$', views.get_water_progruz, name = 'get_water_pasport'), # прогрузочная ведомость в эксель
     url(r'^get_water_impulse_progruz/$', views.get_water_impulse_progruz, name = 'get_water_imp_pasport'), # прогрузочная ведомость в эксель
     url(r'^get_heat_progruz/$', views.get_heat_progruz, name = 'get_heat_pasport'), # прогрузочная ведомость в эксель

@@ -12,7 +12,7 @@ urlpatterns = [
     url(r'^get_object_title/$', views.get_object_title, name = 'get_obj_title'),
     url(r'^get_object_key/$', views.get_object_key, name = 'get_obj_key'),
     url(r'^get_data_table/$', views.get_data_table, name = 'get_data_table'),
-    url(r'^export_excel_electric/$', views.export_excel_electric, name = 'export_excel_electric'),
+    #url(r'^export_excel_electric/$', views.export_excel_electric, name = 'export_excel_electric'),
     url(r'^electric/$', views.electric, name = 'electric'),
     url(r'^economic/$', views.economic, name = 'economic'),
     url(r'^water/$', views.water, name = 'water'),
@@ -159,4 +159,14 @@ urlpatterns = [
     url(r'^addnum/$', views.add_numbers, name = 'add_numbers'),
 
     url(r'^101/$', views.water_consumption_impuls, name = 'period_water_imp_castom'), # вода, показания за период Импульсные для мантулинской
+
+    url(r'^102/$', views.electric_3_zones, name = 'electric_3_zones'), # Показания по электричеству на дату. 3 тарифа с комментарием
+    url(r'^104/$', views.electric_2_zones, name = 'electric_2_zones'), # Показания по электричеству на дату. 2 тарифа с комментарием
+    url(r'^106/$', views.electric_1_zones, name = 'electric_1_zones'), # Показания по электричеству на дату. сумма с комментарием
+    
+    url(r'^103/$', views.electric_consumption_2_zones, name = 'electric_consumption_2_zones'), 
+    url(r'^105/$', views.electric_consumption_1_zone, name = 'electric_consumption_1_zone'),
+
+    url(r'^108/$', views.electric_by_date_podolsk, name = 'electric_by_date_podolsk'), #отчёт для Подольска по электрике на дату
+    url(r'^107/$', views.electric_consumption_podolsk, name = 'electric_consumption_podolsk'),#отчёт для Подольска по электрике за период
 ]

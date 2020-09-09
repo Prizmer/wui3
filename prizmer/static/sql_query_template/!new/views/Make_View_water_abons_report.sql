@@ -1,4 +1,5 @@
-﻿CREATE OR REPLACE VIEW water_abons_report AS 
+﻿--DROP VIEW water_abons_report;
+CREATE OR REPLACE VIEW water_abons_report AS 
  WITH korp AS (
          SELECT objects_1.name,
             objects_1.guid_parent,

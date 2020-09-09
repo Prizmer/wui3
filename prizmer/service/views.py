@@ -12,6 +12,7 @@ from django.views.decorators.csrf import csrf_exempt
 from openpyxl import Workbook
 from openpyxl import load_workbook
 from openpyxl.styles import NamedStyle, PatternFill, Border, Side, Alignment, Font
+from openpyxl.writer.excel import save_virtual_workbook
 import os
 from django.db import connection
 #from general.models import Objects, Abonents, TypesAbonents, Meters, MonthlyValues, DailyValues, CurrentValues, VariousValues, TypesParams, Params, TakenParams, LinkAbonentsTakenParams, Resources, TypesMeters, Measurement, NamesParams, BalanceGroups, LinkMetersComportSettings, LinkMetersTcpipSettings, ComportSettings, TcpipSettings, LinkBalanceGroupsMeters, Groups80020, LinkGroups80020Meters
@@ -46,11 +47,13 @@ logger=logging.getLogger('service_log') # path in settings.py
 
 from django.contrib.auth.decorators import user_passes_test
 
-ali_grey   = NamedStyle(fill=PatternFill(fill_type='solid', start_color='DCDCDC'), border=Border(left=Side(border_style='thin',color='FF000000'), bottom=Side(border_style='thin',color='FF000000'), right=Side(border_style='thin',color='FF000000'), top=Side(border_style='thin',color='FF000000')), alignment = Alignment(horizontal='center', vertical='center', wrap_text=True, shrink_to_fit=True))
-ali_white  = NamedStyle(border=Border(left=Side(border_style='thin',color='FF000000'), bottom=Side(border_style='thin',color='FF000000'), right=Side(border_style='thin',color='FF000000'), top=Side(border_style='thin',color='FF000000')), alignment = Alignment(horizontal='center', vertical='center', wrap_text=True, shrink_to_fit=True))
-ali_blue   = NamedStyle(fill=PatternFill(fill_type='solid', start_color='E6E6FA'), border=Border(left=Side(border_style='thin',color='FF000000'), bottom=Side(border_style='thin',color='FF000000'), right=Side(border_style='thin',color='FF000000'), top=Side(border_style='thin',color='FF000000')), alignment = Alignment(horizontal='center', vertical='center', wrap_text=True, shrink_to_fit=True))
-ali_pink   = NamedStyle(fill=PatternFill(fill_type='solid', start_color='FFF0F5'), border=Border(left=Side(border_style='thin',color='FF000000'), bottom=Side(border_style='thin',color='FF000000'), right=Side(border_style='thin',color='FF000000'), top=Side(border_style='thin',color='FF000000')), alignment = Alignment(horizontal='center', vertical='center', wrap_text=True, shrink_to_fit=True))
+# Стили
+ali_grey   = NamedStyle(name = "ali_grey", fill=PatternFill(fill_type='solid', start_color='DCDCDC'), border=Border(left=Side(border_style='thin',color='FF000000'), bottom=Side(border_style='thin',color='FF000000'), right=Side(border_style='thin',color='FF000000'), top=Side(border_style='thin',color='FF000000')), alignment = Alignment(horizontal='center', vertical='center', wrap_text=True, shrink_to_fit=True))
+ali_white  = NamedStyle(name = "ali_white", border=Border(left=Side(border_style='thin',color='FF000000'), bottom=Side(border_style='thin',color='FF000000'), right=Side(border_style='thin',color='FF000000'), top=Side(border_style='thin',color='FF000000')), alignment = Alignment(horizontal='center', vertical='center', wrap_text=True, shrink_to_fit=True))
+ali_blue   = NamedStyle(name = "ali_blue", fill=PatternFill(fill_type='solid', start_color='E6E6FA'), border=Border(left=Side(border_style='thin',color='FF000000'), bottom=Side(border_style='thin',color='FF000000'), right=Side(border_style='thin',color='FF000000'), top=Side(border_style='thin',color='FF000000')), alignment = Alignment(horizontal='center', vertical='center', wrap_text=True, shrink_to_fit=True))
+ali_pink   = NamedStyle(name = "ali_pink", fill=PatternFill(fill_type='solid', start_color='FFF0F5'), border=Border(left=Side(border_style='thin',color='FF000000'), bottom=Side(border_style='thin',color='FF000000'), right=Side(border_style='thin',color='FF000000'), top=Side(border_style='thin',color='FF000000')), alignment = Alignment(horizontal='center', vertical='center', wrap_text=True, shrink_to_fit=True))
 
+# Конец описания стилей
 
 def isAdmin(user):
     return user.is_staff
@@ -259,13 +262,13 @@ def load_tcp_ip_or_com_ports_from_excel(sPath, sSheet):
     row = 2
     result=""
     IsAdded=False
-    portType=sheet_ranges['M1'].value
+    portType=sheet_ranges['L1'].value
     while (bool(sheet_ranges['G%s'%(row)].value)):
         if sheet_ranges['G%s'%(row)].value is not None:
             #writeToLog(u'Обрабатываем строку ' + str(u'G%s '%(row)) + str(sheet_ranges[u'G%s'%(row)].value))
             ip_adr=sheet_ranges['K%s'%(row)].value
             ip_port=sheet_ranges['L%s'%(row)].value
-            com_port=sheet_ranges['M%s'%(row)].value
+            com_port=sheet_ranges['L%s'%(row)].value
             #print ip_adr, ip_port
             if portType=='Com-port': #добавление com-порта
                 writeToLog(com_port)
@@ -740,7 +743,7 @@ def add_link_meter_port_from_excel_cfg_electric(sender, instance, created, **kwa
         #print u'Обрабатываем строку ' + unicode(dtAll[i][6])+' - '+unicode(dtAll[i][7])
         meter=dtAll[i][6] #счётчик
         #print dtAll[0][11], dtAll[0][12]
-        PortType=str(dtAll[0][12]) # com или tcp-ip
+        PortType=str(dtAll[0][11]) # com или tcp-ip
         #print 'i=',i,' len=', len(dtAll)
         ip_adr=str(dtAll[i][10]).strip()
         ip_port=str(dtAll[i][11]).strip()
@@ -755,7 +758,7 @@ def add_link_meter_port_from_excel_cfg_electric(sender, instance, created, **kwa
                                                     FROM 
                                                       public.comport_settings
                                                     WHERE 
-                                                      comport_settings.name = '%s';"""%(str(dtAll[i][12])))
+                                                      comport_settings.name = '%s';"""%(str(dtAll[i][11])))
                     guid_com_port_from_excel = guid_com_port_from_excel.fetchall()
                     #print guid_com_port_from_excel
                     if (len(guid_com_port_from_excel)>0):
@@ -3136,10 +3139,158 @@ def makeNewTakenParamName(nameParam1, old_meter, new_meter, typeMeter):
     newName= typeMeter + ' ' + str(new_meter) + s
     return newName
     
+def get_electric_progruz_com(request):
+    response = io.StringIO()
+    wb = Workbook()    
+    wb.add_named_style(ali_grey)
+    ws = wb.active
+
+    obj_title         = request.GET.get('obj_title')
+    electric_data_end   = request.GET.get('electric_data_end')
+    electric_data_start   = request.GET.get('electric_data_start')
+    
+#Шапка
+    ws['A1'] = 'Населенный пункт'
+    ws['B1'] = 'Наименование улицы'
+    ws['C1'] = 'Наименование дома'
+    ws['D1'] = 'Квартира'
+    ws['E1'] = 'Идентификатор АСКУЭ'
+    ws['F1'] = 'Номер лицевого счета'
+    ws['G1'] = 'Номер счётчика заводской'
+    ws['H1'] = 'Номер в сети'
+    ws['I1'] = 'Тип счётчика'
+    ws['J1'] = 'ТТ'
+    ws['K1'] = 'ip adress'
+    ws['L1'] = 'ip port'
+    
+    ws['A1'].style = "ali_grey"
+    ws['B1'].style = "ali_grey"
+    ws['C1'].style = "ali_grey"
+    ws['D1'].style = "ali_grey"
+    ws['E1'].style = "ali_grey"
+    ws['F1'].style = "ali_grey"
+    ws['G1'].style = "ali_grey"
+    ws['H1'].style = "ali_grey"
+    ws['I1'].style = "ali_grey"
+    ws['J1'].style = "ali_grey"
+    ws['K1'].style = "ali_grey"
+    ws['L1'].style = "ali_grey"
+
+#Запрашиваем данные для отчета
+    data_table = common_sql.get_electric_register_com()        
+   
+        
+# Заполняем отчет значениями
+    for row in range(2, len(data_table)+2):
+        try:
+            ws.cell('A%s'%(row)).value = '%s' % (data_table[row-2][0])  
+            ws.cell('A%s'%(row)).style = ali_white
+        except:
+            ws.cell('A%s'%(row)).style = ali_white
+            next
+        
+        try:
+            ws.cell('B%s'%(row)).value = '%s' % (data_table[row-2][1]) 
+            ws.cell('B%s'%(row)).style = ali_white
+        except:
+            ws.cell('B%s'%(row)).style = ali_white
+            next
+            
+        try:
+            ws.cell('C%s'%(row)).value = '%s' % (data_table[row-2][2])  
+            ws.cell('C%s'%(row)).style = ali_white
+        except:
+            ws.cell('C%s'%(row)).style = ali_white
+            next
+            
+        try:
+            ws.cell('d%s'%(row)).value = '%s' % (data_table[row-2][3])  # 
+            ws.cell('d%s'%(row)).style = ali_white
+        except:
+            ws.cell('d%s'%(row)).style = ali_white
+            next
+            
+        try:
+            ws.cell('e%s'%(row)).value = '%s' % data_table[row-2][4]  # 
+            ws.cell('e%s'%(row)).style = ali_white
+        except:
+            ws.cell('e%s'%(row)).style = ali_white
+            next
+            
+        try:
+            ws.cell('f%s'%(row)).value = '%s' % data_table[row-2][5]  # 
+            ws.cell('f%s'%(row)).style = ali_white
+        except:
+            ws.cell('f%s'%(row)).style = ali_white
+            next
+        
+        try:
+            ws.cell('g%s'%(row)).value = '%s' % data_table[row-2][6]  
+            ws.cell('g%s'%(row)).style = ali_white
+        except:
+            ws.cell('g%s'%(row)).style = ali_white
+            next
+        
+        try:
+            ws.cell('h%s'%(row)).value = '%s' % (data_table[row-2][7])  
+            ws.cell('h%s'%(row)).style = ali_white
+        except:
+            ws.cell('h%s'%(row)).style = ali_white
+            next
+        
+        try:
+            ws.cell('i%s'%(row)).value = '%s' % (data_table[row-2][8])  
+            ws.cell('i%s'%(row)).style = ali_white
+        except:
+            ws.cell('i%s'%(row)).style = ali_white
+            next
+
+        try:
+            ws.cell('j%s'%(row)).value = '%s' % (data_table[row-2][9])  
+            ws.cell('j%s'%(row)).style = ali_white
+        except:
+            ws.cell('j%s'%(row)).style = ali_white
+            next
+
+        # try:
+        #     ws.cell('k%s'%(row)).value = '%s' % (data_table[row-2][10])  
+        #     ws.cell('k%s'%(row)).style = ali_white
+        # except:
+        #     ws.cell('k%s'%(row)).style = ali_white
+        #     next
+
+        try:
+            ws.cell('l%s'%(row)).value = '%s' % (data_table[row-2][10])  
+            ws.cell('l%s'%(row)).style = ali_white
+        except:
+            ws.cell('l%s'%(row)).style = ali_white
+            next
+
+    #ws.row_dimensions[5].height = 41
+    ws.column_dimensions['A'].width = 15 
+    ws.column_dimensions['B'].width = 30 
+    ws.column_dimensions['C'].width = 20
+    ws.column_dimensions['D'].width = 30
+    ws.column_dimensions['E'].width = 10
+    ws.column_dimensions['G'].width = 18
+    ws.column_dimensions['K'].width = 18
+    ws.column_dimensions['L'].width = 10
+    
+    response.seek(0)
+    response = HttpResponse(save_virtual_workbook(wb),content_type="application/vnd.ms-excel") 
+    now = datetime.datetime.now()
+    electric_data_end = now.strftime("%d-%m-%Y %H:%M")
+    #response = HttpResponse(response.read(), content_type="application/vnd.ms-excel")    
+    output_name = 'electric_register-'+electric_data_end + '_com'
+    file_ext = 'xlsx'    
+    response['Content-Disposition'] = 'attachment;filename="%s.%s"' % (output_name.replace('"', '\"'), file_ext)   
+    return response
+
 
 def get_electric_progruz(request):
     response = io.StringIO()
-    wb = Workbook()
+    wb = Workbook()    
+    wb.add_named_style(ali_grey)
     ws = wb.active
     
     obj_title         = request.GET.get('obj_title')
@@ -3160,18 +3311,18 @@ def get_electric_progruz(request):
     ws['K1'] = 'ip adress'
     ws['L1'] = 'ip port'
     
-    ws['A1'].style = ali_grey
-    ws['B1'].style = ali_grey
-    ws['C1'].style = ali_grey
-    ws['D1'].style = ali_grey
-    ws['E1'].style = ali_grey
-    ws['F1'].style = ali_grey
-    ws['G1'].style = ali_grey
-    ws['H1'].style = ali_grey
-    ws['I1'].style = ali_grey
-    ws['J1'].style = ali_grey
-    ws['K1'].style = ali_grey
-    ws['L1'].style = ali_grey
+    ws['A1'].style = "ali_grey"
+    ws['B1'].style = "ali_grey"
+    ws['C1'].style = "ali_grey"
+    ws['D1'].style = "ali_grey"
+    ws['E1'].style = "ali_grey"
+    ws['F1'].style = "ali_grey"
+    ws['G1'].style = "ali_grey"
+    ws['H1'].style = "ali_grey"
+    ws['I1'].style = "ali_grey"
+    ws['J1'].style = "ali_grey"
+    ws['K1'].style = "ali_grey"
+    ws['L1'].style = "ali_grey"
 
 #Запрашиваем данные для отчета
     data_table = common_sql.get_electric_register()        
@@ -3273,11 +3424,11 @@ def get_electric_progruz(request):
     ws.column_dimensions['K'].width = 18
     ws.column_dimensions['L'].width = 10
     
-    wb.save(response)
     response.seek(0)
+    response = HttpResponse(save_virtual_workbook(wb),content_type="application/vnd.ms-excel") 
     now = datetime.datetime.now()
     electric_data_end = now.strftime("%d-%m-%Y %H:%M")
-    response = HttpResponse(response.read(), content_type="application/vnd.ms-excel")    
+    #response = HttpResponse(response.read(), content_type="application/vnd.ms-excel")    
     output_name = 'electric_register-'+electric_data_end
     file_ext = 'xlsx'    
     response['Content-Disposition'] = 'attachment;filename="%s.%s"' % (output_name.replace('"', '\"'), file_ext)   
@@ -3285,7 +3436,8 @@ def get_electric_progruz(request):
 
 def get_water_progruz(request):
     response = io.StringIO()
-    wb = Workbook()
+    wb = Workbook()    
+    wb.add_named_style(ali_grey)
     ws = wb.active
     
     obj_title         = request.GET.get('obj_title')
@@ -3306,18 +3458,18 @@ def get_water_progruz(request):
     ws['K1'] = 'ip adress'
     ws['L1'] = 'ip port'
     
-    ws['A1'].style = ali_grey
-    ws['B1'].style = ali_grey
-    ws['C1'].style = ali_grey
-    ws['D1'].style = ali_grey
-    ws['E1'].style = ali_grey
-    ws['F1'].style = ali_grey
-    ws['G1'].style = ali_grey
-    ws['H1'].style = ali_grey
-    ws['I1'].style = ali_grey
-    ws['J1'].style = ali_grey
-    ws['K1'].style = ali_grey
-    ws['L1'].style = ali_grey
+    ws['A1'].style = "ali_grey"
+    ws['B1'].style = "ali_grey"
+    ws['C1'].style = "ali_grey"
+    ws['D1'].style = "ali_grey"
+    ws['E1'].style = "ali_grey"
+    ws['F1'].style = "ali_grey"
+    ws['G1'].style = "ali_grey"
+    ws['H1'].style = "ali_grey"
+    ws['I1'].style = "ali_grey"
+    ws['J1'].style = "ali_grey"
+    ws['K1'].style = "ali_grey"
+    ws['L1'].style = "ali_grey"
 
 #Запрашиваем данные для отчета
     data_table = common_sql.get_water_register()        
@@ -3420,11 +3572,11 @@ def get_water_progruz(request):
     ws.column_dimensions['L'].width = 10
     ws.column_dimensions['I'].width = 15
     
-    wb.save(response)
     response.seek(0)
+    response = HttpResponse(save_virtual_workbook(wb),content_type="application/vnd.ms-excel") 
     now = datetime.datetime.now()
     electric_data_end = now.strftime("%d-%m-%Y %H:%M")
-    response = HttpResponse(response.read(), content_type="application/vnd.ms-excel")    
+    #response = HttpResponse(response.read(), content_type="application/vnd.ms-excel")    
     output_name = 'water_register-'+electric_data_end
     file_ext = 'xlsx'    
     response['Content-Disposition'] = 'attachment;filename="%s.%s"' % (output_name.replace('"', '\"'), file_ext)   
@@ -3432,7 +3584,8 @@ def get_water_progruz(request):
 
 def get_water_impulse_progruz(request):
     response = io.StringIO()
-    wb = Workbook()
+    wb = Workbook()    
+    wb.add_named_style(ali_grey)
     ws = wb.active
     
     obj_title         = request.GET.get('obj_title')
@@ -3452,15 +3605,15 @@ def get_water_impulse_progruz(request):
     ws['I2'] = 'Порт'
 
     
-    ws['A2'].style = ali_grey
-    ws['B2'].style = ali_grey
-    ws['C2'].style = ali_grey
-    ws['D2'].style = ali_grey
-    ws['E2'].style = ali_grey
-    ws['F2'].style = ali_grey
-    ws['G2'].style = ali_grey
-    ws['H2'].style = ali_grey
-    ws['I2'].style = ali_grey
+    ws['A2'].style = "ali_grey"
+    ws['B2'].style = "ali_grey"
+    ws['C2'].style = "ali_grey"
+    ws['D2'].style = "ali_grey"
+    ws['E2'].style = "ali_grey"
+    ws['F2'].style = "ali_grey"
+    ws['G2'].style = "ali_grey"
+    ws['H2'].style = "ali_grey"
+    ws['I2'].style = "ali_grey"
 
 #Запрашиваем данные для отчета
     data_table = common_sql.get_water_impulse_register()        
@@ -3542,11 +3695,11 @@ def get_water_impulse_progruz(request):
     ws.column_dimensions['F'].width = 18
     ws.column_dimensions['H'].width = 20
     
-    wb.save(response)
     response.seek(0)
+    response = HttpResponse(save_virtual_workbook(wb),content_type="application/vnd.ms-excel") 
     now = datetime.datetime.now()
     electric_data_end = now.strftime("%d-%m-%Y %H:%M")
-    response = HttpResponse(response.read(), content_type="application/vnd.ms-excel")    
+    #response = HttpResponse(response.read(), content_type="application/vnd.ms-excel")    
     output_name = 'water_impulse_register-'+electric_data_end
     file_ext = 'xlsx'    
     response['Content-Disposition'] = 'attachment;filename="%s.%s"' % (output_name.replace('"', '\"'), file_ext)   
@@ -3554,7 +3707,8 @@ def get_water_impulse_progruz(request):
 
 def get_heat_progruz(request):
     response = io.StringIO()
-    wb = Workbook()
+    wb = Workbook()    
+    wb.add_named_style(ali_grey)
     ws = wb.active
     
     obj_title         = request.GET.get('obj_title')
@@ -3575,18 +3729,18 @@ def get_heat_progruz(request):
     ws['K1'] = 'ip adress'
     ws['L1'] = 'ip port'
     
-    ws['A1'].style = ali_grey
-    ws['B1'].style = ali_grey
-    ws['C1'].style = ali_grey
-    ws['D1'].style = ali_grey
-    ws['E1'].style = ali_grey
-    ws['F1'].style = ali_grey
-    ws['G1'].style = ali_grey
-    ws['H1'].style = ali_grey
-    ws['I1'].style = ali_grey
-    ws['J1'].style = ali_grey
-    ws['K1'].style = ali_grey
-    ws['L1'].style = ali_grey
+    ws['A1'].style = "ali_grey"
+    ws['B1'].style = "ali_grey"
+    ws['C1'].style = "ali_grey"
+    ws['D1'].style = "ali_grey"
+    ws['E1'].style = "ali_grey"
+    ws['F1'].style = "ali_grey"
+    ws['G1'].style = "ali_grey"
+    ws['H1'].style = "ali_grey"
+    ws['I1'].style = "ali_grey"
+    ws['J1'].style = "ali_grey"
+    ws['K1'].style = "ali_grey"
+    ws['L1'].style = "ali_grey"
 
 #Запрашиваем данные для отчета
     data_table = common_sql.get_heat_register()        
@@ -3689,11 +3843,11 @@ def get_heat_progruz(request):
     ws.column_dimensions['L'].width = 10
     ws.column_dimensions['I'].width = 20
 
-    wb.save(response)
     response.seek(0)
+    response = HttpResponse(save_virtual_workbook(wb),content_type="application/vnd.ms-excel") 
     now = datetime.datetime.now()
     electric_data_end = now.strftime("%d-%m-%Y %H:%M")
-    response = HttpResponse(response.read(), content_type="application/vnd.ms-excel")    
+    #response = HttpResponse(response.read(), content_type="application/vnd.ms-excel")    
     output_name = 'heat_register-'+electric_data_end
     file_ext = 'xlsx'    
     response['Content-Disposition'] = 'attachment;filename="%s.%s"' % (output_name.replace('"', '\"'), file_ext)   
@@ -4371,7 +4525,7 @@ def get_users_account_template(request):
 #_____________________________________________________________________________________
 #Прогрузка получасовок
 #________________________________________________________
-con=psycopg2.connect(host='127.0.0.1', port=5432,dbname='prizmer', user='postgres', password='1')
+con = connection
 setev = 0
 zavod = 0
 col=0

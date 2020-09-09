@@ -1,10 +1,10 @@
 
 {% load static %} <link href="{%static "main.css"%}" rel="stylesheet"/>
-{% load static %} <script src="{%static "jquery.js" %}" type=text/javascript></script>
-{% load static %} <script src="{%static "jquery-ui/ui/jquery-ui.js" %}" type=text/javascript></script>
-{% load static %} <script src="{%static "jquery-ui/ui/i18n/jquery.ui.datepicker-ru.js" %}" type=text/javascript></script>
+{% load static %} <script src="{%static "libs/jquery.js" %}" type=text/javascript></script>
+{% load static %} <script src="{%static "libs/jquery-ui/ui/jquery-ui.js" %}" type=text/javascript></script>
+{% load static %} <script src="{%static "libs/jquery-ui/ui/i18n/jquery.ui.datepicker-ru.js" %}" type=text/javascript></script>
 
-<script src="/static/liHighLight.js" type=text/javascript></script>
+<script src="/static/libs/liHighLight.js" type=text/javascript></script>
 
 <br>
 <span><strong> Приборы | Настройки</strong> </span>
@@ -15,6 +15,8 @@
  &nbsp;&nbsp; Создать Паспорт объекта по ресурсу
 		<br><br>
         &nbsp;&nbsp;&nbsp; <a class="button" href ="../../service/get_electric_progruz/"> Электрика </a></span> 
+		<br><br>
+        &nbsp;&nbsp;&nbsp; <a class="button" href ="../../service/get_electric_progruz_com/"> Электрика по COM-порту</a></span> 
 		<br><br>
         &nbsp;&nbsp;&nbsp; <a class="button" href ="../../service/get_water_progruz/"> Вода </a></span> 
 		<br><br>
