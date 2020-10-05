@@ -136,7 +136,7 @@ class TypesAbonents(models.Model):
 #-------------------------    
     
 class MonthlyValues(models.Model):
-#    id = models.AutoField(primary_key=True)
+   # id = models.AutoField(primary_key=True)
     date = models.DateField()
     value = models.FloatField()
     status = models.BooleanField(default=False)
@@ -149,7 +149,7 @@ class MonthlyValues(models.Model):
         return '%s %s %s %s %s' % (self.id_taken_params.guid_meters.name ,self.id_taken_params.guid_meters.factory_number_manual , self.id_taken_params.guid_params.guid_names_params.name, self.date, self.value )
         
 class DailyValues(models.Model):
-#    id = models.AutoField(primary_key=True)
+    #id = models.AutoField(primary_key=True)
     date = models.DateField()
     value = models.FloatField()
     status = models.BooleanField(default=False)
@@ -176,7 +176,7 @@ class CurrentValues(models.Model):
         return '%s %s %s %s %s' % (self.id_taken_params.guid_meters.name ,self.id_taken_params.guid_meters.factory_number_manual , self.id_taken_params.guid_params.guid_names_params.name, self.date, self.value )
         
 class CurrentValuesArchive(models.Model):
-#    id = models.AutoField(primary_key=True)
+    #id = models.AutoField(primary_key=True)
     date = models.DateField()
     time = models.TimeField()
     value = models.FloatField()
@@ -191,7 +191,7 @@ class CurrentValuesArchive(models.Model):
     
         
 class VariousValues(models.Model):
-#    id = models.AutoField(primary_key=True)
+    #id = models.AutoField(primary_key=True)
     date = models.DateField()
     time = models.TimeField()
     value = models.FloatField()
@@ -241,9 +241,9 @@ class Params(models.Model):
         
 @autoconnect     
 class TakenParams(models.Model):
-    #id = models.AutoField(primary_key=True)
+    #id = models.AutoField(primary_key = True)
     name = models.CharField(max_length=200, blank=True)
-    guid = models.UUIDField(primary_key = True, default = uuid.uuid4 )
+    guid = models.UUIDField(unique = True, default = uuid.uuid4 )
     guid_params = models.ForeignKey('Params', db_column = 'guid_params', on_delete=models.CASCADE)
     guid_meters = models.ForeignKey('Meters', db_column = 'guid_meters', on_delete=models.CASCADE)
     class Meta:
@@ -302,7 +302,7 @@ class Meters(models.Model):
     dt_install = models.DateTimeField('Дата установки', blank=True, null=True)
     dt_last_read = models.DateTimeField('Дата последнего удачного чтения данных', blank=True, null=True)
     guid_types_meters = models.ForeignKey('TypesMeters', db_column='guid_types_meters', on_delete=models.CASCADE)
-    guid_meters = models.ForeignKey('Meters', db_column='guid_meters', blank=True, null=True, on_delete=models.DO_NOTHING)
+    guid_meters = models.ForeignKey('Meters', db_column='guid_meters', blank=True, null=True, on_delete=models.CASCADE)
     time_delay_current = models.IntegerField(default=10)
     class Meta:
         db_table = 'meters'
@@ -1480,53 +1480,7 @@ def add_meters(sender, instance, created, **kwargs): #Добавляем пул�
             pass
         row = row + 1
        
-#signals.post_save.connect(add_meters, sender=BalanceGroups)
 
-#def add_link_meter_port(sender, instance, created, **kwargs): #Создаем привязку пульсара к com-порту
-#    guid_com_port = ComportSettings.objects.get(guid=u'2376a4a5-a19a-4a1d-9417-7f65014961e1')
-#    add_com_port_link = LinkMetersComportSettings(guid_meters = instance, guid_comport_settings = guid_com_port)            
-#    add_com_port_link.save()
-#
-##signals.post_save.connect(add_link_meter_port, sender=Meters)
-#
-#def add_link_meter_tcpip_water(sender, instance, created, **kwargs): #Создаем привязку пульсара к tcp-порту
-#    guid_tcpip_port = TcpipSettings.objects.get(guid=u'0346aea3-24ac-4776-900e-e1eb690af7bf')
-#    add_tcpip_port_link = LinkMetersTcpipSettings(guid_meters = instance, guid_tcpip_settings = guid_tcpip_port)            
-#    add_tcpip_port_link.save()
-#
-#signals.post_save.connect(add_link_meter_tcpip_water, sender=Meters)
-
-#def add_link_meter_port_from_excel_cfg_water(sender, instance, created, **kwargs):
-#    """Делаем привязку счётчика к порту по excel файлу ведомости"""
-#    from django.db import connection
-#    from openpyxl import load_workbook
-#    wb = load_workbook(filename = cfg_excel_name)
-#    sheet_ranges = wb[cfg_sheet_name]
-#    row = 2
-#    
-#
-#    while (bool(sheet_ranges[u'C%s'%(row)].value) ):
-#        # Привязка к tpc порту
-#        if sheet_ranges[u'C%s'%(row)].value is not None:
-#            #print sheet_ranges[u'G%s'%(row)].value
-#            if unicode(sheet_ranges[u'E%s'%(row)].value) == instance.factory_number_manual :
-#                guid_ip_port_from_excel = connection.cursor()
-#                guid_ip_port_from_excel.execute("""SELECT 
-#                                                  tcpip_settings.guid
-#                                                FROM 
-#                                                  public.tcpip_settings
-#                                                WHERE 
-#                                                  tcpip_settings.ip_address = %s AND 
-#                                                  tcpip_settings.ip_port = %s;""",[unicode(sheet_ranges[u'G%s'%(row)].value), unicode(sheet_ranges[u'H%s'%(row)].value)])
-#                guid_ip_port_from_excel = guid_ip_port_from_excel.fetchall()
-#        
-#                guid_ip_port = TcpipSettings.objects.get(guid=guid_ip_port_from_excel[0][0])
-#                add_ip_port_link = LinkMetersTcpipSettings(guid_meters = instance, guid_tcpip_settings = guid_ip_port)            
-#                add_ip_port_link.save()
-#            else:
-#                pass
-#            row = row + 1
-#signals.post_save.connect(add_link_meter_port_from_excel_cfg_water, sender=Meters)
 def add_link_meter_port_from_excel_cfg_water(sender, instance, created, **kwargs):
     """Делаем привязку счётчика к порту по excel файлу ведомости"""
     from django.db import connection
@@ -1598,15 +1552,6 @@ def add_link_abonents_taken_params(sender, instance, created, **kwargs):
             pass
     else:
         pass
-                 
-#signals.post_save.connect(add_link_abonents_taken_params, sender=TakenParams)
-
-
-
-#--------------------!!!!!!! Для работы с ведомостью по электрике
-#---------------------------------------------------------------------------------------------------
-#---------------------------------------------------------------------------------------------------
-#---------------------------------------------------------------------------------------------------
 
 def add_objects_from_excel_cfg_electric(sender, instance, created, **kwargs): #Добавляем объекты из файла excel ведомости по электрике:
     from openpyxl import load_workbook
@@ -1723,29 +1668,9 @@ def add_meters_from_excel_cfg_electric(sender, instance, created, **kwargs):
             else:
                 print('Не найдено совпадение с существующим типом прибора')
    
-             
-            # Добавляем привязку к балансной группе 
-            #guid_balance_groups_from_excel = connection.cursor()
-            #guid_balance_groups_from_excel.execute("""SELECT balance_groups.guid FROM public.balance_groups WHERE balance_groups.name = %s;""",[unicode(sheet_ranges[u'M%s'%(row)].value)])
-            #guid_balance_groups_from_excel = guid_balance_groups_from_excel.fetchall()
-            #guid_balance_groups = BalanceGroups.objects.get(guid=guid_balance_groups_from_excel[0][0])
-                        
-            #guid_meters_from_excel = connection.cursor()
-            #guid_meters_from_excel.execute("""SELECT meters.guid FROM public.meters WHERE meters.factory_number_manual = %s;""",[unicode(sheet_ranges[u'G%s'%(row)].value)])
-            #guid_meters_from_excel = guid_meters_from_excel.fetchall()
-            #guid_meters = Meters.objects.get(guid=guid_meters_from_excel[0][0])
-            
-       
-            #add_link_meter_balance_group = LinkBalanceGroupsMeters(guid_balance_groups = guid_balance_groups, guid_meters = guid_meters)
-            #add_link_meter_balance_group.save()
-            # Добавляем привязку к балансной группе конец
-                               
         else:
             pass
         row = row + 1
-#signals.post_save.connect(add_meters_from_excel_cfg_electric, sender=BalanceGroups)
-
-
 
 def add_link_meter_port_from_excel_cfg_electric(sender, instance, created, **kwargs):
     """Делаем привязку счётчика к порту по excel файлу ведомости"""
@@ -1850,45 +1775,6 @@ WHERE
         add_ip_port_link = LinkMetersTcpipSettings(guid_meters = instance_meter, guid_tcpip_settings = instance_ip_port)            
         add_ip_port_link.save()
 
-#signals.post_save.connect(add_link_meter_port_by_type_meter, sender=Resources)
-
-
-# #_____________________________________________________________________________________________________________
-# #При изменении в админке будут переименовыватсья все линки
-# #Не удалять!
-# #_____________________________________________________________________________________________________________
-# #from general.models import  Meters, TypesMeters, LinkAbonentsTakenParams, TakenParams, Params
-# def rename_taken_params(sender, instance, **kwargs):
-#     if (service.views.isService): 
-#         pass
-#     else:    
-#         #переименовываем taken_params
-#         guid_meter=instance.guid
-#         #print guid_meter
-#         new_val=instance.name
-#         old_val= Meters.objects.get(guid=guid_meter).name    
-#         common_sql.update_table_with_replace('taken_params', 'name', 'guid_meters', guid_meter, old_val, new_val)
-
-#         #переименовываем link_abonents_taken_params
-#         for row in TakenParams.objects.filter(guid_meters=guid_meter):
-#             guid_taken_params= row.guid
-#             common_sql.update_table_with_replace('link_abonents_taken_params', 'name', 'guid_taken_params', guid_taken_params, old_val, new_val)
-
-
-
-# def rename_link_abonents_taken_params(sender, instance, **kwargs): 
-#     print  service.views.isService 
-#     if (service.views.isService): 
-#         pass
-#     else:
-#         print 'not work in service'
-#         guid_abon = instance.guid
-#         new_val = instance.name
-#         old_val = Abonents.objects.get(guid=guid_abon).name
-#         common_sql.update_table_with_replace('link_abonents_taken_params', 'name', 'guid_abonents', guid_abon, old_val, new_val)
-
-# signals.pre_save.connect(rename_link_abonents_taken_params, sender=Abonents)
-# signals.pre_save.connect(rename_taken_params, sender=Meters)
 
 
 

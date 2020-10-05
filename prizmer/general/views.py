@@ -8030,7 +8030,7 @@ def electric_potreblenie_3_zones_v3(request):
     args['dates'] = dates
     args['label'] = Xcoord
     args['AllData']=AllData
-    return render_to_response("data_table/electric/91.html", args)
+    return render("data_table/electric/91.html", args)
     
 def pulsar_water_period_2(request):
     args = {}
@@ -9767,7 +9767,8 @@ def electric_3_zones(request):
             request.session["electric_data_start"] = electric_data_start = request.GET['electric_data_start']
             request.session["electric_data_end"]   = electric_data_end   = request.GET['electric_data_end']
             request.session["is_electric_period"]  = is_electric_period  = request.GET['is_electric_period']
-
+            
+                
             if (is_electric_monthly == '1') & (bool(is_abonent_level.search(obj_key))):   # месячные для абонента
                 data_table = common_sql.get_electric_by_date(obj_parent_title, obj_title, electric_data_end, 'monthly', True)
                 
@@ -9776,7 +9777,7 @@ def electric_3_zones(request):
 
 #*********************************************************************************************************************************************************************      
             elif (is_electric_monthly == '1') & (bool(is_object_level.search(obj_key))): # месячные для объекта
-                    data_table= common_sql.get_electric_by_date(obj_parent_title, obj_title, electric_data_end, 'monthly', False)
+                    data_table = common_sql.get_electric_by_date(obj_parent_title, obj_title, electric_data_end, 'monthly', False)
                     if not data_table:
                         data_table = [[electric_data_end, obj_title, u'Н/Д', u'Н/Д', u'Н/Д', u'Н/Д', u'Н/Д']]        
 
@@ -10219,7 +10220,7 @@ def electric_by_date_podolsk(request):
     args['is_electric_period'] = is_electric_period
     args['dates'] = dates    
 
-    return render_to_response("data_table/electric/108.html", args)
+    return render(request,"data_table/electric/108.html", args)
 
 def electric_consumption_podolsk(request):
     args = {}
@@ -10292,4 +10293,41 @@ def electric_consumption_podolsk(request):
     args['electric_data_end'] = electric_data_end
     args['is_electric_period'] = is_electric_period
     args['dates'] = dates
-    return render_to_response("data_table/electric/107.html", args)
+    return render(request,"data_table/electric/107.html", args)
+
+def meter_info(request):
+    args = {}
+    data_table = []
+    obj_title = u'Не выбран'
+    obj_key = u'Не выбран'
+    obj_parent_title = u'Не выбран'
+    tcp_status = u''
+    com_status = u''
+
+    if request.is_ajax():
+        if request.method == 'GET':
+            request.session["obj_title"]           = obj_title           = request.GET['obj_title']
+            request.session["obj_key"]             = obj_key             = request.GET['obj_key']
+            request.session["obj_parent_title"]    = obj_parent_title    = request.GET['obj_parent_title']
+            
+            if (obj_key.find('meter') >= 0):
+                #print('is meter!!!!!!!!!!!!!!!!')
+                data_table = common_sql.get_meter_info_by_number(obj_parent_title, obj_title)
+                dt_tcp = common_sql.get_tcp_ip_info_by_meter(obj_title)
+                dt_com = common_sql.get_com_info_by_meter(obj_title)
+                if len(dt_tcp) > 1 : tcp_status = 'Больше одного подключения!'
+                elif len(dt_tcp) == 0:
+                    tcp_status = 'Нет привязок'
+                    dt_tcp = [[u'-', u'-', u'-', u'-', u'-', u'-', u'-', u'-', u'-', u'-', u'-', u'-', u'-', u'-']]
+                if len(dt_com) > 1 : com_status = 'Больше одного подключения!'
+                elif len(dt_com) == 0: 
+                    com_status = 'Нет привязок'
+                    dt_com = [[u'-', u'-', u'-', u'-', u'-', u'-', u'-', u'-', u'-', u'-', u'-', u'-', u'-', u'-']]
+
+    args['factory_number'] = obj_title
+    args['data_table'] = data_table
+    args['dt_tcp'] = dt_tcp
+    args['dt_com'] = dt_com
+    args['com_status'] = com_status
+    args['tcp_status'] = tcp_status
+    return render(request,"data_table/meter_info.html", args)

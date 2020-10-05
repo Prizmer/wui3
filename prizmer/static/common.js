@@ -1,4 +1,3 @@
-   
 // Variables     
 var is_electric_monthly = 0;
 var is_electric_daily = 1;
@@ -39,8 +38,7 @@ $("#choice_report").selectmenu({
               obj_parent_title = escapeHtml(node.parent.title);}
                 else{obj_title = "Не выбран";
                      obj_key = "Не выбран";
-                     obj_parent_title = "Не выбран";}
-	console.log(obj_title);		
+                     obj_parent_title = "Не выбран";}	
 	
     if ($(this).val()%2==0)
     { //для чётного отображаем 1 календаря
@@ -102,8 +100,8 @@ $( "#tree" ).mouseleave(function() {
                 else{obj_title = "Не выбран";
                      obj_key = "Не выбран";
                      obj_parent_title = "Не выбран";}
-		console.log(obj_parent_title);
-		console.log(obj_title);
+		//console.log(obj_parent_title);
+		//console.log(obj_title);
         var menuItem_1=$("#choice_report").val()		
         var electric_data_start_1 = $('#datepickerStart').datepicker().val();
         var electric_data_end_1 = $('#datepickerEnd').datepicker().val();  	
@@ -121,8 +119,8 @@ $( "#datepickerStart" ).mouseleave(function() {
                 else{obj_title = "Не выбран";
                      obj_key = "Не выбран";
                      obj_parent_title = "Не выбран";}
-		console.log(obj_parent_title);
-		console.log(obj_title);
+		//console.log(obj_parent_title);
+		//console.log(obj_title);
         var menuItem_1=$("#choice_report").val()		
         var electric_data_start_1 = $('#datepickerStart').datepicker().val();
         var electric_data_end_1 = $('#datepickerEnd').datepicker().val();  	
@@ -238,7 +236,7 @@ $("#datepickerEnd").datepicker({onSelect:function(){refresh_data_table($("#choic
 	
     $(function(){ 
 	var pre_url=window.location.pathname
-	console.log(pre_url)
+	//console.log(pre_url)
         $("#tree").fancytree({
 		//var pathname = window.location.pathname;
 		 source: {		   
@@ -337,15 +335,21 @@ var refresh_data_table = function(xyz){
                 else{obj_title = "Не выбран";
                      obj_key = "Не выбран";
                      obj_parent_title = "Не выбран";}
-	 <!-- console.log(electric_data_start);-->
-	 <!-- console.log(electric_data_end); -->
-	 <!-- console.log(xyz); --> 
-     $.ajax({
-        type: "GET",
-        url: "/askue/"+xyz,
-        beforeSend: function(){show_loader();},
-        data: {obj_parent_title:obj_parent_title, obj_key: obj_key, obj_title: obj_title, is_electric_monthly: is_electric_monthly, is_electric_daily: is_electric_daily, is_electric_current: is_electric_current,  is_electric_delta: is_electric_delta, is_electric_period:is_electric_period, electric_data_start: electric_data_start, electric_data_end: electric_data_end},
-       })
+					 
+	 if(obj_key.indexOf('meter') + 1) {
+		 //console.log(obj_key, 'is meter level')
+		 my_url = "/askue/meter_info";}
+	 else {
+		 my_url = "/askue/"+xyz;}
+		
+
+	 $.ajax({
+		type: "GET",
+		url:  my_url,
+		beforeSend: function(){show_loader();},
+		data: {obj_parent_title:obj_parent_title, obj_key: obj_key, obj_title: obj_title, is_electric_monthly: is_electric_monthly, is_electric_daily: is_electric_daily, is_electric_current: is_electric_current,  is_electric_delta: is_electric_delta, is_electric_period:is_electric_period, electric_data_start: electric_data_start, electric_data_end: electric_data_end},
+	   })
+	 
      
 
 	 
@@ -408,7 +412,7 @@ var hide_loader = function(){
  
 //Загрузка комментариев
 var LoadComments = function(){
-    console.log($(this).attr('id'))
+    //console.log($(this).attr('id'))
 	$.ajax({
 		type: "GET",
         url: "../../askue/comment",
@@ -446,7 +450,7 @@ var LoadComments = function(){
 
 //Загрузка комментариев
 var AddComments = function(){
-console.log($(this).attr('id'));
+//console.log($(this).attr('id'));
 var guid_abonents=$(this).attr('id');
 	$.ajax({
 		type: "GET",

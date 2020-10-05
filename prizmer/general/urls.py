@@ -24,6 +24,7 @@ urlpatterns = [
     url(r'^instruction_user/$', views.instruction_user, name = 'instruction_user'),
     url(r'^instruction_admin/$', views.instruction_admin, name = 'instruction_admin'),
     url(r'^exit/$', views.go_out, name = 'exit'),
+    url(r'^meter_info/$', views.meter_info, name = 'meter_info'), #При нажатии на прибор выводится подробная информация по нему
 
     # Отчеты. Чётные - один календарь. Нечётные - два календаря.
     url(r'^0/$', views.choose_report, name = 'choose_report'), # Выберите отчет

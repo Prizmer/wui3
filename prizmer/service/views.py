@@ -24,10 +24,10 @@ import datetime
 from django.db.models import Max 
 import uuid
 import io
+import sys
 
 import common_sql, AskueReports
 from html.parser import HTMLParser
-import io
 import psycopg2
 
 from django.contrib.auth.models import User
@@ -78,7 +78,7 @@ def MakeSheet(request):
             try:
                 wb=load_workbook(directory+fileName)
                 sheets=wb.sheetnames
-            except Exception as e:
+            except: # catch *all* exceptions
                 pass
 
     args['sheets']=sheets
@@ -222,8 +222,9 @@ def load_port(request):
                     result="Порт/ы был успешно добавлен"
                 else:
                     result="Порт не был загружен, он уже существует в БД"
-    except Exception as e:
-        result = "Ошибка: " + e.message
+    except: # catch *all* exceptions
+        e = sys.exc_info()[0]
+        result = ( "Ошибка: %s" % e )
 
     args["choice_file"]    = fileName
     args["choice_sheet"]    = sheet
@@ -501,8 +502,9 @@ def load_electric_objects(request):
                 writeToLog(sPath)
                             
                 result=LoadObjectsAndAbons(sPath, sheet)
-    except Exception as e:
-        result = "Ошибка "+e.message
+    except: # catch *all* exceptions
+        e = sys.exc_info()[0]
+        result = ( "Ошибка: %s" % e )
     
     args["choice_file"]    = fileName
     args["choice_sheet"]    = sheet
@@ -517,14 +519,15 @@ def LoadElectricMeters(sPath, sSheet):
     cfg_excel_name = sPath
     global cfg_sheet_name
     cfg_sheet_name = sSheet
-    result="Счётчики не загружены"
+    result = u"Счётчики не загружены"
     #print type(sPath), sPath, type(sSheet), sSheet
     dtAll=GetTableFromExcel(sPath,sSheet) #получили из excel все строки до первой пустой строки (проверка по колонке А)
     met=0
-    #print 'load dt - ok'
+    #print('load dt - ok')
+    #print('range(1,len(dtAll)) %s'%str(range(1,len(dtAll))))
     for i in range(1,len(dtAll)):
         #writeToLog(u'Обрабатываем строку ' + unicode(dtAll[i][3])+' - '+unicode(dtAll[i][6]))
-        #print unicode(dtAll[i][3]), unicode(dtAll[i][6])
+        #print((dtAll[i][3]), (dtAll[i][6]))
         obj_l2=str(dtAll[i][2]).strip() #корпус
         abon=str(dtAll[i][3]).strip()  #квартира
         meter=str(dtAll[i][6]).strip()  #номер счётчика
@@ -538,27 +541,27 @@ def LoadElectricMeters(sPath, sSheet):
         isNewAbon=SimpleCheckIfExist('objects','name', obj_l2,'abonents', 'name', abon)
         isR = False
         isHalfs = False
-        print('attr1, attr2', meter, attr1, attr2)
-        #if ((attr1 == u'да') or (attr1 == u'Да') or (attr1 == u'ДА') or (attr2 == u'1')):
+        #print('attr1, attr2', meter, attr1, attr2)
         if (attr1 == '+'):
-            isR = True        
-        #if ((attr2 == u'да') or (attr2 == u'Да') or (attr2 == u'ДА') or (attr2 == u'1')):
+            isR = True    
         if (attr2 == '+'):
             isHalfs = True
-        print('attr1, attr2', meter, isR, isHalfs)
+        #print('attr1, attr2', meter, isR, isHalfs)
         #writeToLog( u'счётчик существует ', isNewMeter)
         if not (isNewAbon):
+            #print('Need create struct!')
             return "Сначала создайте структуру объектов и абонентов"
         if not (isNewMeter):
+            #print(str(type_meter))
             if str(type_meter) == 'М-200':
                 add_meter = Meters(name = str(type_meter) + ' ' + str(meter), address = str(adr), factory_number_manual = str(meter), guid_types_meters = TypesMeters.objects.get(guid = "6224d20b-1781-4c39-8799-b1446b60774d") )
                 add_meter.save()
                 writeToLog('Device added' + ' --->   ' + 'М-200')
             elif str(type_meter) == 'М-230':
-                writeToLog('m-230')
+                #print('m-230')
                 add_meter = Meters(name = str(type_meter) + ' ' + str(meter), address = str(adr), password = 111111 , factory_number_manual = str(meter), guid_types_meters = TypesMeters.objects.get(guid = "423b33a7-2d68-47b6-b4f6-5b470aedc4f4") )
                 add_meter.save()
-                writeToLog('Device added' + ' --->   ' + 'М-230')
+                #print('Device added' + ' --->   ' + 'М-230')
                 
             elif str(type_meter) == 'М-230-УМ':
                 add_meter = Meters(name = str(type_meter) + ' ' + str(meter), address = str(adr), password = str(NumLic) , factory_number_manual = str(meter), guid_types_meters = TypesMeters.objects.get(guid = "20e4767a-49e5-4f84-890c-25e311339c28") )
@@ -631,8 +634,9 @@ def LoadElectricMeters(sPath, sSheet):
             #Если экземпляр был создан, то добавляем считываемые параметры
             try:
                 add_taken_param_no_signals(instance = add_meter, isR = isR, isHalfs = isHalfs)
-            except Exception as e:
-                return None
+            except:
+                e = sys.exc_info()[0]
+                return( "Ошибка: %s" % e )
             
             met+=1
             
@@ -662,9 +666,11 @@ def load_electric_counters(request):
                 request.session["counter_status"]    = counter_status    = request.GET['counter_status']
                 directory=os.path.join(BASE_DIR,'static/cfg/')
                 sPath=directory+fileName
+                print(sPath)
                 result=LoadElectricMeters(sPath, sheet)                
-    except Exception as e:
-        result = "Ошибка "+e.message
+    except: # catch *all* exceptions
+        e = sys.exc_info()[0]
+        result = ( "Ошибка: %s" % e )
         
     #print fileName
     args["choice_file"]    = fileName
@@ -1710,6 +1716,7 @@ else:
 
 
 def add_taken_param_no_signals(instance, isR, isHalfs): # Добавляем считываемые параметры при создании счётчика
+    #print(instance.guid_types_meters.name, isR, isHalfs)
     if instance.guid_types_meters.name == 'Меркурий 230':
         #Добавляем параметры для Меркурия 230
     # T0 A+
@@ -1893,7 +1900,7 @@ def add_taken_param_no_signals(instance, isR, isHalfs): # Добавляем с�
       # Канал 5
         add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "b6bdfae8-4f27-4056-af79-d746b44038ee"))
         add_param.save()
-      # Канал 6
+      # ��анал 6
         add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "2c2f7176-8b77-44f4-9678-4773e95e67ce"))
         add_param.save()
       # Канал 7
@@ -2757,8 +2764,9 @@ def load_water_objects(request):
                 directory=os.path.join(BASE_DIR,'static/cfg/')
                 sPath=directory+fileName
                 result=LoadObjectsAndAbons_water(sPath, sheet)
-    except Exception as e:
-        result = "Ошибка "+e.message
+    except: # catch *all* exceptions
+        e = sys.exc_info()[0]
+        result = ( "Ошибка: %s" % e )
     
 
     #print fileName
@@ -2906,8 +2914,9 @@ def load_water_pulsar(request):
                 directory=os.path.join(BASE_DIR,'static/cfg/')
                 sPath=directory+fileName
                 result=LoadWaterPulsar(sPath, sheet)
-    except Exception as e:
-        result = "Ошибка "+e.message
+    except: # catch *all* exceptions
+        e = sys.exc_info()[0]
+        result = ( "Ошибка: %s" % e )
         
     #print fileName
     args["choice_file"]    = fileName
@@ -3040,8 +3049,9 @@ def load_water_port(request):
                     result="Порт/ы был успешно добавлен"
                 else:
                     result="Порт не был загружен, он уже существует в БД"
-    except Exception as e:
-        result = "Ошибка "+e.message
+    except: # catch *all* exceptions
+        e = sys.exc_info()[0]
+        result = ( "Ошибка: %s" % e )
 
     args["choice_file"]    = fileName
     args["choice_sheet"]    = sheet
@@ -4778,8 +4788,9 @@ def load_user_account(request):
                 sPath=directory+fileName
                 result = "Не загружено"
                 result = load_users_account(sPath, sheet)
-    except Exception as e:
-        result = "Ошибка.load: "+e.message
+    except: # catch *all* exceptions
+        e = sys.exc_info()[0]
+        result = ( "Ошибка: %s" % e )
     args["result"]    = result
     return render(request,"service/service_users_account.html", args)
 
@@ -4799,8 +4810,10 @@ def create_user(login, u_pass, u_mail, u_last_name, u_name):
             user = User.objects.create_user(password = u_pass, username=login, first_name = u_name, last_name = u_last_name, email = u_mail)
             user.save()
             #print 'new user created:', user
-    except Exception as e:
-        result = "Ошибка создания user: "+u_name+' '+e.message
+    
+    except: # catch *all* exceptions
+        e = sys.exc_info()[0]
+        result = ( "Ошибка создания пользователя %s: %s" %(u_name, e) )
     return result, user, user_new
 
 
@@ -4832,8 +4845,9 @@ def create_link_user_abonent(user, obj, abon):
         else:
             #print u' Не существует: %s -> %s '%(obj, abon)
             result_link += ' Не существует: %s -> %s. '%(obj, abon)
-    except Exception as e:
-        result_link += "Ошибка.link: "+e.message
+    except: # catch *all* exceptions
+        e = sys.exc_info()[0]
+        result = ( "Ошибка: %s" % e )
         #print result_link
     return result_link, is_new_link
 
@@ -4907,9 +4921,11 @@ def load_80020_group(request):
                 writeToLog(sPath)
                             
                 result = make_80020_report(sPath, sheet)
-    except Exception as e:
-        result.append( "Ошибка "+e.message)
-    print(result)
+    except: # catch *all* exceptions
+        e = sys.exc_info()[0]
+        result.append( "Ошибка: %s" % e )
+
+    #print(result)
     args["choice_file"]  = fileName
     args["choice_sheet"] = sheet
     args["80020_status"] = result

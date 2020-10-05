@@ -20,7 +20,7 @@
 {% load static %} <link href="{%static "libs/jquery-ui/themes/base/jquery-ui.css"%}" rel="stylesheet" type="text/css">
 
 
-{% load static %}	<script src="{%static "libs/Chart.js" %}"> </script>
+{% load static %} <script src="{%static "libs/Chart.js" %}"> </script>
 {% load static %} <link href="{%static "libs/fancytree/skin-win8/ui.fancytree.css"%}" rel="stylesheet" type="text/css">
 {% load static %} <script src="{%static "libs/fancytree/jquery.fancytree-all.min.js" %}" type="text/javascript"></script>
 
@@ -33,6 +33,7 @@
 {% load static %}	<script src="{%static "libs/flot/jquery.flot.stack.js" %}" type="text/javascript" ></script>
 <!-- Все js наши: -->
 {% load static %}	<script src="{%static "common.js" %}" type="text/javascript" ></script>
+{% load static %} <link href="{%static "libs/bootstrap-4.3.1-dist/css/bootstrap.css"%}" rel="stylesheet" type="text/css">
 
 <title>ПРИЗМЕР|Автоматизированная Система Комплексного Учёта Энергоресурсов	</title>
 </head>
@@ -41,7 +42,7 @@
     
 <div id=left-block>
     <div>
-        {% load static %} <img id="logo" src="{%static "images/logo3.jpg" %}" alt="ООО Правильные Измерения">
+        {% load static %} <img id="logo" src="{%static "images/2logo-ico512.png" %}" alt="ООО Правильные Измерения">
         <div id="fadingBarsG">
             <div id="fadingBarsG_1" class="fadingBarsG"></div>
             <div id="fadingBarsG_2" class="fadingBarsG"></div>
@@ -61,12 +62,7 @@
             {% load static %} <a href="../../askue/heat"><img id="heat-ico" src="{{ ico_url_heat }}" alt="Теплоучёт"></a>
             {% load static %} <a href="../../askue/gas" ><img id="gas-ico" src="{{ ico_url_gas }}" alt="Учёт газа"></a>
             {% load static %} <a href="../../askue/economic" ><img id="economic-ico" src="{{ ico_url_economic }}" alt="Экономика"></a>            
-<!-- 		
-            {% load static %} <a href="../../askue/electric"><img id="electric-ico" src="{%static "images/electric-ico36.png" %}" alt="Электроучёт"></a>
-            {% load static %} <a href="../../askue/water"><img id="water-ico" src="{%static "images/water-ico36.png" %}" alt="Водоучёт"></a>
-            {% load static %} <a href="../../askue/heat"><img id="heat-ico" src="{%static "images/heat-ico36.png" %}" alt="Теплоучёт"></a>
-            {% load static %} <a href="../../askue/gas" ><img id="gas-ico" src="{%static "images/gas-ico36.png" %}" alt="Учёт газа"></a>
-            {% load static %} <img id="economic-ico" src="{%static "images/economic-ico36.png" %}" alt="Экономика"> -->
+
     <br>
     <br>
     <span>Дерево объектов</span>
@@ -77,9 +73,9 @@
 <div id="right-block">
     <div>
 	<div id="title-exit">
-	{% load static %} <a href="../exit"><img id="exit" src="{%static "images/exit-ico.png" %}" alt="Выход"></a>
+	{% load static %} <a href="../exit"><img id="exit" src="{%static "images/3user-ico64.png" %}" alt="Выход"></a>
 	</div>
-        <h2 id="system-name">Автоматизированная Система Комплексного Учёта Энергоресурсов</h2>
+        <h3 id="system-name">Автоматизированная Система Комплексного Учёта Энергоресурсов <br> ПАК "ПРИЗМЕР"</h3>
     
     </div>
     <div id="control-block">
@@ -98,19 +94,22 @@
         <span id="QQQ"></span>        
     </div>
 	<br><br>
-	<div id="myfooter">
-         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-	    {% load static %} <a target="_blank" href="../../askue/instruction_user" ><img id="user_info-ico48" src="{%static "images/user_info-ico48.png" %}"  title="Инструкция пользователя"></a>&nbsp;&nbsp;&nbsp;&nbsp;
-        <!-- {% load static %} <a target="_blank" href="../../service/config" ><img id="faq-ico48" src="{%static "images/faq-ico48.png" %}"  title="Часто задаваемые вопросы"></a>&nbsp;&nbsp;&nbsp;&nbsp; -->
-		{% load static %} <a target="_blank" href="../../askue/instruction_admin" ><img id="admin_info-ico48" src="{%static "images/admin_info-ico48.png" %}"  title="Инструкция администратора"></a>&nbsp;&nbsp;&nbsp;&nbsp;
-		{% load static %} <a target="_blank" href="../../admin" ><img id="admin_panel-ico48" src="{%static "images/admin_panel-ico48.png" %}"  title="Панель администратора"></a>&nbsp;&nbsp;&nbsp;&nbsp;
-		{% load static %} <a target="_blank" href="../../service/config" ><img id="admin_config-ico48" src="{%static "images/admin_config-ico48.png" %}"  title="Панель конфигурирования"></a>&nbsp;&nbsp;&nbsp;&nbsp;
-		
-	<div id="vizitka">
-	<span><strong><a href="http://www.prizmer.ru/">ООО "Правильные измерения"</a></strong></span><br>
-	 v.1.24.1
-    </div>
-</div>
+
+	<div class="container" id="myfooter">		
+	<div class="row align-items-center">
+		<div class="col-1">{% load static %} <a target="_blank" href="../../askue/instruction_user" ><img id="user_info-ico48" src="{%static "images/user_info-ico48.png" %}"  title="Инструкция пользователя"></a>		</div>
+		<div class="col-1">{% load static %} <a target="_blank" href="../../askue/instruction_admin" ><img id="admin_info-ico48" src="{%static "images/admin_info-ico48.png" %}"  title="Инструкция администратора"></a></div>
+		<div class="col-1">{% load static %} <a target="_blank" href="../../admin" ><img id="admin_panel-ico48" src="{%static "images/admin_panel-ico48.png" %}"  title="Панель администратора"></a></div>
+		<div class="col-1">{% load static %} <a target="_blank" href="../../service/config" ><img id="admin_config-ico48" src="{%static "images/admin_config-ico48.png" %}"  title="Панель конфигурирования"></a></div>
+
+		<div class="col-4 offset-md-4">
+		<strong><a class="text-warning" href="http://www.prizmer.ru/"> ООО "Правильные измерения"</a></strong>
+		<img src="{%static "images/logo-ico48.png" %}"> 
+		 <a class="text-warning" href="#">v. 2.0.0</a>
+		</div>
+	</div>
+	</div>
+	
 </div>
 
 

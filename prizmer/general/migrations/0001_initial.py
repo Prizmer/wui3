@@ -113,7 +113,7 @@ class Migration(migrations.Migration):
                 ('dt_install', models.DateTimeField(blank=True, null=True, verbose_name='Дата установки')),
                 ('dt_last_read', models.DateTimeField(blank=True, null=True, verbose_name='Дата последнего удачного чтения данных')),
                 ('time_delay_current', models.IntegerField(default=10)),
-                ('guid_meters', models.ForeignKey(blank=True, db_column='guid_meters', null=True, on_delete=django.db.models.deletion.DO_NOTHING, to='general.Meters')),
+                ('guid_meters', models.ForeignKey(blank=True, db_column='guid_meters', null=True, on_delete=django.db.models.deletion.CASCADE, to='general.Meters')),
             ],
             options={
                 'verbose_name': 'Счётчик',
@@ -206,8 +206,9 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='TakenParams',
             fields=[
+                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('name', models.CharField(blank=True, max_length=200)),
-                ('guid', models.UUIDField(default=uuid.uuid4, primary_key=True, serialize=False)),
+                ('guid', models.UUIDField(default=uuid.uuid4, unique = True, serialize=False)),
                 ('guid_meters', models.ForeignKey(db_column='guid_meters', on_delete=django.db.models.deletion.CASCADE, to='general.Meters')),
                 ('guid_params', models.ForeignKey(db_column='guid_params', on_delete=django.db.models.deletion.CASCADE, to='general.Params')),
             ],
@@ -402,7 +403,7 @@ class Migration(migrations.Migration):
                 ('coefficient_2', models.FloatField(default=1)),
                 ('coefficient_3', models.FloatField(default=1000)),
                 ('guid_abonents', models.ForeignKey(db_column='guid_abonents', on_delete=django.db.models.deletion.CASCADE, to='general.Abonents')),
-                ('guid_taken_params', models.ForeignKey(db_column='guid_taken_params', on_delete=django.db.models.deletion.CASCADE, to='general.TakenParams')),
+                ('guid_taken_params', models.ForeignKey(db_column='guid_taken_params', on_delete=django.db.models.deletion.CASCADE, to='general.TakenParams', to_field='guid')),
             ],
             options={
                 'verbose_name': 'Привязка абонента к параметру',

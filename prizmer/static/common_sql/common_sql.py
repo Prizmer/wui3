@@ -12873,3 +12873,97 @@ def get_data_table_electric_period_podolsk(isAbon,obj_title,obj_parent_title, el
     
     if len(data_table)>0: data_table=ChangeNull(data_table, None)
     return data_table
+
+def get_meter_info_by_number(obj_parent_title, obj_title):
+    data_table = []
+    cursor = connection.cursor()
+    sQuery = """
+    SELECT 
+  objects.name, 
+  abonents.name, 
+  taken_params.name, 
+  meters.name, 
+  meters.factory_number_manual, 
+  types_meters.name, 
+  meters.address, 
+  meters.factory_number_readed
+FROM 
+  public.abonents, 
+  public.objects, 
+  public.link_abonents_taken_params, 
+  public.taken_params, 
+  public.meters,  
+  public.types_meters
+WHERE 
+  abonents.guid_objects = objects.guid AND
+  link_abonents_taken_params.guid_abonents = abonents.guid AND
+  link_abonents_taken_params.guid_taken_params = taken_params.guid AND
+  meters.guid = taken_params.guid_meters AND
+  meters.guid_types_meters = types_meters.guid 
+  AND factory_number_manual = '%s'
+  order by taken_params.name
+    """%(obj_title)
+    cursor.execute(sQuery)
+    data_table = cursor.fetchall()    
+    if len(data_table)>0: data_table=ChangeNull(data_table, None)
+    return data_table
+
+def get_tcp_ip_info_by_meter(obj_title):
+    data_table = []
+    cursor = connection.cursor()
+    sQuery = """
+    SELECT 
+  meters.name, 
+  meters.factory_number_manual, 
+  tcpip_settings.ip_address, 
+  tcpip_settings.ip_port, 
+  tcpip_settings.write_timeout, 
+  tcpip_settings.read_timeout, 
+  tcpip_settings.attempts, 
+  tcpip_settings.delay_between_sending
+FROM 
+  public.tcpip_settings, 
+  public.link_meters_tcpip_settings, 
+  public.meters
+WHERE 
+  link_meters_tcpip_settings.guid_tcpip_settings = tcpip_settings.guid AND
+  link_meters_tcpip_settings.guid_meters = meters.guid AND
+  meters.factory_number_manual = '%s'
+    """%(obj_title)
+    cursor.execute(sQuery)
+    data_table = cursor.fetchall()    
+    if len(data_table)>0: data_table=ChangeNull(data_table, None)
+    return data_table
+
+def get_com_info_by_meter(obj_title):
+    data_table = []
+    cursor = connection.cursor()
+    sQuery = """
+    SELECT 
+  meters.name, 
+  meters.factory_number_manual, 
+  comport_settings.name, 
+  comport_settings.baudrate, 
+  comport_settings.data_bits, 
+  comport_settings.parity, 
+  comport_settings.stop_bits, 
+  comport_settings.write_timeout, 
+  comport_settings.read_timeout, 
+  comport_settings.attempts, 
+  comport_settings.delay_between_sending, 
+  comport_settings.gsm_init_string, 
+  comport_settings.gsm_on, 
+  comport_settings.gsm_phone_number
+FROM 
+  public.link_meters_comport_settings, 
+  public.comport_settings, 
+  public.meters
+WHERE 
+  link_meters_comport_settings.guid_comport_settings = comport_settings.guid AND
+  link_meters_comport_settings.guid_meters = meters.guid AND
+  meters.factory_number_manual = '%s'
+    """%(obj_title)
+    cursor.execute(sQuery)
+    data_table = cursor.fetchall()    
+    if len(data_table)>0: data_table=ChangeNull(data_table, None)
+    return data_table

@@ -1,0 +1,5 @@
+8ac58ece-45a6-49a1-a14f-96cf49dc3ee0;A;500;333333;true;00000000;;;2014-11-11 16:09:31+03;;10;;423b33a7-2d68-47b6-b4f6-5b470aedc4f4;"";"";"";""
+
+INSERT INTO public.meters(
+	guid, name, address, password, attr1, attr2, attr3, attr4, password_type_hex, factory_number_manual, factory_number_readed, is_factory_numbers_equal, dt_install, dt_last_read, time_delay_current, guid_meters, guid_types_meters)
+	VALUES ('8ac58ece-45a6-49a1-a14f-96cf49dc3ee0', 'A', 500, 333333, '', '', '', '', true, 0000000, '',false, '2014-11-11 16:09:31+03', '2014-11-11 16:09:31+03', 10, null, '423b33a7-2d68-47b6-b4f6-5b470aedc4f4');

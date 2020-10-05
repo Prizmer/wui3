@@ -38,7 +38,7 @@ padding: 5px 5px 5px 70px;
 width: 200px;
 border: 1px solid black;
 `font-family: sans-serif;
-background-color: lightgrey;
+background-color: #D8E2EC;
 border-radius: 5px;
 vertical-align: middle;
 }
@@ -52,7 +52,7 @@ vertical-align: middle;
 float: left;
 width: 20%;
 min-height: 320px;
-background-color: lightgrey;
+background-color: #D8E2EC;
 border-radius: 5px;
 }
 
@@ -98,15 +98,15 @@ margin-right: 25px;
 #system-name {
 padding-top: 5px; 
 padding-bottom: 10px;
-color: black;
+color: #004C79;
 margin:0 auto;
 margin-left: 21%;
 height: 15%;
 text-align: center;
-background-color:lightgrey;
+background-color:#D8E2EC;
 border-style: solid;
 border-width: 2px;
-border-color: grey;
+border-color: #fff;
 border-radius: 5px;
 }
 
@@ -118,7 +118,7 @@ margin:0 auto;
 margin-left: 21%;
 height: 5%;
 text-align: center;
-background-color:lightgrey;
+background-color:#D8E2EC;
 border-style: solid;
 border-width: 2px;
 border-color: grey;
@@ -303,7 +303,7 @@ padding: 3px;
 .td_selected
 {
     background: ghostwhite;
-    border: 3px solid lightgrey;
+    border: 3px solid #D8E2EC;
 }
 
 .div_scroll
@@ -351,7 +351,8 @@ height: 480px;
 }
 
 #myfooter{
-min-height: 30px;
+min-height: 35px;
+min-width: 100%;
 background: green;
 }
 
@@ -719,6 +720,14 @@ margin-top: 0.05em;
     word-break: break-all;
 	width: 400px;
 }
+
+/*Инфо по счётчику*/
+.radius {
+    /*background: #f0f0f0;*/ /* Цвет фона */
+    border: 3px solid #2860AA; /* Параметры рамки */
+    padding: 15px; /* Поля вокруг текста */
+    margin-bottom: 10px; /* Отступ снизу */
+   }
 
 .a{width: 33%; height: 500px; background-color: #F5F5DC; float: left; background-position: top left; overflow-y:scroll;}
 .b{width: 33%; height: 500px; background-color: #FAF0E6; float: left; background-position: top left; overflow-y:scroll;}
