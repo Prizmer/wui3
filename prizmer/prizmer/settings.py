@@ -35,19 +35,16 @@ TEMPLATES = [
     },
 ]
 
-#TEMPLATE_DIRS = [os.path.join(BASE_DIR, "templates")]
 STATIC_ROOT = os.path.join(BASE_DIR, "prizmer/static")
 STATIC_URL = '/static/'
 STATICFILES_DIRS = (os.path.join(BASE_DIR, "../prizmer/static"),    
                      os.path.join(BASE_DIR, "../prizmer/static/excel"), 
-                      os.path.join(BASE_DIR, "../prizmer/static/account_prizmer_imgs"),					 
-					) 
+                      os.path.join(BASE_DIR, "../prizmer/static/account_prizmer_imgs"),                     
+                    ) 
 
-					
+                    
 
 import sys
-#sys.path.append("C:\Work\mitino\prizmer\static\common_sql")
-                     
 sys.path.append(os.path.join(BASE_DIR, "static/common_sql"))
 
 # Quick-start development settings - unsuitable for production
@@ -79,8 +76,8 @@ INSTALLED_APPS = (
     'loginsys',
     'AskueReports',
    # 'AskueViz',
-	'service',
-	'account_prizmer',
+    'service',
+    'account_prizmer',
 
 )
 
@@ -91,7 +88,7 @@ MIDDLEWARE = (
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-	'debug_toolbar.middleware.DebugToolbarMiddleware',
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
 )
 
 ROOT_URLCONF = 'prizmer.urls'
@@ -140,8 +137,8 @@ USE_TZ = True
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
-	}
-	
+    }
+    
 import logging.config
 LOGGING = {
     'version': 1,
@@ -151,22 +148,16 @@ LOGGING = {
             'level': 'INFO',
             'class': 'logging.FileHandler',
             'filename': BASE_DIR+'\static\log\service_log.log',
-        }},	
-	'loggers': {
+        }},
+    'loggers': {
         'service_log': {
             'handlers': ['file'],
             'level': os.getenv( 'DJANGO_LOG_LEVEL', 'INFO'),
          },
-	    }
+        }
 }
 
 CLEAN_DOUBLE_30 = False #Удаление получасовок перед формированием отчёта, актулаьно для СЭТов
 SHOW_LIC_NUM = False #Показывать лицевой номер в отчёте, актуально для 91, 102, 104, 106 и старше отчётов
 SEPARATOR = ',' # Какой разделитель использовать при экспорте в excel '.' or ','
-
-#TEMPLATE_LOADERS = (
-#    ('django.template.loaders.cached.Loader', (
-#        'django.template.loaders.filesystem.Loader',
-#        'django.template.loaders.app_directories.Loader',
-#    )),
-#)
+ROUND_SIZE = 3 #Сколько знаков после запятой будет выводится в отчёт excel
