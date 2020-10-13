@@ -20,6 +20,7 @@ import decimal
 # для работы с xml
 from lxml import etree
 from django.conf import settings
+#from io import StringIO
 separator = getattr(settings, 'SEPARATOR', ',') #'.' #separator = '.' or ','
 
 
@@ -7074,7 +7075,7 @@ def report_water_by_date(request):
     
 def report_forma_80020(request):
     import zipfile
-    response = io.StringIO()
+    response = io.BytesIO()
     #Запрашиваем данные для отчета
     
     group_80020_name    = request.session['obj_title']
@@ -7290,7 +7291,7 @@ def report_forma_80020(request):
         
         # Создание и сохранение документа
         doc = etree.ElementTree(root) 
-        myxml_IO=io.StringIO()   
+        myxml_IO=io.BytesIO()   
         doc.write(myxml_IO, xml_declaration=True, encoding='UTF-8')
         # Формируем имя документа
         name_of_document = '80020'
@@ -9921,7 +9922,7 @@ def report_heat_karat_daily(request):
     
 def report_empty_alert(request):
    
-    #response = StringIO.StringIO()
+    #response = io.StringIO()
     response = HttpResponse('Отчёт не предусмотрен', content_type="text/plain")
     output_name = 'empty'
     file_ext = 'txt'
@@ -13040,7 +13041,7 @@ def water_consumption_impuls_report(request):
 def report_electric_3_zones(request):
     SHOW_LIC_NUM = getattr(settings, 'SHOW_LIC_NUM', 'False')
     ROUND_SIZE = getattr(settings, 'ROUND_SIZE', 3)
-    response = StringIO.StringIO()
+    response = io.StringIO()
     wb = Workbook()
     wb.add_named_style(ali_grey)
     wb.add_named_style(ali_white)
@@ -13302,7 +13303,7 @@ def report_electric_3_zones(request):
 def report_electric_2_zones(request):
     SHOW_LIC_NUM = getattr(settings, 'SHOW_LIC_NUM', 'False')
     ROUND_SIZE = getattr(settings, 'ROUND_SIZE', 3)
-    response = StringIO.StringIO()
+    response = io.StringIO()
     wb = Workbook()
     wb.add_named_style(ali_grey)
     wb.add_named_style(ali_white)
@@ -13538,7 +13539,7 @@ def report_electric_2_zones(request):
 def report_electric_1_zones(request):
     SHOW_LIC_NUM = getattr(settings, 'SHOW_LIC_NUM', 'False')
     ROUND_SIZE = getattr(settings, 'ROUND_SIZE', 'False')
-    response = StringIO.StringIO()
+    response = io.StringIO()
     wb = Workbook()
     wb.add_named_style(ali_grey)
     wb.add_named_style(ali_white)
@@ -13716,7 +13717,7 @@ def report_electric_1_zones(request):
 def report_electric_consumption_2_zones(request):
     SHOW_LIC_NUM = getattr(settings, 'SHOW_LIC_NUM', 'False')
     ROUND_SIZE = getattr(settings, 'ROUND_SIZE', 'False')
-    response = StringIO.StringIO()
+    response = io.StringIO()
     wb = Workbook()
     wb.add_named_style(ali_grey)
     wb.add_named_style(ali_white)
@@ -14094,7 +14095,7 @@ def report_electric_consumption_2_zones(request):
 def report_electric_consumption_1_zone(request):
     SHOW_LIC_NUM = getattr(settings, 'SHOW_LIC_NUM', 'False')
     ROUND_SIZE = getattr(settings, 'ROUND_SIZE', 'False')
-    response = StringIO.StringIO()
+    response = io.StringIO()
     wb = Workbook()
     wb.add_named_style(ali_grey)
     wb.add_named_style(ali_white)
@@ -14319,7 +14320,7 @@ def report_electric_consumption_1_zone(request):
     return response
 
 def report_electric_consumption_podolsk(request):
-    response = StringIO.StringIO()
+    response =io.StringIO()
     wb = Workbook()
     wb.add_named_style(ali_grey)
     wb.add_named_style(ali_white)
@@ -14714,7 +14715,7 @@ def report_electric_consumption_podolsk(request):
 
 def report_electric_podolsk(request):
     SHOW_LIC_NUM = getattr(settings, 'SHOW_LIC_NUM', 'False')
-    response = StringIO.StringIO()
+    response = io.StringIO()
     wb = Workbook()
     wb.add_named_style(ali_grey)
     wb.add_named_style(ali_white)

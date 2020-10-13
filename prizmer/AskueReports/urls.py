@@ -129,13 +129,15 @@ urlpatterns = [
 
     url(r'^101/$', views.water_consumption_impuls_report, name = '101'), # вода, показания за период Импульсные для мантулинской
     
-    url(r'^102/$', views.report_electric_3_zones, name = '102'), # Показания по электричеству на дату. 3 тарифа с комментарием
-    url(r'^104/$', views.report_electric_2_zones, name = '104'), # Показания по электричеству на дату. 2 тарифа с комментарием
-    url(r'^106/$', views.report_electric_1_zones, name = '106'), # Показания по электричеству на дату. 1 тариф с комментарием
+    url(r'^102/$', views.report_electric_3_zones, name = '102'), # *Показания по электричеству на дату. 3 тарифа с комментарием
+    url(r'^104/$', views.report_electric_2_zones, name = '104'), # *Показания по электричеству на дату. 2 тарифа с комментарием
+    url(r'^106/$', views.report_electric_1_zones, name = '106'), # *Показания по электричеству на дату. 1 тариф с комментарием
 
-    url(r'^103/$', views.report_electric_consumption_2_zones, name = '103'), #Потребление за период 2 тарифа
-    url(r'^105/$', views.report_electric_consumption_1_zone, name = '105'), #Потребление за период 1 тариф
+    url(r'^103/$', views.report_electric_consumption_2_zones, name = '103'), #*Потребление за период 2 тарифа
+    url(r'^105/$', views.report_electric_consumption_1_zone, name = '105'), #*Потребление за период 1 тариф
 
     url(r'^108/$', views.report_electric_podolsk, name = '108'), # Показания по электричеству на дату. Подольск
     url(r'^107/$', views.report_electric_consumption_podolsk, name = '107'), #Потребление за период 2 тарифа Подольск
+
+    # Наличие в комментарии *, говорит о том, что он реагирует на свойства SHOW_LIC_NUM,SEPARATOR и ROUND_SIZE
 ]

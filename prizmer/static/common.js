@@ -23,7 +23,7 @@ $("#tree").click(function clickTree(){
 
 
 // Меню выбора типа отчета
-$("#choice_report").selectmenu({ width: 330 });
+$("#choice_report").selectmenu({ width: 383 });
 $("#choice_report").selectmenu({
      select: function( event, ui ) {
 	 var electric_data_start_1 = $('#datepickerStart').datepicker().val();
@@ -46,9 +46,9 @@ $("#choice_report").selectmenu({
         $("#datepickerStart").hide();
         $("#title-date-start").hide();
 		
-		<!-- $("#export_report").html('<a class="button" href ='+'"../../report/'+$(this).val()+'?electric_data_end='+$('#datepickerEnd').datepicker().val()+'&electric_data_start='+$('#datepickerStart').datepicker().val()+'"'+'>Экспорт Excel</a>') -->
-        <!-- $("#export_report").html('<a class="button" href ='+'"../../report/'+$(this).val()+'?electric_data_end='+electric_data_end+'"'+'>Экспорт Excel</a>') -->
-		$("#export_report").html('<a class="button" href ='+'"../../report/'+$(this).val()+'?electric_data_end='+electric_data_end_1+'&electric_data_start='+electric_data_start_1+'&obj_key='+obj_key+'&is_electric_monthly='+is_electric_monthly+'&is_electric_daily='+is_electric_daily+'&is_electric_current='+is_electric_current+'&is_electric_delta='+is_electric_delta+'&is_electric_period='+is_electric_period+'&obj_parent_title='+obj_parent_title+'&obj_title='+obj_title+'"'+'>Экспорт Excel</a>')
+		<!-- $("#export_report").html('<a class="button" href ='+'"../../report/'+$(this).val()+'?electric_data_end='+$('#datepickerEnd').datepicker().val()+'&electric_data_start='+$('#datepickerStart').datepicker().val()+'"'+'>Экспорт</a>') -->
+        <!-- $("#export_report").html('<a class="button" href ='+'"../../report/'+$(this).val()+'?electric_data_end='+electric_data_end+'"'+'>Экспорт</a>') -->
+		$("#export_report").html('<a class="button" href ='+'"../../report/'+$(this).val()+'?electric_data_end='+electric_data_end_1+'&electric_data_start='+electric_data_start_1+'&obj_key='+obj_key+'&is_electric_monthly='+is_electric_monthly+'&is_electric_daily='+is_electric_daily+'&is_electric_current='+is_electric_current+'&is_electric_delta='+is_electric_delta+'&is_electric_period='+is_electric_period+'&obj_parent_title='+obj_parent_title+'&obj_title='+obj_title+'"'+'>Экспорт</a>')
 		<!-- $("#export_report_archive").html('<a class="button" href ='+'"../../report/'+$(this).val()+'_arch"'+'>Экспорт в Архив</a>') -->
         refresh_data_table($(this).val());
     }
@@ -59,12 +59,12 @@ $("#choice_report").selectmenu({
         $("#title-date-start").show();
 		
 		
-		<!-- $("#export_report").html('<a class="button" href ='+'"../../report/'+$(this).val()+'/"'+'>Экспорт Excel</a>') -->
-		<!-- $("#export_report").html('<a class="button" href ='+'"../../report/'+$(this).val()+'"'+'>Экспорт Excel</a>') -->
-        <!-- $("#export_report").html('<a class="button" href ='+'"../../report/'+$(this).val()+'?electric_data_end='+$('#datepickerEnd').datepicker().val()+'&electric_data_start='+$('#datepickerStart').datepicker().val()+'&test=Test'+'"'+'>Экспорт Excel</a>') -->
-<!-- 	$("#export_report").html('<a class="button" href ='+'"../../report/'+$(this).val()+'?electric_data_end='+electric_data_end+'&electric_data_start='+electric_data_start+'&test=Test'+'"'+'>Экспорт Excel</a>') -->
-		<!-- $("#export_report").html('<a class="button" href ='+'"../../report/'+$(this).val()+'?electric_data_end='+electric_data_end+'"'+'>Экспорт Excel</a>') -->
-		$("#export_report").html('<a class="button" href ='+'"../../report/'+$(this).val()+'?electric_data_end='+electric_data_end_1+'&electric_data_start='+electric_data_start_1+'&obj_key='+obj_key+'&is_electric_monthly='+is_electric_monthly+'&is_electric_daily='+is_electric_daily+'&is_electric_current='+is_electric_current+'&is_electric_delta='+is_electric_delta+'&is_electric_period='+is_electric_period+'&obj_parent_title='+obj_parent_title+'&obj_title='+obj_title+'"'+'>Экспорт Excel</a>')
+		<!-- $("#export_report").html('<a class="button" href ='+'"../../report/'+$(this).val()+'/"'+'>Экспорт</a>') -->
+		<!-- $("#export_report").html('<a class="button" href ='+'"../../report/'+$(this).val()+'"'+'>Экспорт</a>') -->
+        <!-- $("#export_report").html('<a class="button" href ='+'"../../report/'+$(this).val()+'?electric_data_end='+$('#datepickerEnd').datepicker().val()+'&electric_data_start='+$('#datepickerStart').datepicker().val()+'&test=Test'+'"'+'>Экспорт</a>') -->
+<!-- 	$("#export_report").html('<a class="button" href ='+'"../../report/'+$(this).val()+'?electric_data_end='+electric_data_end+'&electric_data_start='+electric_data_start+'&test=Test'+'"'+'>Экспорт</a>') -->
+		<!-- $("#export_report").html('<a class="button" href ='+'"../../report/'+$(this).val()+'?electric_data_end='+electric_data_end+'"'+'>Экспорт</a>') -->
+		$("#export_report").html('<a class="button" href ='+'"../../report/'+$(this).val()+'?electric_data_end='+electric_data_end_1+'&electric_data_start='+electric_data_start_1+'&obj_key='+obj_key+'&is_electric_monthly='+is_electric_monthly+'&is_electric_daily='+is_electric_daily+'&is_electric_current='+is_electric_current+'&is_electric_delta='+is_electric_delta+'&is_electric_period='+is_electric_period+'&obj_parent_title='+obj_parent_title+'&obj_title='+obj_title+'"'+'>Экспорт</a>')
 		<!-- $("#export_report_archive").html('<a class="button" href ='+'"../../report/'+$(this).val()+'_arch"'+'>Экспорт в Архив</a>') -->
         refresh_data_table($(this).val());
     }
@@ -72,7 +72,11 @@ $("#choice_report").selectmenu({
     });
 // конец Меню выбора отчета
 // Подкрашиваем зеленым "На начало суток"
-$("#electric-daily-button").css( "color", "green" );
+$("#electric-daily-button").css("background-color", "#E6F7F2");
+$("#electric-daily-button").css("border", "3px solid rgba(132,159,187,1)");
+$("#electric-monthly-button").css("border", "2px solid rgba(132,159,187,1)");
+$("#electric-monthly-button").css("background-color", "#D8E2EC");
+$("#electric-monthly-button").css("color", "grey");
 
 //замена спецсимволов
 function escapeHtml(text) {
@@ -105,8 +109,8 @@ $( "#tree" ).mouseleave(function() {
         var menuItem_1=$("#choice_report").val()		
         var electric_data_start_1 = $('#datepickerStart').datepicker().val();
         var electric_data_end_1 = $('#datepickerEnd').datepicker().val();  	
-        <!-- $("#export_report").html('<a class="button" href ='+'"../../report/'+$(this).val()+'?electric_data_end='+electric_data_end+'"'+'>Экспорт Excel</a>') -->
-		$("#export_report").html('<a class="button" href ='+'"../../report/'+menuItem_1+'?electric_data_end='+electric_data_end_1+'&electric_data_start='+electric_data_start_1+'&obj_key='+obj_key+'&is_electric_monthly='+is_electric_monthly+'&is_electric_daily='+is_electric_daily+'&is_electric_current='+is_electric_current+'&is_electric_delta='+is_electric_delta+'&is_electric_period='+is_electric_period+'&obj_parent_title='+obj_parent_title+'&obj_title='+obj_title+'"'+'>Экспорт Excel</a>')
+        <!-- $("#export_report").html('<a class="button" href ='+'"../../report/'+$(this).val()+'?electric_data_end='+electric_data_end+'"'+'>Экспорт</a>') -->
+		$("#export_report").html('<a class="button" href ='+'"../../report/'+menuItem_1+'?electric_data_end='+electric_data_end_1+'&electric_data_start='+electric_data_start_1+'&obj_key='+obj_key+'&is_electric_monthly='+is_electric_monthly+'&is_electric_daily='+is_electric_daily+'&is_electric_current='+is_electric_current+'&is_electric_delta='+is_electric_delta+'&is_electric_period='+is_electric_period+'&obj_parent_title='+obj_parent_title+'&obj_title='+obj_title+'"'+'>Экспорт</a>')
 });
 $( "#datepickerStart" ).mouseleave(function() {
          var obj_parent_title="";
@@ -124,8 +128,8 @@ $( "#datepickerStart" ).mouseleave(function() {
         var menuItem_1=$("#choice_report").val()		
         var electric_data_start_1 = $('#datepickerStart').datepicker().val();
         var electric_data_end_1 = $('#datepickerEnd').datepicker().val();  	
-        <!-- $("#export_report").html('<a class="button" href ='+'"../../report/'+$(this).val()+'?electric_data_end='+electric_data_end+'"'+'>Экспорт Excel</a>') -->
-		$("#export_report").html('<a class="button" href ='+'"../../report/'+menuItem_1+'?electric_data_end='+electric_data_end_1+'&electric_data_start='+electric_data_start_1+'&obj_key='+obj_key+'&is_electric_monthly='+is_electric_monthly+'&is_electric_daily='+is_electric_daily+'&is_electric_current='+is_electric_current+'&is_electric_delta='+is_electric_delta+'&is_electric_period='+is_electric_period+'&obj_parent_title='+obj_parent_title+'&obj_title='+obj_title+'"'+'>Экспорт Excel</a>')
+        <!-- $("#export_report").html('<a class="button" href ='+'"../../report/'+$(this).val()+'?electric_data_end='+electric_data_end+'"'+'>Экспорт</a>') -->
+		$("#export_report").html('<a class="button" href ='+'"../../report/'+menuItem_1+'?electric_data_end='+electric_data_end_1+'&electric_data_start='+electric_data_start_1+'&obj_key='+obj_key+'&is_electric_monthly='+is_electric_monthly+'&is_electric_daily='+is_electric_daily+'&is_electric_current='+is_electric_current+'&is_electric_delta='+is_electric_delta+'&is_electric_period='+is_electric_period+'&obj_parent_title='+obj_parent_title+'&obj_title='+obj_title+'"'+'>Экспорт</a>')
 });
 $( "#datepickerEnd" ).mouseleave(function() {
          var obj_parent_title="";
@@ -141,8 +145,8 @@ $( "#datepickerEnd" ).mouseleave(function() {
                 else{obj_title = "Не выбран";
                      obj_key = "Не выбран";
                      obj_parent_title = "Не выбран";}
-       <!-- $("#export_report").html('<a class="button" href ='+'"../../report/'+$(this).val()+'?electric_data_end='+electric_data_end+'"'+'>Экспорт Excel</a>') -->
-		$("#export_report").html('<a class="button" href ='+'"../../report/'+menuItem_1+'?electric_data_end='+electric_data_end_1+'&electric_data_start='+electric_data_start_1+'&obj_key='+obj_key+'&is_electric_monthly='+is_electric_monthly+'&is_electric_daily='+is_electric_daily+'&is_electric_current='+is_electric_current+'&is_electric_delta='+is_electric_delta+'&is_electric_period='+is_electric_period+'&obj_parent_title='+obj_parent_title+'&obj_title='+obj_title+'"'+'>Экспорт Excel</a>')
+       <!-- $("#export_report").html('<a class="button" href ='+'"../../report/'+$(this).val()+'?electric_data_end='+electric_data_end+'"'+'>Экспорт</a>') -->
+		$("#export_report").html('<a class="button" href ='+'"../../report/'+menuItem_1+'?electric_data_end='+electric_data_end_1+'&electric_data_start='+electric_data_start_1+'&obj_key='+obj_key+'&is_electric_monthly='+is_electric_monthly+'&is_electric_daily='+is_electric_daily+'&is_electric_current='+is_electric_current+'&is_electric_delta='+is_electric_delta+'&is_electric_period='+is_electric_period+'&obj_parent_title='+obj_parent_title+'&obj_title='+obj_title+'"'+'>Экспорт</a>')
 		
 });
 
@@ -159,10 +163,15 @@ $("#datepickerEnd").datepicker({onSelect:function(){refresh_data_table($("#choic
         is_electric_current = 0;
         is_electric_delta = 0;
         refresh_all();
-        $("#datepickerStart").hide();
-        $("#title-date-start").hide();
-        $("#electric-monthly-button").css( "color", "green" );
-        $("#electric-daily-button").css( "color", "black" );
+       /*  $("#datepickerStart").hide();
+        $("#title-date-start").hide(); */
+        $("#electric-monthly-button").css("background-color", "#E6F7F2");
+		$("#electric-monthly-button").css("border", "3px solid rgba(132,159,187,1)");
+		$("#electric-daily-button").css("border", "2px solid rgba(132,159,187,1)");
+		$("#electric-daily-button").css("background-color", "#D8E2EC");
+		$("#electric-daily-button").css("color", "grey");
+		
+		
         $("#electric-current-button").css( "color", "black" );
         $("#electric-delta").css( "color", "black" );      
         });
@@ -173,10 +182,16 @@ $("#datepickerEnd").datepicker({onSelect:function(){refresh_data_table($("#choic
         is_electric_current = 0;
         is_electric_delta = 0;
         refresh_all();
-        $("#datepickerStart").hide();
-        $("#title-date-start").hide();
-        $("#electric-monthly-button").css( "color", "black" );
-        $("#electric-daily-button").css( "color", "green" );
+        /* $("#datepickerStart").hide();
+        $("#title-date-start").hide(); */
+		$("#electric-daily-button").css("background-color", "#E6F7F2");
+		$("#electric-daily-button").css("border", "3px solid rgba(132,159,187,1)");
+		$("#electric-monthly-button").css("border", "2px solid rgba(132,159,187,1)");
+		$("#electric-monthly-button").css("background-color", "#D8E2EC");
+		$("#electric-monthly-button").css("color", "grey");
+		
+		
+       
         $("#electric-current-button").css( "color", "black" );
         $("#electric-delta").css( "color", "black" );
         });
@@ -187,8 +202,8 @@ $("#datepickerEnd").datepicker({onSelect:function(){refresh_data_table($("#choic
         is_electric_current = 1;
         is_electric_delta = 0;
         refresh_all();
-        $("#datepickerStart").hide();
-        $("#title-date-start").hide();
+       /*  $("#datepickerStart").hide();
+        $("#title-date-start").hide(); */
         $("#electric-monthly-button").css( "color", "black" );
         $("#electric-daily-button").css( "color", "black" );
         $("#electric-current-button").css( "color", "green" );
@@ -327,7 +342,7 @@ var refresh_data_table = function(xyz){
     setTimeout(function() {
      var electric_data_start = $('#datepickerStart').datepicker().val();
      var electric_data_end = $('#datepickerEnd').datepicker().val();
-	 <!-- $("#export_report").html('<a class="button" href ='+'"../../report/'+$(this).val()+'?electric_data_end='+electric_data_end+'&electric_data_start='+electric_data_start+'&test=Test'+'"'+'>Экспорт Excel</a>') -->
+	 <!-- $("#export_report").html('<a class="button" href ='+'"../../report/'+$(this).val()+'?electric_data_end='+electric_data_end+'&electric_data_start='+electric_data_start+'&test=Test'+'"'+'>Экспорт</a>') -->
      var node = $("#tree").fancytree("getActiveNode");
 	     if(node){obj_title = node.title;
               obj_key = node.key;

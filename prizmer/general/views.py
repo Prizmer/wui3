@@ -8030,7 +8030,7 @@ def electric_potreblenie_3_zones_v3(request):
     args['dates'] = dates
     args['label'] = Xcoord
     args['AllData']=AllData
-    return render("data_table/electric/91.html", args)
+    return render(request, "data_table/electric/91.html", args)
     
 def pulsar_water_period_2(request):
     args = {}
