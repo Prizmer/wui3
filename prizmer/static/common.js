@@ -19,7 +19,9 @@ $("#tree").click(function clickTree(){
         refresh_data_table($("#choice_report").val());
         });
 		
-
+$(function () {
+  $('[data-toggle="tooltip"]').tooltip()
+})
 
 
 // Меню выбора типа отчета
