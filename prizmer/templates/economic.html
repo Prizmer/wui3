@@ -1,19 +1,29 @@
 {% extends "base.html" %}
 
 {% block control-block %}
-<div class = "container">
-
-<div class = "row align-items-center">
 	<div class = "col-6">
-		<div class = "row">
-			<div class = "col-4" > {% load static %} <img  src="{%static "images/new_ico/econom2-ico96.png" %}" alt="Экономический учёт"></div>
-			<div class = "col-8" > <h3> Отчёты</h3> </div>	
+	
+		<div class = "row align-items-center">
+			<div class = "col-2" > {% load static %} <img  src="{%static "images/new_ico/econom2-ico96.png" %}" alt="Экономический учёт"></div>
+			<div class = "col-6" > <h3> Отчёты</h3> </div>	
+
+			<div class = "col-3">
+			<div class="spinner-grow text-primary" style="width: 1rem; height: 1rem;"  role="status" id="fadingBarsG_1">
+			  <span class="sr-only">Выполняется...</span>
+			</div>
+			<div class="spinner-grow text-danger" style="width: 1rem; height: 1rem;"  role="status" id ="fadingBarsG_2">
+			  <span class="sr-only">Выполняется...</span>
+			</div>
+			<div class="spinner-grow text-warning" style="width: 1rem; height: 1rem;"  role="status" id="fadingBarsG_3">
+			  <span class="sr-only">Выполняется...</span>
+			</div>			
+			
+		</div> 
 		</div>
 		<br>
-		<br>
-		<br>
+		<br>	
 		<div class = "row justify-content-start align-self-center item">
-			<div class = "col">
+			<div class = "col-7">
 				<select id="choice_report" style = "width:500;">
 					<option value="0"><strong>Выберите отчёт...</strong></option>
 					<option value="1">Потребление за период.</option>
@@ -41,18 +51,17 @@
 					<option value="94">94. Статистика опроса по воде (цифровые ПУ)</option> 
 				</select>
 			</div>			
-			<div id ="export_report"></div>	
+			<div class = "col-2" id ="export_report"></div>	
 		</div>
-
-			</div>
+		
+			</div>			
 	
-	<div class = "col-6">
+	<div class = "col-5 offset-1">
 		<div class = "row">
-			<div class = "col-5 offset-1" id="datepickerStart"><strong>Начальная дата:</strong></div>
-			<div class = "col-5" id="datepickerEnd"><span id="title-date-start"><strong>Конечная дата:</strong></span></div>	
+			<div class = "col-3 offset-2"> <div id="datepickerStart"><strong>Начальная дата:</strong></div> </div>
+			<div class = "col-3 offset-2"> <div id="datepickerEnd"><span id="title-date-start"><strong>Конечная дата:</strong></span></div>	</div>
 		</div>
-	</div>		
-</div>
+	</div>
 
-</div>
+
 {% endblock %}

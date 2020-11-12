@@ -139,5 +139,10 @@ urlpatterns = [
     url(r'^108/$', views.report_electric_podolsk, name = '108'), # Показания по электричеству на дату. Подольск
     url(r'^107/$', views.report_electric_consumption_podolsk, name = '107'), #Потребление за период 2 тарифа Подольск
 
+    url(r'^109/$', views.report_water_tem104_consumption, name = '109'), #*потребеление по воде ТЭМ-104
+    url(r'^110/$', views.report_water_tem104_daily, name = '110'), #*показания по воде ТЭМ-104 на дату
+    url(r'^111/$', views.report_heat_tem104_consumption, name = '111'), #*потребеление по теплу ТЭМ-104
+    url(r'^112/$', views.report_heat_tem104_daily, name = '112'), #*показания по теплу ТЭМ-104 на дату
+
     # Наличие в комментарии *, говорит о том, что он реагирует на свойства SHOW_LIC_NUM,SEPARATOR и ROUND_SIZE
 ]

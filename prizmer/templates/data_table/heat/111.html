@@ -1,0 +1,47 @@
+<html>
+<head>
+</head>
+<body>
+<script src="/static/libs/liHighLight.js" type=text/javascript></script>
+<p>
+<span>Потребление по теплосчётчикам ТЭМ-104 за период с <strong>{{electric_data_start}}</strong> по <strong>{{electric_data_end}}</strong></span>
+<br>
+<span>Местополжение: <strong>{{obj_title}}</strong></span>
+<br>
+{% if data_table %} 
+<table class="content" id="data-table" >
+<tr>
+<th>Абонент</th>
+<th>№ прибора</th>
+<th>№ подсистемы</th>
+<th>Значение Q на {{electric_data_start}}, Гкал</th>
+<th>Значение Q на {{electric_data_end}}, Гкал</th>
+<th>Значение V на {{electric_data_start}}, м3</th>
+<th>Значение V на {{electric_data_end}}, м3</th>
+<th>Расход Q, Гкал</th>
+<th>Расход V, м3</th>
+
+</tr>
+{% for value in data_table %}
+<tr>
+<td>{{value.1}}</td>
+<td>{{value.5}}</td>
+<td>{{value.3}}</td>
+<td>{{value.7}}</td>
+<td>{{value.9}}</td>
+<td>{{value.13}}</td>
+<td>{{value.14}}</td>
+<td><strong>{{value.9}}</strong></td>
+<td><strong>{{value.15}}</strong></td>
+
+</tr>
+{% endfor %}
+</table>
+{% else %}
+<br>
+<br>
+<span><strong>Нет данных.</strong></span>
+<br>
+{% endif %}
+</body>
+</html>

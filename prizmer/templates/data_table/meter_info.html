@@ -3,20 +3,14 @@
     </head>
     <body>
 <script src="/static/libs/liHighLight.js" type=text/javascript></script>
-
-<!-- {% load static %} <script src="{%static "libs/jquery.js" %}" type=text/javascript> </script> -->
-
-<!-- 
-<br>
-<span>Информация о приборе <strong>{{factory_number}}</strong> </span> -->
 <br>
 <br>
-<div class="container">		
-	<div class="row">
+<div class="col-11">
+	<div class="row justify-content-center radius"  style="border-radius: 10px 40px" >
 		<div class="col-md-1" > 
 		{% load static %} <img src="{%static "images/device-ico64.png" %}">
 		</div>
-		<div class="col-md-11 radius"  style="border-radius: 10px 40px" >
+		<div class="col-md-11" >
 			<div class="row">
 				<div class="col-md-2" > Заводской №:
 				</div>
@@ -38,20 +32,19 @@
 	</div>
 
 	<br>
-	<div class="row">
+	<div class="row justify-content-center radius"  style="border-radius: 10px 40px">
 		<div class="col-md-1" > 
 		{% load static %} <img src="{%static "images/place-ico64.png" %}">
 		</div>
-		<div class="col align-self-center radius"  style="border-radius: 10px 40px" > <strong>{{data_table.0.0}}<img src="{%static "images/right-ico20.png" %}">  {{data_table.0.1}} </strong>
+		<div class="col-11 align-self-center"  > <strong>{{data_table.0.0}}<img src="{%static "images/right-ico20.png" %}">  {{data_table.0.1}} </strong>
 		</div>		
 	</div>
 	<br>
-	<div class="row">
-		<div class="col-md-1" > 
+	<div class="row justify-content-center radius" style="border-radius: 10px 60px" >
+		<div class="col-1" > 
 		{% load static %} <img src="{%static "images/cable-ico64.png" %}">
-		</div>
-		
-		<div class="col-md-5 align-self-center radius" style="border-radius: 10px 60px"  > <strong>TCP/IP</strong> {{tcp_status}}
+		</div>		
+		<div class="col-5 align-self-center"> <strong>TCP/IP</strong> {{tcp_status}}
 		{% if dt_tcp %} 		
 		<div class="row">
 			<div class="col-md-6"><strong>IP-пор</strong></div>
@@ -68,8 +61,10 @@
 			<div  class="col-md-6">{{dt_tcp.0.7}}</div>
 		</div>
 		{% endif%}
-		</div>		
-		<div class="col-md-5 align-self-center radius offset-md-1" style="border-radius: 10px 60px"  > <strong>COM </strong>{{com_status}}
+		</div>	
+
+		
+		<div class="col-5 align-self-center offset-md-1"> <strong>COM </strong>{{com_status}}
 		{% if dt_com %} 		
 		<div class="row">					
 			<div class="col-md-3">Номер</div>
@@ -114,11 +109,11 @@
 		</div>			
 	</div>
 	<br>
-	<div class="row">
+	<div class="row justify-content-center radius" style="border-radius: 10px 60px">
 		<div class="col-md-1" > 
 		{% load static %} <img src="{%static "images/dev-ico64.png" %}">
 		</div>
-		<div class="col align-self-center radius" style="border-radius: 10px 60px"> <strong>Считываемые параметры</strong>
+		<div class="col-11 align-self-center" > <strong>Считываемые параметры</strong>
 			<div class="row">
 			{% if data_table %}
 			{% for value in data_table %}
@@ -133,109 +128,8 @@
 		</div>		
 	</div>
 		
-
-<!-- 
-Тип прибора:  <strong>{{data_table.0.5}}</strong>
-<br><br>
-Сетевой адрес:  <strong>{{data_table.0.6}}</strong>
-<br><br>
-Заводской номер из прибора:  <strong>{{data_table.0.7}}</strong>
-<br><br>	
-
-Место установки:  <strong>{{data_table.0.0}}  {{data_table.0.1}}</strong>
-<br><br>  -->
-
-<!-- Подключение по TCP/IP-порту:
-<br>
-{% if dt_tcp %} 
-<table class="content" >
-<tr>
-<th>IP-порт</th>
-<th>IP-адрес</th>
-<th>Write timeout</th>
-<th>Read timeout</th>
-<th>Attempts</th>
-<th>Delay between sending</th>
-</tr>
-{% for value in dt_tcp %}
-<tr>
-<td>{{value.2}}</td>
-<td>{{value.3}}</td>
-<td>{{value.4}}</td>
-<td>{{value.5}}</td>
-<td>{{value.6}}</td>
-<td>{{value.7}}</td>
-</tr>
-{% endfor %}
-</table>
-{% else %}
-<span><strong>Нет TCP/IP-портов</strong></span>
-{% endif %}
-<br><br> 
-Подключение по COM-порту:
-<br>
-{% if dt_com %} 
-<table class="content" >
-<tr>
-<th>Номер<th>
-<th>Baudrate</th>
-<th>Data bits</th>
-<th>Parity</th>
-<th>Stop bits</th>
-<th>Write timeout</th>
-<th>Read timeout</th>
-<th>Attempts</th>
-<th>Delay between sending</th>
-<th>Используется GSM-канал</th>
-<th>GSM номер телефона</th>
-<th>GSM init string</th>
-</tr>
-{% for value in dt_com %}
-<tr>
-<td>{{value.2}}</td>
-<td>{{value.3}}</td>
-<td>{{value.4}}</td>
-<td>{{value.5}}</td>
-<td>{{value.6}}</td>
-<td>{{value.7}}</td>
-<td>{{value.8}}</td>
-<td>{{value.9}}</td>
-<td>{{value.10}}</td>
-<td>{{value.11}}</td>
-<td>{{value.12}}</td>
-<td>{{value.13}}</td>
-</tr>
-{% endfor %}
-</table>
-{% else %}
-<span><strong>Нет COM-портов</strong></span>
-<br>
-{% endif %}
-
-<br><br>
-Считываемые параметры: <br>
-{% if data_table %}
-<table class="content" id="data-table" >
-<tr>
-<th>Имя</th>
-</tr>
-{% for value in data_table %}
-<tr>
-<td>{{value.2}}</td>
-</tr>
-{% endfor %}
-</table>
-{% else %}
-<span><strong>Нет данных.</strong></span>
-<br>
-{% endif %}
--->
-
-
 </div>
-<br>
-<br>
-<br>
+
 <br>
 <br>
 </body>

@@ -1,0 +1,36 @@
+<html>
+<head>
+</head>
+<body>
+<span>Показания по водосчётчикам ТЭМ-104 на <strong>{{electric_data_end}}</strong></span>
+<br>
+<span>Местоположение: <strong>{{obj_title}}</strong></span>
+<br>
+
+{% if data_table %} 
+<table class="content" id="data-table" >
+<tr>
+<th>Абонент</th>
+<th>№ прибора</th>
+<th>№ подсистемы</th>
+<th>Объём, м3</th>
+
+</tr>
+{% for value in data_table %}
+<tr>
+<td>{{value.1}}</td>
+<td>{{value.5}}</td>
+<td>{{value.3}}</td>
+<td><strong>{{value.22}}</strong></td>
+
+</tr>
+{% endfor %}
+</table>
+{% else %}
+<br>
+<br>
+<span><strong>Нет данных.</strong></span>
+<br>
+{% endif %}
+</body>
+</html>

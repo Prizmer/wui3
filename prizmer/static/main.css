@@ -1,5 +1,5 @@
 #layout { 
-width: 1400px;
+width: 1800px;
 min-width: 600px;
 min-height: 300px;
 margin: 0 auto;
@@ -62,17 +62,17 @@ background-color: ghostwhite;
 }
 
 #logo {
-margin-top: 25px;
+margin-top: 0px;
 margin-bottom: 0;
-margin-left: 5px;
+margin-left: 0px;
 width: 95%;
 }
 
 #title-exit{
  	align:right;
 	float:right;
-	padding-top:1.5em;
-	padding-right:1em;
+	padding-top:0.5em;
+	/*padding-right:1em;*/
 
 }
 
@@ -95,6 +95,11 @@ margin-right: 25px;
 /* margin-left: 1.8em; */
 }
 
+#blue-style
+{
+color: #004C79;
+}
+
 #system-name {
 /* padding-top: 5px; 
 padding-bottom: 10px; */
@@ -108,6 +113,8 @@ border-style: solid;
 border-width: 2px;
 border-color: #fff;
 border-radius: 5px;
+position: inherit;
+top: 5px;
 }
 
 #system-name-service {
@@ -183,6 +190,7 @@ margin-left: 1em;
 top: 1px; 
 right: 230px; */ 
 font-size : 8pt;
+
 }
 
 #datepickerEnd{
@@ -196,9 +204,11 @@ font-size : 8pt;
 `margin-top: 15px;
 /* margin-left: 21%; */
 min-height: 501px;
-`border-style: solid;
-`border-width: 1px;
-`border-top-color: black;
+border-style: solid;
+border-width: 1px 0 0 ;
+border-top-color: #004C79;
+max-height:900px;
+overflow-y: scroll;
 }
 
 #data-block-service{
@@ -377,10 +387,11 @@ a.button, span.button {
   -webkit-user-select: none;
   user-select: none;
 }
-a.button:hover, span.button:hover {
+a.button:hover, a:hover img, span.button:hover {
   background: #dcdcdc linear-gradient(#fff, #dcdcdc);
   box-shadow: 0 0 0 1px #aaa inset, 0 1px 1px #aaa;
 }
+
 a.button:active, span.button:active {
   background: none;
   /* box-shadow: 0 0 0 1px #bbb inset, 0 1px 3px rgba(0,0,0,.5) inset, 0 1px 2px #fff; */
@@ -660,27 +671,34 @@ margin-top: 0.5em;
 /* JQuery Css */
 
 #choice_report-menu{
-font-size: 0.8em;
+font-size: 0.7em;
 
 /*float: left;
  margin-right: 1em; */
 }
 
 #choice_report-button{
-font-size: 0.7em;
+font-size: 0.8em;
 /*margin-left: 0.4em;*/
 float: left;
 margin-right: 1em;
-box-shadow: 0px 0px 1px 2px rgba(132,159,187,1);
+box-shadow: 0px 0px 1px 1px rgba(132,159,187,1);
 /*   -moz-box-shadow: 0px 0px 10px 3px rgba(132,159,187,1);
   box-shadow: 0px 0px 10px 3px rgba(132,159,187,1); */
+  top: 9px;
 
 }
 
 #export_report{
+align: center;
 font-weight:bold;
 font-size: 1em;
-margin-top: 0.05em;
+/*margin-top: 0.05em;*/
+color: #004C79;
+text-align: center;
+top:9px;
+/* border-radius: 5px;
+border: 1px rgba(132,159,187,1) solid; */
 }
 
 #comment-block{
@@ -734,7 +752,7 @@ margin-top: 0.05em;
 /*Инфо по счётчику*/
 .radius {
     /*background: #f0f0f0;*/ /* Цвет фона */
-    border: 3px solid #2860AA; /* Параметры рамки */
+    border: 2px solid #2860AA; /* Параметры рамки */
     padding: 15px; /* Поля вокруг текста */
     margin-bottom: 10px; /* Отступ снизу */
    }
@@ -745,7 +763,7 @@ margin-top: 0.05em;
 
 
 .container-my {
-    max-width: 1260px;
+    max-width: 1600px;
     position: relative;
     margin-left: auto;
     margin-right: auto;
@@ -757,3 +775,5 @@ margin-top: 0.05em;
 	flex: 0 0 23%;
 	max-width: 23%;
 }
+
+

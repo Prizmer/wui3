@@ -44,32 +44,35 @@
 	<div class="col-2">  <!-- В этой колонке лого и дерево объектов -->	
 	<!-- <div id="title-structura"> -->
 		<div class="row justify-content-center">
-			<div class = "col-12">{% load static %} <img id="logo" src="{%static "images/new_ico/logo2-ico128.png" %}" alt="ООО Правильные Измерения"> </div>
+			<div class = "col-9">{% load static %} <img id="logo" src="{%static "images/new_ico/logo2-ico256.png" %}" alt="ООО Правильные Измерения"> </div>
 		</div>
 			 
-		<!-- <div class = "row justify-content-center"> <h4>ПАК "ПРИЗМЕР"</h4></div> -->
-		
+		<div class = "row justify-content-center"  id="blue-style"> 
+			<div class = "col-11"><h6>ПРАВИЛЬНЫЕ ИЗМЕРЕНИЯ</h6></div>
+		</div>
 		<br>
+		<br>
+		<!-- <br>
 		<div  class = "row">
-			<div class = "col-10">
-				<div id="fadingBarsG">
-				<div id="fadingBarsG_1" class="fadingBarsG"></div>
-				<div id="fadingBarsG_2" class="fadingBarsG"></div>
-				<div id="fadingBarsG_3" class="fadingBarsG"></div>
-				<div id="fadingBarsG_4" class="fadingBarsG"></div>
-				<div id="fadingBarsG_5" class="fadingBarsG"></div>
-				<div id="fadingBarsG_6" class="fadingBarsG"></div>
-				<div id="fadingBarsG_7" class="fadingBarsG"></div>
-				<div id="fadingBarsG_8" class="fadingBarsG"></div>
-				</div>
+			<div class = "col-10 align-self-center">
+			<div class="spinner-border text-success" role="status" id="fadingBarsG_1">
+			  <span class="sr-only">Выполняется...</span>
 			</div>
-		</div> 	
+			<div class="spinner-border text-danger" role="status" id ="fadingBarsG_2">
+			  <span class="sr-only">Выполняется...</span>
+			</div>
+			<div class="spinner-border text-warning" role="status" id="fadingBarsG_3">
+			  <span class="sr-only">Выполняется...</span>
+			</div>
+				
+			</div>
+		</div>  -->	
 
         <div class="row">
-			<div class="ico-title"> {% load static %} <a href="../../askue/electric"><img id="electric-ico" src="{%static "images/new_ico/lamp2-ico48.png" %}" data-toggle="tooltip" data-placement="top" title="Электроучёт"></a></div>
-			<div class="ico-title"> {% load static %} <a href="../../askue/water"><img id="water-ico" src="{%static "images/new_ico/water-ico48.png" %}" data-toggle="tooltip" data-placement="top" title="Водоучёт"></a> </div>
-			<div class="ico-title"> {% load static %} <a href="../../askue/heat"><img id="heat-ico" src="{%static "images/new_ico/heat-ico48.png" %}" data-toggle="tooltip" data-placement="top" title="Теплоучёт"></a> </div>
-			<div class="ico-title"> {% load static %} <a href="../../askue/economic" ><img id="economic-ico" src="{%static "images/new_ico/econom2-ico48.png" %}" data-toggle="tooltip" data-placement="top" title="Экономика"></a></div>
+			<div class="col-2 offset-1 ico-title"> {% load static %} <a href="../../askue/electric"><img id="electric-ico" src="{%static "images/new_ico/lamp2-ico48.png" %}" data-toggle="tooltip" data-placement="top" title="Электроучёт"></a></div>
+			<div class="col-2 ico-title"> {% load static %} <a href="../../askue/water"><img id="water-ico" src="{%static "images/new_ico/water-ico48.png" %}" data-toggle="tooltip" data-placement="top" title="Водоучёт"></a> </div>
+			<div class="col-2 ico-title"> {% load static %} <a href="../../askue/heat"><img id="heat-ico" src="{%static "images/new_ico/heat-ico48.png" %}" data-toggle="tooltip" data-placement="top" title="Теплоучёт"></a> </div>
+			<div class="col-2 ico-title"> {% load static %} <a href="../../askue/economic" ><img id="economic-ico" src="{%static "images/new_ico/econom2-ico48.png" %}" data-toggle="tooltip" data-placement="top" title="Экономика"></a></div>
 		</div>	
 		<br>
 		<div class="row"> 
@@ -85,12 +88,12 @@
 
 	<div class="col-10">  <!-- В этой колонке название и основное --> <!--  id="right-block"  -->
 	
-		<div  id="system-name" class = "row">
-			<div class ="col-11"> <h3>Автоматизированная Система Комплексного Учёта Энергоресурсов <br>  ПАК "ПРИЗМЕР" </h3> </div>
-			<div class = "col-1">{% load static %} <a href="../exit"><img src="{%static "images/exit-ico24.png" %}" alt="Выход"></a></div>		
+		<div id="system-name" class = "row justify-content-center" >
+			<div  class ="col-11"> <h3>Автоматизированная Система Комплексного Учёта Энергоресурсов </h3> </div>
+			<div class = "col-1" id="title-exit"> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{% load static %} <a href="../exit"><img src="{%static "images/exit-ico24.png" %}" alt="Выход"></a></div>		
 		</div>
 		<br>
-		<div class = "row">
+		<div class = "row" >
 			{% block control-block %}
 			<br>
 			<br>
@@ -101,8 +104,10 @@
 			{% endblock %}
 		</div>
 		<br>
-		<div class = "row" id="data-block">	
-			<div class = "col-11">
+		
+		<div class = "row" id="data-block">				
+			<div class = "col-12">
+			<br>
 				<div id="data-table"></div>
 				<span id="QQQ"></span>    
 			</div>
@@ -111,16 +116,23 @@
 	</div> 	
 </div>
 <br>
-<div  id="myfooter" class="row">
-		<div class="col-1">{% load static %} <a target="_blank" href="../../askue/instruction_user" ><img id="user_info-ico48" src="{%static "images/user_info-ico48.png" %}" data-toggle="tooltip" data-placement="top" title="Инструкция пользователя"></a>		</div>
-		<div class="col-1">{% load static %} <a target="_blank" href="../../askue/instruction_admin" ><img id="admin_info-ico48" src="{%static "images/admin_info-ico48.png" %}"  data-toggle="tooltip" data-placement="top" title="Инструкция администратора"></a></div>
-		<div class="col-1">{% load static %} <a target="_blank" href="../../admin" ><img id="admin_panel-ico48" src="{%static "images/admin_panel-ico48.png" %}" data-toggle="tooltip" data-placement="top" title="Панель администратора"></a></div>
-		<div class="col-1">{% load static %} <a target="_blank" href="../../service/config" ><img id="admin_config-ico48" src="{%static "images/admin_config-ico48.png" %}" data-toggle="tooltip" data-placement="top" title="Панель конфигурирования"></a></div>
-
-		<div class="col-5 offset-md-3">
-		<strong><a class="text-warning" href="http://www.prizmer.ru/"> ООО "Правильные измерения"</a></strong>
-		<img src="{%static "images/new_ico/logo2-ico48.png" %}"> 
-		 <a class="text-warning" href="#">v. 2.0.0</a>
+<div  id="myfooter" class="row align-self-center justify-content-between">
+		<div class = "col-5">
+			<div class = "row">
+			<div class="col-1">{% load static %} <a target="_blank" href="../../askue/instruction_user" ><img id="user_info-ico48" src="{%static "images/user_info-ico48.png" %}" data-toggle="tooltip" data-placement="top" title="Инструкция пользователя"></a>		</div>
+			<div class="col-1">{% load static %} <a target="_blank" href="../../askue/instruction_admin" ><img id="admin_info-ico48" src="{%static "images/admin_info-ico48.png" %}"  data-toggle="tooltip" data-placement="top" title="Инструкция администратора"></a></div>
+			<div class="col-1">{% load static %} <a target="_blank" href="../../admin" ><img id="admin_panel-ico48" src="{%static "images/admin_panel-ico48.png" %}" data-toggle="tooltip" data-placement="top" title="Панель администратора"></a></div>
+			<div class="col-1">{% load static %} <a target="_blank" href="../../service/config" ><img id="admin_config-ico48" src="{%static "images/admin_config-ico48.png" %}" data-toggle="tooltip" data-placement="top" title="Панель конфигурирования"></a></div>
+			</div>
+		</div>
+		<div class="col-5 offset-md-1">
+			<div class = "row justify-content-end">
+			<div class = "col-7">	<strong><a class="text-warning" href="http://www.prizmer.ru/"> ООО "Правильные измерения"</a></strong>	
+								<img src="{%static "images/new_ico/logo2-ico48.png" %}">			
+								<span >v. 2.0.0</span> </div>
+			  
+		
+			</div>
 		</div>
 	</div>
 </div>

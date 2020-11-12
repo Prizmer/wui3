@@ -170,4 +170,11 @@ urlpatterns = [
 
     url(r'^108/$', views.electric_by_date_podolsk, name = 'electric_by_date_podolsk'), #отчёт для Подольска по электрике на дату
     url(r'^107/$', views.electric_consumption_podolsk, name = 'electric_consumption_podolsk'),#отчёт для Подольска по электрике за период
+
+    url(r'^109/$', views.water_tem104_consumption, name = 'water_tem104_consumption'), #потребеление по воде ТЭМ-104
+    url(r'^110/$', views.water_tem104_daily, name = 'water_tem104_daily'), #показания по воде ТЭМ-104 на дату
+    url(r'^111/$', views.heat_tem104_consumption, name = 'heat_tem104_consumption'), #потребеление по теплу ТЭМ-104
+    url(r'^112/$', views.heat_tem104_daily, name = 'heat_tem104_daily'), #показания по теплу ТЭМ-104 на дату
+
+
 ]
