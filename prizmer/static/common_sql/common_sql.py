@@ -8153,7 +8153,7 @@ SELECT
   balance_groups.name as balance_name,
   link_balance_groups_meters.type,
   types_abonents.name as type_abon,
-  sum(daily_values.value * link_abonents_taken_params.coefficient) as sumT,
+  sum(daily_values.value * link_abonents_taken_params.coefficient * link_abonents_taken_params.coefficient_2) as sumT,
   count(daily_values.value) as countAbon,
   names_params.name as param_name,
   resources.name AS res_name,
@@ -8198,7 +8198,7 @@ WHERE
   order by types_abonents.name,date)z3
 on z4.c_date=z3.date ) z1
 order by c_date"""%(electric_data_start, electric_data_end, obj_title,my_params[0], electric_data_start, electric_data_end,my_params[1],guid_type_abon)
-    #print sQuery
+    #print(sQuery)
     return sQuery
         
 def get_data_table_balance_electric_perid(obj_parent_title, obj_title,electric_data_start, electric_data_end,guid_type_abon):

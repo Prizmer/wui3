@@ -8289,7 +8289,7 @@ def balance_period_electric(request):
          guid_type_abon=dt_type_abon[i][0]         
              
          if not(bool(is_abonent_level.search(obj_key))):
-             print(guid_type_abon, dt_type_abon[i][1])
+             #print(guid_type_abon, dt_type_abon[i][1])
              data_table = common_sql.get_data_table_balance_electric_perid(obj_parent_title, obj_title,electric_data_start, electric_data_end,guid_type_abon)
              if i==1:
                      Xcoord=makeOneCoords(data_table,5)
