@@ -56,7 +56,7 @@ ali_pink   = NamedStyle(name = "ali_pink", fill=PatternFill(fill_type='solid', s
 # Конец описания стилей
 
 def isAdmin(user):
-    return user.is_staff
+    return user.is_superuser
 
 #@user_passes_test(isAdmin)
 class UploadFileForm(forms.Form):
@@ -66,13 +66,10 @@ class UploadFileForm(forms.Form):
 def MakeSheet(request):
     args={}
     fileName=""
-    sheets=""
-    #print request.GET['choice_file']
-    #print '___________'
-    #print request.GET.get('choice_file')
+    sheets = ""
     if request.is_ajax():
         if request.method == 'GET':
-            request.session["choice_file"]    = fileName    = request.GET['choice_file']
+            fileName    = request.GET['choice_file']
             #print fileName
             directory=os.path.join(BASE_DIR,'static/cfg/')
             try:
@@ -95,15 +92,25 @@ def writeToLog(msg):
 @user_passes_test(isAdmin, login_url='/auth/login/')
 def choose_service(request):
     args={}
-    directory=os.path.join(BASE_DIR,'static\\cfg\\')
+    # directory=os.path.join(BASE_DIR,'static\\cfg\\')
     
+    # if  not(os.path.exists(directory)):
+    #     os.mkdir(directory)
+    # #print directory
+    # files = os.listdir(directory) 
+    # #print files
+    # args['filesFF']= files
+    return render(request,"choose_service.html", args)
+
+def make_excel(request):
+    args = {}
+    directory=os.path.join(BASE_DIR,'static\\cfg\\')    
     if  not(os.path.exists(directory)):
         os.mkdir(directory)
-    #print directory
     files = os.listdir(directory) 
-    #print files
     args['filesFF']= files
-    return render(request,"choose_service.html", args)
+    #print(files)
+    return render(request,"service/service_excel.html", args)
 
 @csrf_exempt
 def service_electric(request):
@@ -111,10 +118,10 @@ def service_electric(request):
     return render(request,"service/service_electric.html", args)
 
 #@login_required(login_url='/auth/login/') 
-#@user_passes_test(isAdmin, login_url='/auth/login/')
+@csrf_exempt
 def service_file(request):
     args={}
-    args.update(csrf(request))    
+    #args.update(csrf(request))    
     data_table=[]
     status='Файл не загружен'
     args['data_table'] = data_table

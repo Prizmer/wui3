@@ -5,7 +5,7 @@
 {% load static %} <script src="{%static "libs/jquery.js" %}" type=text/javascript> </script>
 {% load static %} <script src="{%static "libs/jquery-ui/ui/jquery-ui.js" %}" type=text/javascript></script>
 {% load static %} <script src="{%static "libs/jquery-ui/ui/i18n/jquery.ui.datepicker-ru.js" %}" type=text/javascript></script>
-
+{% load static %} <link href="{%static "libs/bootstrap-4.3.1-dist/css/bootstrap.css"%}" rel="stylesheet" type="text/css">
 
     <title> ПАК ПРИЗМЕР| Сервисные настройки |</title>
  <script type="text/javascript">
@@ -32,7 +32,31 @@ var meter1="";
 var meter2="";
 			
 var load_service = function(page){
-        isFirst=1;
+		//загружаем экселевские файлы из cfg
+		console.log(page);
+		if (page == 'service_file'){
+			$('#excel-block').html('');
+			change_wb();			
+		}
+		else
+		{
+		$.ajax({
+			type: "GET",
+			url: "/service/make_excel",
+			beforeSend: function(){show_loader();},
+			data:{},        
+		   })
+		   
+	   .done(function( msg ) {
+		//console.log('load excel-block');
+		$('#excel-block').html(msg); // Пишем в div ответ от страницы 
+		hide_loader();
+		change_wb();
+		});			
+		}
+		
+		//загружаем страницу, на которую кликнули
+        //isFirst=1;
 		choice_file=$("#choice_file").val();
 		choice_sheet=$("#choice_sheet").val();
 		old_meter=$("#old_meter").val();
@@ -47,7 +71,7 @@ var load_service = function(page){
         type: "GET",
         url: "/service/"+page,
         beforeSend: function(){show_loader();},
-        data:{isFirst:isFirst, choice_file:choice_file, choice_sheet:choice_sheet, tcp_ip_status:tcp_ip_status, object_status:object_status, counter_status:counter_status, old_meter:old_meter, new_meter:new_meter, meter1:meter1,meter2:meter2, balance_status:balance_status, file30:file30},        
+        data:{ choice_file:choice_file, choice_sheet:choice_sheet, tcp_ip_status:tcp_ip_status, object_status:object_status, counter_status:counter_status, old_meter:old_meter, new_meter:new_meter, meter1:meter1,meter2:meter2, balance_status:balance_status, file30:file30},        
        })
 	   
 	   .done(function( msg ) {
@@ -61,44 +85,36 @@ var load_service = function(page){
     };
 
 function change_wb(){
-     console.log($("#choice_file").val());
+     //console.log($("#choice_file").val());
      choice_file=$("#choice_file").val();
-	 
+	 if (typeof choice_file != 'undefined') {
 	 $.ajax({
         type: "GET",
         url: "/service/make_sheet",
         beforeSend: function(){show_loader();},
-        data:{isFirst:isFirst, choice_file:choice_file},        
+        data:{choice_file:choice_file},        
        })
 	   
 	   .done(function( msg ) {
         $('#sheets-block').html(msg); // Пишем в div ответ от страницы 
             hide_loader();
         });
+		}
+	  else {
+	  $('#sheets-block').html('');
+	  }
 	 };
-
-	 
 	 
 var show_loader = function(){
     $("#fadingBarsG_1").show();
     $("#fadingBarsG_2").show();
     $("#fadingBarsG_3").show();
-    $("#fadingBarsG_4").show();
-    $("#fadingBarsG_5").show();
-    $("#fadingBarsG_6").show();
-    $("#fadingBarsG_7").show();
-    $("#fadingBarsG_8").show();
     };
     
 var hide_loader = function(){
     $("#fadingBarsG_1").hide();
     $("#fadingBarsG_2").hide();
     $("#fadingBarsG_3").hide();
-    $("#fadingBarsG_4").hide();
-    $("#fadingBarsG_5").hide();
-    $("#fadingBarsG_6").hide();
-    $("#fadingBarsG_7").hide();
-    $("#fadingBarsG_8").hide();
     };
 
 function upload(event) {
@@ -115,7 +131,6 @@ $.ajax({
     success: function(data) {
         alert('success');		
     }
-	
 
 });		
 return false;
@@ -136,65 +151,59 @@ $(function() {
 </script>
     </head>
 <body>
-<div id=layout>
-	<div id="right-block">
-		<h2 id="system-name-service">Сервисные настройки</h2>
-		
-		<div id="control-block">
-		 {% block control-block %}
-		 <br>
-		<span><strong> &nbsp;&nbsp; Выберите сервис </strong></span>
-		<div id="fadingBarsG">
-            <div id="fadingBarsG_1" class="fadingBarsG"></div>
-            <div id="fadingBarsG_2" class="fadingBarsG"></div>
-            <div id="fadingBarsG_3" class="fadingBarsG"></div>
-            <div id="fadingBarsG_4" class="fadingBarsG"></div>
-            <div id="fadingBarsG_5" class="fadingBarsG"></div>
-            <div id="fadingBarsG_6" class="fadingBarsG"></div>
-            <div id="fadingBarsG_7" class="fadingBarsG"></div>
-            <div id="fadingBarsG_8" class="fadingBarsG"></div>
-        </div> 
-		<br>
-		<br>
-		<div>
-		{% load static %} <img onclick="load_service('service_file')" id="download-ico" src="{%static "images/download2-ico64.png" %}" title="Загрузить файл">
-		{% load static %} <img onclick="load_service('service_electric')" id="electric-ico" src="{%static "images/digital5-ico64.png" %}" title="Цифровые приборы">
-		{% load static %} <img  onclick="load_service('service_water')" id="water-ico" src="{%static "images/impulse5-ico64.png" %}" title="Импульсные приборы">
-		{% load static %} <img  onclick="load_service('service_change_electric')" id="change-ico" src="{%static "images/change2-ico64.png" %}" title="Замена счётчиков-электричество и тепло!">
-		{% load static %} <img  onclick="load_service('service_get_info')" id="change-ico" src="{%static "images/tech3-ico64.png" %}" title="Информация по объекту">
-		{% load static %} <img  onclick="load_service('service_balance_load')" id="balance-ico" src="{%static "images/balance2-ico64.png" %}" title="Загрузка балансных групп">
-		{% load static %} <img  onclick="load_service('service_load30_page')" id="load30-ico" src="{%static "images/to_db2-ico64.png" %}" title="Загрузка Профилей мощности">
-		{% load static %} <img  onclick="load_service('service_user_account')" id="user-ico" src="{%static "images/users-ico64.png" %}" title="Добавление пользователей ЛК">
-		{% load static %} <img  onclick="load_service('service_del_meters')" id="del-ico" src="{%static "images/del-ico64.png" %}" title="Удалёние приборов">
-		<p>
-		<span><strong>Выберите файл &nbsp;</strong></span>
-			<select onchange="change_wb();" name="choice_file" id="choice_file">
-			<option value="0"><strong>Выберите файл...</strong></option>
-			{% for f in filesFF %}			
-			<option value='{{f}}'>{{f}}</option>
-			{% endfor %}           
-			</select>
-			
-			<div id="sheets-block" >
-			<span>Выберите лист </span>
-
-			</div>
-			{% endblock %}
-		
+<div id=layout class="container">
+	<div id="system-name-service" class = "row row justify-content-center">
+		<div class="col-10"><h2>Сервисные настройки</h2></div>
 	</div>
-	<strong>{{status}}</strong>
-	<div id="data-block-service">
-        <div id="data-table" ></div>
-		
-        <span id="QQQ"></span>        
+	<div class = "row">
+		<div class = "col-4" > <h5> Выберите сервис</h5> </div>	
+		<div class = "col-3">
+			<div class="spinner-grow text-primary" style="width: 1rem; height: 1rem;"  role="status" id="fadingBarsG_1">
+			  <span class="sr-only">Выполняется...</span>
+			</div>
+			<div class="spinner-grow text-danger" style="width: 1rem; height: 1rem;"  role="status" id ="fadingBarsG_2">
+			  <span class="sr-only">Выполняется...</span>
+			</div>
+			<div class="spinner-grow text-warning" style="width: 1rem; height: 1rem;"  role="status" id="fadingBarsG_3">
+			  <span class="sr-only">Выполняется...</span>
+			</div>	
+		</div>
+	</div>
+	<br>
+	<div class = "row">
+		<div class = "col-1">{% load static %} <img onclick="load_service('service_file')" id="download-ico" src="{%static "images/download2-ico64.png" %}" title="Загрузить файл"> </div>
+		<div class = "col-1">{% load static %} <img onclick="load_service('service_electric')" id="electric-ico" src="{%static "images/digital5-ico64.png" %}" title="Цифровые приборы"> </div>
+		<div class = "col-1">{% load static %} <img  onclick="load_service('service_water')" id="water-ico" src="{%static "images/impulse5-ico64.png" %}" title="Импульсные приборы"> </div>
+		<div class = "col-1">{% load static %} <img  onclick="load_service('service_change_electric')" id="change-ico" src="{%static "images/change2-ico64.png" %}" title="Замена счётчиков ЦИФРОВЫХ(!)"> </div>
+		<div class = "col-1">{% load static %} <img  onclick="load_service('service_get_info')" id="change-ico" src="{%static "images/tech3-ico64.png" %}" title="Информация по объекту"> </div>
+		<div class = "col-1">{% load static %} <img  onclick="load_service('service_balance_load')" id="balance-ico" src="{%static "images/balance2-ico64.png" %}" title="Загрузка балансных групп"> </div>
+		<div class = "col-1">{% load static %} <img  onclick="load_service('service_load30_page')" id="load30-ico" src="{%static "images/to_db2-ico64.png" %}" title="Загрузка Профилей мощности"> </div>
+		<div class = "col-1">{% load static %} <img  onclick="load_service('service_user_account')" id="user-ico" src="{%static "images/users-ico64.png" %}" title="Добавление пользователей ЛК"> </div>
+		<div class = "col-1">{% load static %} <img  onclick="load_service('service_del_meters')" id="del-ico" src="{%static "images/del-ico64.png" %}" title="Удалёние приборов"> </div>
+	</div>
+	<br>
+	
+	<div id ="excel-block">	</div>	
+	<div id="sheets-block" > </div>
+	<div class = "row justify-content-center">
+		<div class = "col-12">
+		<div id="data-block-service">
+			<div id="data-table" ></div>
+			
+			<span id="QQQ"></span>        
+			</div>
+		</div>
+	</div>
+	
+	<div class = "row justify-content-end" id="myfooter">
+    <div  class = "col-4" id="vizitka">
+        <span><strong><a class="text-warning" href="http://www.prizmer.ru/">ООО "Правильные измерения"</a></strong></span>
+		<img src="{%static "images/new_ico/logo2-ico48.png" %}">
     </div>
-</div>
+	</div>		
 
-
-<div id="myfooter">
-    <div id="vizitka">
-        <span><strong><a href="http://www.prizmer.ru/">ООО "Правильные измерения"</a></strong></span><br>
-    </div>
 </div>
+	
+
 </body>
 </html>

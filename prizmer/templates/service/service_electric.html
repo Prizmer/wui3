@@ -4,60 +4,76 @@
 {% load static %} <script src="{%static "libs/jquery-ui/ui/jquery-ui.js" %}" type=text/javascript></script>
 {% load static %} <script src="{%static "libs/jquery-ui/ui/i18n/jquery.ui.datepicker-ru.js" %}" type=text/javascript></script>
 
-<script src="/static/libs/liHighLight.js" type=text/javascript></script>
 
 <br>
-<span><strong> Цифровые приборы | Прогрузка</strong> 
+<div class = "container radius"  style="border-radius: 10px 40px">
+<div class = "row"  >
+	<div class = "col" id = "blue-style"><h5><strong> Цифровые приборы | Прогрузка</strong> </h5></div>
+</div>
 <br><br>
-
-<p>
-   <div class="meters_change_block">
-        <span><strong>Загрузка портов &nbsp;</strong></span>
-        <span onclick="load_service('load_tcp_ip')" class="button" id="tcp-ip-port-button">Загрузить</span> &nbsp;{{tcp_ip_status}}
-		<br>
-        <br><br>
-		<span><strong>Загрузка Объектов и Абонентов &nbsp;</strong></span>
-        <span onclick="load_service('load_electric_objects')" class="button" id="object_load_button">Загрузить</span> &nbsp;{{object_status}}
-		
-        <br><br>
-      <!--   <form>
-            {% load static %} <img src="{%static "images/question2-ico20.png" %}" title ="Если вы отметите флаг, то для загружаемой группы счётчиков будут считывать выбранные параметры. Для квартир рекомендуем НЕ выбирать данные параметры, т.к. это будет увеличивать размеры БД и снижать скорость работы." > <b>Для электро-счётчиков:   </b>
-           <br><input type="checkbox" name="option1" value="reactiv">Необходимо чтение реактивной энергии R+<Br>
-           <input type="checkbox" name="option2" value="halfs">Необходимо чтение получасовых профилей мощности A+ и R+<Br> 
-          </form> -->
-        <img src="{%static "images/question2-ico20.png" %}" title ="Для электрических ПУ: Если необходимо получение из прибора Получасовых профилей мощности и/или Реактивной энергии, сделайте отметки в прогрузочной ведомости. Для квартир рекомендуем НЕ выбирать данные параметры, т.к. это будет увеличивать размеры БД и снижать скорость работы." >
-		<br>
-        <span><strong>Загрузка  счётчиков&nbsp;</strong></span>        
-          
-        <span onclick="load_service('load_electric_counters')" class="button" id="counter_load_button">Загрузить</span> &nbsp;{{counter_status}}
-    </div>
-	
-    <p>	
-	<p>
-	<div class="meters_change_block">
-			<span><strong>Загрузка данных для отчёта по форме 80020 &nbsp;</strong></span>
-        <span onclick="load_service('load_80020_group')" class="button" id="counter_load_button">Загрузить</span> 
-        &nbsp; 
-        {% for value in 80020_status %}
+<div class = "row justify-content-start align-items-center" >
+	<div class = "col-4"> <strong>Загрузка портов</strong> </div>
+	<div class = "col-1"> <span onclick="load_service('load_tcp_ip')" class="button" id="tcp-ip-port-button">Загрузить</span> </div>
+	<div class = "col-7"> {{tcp_ip_status}}</div>
+</div>
+<br><br>
+<div class = "row justify-content-start align-items-center" >
+	<div class = "col-4"> <strong>Загрузка Объектов и Абонентов</strong> </div>
+	<div class = "col-1"> <span onclick="load_service('load_electric_objects')" class="button" id="object_load_button">Загрузить</span> </div>
+	<div class = "col-7"> {{object_status}}</div>
+</div>
+<br>
+<div class = "row">
+<div class = "col"><img src="{%static "images/question2-ico20.png" %}" title ="Для электрических ПУ: Если необходимо получение из прибора Получасовых профилей мощности и/или Реактивной энергии, сделайте отметки в прогрузочной ведомости. Для квартир рекомендуем НЕ выбирать данные параметры, т.к. это будет увеличивать размеры БД и снижать скорость работы." ></div></div>
+<div class = "row justify-content-start align-items-center" >
+	<div class = "col-4"> <strong>Загрузка  счётчиков </strong> </div>
+	<div class = "col-1"> <span onclick="load_service('load_electric_counters')" class="button" id="counter_load_button">Загрузить</span> </div>
+	<div class = "col-7"> {{counter_status}}</div>
+	<br>
+</div>
+<br><br>
+</div>
+<br>
+<div class = "container radius"  style="border-radius: 10px 40px">
+<br>
+<div class = "row">
+	<div class = "col-5"><strong>Загрузка данных для отчёта по форме 80020</strong></div>
+	<div class = "col-1"> <span onclick="load_service('load_80020_group')" class="button" id="counter_load_button">Загрузить</span>  </div>
+</div>
+<div class = "row">
+	<div class = "col-11">
+		{% for value in 80020_status %}
             <br> {{value}} 
-        {% endfor %}
-
-    </div>
-    <p>	
-	<p>
-	<div class="meters_change_block">
-	<p>
-	&nbsp; &nbsp;&nbsp;&nbsp; <a class="button" href ="../../service/get_electric_template/"> Образец прогрузочного файла по электрике </a></span>
-	<p>
-	&nbsp; &nbsp;&nbsp;&nbsp; <a class="button" href ="../../service/get_heat_template/"> Образец прогрузочного файла по теплу </a></span>
-	<p>
-	&nbsp; &nbsp;&nbsp;&nbsp; <a class="button" href ="../../service/get_water_digital_template/"> Образец прогрузочного файла по воде </a></span>
-	<p>
-    <p>
-	&nbsp; &nbsp;&nbsp;&nbsp; <a class="button" href ="../../service/get_80020_template/"> Образец прогрузочного файла для отчёта по форме 80020 </a></span>
-	<p>
+        {% endfor %}	
 	</div>
-</form>
+</div>
 <br>
+</div>
 <br>
+<div class = "container radius"  style="border-radius: 10px 40px">
+<div class = "row"  >
+	<div class = "col" id = "blue-style"><h5><strong> Образцы</strong> </h5></div>
+</div>
 <br>
+<div class = "row justify-content-start align-items-center">
+	<div class = "col-5"><strong>Образец прогрузочного файла по электрике</strong> </div>
+	<div class = "col-1"><a href ="../../service/get_electric_template/"> <img  src="{%static "images/save-ico48.png" %}" data-toggle="tooltip" data-placement="top" title="Образец прогрузочного файла по электрике"></a></div>
+</div><br>
+<div class = "row justify-content-start align-items-center">
+	<div class = "col-5"><strong>Образец прогрузочного файла по теплу</strong></div>
+	<div class = "col-1"><a href ="../../service/get_heat_template/"> <img src="{%static "images/save-ico48.png" %}" data-toggle="tooltip" data-placement="top" title="Образец прогрузочного файла по теплу"></a></div>
+</div><br>
+<div class = "row  justify-content-start align-items-center">
+	<div class = "col-5"><strong>Образец прогрузочного файла по воде</strong></div>
+	<div class = "col-1"><a href ="../../service/get_water_digital_template/"> <img src="{%static "images/save-ico48.png" %}" data-toggle="tooltip" data-placement="top" title="Образец прогрузочного файла по воде"></a></div>
+</div><br>
+<div class = "row  justify-content-start align-items-center">
+	<div class = "col-5"><strong>Образец прогрузочного файла для отчёта по форме 80020</strong></div>
+	<div class = "col-1"><a href ="../../service/get_80020_template/"> <img src="{%static "images/save-ico48.png" %}" data-toggle="tooltip" data-placement="top" title="Образец прогрузочного файла для отчёта по форме 80020"></a></div>
+</div><br>
+</div>
+
+
+
+<br>
+ 	

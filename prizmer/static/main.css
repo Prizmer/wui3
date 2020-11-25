@@ -118,18 +118,19 @@ top: 5px;
 }
 
 #system-name-service {
-padding-top: 5px; 
-padding-bottom: 10px;
-color: black;
-margin:0 auto;
-margin-left: 21%;
+/* padding-top: 10px; 
+padding-bottom: 10px; */
+color: #004C79;
+/* margin:0 auto;
+margin-left: 21%; */
 height: 5%;
 text-align: center;
 background-color:#D8E2EC;
 border-style: solid;
 border-width: 2px;
-border-color: grey;
+border-color: #fff;
 border-radius: 5px;
+position: inherit;
 }
 
 #control-block{
@@ -213,7 +214,7 @@ overflow-y: scroll;
 
 #data-block-service{
 `margin-top: 15px;
-margin-left: 5%;
+/*margin-left: 5%;*/
 min-height: 501px;
 `border-style: solid;
 `border-width: 1px;
@@ -365,7 +366,7 @@ height: 480px;
 min-height: 35px;
 /*min-width: 100%;*/
 background: green;
-position: relative;
+/* position: relative; */
 }
 
 a.button, span.button {
@@ -660,9 +661,9 @@ background-color:#D3D3D3;
 
 /* LOADER END */
 #vizitka{
-float: right;
+/* float: right;
 margin-right: 3em;
-margin-top: 0.5em;
+margin-top: 0.5em; */
 }
 .highlight { background:#FC1B1E; color:#fff;}
 
@@ -678,6 +679,25 @@ font-size: 0.7em;
 }
 
 #choice_report-button{
+font-size: 0.8em;
+/*margin-left: 0.4em;*/
+float: left;
+margin-right: 1em;
+box-shadow: 0px 0px 1px 1px rgba(132,159,187,1);
+/*   -moz-box-shadow: 0px 0px 10px 3px rgba(132,159,187,1);
+  box-shadow: 0px 0px 10px 3px rgba(132,159,187,1); */
+  top: 9px;
+
+}
+
+#choice_file-menu{
+font-size: 0.7em;
+
+/*float: left;
+ margin-right: 1em; */
+}
+
+#choice_file-button{
 font-size: 0.8em;
 /*margin-left: 0.4em;*/
 float: left;
@@ -752,7 +772,7 @@ border: 1px rgba(132,159,187,1) solid; */
 /*Инфо по счётчику*/
 .radius {
     /*background: #f0f0f0;*/ /* Цвет фона */
-    border: 2px solid #2860AA; /* Параметры рамки */
+    border: 1.5px solid #2860AA; /* Параметры рамки */
     padding: 15px; /* Поля вокруг текста */
     margin-bottom: 10px; /* Отступ снизу */
    }

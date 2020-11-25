@@ -13,6 +13,7 @@ urlpatterns = [
     url(r'^service_electric/$', views.service_electric, name = 'service_electric'), # электрика, загрузка нужных полей
     url(r'^service_electric_load/$', views.service_electric_load, name = 'service_electric_load'), # электрика прогрузка
     url(r'^load_tcp_ip/$', views.load_port, name = 'load_port'), # загрузка портов по элетрике
+    url(r'^make_excel/$', views.make_excel, name = 'make_excel'), #возвращает список книг excel
     url(r'^make_sheet/$', views.MakeSheet, name = 'make_sheet'), #возвращает список страниц в книге excel
     url(r'^load_electric_objects/$', views.load_electric_objects, name = 'load_electric_objects'), # загрузка объектов и абонентов
     url(r'^load_electric_counters/$', views.load_electric_counters, name = 'load_electric_counters'), # загрузка счётчиков
