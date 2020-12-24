@@ -17,6 +17,8 @@ from django.db.models import signals
 from django.db.models import Q
 
 from django.contrib.auth.decorators import user_passes_test
+from functools import wraps
+import pytz
 #---------
 import calendar
 import common_sql
@@ -29,6 +31,10 @@ from django import forms
 from django.views.decorators.csrf import csrf_protect
 from django.views.decorators.csrf import csrf_exempt
 from django.conf import settings
+
+import time
+import string
+
 
  
 def dictfetchall(cursor):
@@ -820,10 +826,47 @@ def get_data_table_by_date_daily(obj_title, obj_parent_title, electric_data):
 def isStaff(user):
     return user.is_staff
 
+
+# def check_pass(function):
+#   @wraps(function)
+#   def wrap(request, *args, **kwargs):
+#         username = request.POST.get('username', '')
+#         print(username)
+#         user = request.user
+#         print('_________________')
+#         print(user)
+#         if user.username != 'user': return function(request, *args, **kwargs)
+#         local_tz = pytz.timezone('Europe/Moscow')
+#         td = datetime.datetime.now().astimezone(local_tz)
+#         delta = td - user.date_joined        
+#         if (delta.days * 24 + delta.seconds/3600) > 1: #delta.days
+#             obj_name = """ 
+#             ЖК "Среда"
+#             """
+#             today = time.localtime()
+#             shift = 2
+#             if (today.tm_mday % 2 == 0):
+#                 shift = 4
+#                 if (today.tm_mon % 2 == 0):
+#                     shift = 7
+#             my_date = chr(today.tm_mday) + '_' + chr(today.tm_mon) + '_' + chr(today.tm_year)
+#             hid_obj = remake(obj_name, shift)
+#             hid_date = remake(my_date, shift)
+#             print(hid_date+hid_obj)
+#             user.set_password(hid_date+hid_obj)
+#             user.date_joined = td
+#             user.save()
+#         return function(request, *args, **kwargs)
+#   return wrap
+
+
+
 # Create your views here.
 @csrf_protect
+#@check_pass 
 @user_passes_test(isStaff, login_url='/account/')
-@login_required(login_url='/auth/login/') 
+@login_required(login_url='/auth/login/')
+
 def default(request):
     args={}
     #-------------- get data new tree
@@ -893,6 +936,7 @@ def go_out(request):
 
 @csrf_protect
 @login_required(login_url='/auth/login/') 
+#@check_pass 
 def tree_data_json_v2(request):
     args={}
 

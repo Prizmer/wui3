@@ -9,7 +9,7 @@ class LinkAbonentsTakenParamsAdmin(admin.ModelAdmin):
 class MetersAdmin(admin.ModelAdmin):
     search_fields = ['name']
     date_hierarchy = 'dt_last_read'
-    list_display = ('name','factory_number_manual', 'dt_last_read', 'is_factory_numbers_equal')
+    list_display = ('name','factory_number_manual', 'address', 'dt_last_read', 'is_factory_numbers_equal')
     
 class AbonentsAdmin(admin.ModelAdmin):
     search_fields = ['name', 'account_2']
