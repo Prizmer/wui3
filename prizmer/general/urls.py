@@ -25,6 +25,7 @@ urlpatterns = [
     url(r'^instruction_admin/$', views.instruction_admin, name = 'instruction_admin'),
     url(r'^exit/$', views.go_out, name = 'exit'),
     url(r'^meter_info/$', views.meter_info, name = 'meter_info'), #При нажатии на прибор выводится подробная информация по нему
+    url(r'^extended_info/$', views.extended_info, name = 'extended_info'), #Расширенная информация по потреблению прибора за период
 
     # Отчеты. Чётные - один календарь. Нечётные - два календаря.
     url(r'^0/$', views.choose_report, name = 'choose_report'), # Выберите отчет
@@ -121,7 +122,7 @@ urlpatterns = [
     url(r'^75/$', views.heat_karat_potreblenie, name = 'period_heat_karat'),
 
     url(r'^76/$', views.all_res_by_date, name = 'all_res_by_date'), 
-    url(r'^77/$', views.balance_period_electric, name = 'period_electric_balance'),
+    url(r'^77/$', views.balance_period_electric_2, name = 'period_electric_balance'),
 
     url(r'^79/$', views.water_potreblenie_pulsar_with_graphic, name = 'period_water_pulsar_imp_graphic'), # вода, показания за период Импульсные, отчёт как 39
     
@@ -176,5 +177,6 @@ urlpatterns = [
     url(r'^111/$', views.heat_tem104_consumption, name = 'heat_tem104_consumption'), #потребеление по теплу ТЭМ-104
     url(r'^112/$', views.heat_tem104_daily, name = 'heat_tem104_daily'), #показания по теплу ТЭМ-104 на дату
 
+    url(r'^113/$', views.electric_consumption_3_zones_with_limit, name = 'electric_consumption_with_limit'), # Потребление по электричеству за период. 3 тарифа с выделением строк, где потребление было меньше порога
 
 ]

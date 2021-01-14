@@ -1,12 +1,10 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <html>
 <head>
-	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-	<title>Удельный расход</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <!-- Graph plugin-->
 	<script type="text/javascript">
 	{% if AllData %}
-    var ctx = document.getElementById("myChart").getContext('2d');
+    var ctx = document.getElementById("myChart2").getContext('2d');
 	var myChart = new Chart(ctx, {
     type: 'line',
     data: {
@@ -29,21 +27,30 @@
  
 </head>
 <body>
-<br>
-<br>
-<span>Абонент: <strong>{{obj_title}}</strong></span>
-<br>
+
+<div class="row">
+	<div class="col-12" id="comment-title"><h6>Профиль потребления <h6> </div>
+</div>
+<div class = "row">
+<div class="col-11" id="blue-style"><strong>{{abonent}} ({{object}})</strong> </div>
+</div>
+
 <br>{% if AllData %}
-			<canvas id="myChart" width="300" height="100"></canvas>						
+			<canvas id="myChart2" width="300" height="100"></canvas>						
 	{% endif %}
-<br>		
-		
-
 <br>
+<strong>min</strong> - значение в 3 раза меньше среднего за последние 7 дней выбранного диапазона
+<br>
+<strong>max</strong> - значение в 3 раза больше среднего за последние 7 дней выбранного диапазона
+<br><br>
+<div class="row">
 {% if data_table %}
-<span>Таблица значений профиля показаний за период с <strong>{{electric_data_start}}</strong> по <strong>{{electric_data_end}}  без учёта Кт</span> 
+<div class = "col-11">Таблица значений профиля показаний за период с <strong>{{electric_data_start}}</strong> по <strong>{{electric_data_end}}  без учёта Кт</div> 
+</div>
 
+<div class="row">
 <table class="content" id="data-table" >
+<div class="col-11">
 <tr>
 <th>Дата</th>
 <th>T0 A+, кВт*ч</th>
@@ -54,11 +61,6 @@
 <th>Расход T2 за прошедшие сутки, кВт*ч</th>
 <th>T3 A+, кВт*ч</th>
 <th>Расход T3 за прошедшие сутки, кВт*ч</th>
-<!--<th>T1 A+</th>-->
-<!--<th>T2 A+</th>-->
-<!--<th>T3 A+</th>-->
-
-
 </tr>
 {% for value in data_table %}
 <tr>
@@ -77,8 +79,7 @@
 {% else %}
 <span><strong>Нет данных.</strong></span>
 {% endif %}
-<br>
-<br>
-<br>
+</div>
+</div>
+
 </body>
-</html>

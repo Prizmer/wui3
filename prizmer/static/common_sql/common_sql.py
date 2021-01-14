@@ -1667,7 +1667,8 @@ where electric_abons.ab_name = '%s' AND electric_abons.obj_name='%s'
 ORDER BY electric_abons.ab_name, z2.daily_date  ASC) z3
 on z4.c_date=z3.daily_date 
 order by z4.c_date""" % (data_start,data_end,params[0],params[1],params[2],params[3],str(params[4]),str(obj_title), str(obj_parent_title), data_start,data_end,str(obj_title), str(obj_parent_title))
-    #print sQuery
+    #print('sQuery_________________________________________________')
+    #print(sQuery)
     return sQuery
 
 
@@ -1829,8 +1830,9 @@ on z4.c_date=z2.daily_date
 ) z3
 order by c_date
     """%(data_start, data_end,params[0],params[1],params[2],params[3],params[4],obj_title,data_start, data_end )
-    #print sQuery
+    #print(sQuery)
     return sQuery
+
 def get_data_table_electric_between_for_obj(obj_title, obj_parent_title,data_start, data_end):
     data_table = []
     params=['T0 A+','T1 A+','T2 A+','T3 A+', 'Электричество']
@@ -2218,7 +2220,7 @@ order by z3.ab_name ASC""" % (params[0],params[1],params[2],params[3], params[4]
     if dm=='monthly' or dm=='daily' or dm=='current':
         sQuery=sQuery.replace('daily',dm)
     #
-    #print sQuery
+    #print(sQuery)
     return sQuery
 
 #def get_data_table_electric_parametr_by_period_v2(isAbon,obj_title, obj_parent_title, electric_data_start, electric_data_end, params, res, dm):
@@ -8138,7 +8140,7 @@ def GetSimpleTable(table,fieldName,value):
 
 def MakeSqlQuery_balance_electric_period(obj_parent_title, obj_title,electric_data_start, electric_data_end, my_params, guid_type_abon):
     sQuery="""
-    select balance_name,type,type_abon,sumT,res_name, c_date,
+    select balance_name,type,type_abon,round(sumT::numeric,3),res_name, c_date,
 round((z1.sumT-lag(sumT) over (order by date))::numeric,3) as delta,
 countAbon,
 guid_types_abonents
@@ -8259,7 +8261,7 @@ WHERE
   names_params.name, 
   resources.name,daily_values.date
   order by date) z1 """%(type_abon,obj_title,electric_data_start, electric_data_end,my_params[0],my_params[1])
-    #print sQuery
+    #print(sQuery)
     return sQuery
 def get_data_table_balance_electric_perid_potrebiteli(obj_parent_title, obj_title,electric_data_start, electric_data_end, type_abon):
     my_params=['Электричество', 'T0 A+']    

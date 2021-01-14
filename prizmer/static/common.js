@@ -503,3 +503,49 @@ var guid_abonents=$(this).attr('id');
 	});
 	
 };
+
+
+var LoadExtendedInfo = function(){
+	/*console.log('LoadExtendedInfo')*/
+    /* console.log($(this).attr('id')) */
+	var row = document.getElementById($(this).attr('id'));
+	/* console.log(row.dataset.dateStart, row.dataset.dateEnd) */
+	$.ajax({
+		type: "GET",
+        url: "../../askue/extended_info",
+		data: {
+			'id':$(this).attr('id'),
+			'electric_data_start':row.dataset.dateStart,
+			'electric_data_end':row.dataset.dateEnd,
+			'obj_title':row.dataset.abonent,
+			'obj_parent_title':row.dataset.object,
+			'mini':row.dataset.limitMini,
+			'maxi':row.dataset.limitMaxi,
+		},
+		dataType: "html",
+        cache: false,
+		success:function(data) {
+		event.preventDefault();
+		$('#overlay').fadeIn(400, // снaчaлa плaвнo пoкaзывaем темную пoдлoжку
+		 	function(){ // пoсле выпoлнения предъидущей aнимaции
+				$('#extended-info') 
+					.css('display', 'block') // убирaем у мoдaльнoгo oкнa display: none;
+					.animate({opacity: 1, top: '50%'}, 200); // плaвнo прибaвляем прoзрaчнoсть oднoвременнo сo съезжaнием вниз
+		});
+        $("#extended-info").html(data); // Пишем в div ответ от страницы 
+       	
+        }		
+	});	
+
+	/* Зaкрытие мoдaльнoгo oкнa, тут делaем тo же сaмoе нo в oбрaтнoм пoрядке */
+	$('#modal_close, #overlay').click( function(){ // лoвим клик пo крестику или пoдлoжке
+		$('#extended-info')
+			.animate({opacity: 0, top: '45%'}, 200,  // плaвнo меняем прoзрaчнoсть нa 0 и oднoвременнo двигaем oкнo вверх
+				function(){ // пoсле aнимaции
+					$(this).css('display', 'none'); // делaем ему display: none;
+					$('#overlay').fadeOut(400); // скрывaем пoдлoжку
+				}
+			);
+	});
+	
+};
