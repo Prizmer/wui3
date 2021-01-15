@@ -97,6 +97,7 @@ class Comments(models.Model):
     comment = models.TextField('Комментарий')
     date = models.DateTimeField('Дата комментария', auto_now_add=True)
     guid_abonents = models.ForeignKey('Abonents', db_column='guid_abonents', on_delete=models.CASCADE)
+    guid_resources = models.ForeignKey('Resources', db_column = 'guid_resources', null=True, on_delete=models.CASCADE)
     class Meta:
         db_table = 'comments'
         verbose_name = 'Комментарии'

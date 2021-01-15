@@ -6423,7 +6423,9 @@ def get_data_table_pulsar_water_daily(obj_parent_title, obj_title, electric_data
     
 def MakeSqlQuery_water_pulsar_daily_for_abonent(obj_parent_title, obj_title, electric_data_end, my_params):
     sQuery="""
-    Select z1.date,water_pulsar_abons.ab_name, water_pulsar_abons.type_meter, water_pulsar_abons.attr1, water_pulsar_abons.factory_number_manual, round(z1.value::numeric,3)
+    Select z1.date,water_pulsar_abons.ab_name, water_pulsar_abons.type_meter, water_pulsar_abons.attr1, water_pulsar_abons.factory_number_manual, round(z1.value::numeric,3),
+     water_pulsar_abons.ab_guid, 
+ water_pulsar_abons.comment
 from water_pulsar_abons
 left join
 (SELECT 
@@ -6464,14 +6466,18 @@ water_pulsar_abons.ab_name,
 water_pulsar_abons.type_meter, 
 water_pulsar_abons.attr1, 
 water_pulsar_abons.factory_number_manual, 
-z1.value
+z1.value,
+ water_pulsar_abons.ab_guid, 
+ water_pulsar_abons.comment
     """%(obj_parent_title, obj_title, electric_data_end, my_params[0],my_params[1],obj_parent_title, obj_title)
-    #print sQuery
+    #print(sQuery)
     return sQuery
     
 def MakeSqlQuery_water_pulsar_daily_for_all(obj_parent_title, obj_title, electric_data_end, my_params):
     sQuery="""
-    Select z1.date, water_pulsar_abons.ab_name, z1.type_meter, z1.attr1, water_pulsar_abons.factory_number_manual, round(z1.value::numeric,3),water_pulsar_abons.ab_guid
+    Select z1.date, water_pulsar_abons.ab_name, z1.type_meter, z1.attr1, water_pulsar_abons.factory_number_manual, round(z1.value::numeric,3),water_pulsar_abons.ab_guid,
+     water_pulsar_abons.ab_guid, 
+ water_pulsar_abons.comment
 from water_pulsar_abons
 left join 
 (SELECT 
@@ -6509,7 +6515,9 @@ water_pulsar_abons.ab_name,
 z1.type_meter, 
 z1.attr1, 
 water_pulsar_abons.factory_number_manual, z1.value,
-water_pulsar_abons.ab_guid
+water_pulsar_abons.ab_guid,
+water_pulsar_abons.ab_guid, 
+ water_pulsar_abons.comment
   order by water_pulsar_abons.ab_name, z1.type_meter, z1.attr1
     """%(obj_title, electric_data_end, my_params[0],my_params[1],obj_title)
     #print sQuery

@@ -430,11 +430,12 @@ var hide_loader = function(){
 //Загрузка комментариев
 var LoadComments = function(){
     //console.log($(this).attr('id'))
+
 	$.ajax({
 		type: "GET",
         url: "../../askue/comment",
 		data: {
-			'id':$(this).attr('id'),
+			'id':$(this).attr('id'),		
 		},
 		dataType: "html",
         cache: false,
@@ -468,13 +469,17 @@ var LoadComments = function(){
 //Загрузка комментариев
 var AddComments = function(){
 //console.log($(this).attr('id'));
+var row = document.getElementById($(this).attr('id'));
 var guid_abonents=$(this).attr('id');
+var resource = row.dataset.resource;
+console.log('!!!!!!!!!', resource);
 	$.ajax({
 		type: "GET",
         url: "../../askue/add_comment/",
 		
 		data: {
-			'id':guid_abonents,					
+			'id':guid_abonents,	
+			'resource':resource,			
 		},
 		dataType: "html",
         cache: false,

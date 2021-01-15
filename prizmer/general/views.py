@@ -26,7 +26,7 @@ from django.shortcuts import redirect
 
 #---------
 
-from general.models import Objects, Abonents, BalanceGroups, Meters, LinkBalanceGroupsMeters, Comments
+from general.models import Objects, Abonents, BalanceGroups, Meters, LinkBalanceGroupsMeters, Comments, Resources
 from django import forms
 from django.views.decorators.csrf import csrf_protect
 from django.views.decorators.csrf import csrf_exempt
@@ -7508,7 +7508,7 @@ def pulsar_water_daily(request):
         data_table = common_sql.get_data_table_pulsar_water_daily(obj_parent_title, obj_title, electric_data_end, False)
               
     if len(data_table)>0: 
-        data_table=common_sql.ChangeNull(data_table, None)
+        data_table=common_sql.ChangeNull_and_LeaveEmptyCol(data_table, None, 8)
         
     args['data_table'] = data_table
     args['obj_title'] = obj_title
@@ -9319,31 +9319,47 @@ def add_comment(request):
 
     if request.method == "GET":        
         form=AddCommentForm()
-        guid_abonent         =  request.GET['id']
+        guid_abonent        =  request.GET['id']
+        resource            =  request.GET['resource']
         
-    
-
     args['form'] = form
     args['comment_status'] = comment_status
     args['guid_abonent'] = guid_abonent
-    #print guid_abonent
+    args['resource'] = resource
+    print(guid_abonent, resource)
     return render(request, "data_table/add_comment.html", args)
 
 @csrf_protect
 @csrf_exempt       
 def load_comment(request):
     comment_status = 'Добавление нового комментария'
-      
     if request.method == "POST":      
         form = AddCommentForm(data=request.POST)  
-        guid_abonent         =  request.POST['guid_abonents']
+        guid_abonent     =  request.POST['guid_abonents']
+        resource         =  request.POST['resource']#request.GET.get('resource') #request.GET['resource'] #request.POST.get('resource', '')
+        guid_resource = ''
+        if resource =='electric':
+            guid_resource = 'ba710cff-e390-48ca-b442-70141c9864f7'
+        if resource == 'heat':
+            guid_resource = 'c0491ede-e00b-4e1d-a8ba-1ef61dba1cd3'
+        if resource == 'water':
+            guid_resource = '47f0b64c-2bf6-45b4-972b-601f473a3752'
+        if resource == 'gvs':
+            guid_resource = '57ec8f42-69c6-4f79-81bb-8ea139407aa9'
+        if resource == 'impulse':
+            guid_resource = '12574d66-2034-4c8e-8c8c-249757736858'
+        print(resource)
+        #print(guid_resource)
         if form.is_valid():
             Comments = form.save(commit=False)
-            Comments.guid_abonents = Abonents.objects.get(guid=guid_abonent)  
+            Comments.guid_abonents = Abonents.objects.get(guid=guid_abonent)
+            if len(guid_resource) > 0:
+                Comments.guid_resources = Resources.objects.get(guid=guid_resource)  
             Comments.date=datetime.datetime.now()          
             Comments.save()           
             comment_status = 'Комментарий добавлен'
     #return redirect(request, '../electric')
+    #print('1111111111111111111')
     return redirect('../electric')
 
 #Разработка формы 80040 ___________________---------------------------------------_______________________________

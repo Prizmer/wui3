@@ -58,7 +58,7 @@ $(".add_comment").click(AddComments);
 
 <td class="th_hvs"> 
 {% if value.11 %} 
-<div class="comment" id={{value.13}}> 
+<div class="comment" id={{value.13}}  data-resource='electric'> 
  {{value.11}}
  {% load static %} <img src="{%static "images/comment-ico24.png" %}" >
 </div>
@@ -67,7 +67,7 @@ $(".add_comment").click(AddComments);
 <!--<td><strong>{{value.8}}</strong></td>-->
 <td class="th_hvs"> 
 
-<div class="add_comment" id={{value.13}}> 
+<div class="add_comment" id={{value.13}}  data-resource='electric'> 
  {% load static %} <img src="{%static "images/add_comment-ico16.png" %}" >
 </div>
 </td>
