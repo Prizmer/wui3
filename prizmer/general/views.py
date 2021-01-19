@@ -7508,7 +7508,7 @@ def pulsar_water_daily(request):
         data_table = common_sql.get_data_table_pulsar_water_daily(obj_parent_title, obj_title, electric_data_end, False)
               
     if len(data_table)>0: 
-        data_table=common_sql.ChangeNull_and_LeaveEmptyCol(data_table, None, 8)
+        data_table=common_sql.ChangeNull_and_LeaveEmptyCol(data_table, None, 7)
         
     args['data_table'] = data_table
     args['obj_title'] = obj_title
@@ -8101,26 +8101,7 @@ def pulsar_water_period_2(request):
 
     return render(request, "data_table/water/73.html", args)
     
-def comment(request):
-    args = {}
 
-    data_table = []
-
-    if request.is_ajax():
-        if request.method == 'GET':
-            request.session["id"]           = guid_abonent           = request.GET['id']
-            
-    if (not(guid_abonent is None) and not(guid_abonent=="")):
-        data_table = common_sql.get_data_table_comments_for_abon(guid_abonent)
-
-    
-    args['data_table'] = data_table
-    if len(data_table)>0:
-        args['object'] = data_table[0][5]
-        args['abonent'] = data_table[0][4] 
-    #print data_table
-
-    return render(request, "data_table/comment.html", args)
     
 def heat_karat_daily(request):
     args = {}
@@ -9306,6 +9287,39 @@ def all_res_status_monthly(request):
     
     return render(request, "data_table/92.html", args)
     
+
+def comment(request):
+    args = {}
+
+    data_table = []
+
+    if request.is_ajax():
+        if request.method == 'GET':
+            guid_abonent       = request.GET['id']
+            resource           = request.GET['resource']
+            guid_resource = ''
+            if resource =='electric':
+                guid_resource = 'ba710cff-e390-48ca-b442-70141c9864f7'
+            if resource == 'heat':
+                guid_resource = 'c0491ede-e00b-4e1d-a8ba-1ef61dba1cd3'
+            if resource == 'water':
+                guid_resource = '47f0b64c-2bf6-45b4-972b-601f473a3752'
+            if resource == 'gvs':
+                guid_resource = '57ec8f42-69c6-4f79-81bb-8ea139407aa9'
+            if resource == 'impulse':
+                guid_resource = '12574d66-2034-4c8e-8c8c-249757736858'
+    if (not(guid_abonent is None) and not(guid_abonent=="")):
+        data_table = common_sql.get_data_table_comments_for_abon(guid_abonent, guid_resource)
+
+    
+    args['data_table'] = data_table
+    if len(data_table)>0:
+        args['object'] = data_table[0][5]
+        args['abonent'] = data_table[0][4] 
+    #print data_table
+
+    return render(request, "data_table/comment.html", args)
+
 class AddCommentForm(forms.ModelForm):
     class Meta:
         model = Comments
@@ -9316,17 +9330,17 @@ class AddCommentForm(forms.ModelForm):
 def add_comment(request):
     args={}
     comment_status = 'Добавление нового комментария'
-
+    #print('1111111')
     if request.method == "GET":        
         form=AddCommentForm()
         guid_abonent        =  request.GET['id']
         resource            =  request.GET['resource']
-        
+        #print('is get')
     args['form'] = form
     args['comment_status'] = comment_status
     args['guid_abonent'] = guid_abonent
     args['resource'] = resource
-    print(guid_abonent, resource)
+
     return render(request, "data_table/add_comment.html", args)
 
 @csrf_protect
@@ -9348,7 +9362,7 @@ def load_comment(request):
             guid_resource = '57ec8f42-69c6-4f79-81bb-8ea139407aa9'
         if resource == 'impulse':
             guid_resource = '12574d66-2034-4c8e-8c8c-249757736858'
-        print(resource)
+        #print(resource)
         #print(guid_resource)
         if form.is_valid():
             Comments = form.save(commit=False)
@@ -9358,9 +9372,9 @@ def load_comment(request):
             Comments.date=datetime.datetime.now()          
             Comments.save()           
             comment_status = 'Комментарий добавлен'
-    #return redirect(request, '../electric')
-    #print('1111111111111111111')
-    return redirect('../electric')
+    if resource =='electric':    return redirect('../electric')
+    if resource =='water' or resource == 'impulse':    return redirect('../water')
+    if resource =='heat':    return redirect('../heat')
 
 #Разработка формы 80040 ___________________---------------------------------------_______________________________
     

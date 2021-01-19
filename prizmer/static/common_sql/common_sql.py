@@ -5874,7 +5874,9 @@ def makeSqlQuery_heat_daily_pulsar_teplo_abon(obj_parent_title,obj_title, electr
 round(z2.energy::numeric,7),
 round(z2.volume::numeric,7),
 round(z2.t_in::numeric,1),
-round(z2.t_out::numeric,1)
+round(z2.t_out::numeric,1),
+heat_abons.comment,
+heat_abons.ab_guid
 from heat_abons
 left join
 (SELECT z1.daily_date, z1.name_objects, z1.name_abonents, z1.number_manual, 
@@ -5930,7 +5932,9 @@ def makeSqlQuery_heat_daily_pulsar_teplo_all(obj_title, electric_data, params):
 round(z2.energy::numeric,7),
 round(z2.volume::numeric,7),
 round(z2.t_in::numeric,1),
-round(z2.t_out::numeric,1)
+round(z2.t_out::numeric,1),
+heat_abons.comment,
+heat_abons.ab_guid
 from heat_abons
 left join
 (SELECT z1.daily_date, z1.name_objects, z1.name_abonents, z1.number_manual, 
@@ -5976,7 +5980,7 @@ left join
 on z2.number_manual=heat_abons.factory_number_manual
 where heat_abons.obj_name='%s'
 order by heat_abons.ab_name""" % (params[0],params[1],params[2],params[3], obj_title,params[4], electric_data, obj_title )
-    #print sQuery    
+    #print(sQuery)    
     return sQuery
 
 
@@ -5991,9 +5995,8 @@ def get_data_table_by_date_daily_pulsar_teplo(obj_parent_title, obj_title, elect
         cursor.execute(makeSqlQuery_heat_daily_pulsar_teplo_all(obj_title, electric_data, params))
     data_table = cursor.fetchall()   
     
-    if len(data_table)>0: data_table=ChangeNull(data_table, electric_data)
+    if len(data_table)>0: data_table=ChangeNull_and_LeaveEmptyCol(data_table, electric_data, 7) 
     return data_table
-
 
 
 def makeSqlQuery_heat_pulsar_teplo_abon_period(obj_parent_title,obj_title, electric_data_end, electric_data_start, params):
@@ -6425,7 +6428,7 @@ def MakeSqlQuery_water_pulsar_daily_for_abonent(obj_parent_title, obj_title, ele
     sQuery="""
     Select z1.date,water_pulsar_abons.ab_name, water_pulsar_abons.type_meter, water_pulsar_abons.attr1, water_pulsar_abons.factory_number_manual, round(z1.value::numeric,3),
      water_pulsar_abons.ab_guid, 
- water_pulsar_abons.comment
+    water_pulsar_abons.comment
 from water_pulsar_abons
 left join
 (SELECT 
@@ -6476,7 +6479,6 @@ z1.value,
 def MakeSqlQuery_water_pulsar_daily_for_all(obj_parent_title, obj_title, electric_data_end, my_params):
     sQuery="""
     Select z1.date, water_pulsar_abons.ab_name, z1.type_meter, z1.attr1, water_pulsar_abons.factory_number_manual, round(z1.value::numeric,3),water_pulsar_abons.ab_guid,
-     water_pulsar_abons.ab_guid, 
  water_pulsar_abons.comment
 from water_pulsar_abons
 left join 
@@ -7672,7 +7674,7 @@ def get_data_table_water_pulsar1_between_dates(obj_title, obj_parent_title,elect
     
     return data_table
     
-def MakeSqlQuery_comments_for_abon(guid_abonent):
+def MakeSqlQuery_comments_for_abon(guid_abonent, guid_resource):
     sQuery="""
     SELECT 
   comments.guid, 
@@ -7688,15 +7690,16 @@ FROM
 WHERE 
   comments.guid_abonents = abonents.guid AND
   abonents.guid_objects = objects.guid AND
-  comments.guid_abonents = '%s'
+  comments.guid_abonents = '%s' AND
+  comments.guid_resources = '%s'
   order by comments.date
-    """%(guid_abonent)
+    """%(guid_abonent, guid_resource)
     #print sQuery
     return sQuery
-def get_data_table_comments_for_abon(guid_abonent):
+def get_data_table_comments_for_abon(guid_abonent, guid_resource):
     cursor = connection.cursor()
     data_table=[]    
-    cursor.execute(MakeSqlQuery_comments_for_abon(guid_abonent))   
+    cursor.execute(MakeSqlQuery_comments_for_abon(guid_abonent, guid_resource))   
     data_table = cursor.fetchall()
     
     return data_table

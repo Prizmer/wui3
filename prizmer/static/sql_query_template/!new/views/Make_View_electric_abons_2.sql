@@ -10,7 +10,7 @@ CREATE OR REPLACE VIEW public.electric_abons_2
             comments.comment,
             comments.guid_abonents
            FROM comments
-	 where comments.guid_resources = 'ba710cff-e390-48ca-b442-70141c9864f7'
+	 		where guid_resources = 'ba710cff-e390-48ca-b442-70141c9864f7'
         )
  SELECT z1.ab_guid,
     z1.ab_name,
