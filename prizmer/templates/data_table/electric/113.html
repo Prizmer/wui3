@@ -75,14 +75,14 @@ $(".extended").click(LoadExtendedInfo);
 <tr>
 {%if value.26 == 1 %}
 <td>
-	<div class="extended" id={{value.1}} data-date-start = {{electric_data_start}} data-date-end = {{electric_data_end}} data-abonent = '{{value.0}}' data-object = '{{obj_title}}' data-limit-mini ={{value.28}} data-limit-maxi ={{value.29}}>
+	<div class="extended" id={{value.1}} data-date-start = {{electric_data_start}} data-date-end = {{electric_data_end}} data-abonent = '{{value.0}}' data-object = '{{obj_name}}' data-limit-mini ={{value.28}} data-limit-maxi ={{value.29}}>
 		{% load static %} <img  src="{%static "images/top-ico32.png" %}" data-toggle="tooltip" data-placement="top" title="{{value.27}}">
 	</div>
 </td>
 {%else%}
 	{%if value.26 == 2 %}
 	<td>
-		<div class="extended" id={{value.1}} data-date-start = {{electric_data_start}} data-date-end = {{electric_data_end}} data-abonent = '{{value.0}}' data-object = '{{obj_title}}' data-limit-mini ={{value.28}} data-limit-maxi ={{value.29}}>
+		<div class="extended" id={{value.1}} data-date-start = {{electric_data_start}} data-date-end = {{electric_data_end}} data-abonent = '{{value.0}}' data-object = '{{obj_name}}' data-limit-mini ={{value.28}} data-limit-maxi ={{value.29}}>
 		{% load static %} <img  src="{%static "images/down-ico32.png" %}" data-toggle="tooltip" data-placement="top" title="{{value.27}}">
 		</div>
 	</td>

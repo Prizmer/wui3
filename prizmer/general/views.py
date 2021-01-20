@@ -10721,7 +10721,8 @@ def get_aver_for_7_days(data_table_graphic):
     j = 0
     while i > 0:
         if len(data_table_graphic) - i > 7:
-                break
+            #print('break', len(data_table_graphic), i)
+            break
         if data_table_graphic[i][12] == None or data_table_graphic[i][12] == 'Н/Д' or data_table_graphic[i][12] == 0:
             #print('none', data_table_graphic[i][12])
             i-=1
@@ -10740,17 +10741,20 @@ def get_aver_for_7_days(data_table_graphic):
     #print(aver, 'aver')
     return aver
 
-def analize_consumption(data_table, electric_data_start, electric_data_end, obj_title,obj_parent_title ):
+def analize_consumption(data_table, electric_data_start, electric_data_end, obj_title, obj_parent_title ):
     new_dt = []
     params=[u'T0 A+',u'T1 A+',u'T2 A+',u'T3 A+', u'Электричество']
     for row in data_table:
         new_row = []
         new_row = list(row)
-
+        #print(row[0], row[1], obj_title, obj_parent_title)
+        if len(data_table)==1:
+            obj_title = obj_parent_title
         data_table_graphic = common_sql.get_data_table_electric_between(row[0],obj_title,electric_data_start, electric_data_end, params)
         data_table_graphic = normalaize_data_consumption(data_table_graphic)
         meter = row[1]
         #print(meter)
+        #print(data_table_graphic)
         aver = get_aver_for_7_days(data_table_graphic)
         max = aver*3
         min = aver/3
@@ -10775,6 +10779,7 @@ def analize_consumption(data_table, electric_data_start, electric_data_end, obj_
         new_row.append(max)
         new_row = tuple(new_row)
         new_dt.append(new_row)
+        #print(new_row)
     return new_dt
 
 def electric_consumption_3_zones_with_limit(request):
@@ -10856,7 +10861,11 @@ def electric_consumption_3_zones_with_limit(request):
              {str("data"):makeOneCoords(data_table_graphic,15), str("label"):str("potreblenie T3"),  str("backgroundColor"): get_rgba_color(8)}]
     
     data_table = analize_consumption(data_table, electric_data_start, electric_data_end,obj_title,obj_parent_title)
-    #print('len', len(data_table[0]))
+    
+    #print(obj_parent_title, obj_title)
+    #print('len', len(data_table))
+    if (len(data_table) == 1): args['obj_name'] = obj_parent_title
+    else: args['obj_name'] = obj_title
     #print AllData
     args['data_table'] = data_table
     args['obj_title'] = obj_title
@@ -10894,13 +10903,18 @@ def extended_info(request):
             request.session["obj_parent_title"]    = obj_parent_title    = request.GET['obj_parent_title']
             request.session["electric_data_start"] = electric_data_start = request.GET['electric_data_start']
             request.session["electric_data_end"]   = electric_data_end   = request.GET['electric_data_end']
-            request.session["mini"]   = mini   = request.GET['mini']
-            request.session["maxi"]   = maxi   = request.GET['maxi']
-            #print(obj_title, obj_parent_title,electric_data_start, electric_data_end)
+            request.session["mini"]                = mini                = request.GET['mini']
+            request.session["maxi"]                = maxi                = request.GET['maxi']
+            print(obj_title, obj_parent_title,electric_data_start, electric_data_end)
             #print(mini, maxi)
             params=['T0 A+','T1 A+','T2 A+','T3 A+', 'Электричество']
             data_table = common_sql.get_data_table_electric_between(obj_title, obj_parent_title,electric_data_start, electric_data_end, params)
-
+            
+            # if  (bool(is_abonent_level.search(obj_key))): # delta for abonents
+            #     data_table = common_sql.get_data_table_electric_between(obj_title, obj_parent_title,electric_data_start, electric_data_end, params)
+                       
+            # elif (bool(is_object_level.search(obj_key))): # daily delta for abonents group
+            #     data_table = common_sql.get_data_table_electric_between_for_obj(obj_title, obj_parent_title,electric_data_start, electric_data_end)
             
     AllData=[]
     Xcoord=[]
