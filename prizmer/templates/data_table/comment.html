@@ -1,4 +1,10 @@
 <script src="/static/libs/liHighLight.js" type=text/javascript></script>
+<script>
+
+$(document).ready(function(){  
+$(".del_comment").click(DelComments);   
+});
+	</script>
 <!-- {{comment_status}} -->
 <div class="row">
 	<div class="col-12" id="comment-title"><h6>Комментарии к абоненту <h6> </div>
@@ -14,12 +20,15 @@
 <tr>
 <th>Дата</th>
 <th class="th_hvs">Комментарий</th>
+<th></th>
 
 </tr>
 {% for value in data_table %}
 <tr>
 <td width=>{{value.2}}</td>
 <td class="th_hvs">{{value.1}} </td>
+<td class='del_comment' id='{{value.0}}'>
+ {% load static %} <img src="{%static "images/del_comment-ico16.png" %}" ></td>
 </tr>
 {% endfor %}
 </div>

@@ -475,7 +475,7 @@ var AddComments = function(){
 var row = document.getElementById($(this).attr('id'));
 var guid_abonents=$(this).attr('id');
 var resource = row.dataset.resource;
-console.log('!!!!!!!!!', resource);
+
 	$.ajax({
 		type: "GET",
         url: "../../askue/add_comment/",		
@@ -555,4 +555,34 @@ var LoadExtendedInfo = function(){
 			);
 	});
 	
+};
+
+//Удаление комментариев
+var DelComments = function(){
+var guid_comment=$(this).attr('id');
+	$.ajax({
+		type: "GET",
+        url: "../../askue/del_comment/",		
+		data: {
+			'id':guid_comment,			
+		},
+		dataType: "html",
+        cache: false,
+		success:function(data) {
+			/* Зaкрытие мoдaльнoгo oкнa, тут делaем тo же сaмoе нo в oбрaтнoм пoрядке */		
+			$('#comment-block')
+				.animate({opacity: 0, top: '45%'}, 200,  // плaвнo меняем прoзрaчнoсть нa 0 и oднoвременнo двигaем oкнo вверх
+					function(){ // пoсле aнимaции
+						$(this).css('display', 'none'); // делaем ему display: none;
+						$('#overlay').fadeOut(400); // скрывaем пoдлoжку
+					}
+				);
+		refresh_all();
+        //$("#comment-block").html(data); // Пишем в div ответ от страницы 
+       	//alert(data);
+		
+		
+        }		
+	});	
+	     
 };

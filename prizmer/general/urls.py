@@ -21,6 +21,7 @@ urlpatterns = [
     url(r'^comment/$', views.comment, name = 'comment'),
     url(r'^add_comment/$', views.add_comment, name = 'add_comment'),
     url(r'^load_comment/$', views.load_comment, name = 'load_comment'),
+    url(r'^del_comment/$', views.del_comment, name = 'del_comment'),
     url(r'^instruction_user/$', views.instruction_user, name = 'instruction_user'),
     url(r'^instruction_admin/$', views.instruction_admin, name = 'instruction_admin'),
     url(r'^exit/$', views.go_out, name = 'exit'),

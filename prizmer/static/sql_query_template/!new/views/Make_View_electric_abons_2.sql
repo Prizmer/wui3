@@ -5,12 +5,13 @@
 CREATE OR REPLACE VIEW public.electric_abons_2
  AS
  WITH last_comment AS (
-         SELECT DISTINCT ON (comments.name) comments.date,
-            comments.name,
+         SELECT DISTINCT ON (comments.name) comments.name,
+	 		comments.date,
             comments.comment,
             comments.guid_abonents
            FROM comments
-	 		where guid_resources = 'ba710cff-e390-48ca-b442-70141c9864f7'
+          WHERE (comments.guid_resources = 'ba710cff-e390-48ca-b442-70141c9864f7'::uuid)
+	 	order by comments.name, comments.date DESC
         )
  SELECT z1.ab_guid,
     z1.ab_name,

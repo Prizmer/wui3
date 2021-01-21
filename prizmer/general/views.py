@@ -9287,6 +9287,16 @@ def all_res_status_monthly(request):
     
     return render(request, "data_table/92.html", args)
     
+def del_comment(request):
+    if request.is_ajax():
+        if request.method == 'GET':
+            guid_comment       = request.GET['id']
+            comm = Comments.objects.get(guid=guid_comment)
+            comm.delete()
+
+    #print data_table
+    return redirect('..')
+
 
 def comment(request):
     args = {}
@@ -9309,15 +9319,14 @@ def comment(request):
             if resource == 'impulse':
                 guid_resource = '12574d66-2034-4c8e-8c8c-249757736858'
     if (not(guid_abonent is None) and not(guid_abonent=="")):
-        data_table = common_sql.get_data_table_comments_for_abon(guid_abonent, guid_resource)
-
+        data_table = common_sql.get_data_table_comments_for_abon(guid_abonent, guid_resource)    
     
     args['data_table'] = data_table
     if len(data_table)>0:
         args['object'] = data_table[0][5]
-        args['abonent'] = data_table[0][4] 
+        args['abonent'] = data_table[0][4]
+        args['guid_comment'] = data_table[0][0]
     #print data_table
-
     return render(request, "data_table/comment.html", args)
 
 class AddCommentForm(forms.ModelForm):
@@ -9372,6 +9381,7 @@ def load_comment(request):
             Comments.date=datetime.datetime.now()          
             Comments.save()           
             comment_status = 'Комментарий добавлен'
+    #return redirect('..')
     if resource =='electric':    return redirect('../electric')
     if resource =='water' or resource == 'impulse':    return redirect('../water')
     if resource =='heat':    return redirect('../heat')

@@ -10,9 +10,10 @@ CREATE OR REPLACE VIEW public.water_pulsar_abons
             comments.comment,
             comments.guid_abonents,
             comments.date AS date_comment,
-            comments.guid_resources	 
+            comments.guid_resources
            FROM comments
-	 where (comments.guid_resources = '47f0b64c-2bf6-45b4-972b-601f473a3752' or comments.guid_resources = '57ec8f42-69c6-4f79-81bb-8ea139407aa9')
+          WHERE ((comments.guid_resources = '47f0b64c-2bf6-45b4-972b-601f473a3752'::uuid) OR (comments.guid_resources = '57ec8f42-69c6-4f79-81bb-8ea139407aa9'::uuid))
+	 		order by comments.name, comments.date DESC
         )
  SELECT z1.obj_guid,
     z1.obj_name,

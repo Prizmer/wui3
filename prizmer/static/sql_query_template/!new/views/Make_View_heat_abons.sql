@@ -11,6 +11,7 @@ CREATE OR REPLACE VIEW public.heat_abons
             comments.guid_abonents
            FROM comments
           WHERE (comments.guid_resources = 'c0491ede-e00b-4e1d-a8ba-1ef61dba1cd3'::uuid)
+	 order by comments.name, comments.date DESC
         )
 
  SELECT z1.ab_guid,
