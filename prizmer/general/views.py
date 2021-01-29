@@ -10951,3 +10951,5 @@ def extended_info(request):
     args['AllData']=AllData  
 
     return render(request, "data_table/extended_info.html", args)
+
+    

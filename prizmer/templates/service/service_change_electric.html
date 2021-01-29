@@ -5,47 +5,50 @@
 {% load static %} <script src="{%static "libs/jquery-ui/ui/i18n/jquery.ui.datepicker-ru.js" %}" type=text/javascript></script>
 
 <script src="/static/libs/liHighLight.js" type=text/javascript></script>
-
+<br><br>
+<div class = "container radius"  style="border-radius: 10px 40px">
+<div class = "row"  >
+	<div class = "col" id = "blue-style"><h5><strong> Цифровые приборы | Замена счётчиков</strong> </h5></div>
+</div>
+<br><br>
+<div class = "row justify-content-start align-items-center" >
+    <img src="{%static "images/del-ico64.png" %}">
+	<div class="col">Старый номер счётчика будет удалён из БД, на его место будет записан новый счётчик. </div>
+</div>
 <br>
-<span><strong> Цифровые приборы | Замена счётчиков</strong> </span>
+<div class = "row justify-content-start align-items-center">
+	<div class="col-2"><b>Старый счётчик</b></div>
+	<div class="col-2"><input id="old_meter" name="old_meter" type="text" value ={{old_meter}}></div>
+	<div class="col-2 offset-1"><b>Новый счётчик</b></div>
+	<div class="col-2"><input id="new_meter" name="new_meter" type="text" value={{new_meter}}></div>
+	<div class="col-2 offset-1"><span onclick="load_service('service_change_electric')" class="button" id="change_button"><b>Заменить</b></span> </div>
+</div>
+<br>
+<div class = "row justify-content-start align-items-center">
+	<div class="col-11"><font color="#FF6347"> {{change_meter_status}} </font></div>
+</div>
+<br>
+</div>
+<br>
+<div class = "container radius"  style="border-radius: 10px 40px">
+<br>
+<div class = "row justify-content-start align-items-center" >
+<img  src="{%static "images/change2-ico64.png" %}" >
+	<div class="col">Счётчики будут поменяны местами в БД </div>
+</div>
+<br>
+<div class = "row justify-content-start align-items-center">
+	<div class="col-2"><b>Счётчик 1</b></div>
+	<div class="col-2"><input id="meter1" name="meter1" type="text" value={{meter1}}></div>
+	<div class="col-2 offset-1"><b>Счётчик 2</b></div>
+	<div class="col-2"><input id="meter2" name="meter2" type="text" value={{meter2}}></div>
+	<div class="col-2 offset-1"><span onclick="load_service('service_replace_electric')" class="button" id="replace_button"><b>Заменить</b></span>  </div>
+</div>
+<br>
+<div class = "row justify-content-start align-items-center">
+	<div class="col-11"><font color="#FF6347"> {{replace_meter_status}} </font></div>
+</div>
+<br>
+</div>
 <br><br>
 
-<p>
- <div class="meters_change_block">
- &nbsp;&nbsp;Старый номер счётчика будет удалён из БД, на его место будет записан новый счётчик. 
-<br><br>
- <font color="000">
-        <span><strong>&nbsp;&nbsp;Старый счётчик&nbsp;</strong></span>
-		<input id="old_meter" name="old_meter" type="text" value ={{old_meter}}>
-
-		<span><strong>&nbsp;&nbsp;&nbsp;Новый счётчик&nbsp;</strong></span>
-		<input id="new_meter" name="new_meter" type="text" value={{new_meter}}>
-		<br><br>
-        &nbsp;&nbsp;<span onclick="load_service('service_change_electric')" class="button" id="change_button"><b>Заменить</b></span> 
-		<br>        
-	</font>	
-	 <br>&nbsp;&nbsp; <font color="#FF6347"> {{change_meter_status}} </font>
-	<br><br>
-    </div>
-<br>
-<div class="meters_change_block">
- &nbsp;&nbsp;Счётчики будут поменяны местами в БД
-<br><br>
- <font color="000">
-        <span><strong>&nbsp;&nbsp;Счётчик 1&nbsp;</strong></span>
-		<input id="meter1" name="meter1" type="text" value={{meter1}}>
-
-		<span><strong>&nbsp;&nbsp;&nbsp;Счётчик 2&nbsp;</strong></span>
-		<input id="meter2" name="meter2" type="text" value={{meter2}}>
-		<br><br>
-        &nbsp;&nbsp;<span onclick="load_service('service_replace_electric')" class="button" id="replace_button"><b>Заменить</b></span> 
-		<br>        
-	</font>	
-	 <br>&nbsp;&nbsp; <font color="#FF6347"> {{replace_meter_status}} <font>
-	<br><br>
-    </div>
-	
-</form>
-<br>
-<br>
-<br>

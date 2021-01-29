@@ -7,24 +7,23 @@
 <script src="/static/libs/liHighLight.js" type=text/javascript></script>
 
 <br>
-<span><strong> Массовое удаление ПУ</strong> </span>
+<div class = "container radius"  style="border-radius: 10px 40px">
+<div class = "row"  >
+	<div class = "col" id = "blue-style"><h5><strong> Удаление приборов по прогрузочной ведомости</strong> </h5></div>
+</div>
 <br><br>
-
-<p>
- <div class="meters_change_block">
- В разработке
-<!--         <span><strong>Загрузка пользователей личного кабинета &nbsp;</strong></span>
-        <span onclick="load_service('load_user_account')" class="button" id="balance-button">Загрузить</span> 
-		<br>&nbsp;{{result}} -->
-		<br>
+<div class = "row justify-content-start align-items-center" >
+	<div class = "col-4"> <strong>Вы уверены, что хотите удалить ПУ из выбранного файла?</strong> </div>
+	<div class = "col-1"> <span onclick="load_service('del_meters')" class="button" id="del-meters-button">Удалить </div>
+	
 </div>
-<p>
-<p>
- <!-- <div class="meters_change_block">
-        <p>
-	&nbsp; &nbsp;&nbsp;&nbsp; <a class="button" href ="../../service/get_users_account_template/"> Образец прогрузочного файла для создания аккаунтов пользователей </a></span>
+<div class = "row">
+	<div class = "col-11">
+		{% for value in del_status %}
+            <br> {{value}} 
+        {% endfor %}	
+	</div>
 </div>
- -->
 <br>
 <br>
 <br>

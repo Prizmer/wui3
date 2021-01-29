@@ -28,6 +28,7 @@ urlpatterns = [
     url(r'^meter_info/$', views.meter_info, name = 'meter_info'), #При нажатии на прибор выводится подробная информация по нему
     url(r'^extended_info/$', views.extended_info, name = 'extended_info'), #Расширенная информация по потреблению прибора за период
 
+
     # Отчеты. Чётные - один календарь. Нечётные - два календаря.
     url(r'^0/$', views.choose_report, name = 'choose_report'), # Выберите отчет
     url(r'^1/$', views.data_table_3_tarifa_k, name = 'dt_3tarifa'), # Потребление за период по T0 A+ и T0 R+ с учётом коэфф.-не переделывала

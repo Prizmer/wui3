@@ -33,7 +33,7 @@ var meter2="";
 			
 var load_service = function(page){
 		//загружаем экселевские файлы из cfg
-		console.log(page);
+		//console.log(page);
 		if (page == 'service_file'){
 			$('#excel-block').html('');
 			change_wb();			
@@ -43,20 +43,19 @@ var load_service = function(page){
 		$.ajax({
 			type: "GET",
 			url: "/service/make_excel",
-			beforeSend: function(){show_loader();},
+			//beforeSend: function(){show_loader();},
 			data:{},        
 		   })
 		   
 	   .done(function( msg ) {
 		//console.log('load excel-block');
 		$('#excel-block').html(msg); // Пишем в div ответ от страницы 
-		hide_loader();
+		//hide_loader();
 		change_wb();
 		});			
 		}
 		
 		//загружаем страницу, на которую кликнули
-        //isFirst=1;
 		choice_file=$("#choice_file").val();
 		choice_sheet=$("#choice_sheet").val();
 		old_meter=$("#old_meter").val();
@@ -75,12 +74,17 @@ var load_service = function(page){
        })
 	   
 	   .done(function( msg ) {
-	    tcp_ip_status="{{tcp_ip_status}}";
-		object_status="{{object_status}}";
-		counter_status="{{counter_status}}";
-        $('#data-table').html(msg); // Пишем в div ответ от страницы 
-            hide_loader();
-			$("span").css("pointer-events", "auto");
+        $('#data-table').html(msg); // Пишем в div ответ от страницы
+		if (document.getElementById("file_name") != null) {
+		//console.log(document.getElementById("file_name").value);
+		$("#choice_file").val(document.getElementById("file_name").value)
+		change_wb();
+		if (document.getElementById("sheet_name") != null){
+		$("#choice_sheet").val(document.getElementById("sheet_name").value)
+		};
+		};
+        hide_loader();
+		$("span").css("pointer-events", "auto");
         });
     };
 
@@ -91,13 +95,13 @@ function change_wb(){
 	 $.ajax({
         type: "GET",
         url: "/service/make_sheet",
-        beforeSend: function(){show_loader();},
+        <!-- beforeSend: function(){show_loader();}, -->
         data:{choice_file:choice_file},        
        })
 	   
 	   .done(function( msg ) {
         $('#sheets-block').html(msg); // Пишем в div ответ от страницы 
-            hide_loader();
+        <!--   hide_loader(); -->
         });
 		}
 	  else {
