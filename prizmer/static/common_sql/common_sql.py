@@ -6245,7 +6245,8 @@ left join
 (SELECT 
   daily_values.date,  
   abonents.name, 
-  substring(types_meters.name from 9 for 11)as type_meters,
+  (Case when (types_meters.name = 'Пульс СТК ХВС' or types_meters.name = 'Пульс СТК ГВС') then "substring"((types_meters.name)::text, 11, 13) else "substring"((types_meters.name)::text, 9, 11) end)
+             AS type_meter,
    
   meters.attr1,
   meters.factory_number_manual,   
@@ -6269,7 +6270,7 @@ WHERE
   objects.name = '%s' AND 
   abonents.name='%s' and
   daily_values.date = '%s' and
-  (types_meters.name='%s' or types_meters.name='%s')
+  (types_meters.name like '%s' or types_meters.name like '%s')
 ) as z0
 on z0.factory_number_manual=water_pulsar_abons.factory_number_manual
 where water_pulsar_abons.obj_name='%s' 
@@ -6281,7 +6282,8 @@ left join
 (SELECT 
   daily_values.date,  
   abonents.name, 
-  substring(types_meters.name from 9 for 11)as type_meters,
+  (Case when (types_meters.name = 'Пульс СТК ХВС' or types_meters.name = 'Пульс СТК ГВС') then "substring"((types_meters.name)::text, 11, 13) else "substring"((types_meters.name)::text, 9, 11) end)
+             AS type_meter,
    
   meters.attr1,
   meters.factory_number_manual,   
@@ -6305,7 +6307,7 @@ WHERE
   objects.name = '%s' AND 
   abonents.name='%s' and
   daily_values.date = '%s' and
-  (types_meters.name='%s' or types_meters.name='%s')
+  (types_meters.name like '%s' or types_meters.name like '%s')
 ) as z1
 on z1.factory_number_manual=water_pulsar_abons.factory_number_manual
 where water_pulsar_abons.obj_name='%s' 
@@ -6319,7 +6321,7 @@ z1.factory_number_manual,
 z1.value_start,
 z2.value_end
     """%(obj_parent_title, obj_title,electric_data_start, my_params[0], my_params[1],obj_parent_title, obj_title, obj_parent_title, obj_title,  electric_data_end, my_params[0], my_params[1],obj_parent_title, obj_title)
-    #print sQuery  
+    #print (sQuery)  
     return sQuery
     
 def MakeSqlQuery_water_pulsar_period_for_all(obj_parent_title, obj_title,electric_data_start, electric_data_end, my_params):
@@ -6358,8 +6360,8 @@ WHERE
   params.guid_names_params = names_params.guid AND
   names_params.guid_resources = resources.guid AND
   daily_values.date = '%s' AND 
-  (resources.name = '%s' OR 
-  resources.name = '%s'))as z1
+  (resources.name like '%s' OR 
+  resources.name like '%s'))as z1
   on z1.factory_number_manual=water_pulsar_abons.factory_number_manual
   where water_pulsar_abons.obj_name='%s'
   order by ab_name) as z_end,
@@ -6395,8 +6397,8 @@ WHERE
   params.guid_names_params = names_params.guid AND
   names_params.guid_resources = resources.guid AND
   daily_values.date = '%s' AND 
-  (resources.name = '%s' OR 
-  resources.name = '%s'))as z1
+  (resources.name like '%s' OR 
+  resources.name like '%s'))as z1
   on z1.factory_number_manual=water_pulsar_abons.factory_number_manual
   where water_pulsar_abons.obj_name='%s'
   order by ab_name) as z_start
@@ -6407,15 +6409,15 @@ z_start.attr1,
 z_start.factory_number_manual,z_start.value,
 z_end.value
 order by z_start.ab_name, z_start.attr1, z_start.type_meter 
-
     """%(electric_data_end , my_params[2], my_params[3], obj_title, electric_data_start, my_params[2], my_params[3],obj_title)
-    #print sQuery 
+    #print (sQuery) 
     return sQuery
     
 def get_data_table_pulsar_water_daily(obj_parent_title, obj_title, electric_data_end, isAbon):
-    my_params=['Пульсар ГВС', 'Пульсар ХВС']
+    my_params=['Пуль%%ГВС', 'Пульс%%ХВС']
     cursor = connection.cursor()
     data_table=[]
+    
     if (isAbon):
         cursor.execute(MakeSqlQuery_water_pulsar_daily_for_abonent(obj_parent_title, obj_title, electric_data_end, my_params))
     else:
@@ -6457,7 +6459,7 @@ WHERE
   objects.name = '%s' AND 
   abonents.name='%s' and
   daily_values.date = '%s' and
-  (types_meters.name='%s' or types_meters.name='%s')
+  (types_meters.name like '%s' or types_meters.name like '%s')
 ) as z1
 on z1.factory_number_manual=water_pulsar_abons.factory_number_manual
 where 
@@ -6474,6 +6476,7 @@ z1.value,
  water_pulsar_abons.comment
     """%(obj_parent_title, obj_title, electric_data_end, my_params[0],my_params[1],obj_parent_title, obj_title)
     #print(sQuery)
+    #print('22222222222222222222222')
     return sQuery
     
 def MakeSqlQuery_water_pulsar_daily_for_all(obj_parent_title, obj_title, electric_data_end, my_params):
@@ -6485,7 +6488,8 @@ left join
 (SELECT 
   daily_values.date,  
   abonents.name, 
-  substring(types_meters.name from 9 for 11) as type_meter,   
+  (Case when (types_meters.name = 'Пульс СТК ХВС' or types_meters.name = 'Пульс СТК ГВС') then "substring"((types_meters.name)::text, 11, 13) else "substring"((types_meters.name)::text, 9, 11) end)
+             AS type_meter,   
   meters.attr1,
   meters.factory_number_manual,   
   daily_values.value,   
@@ -6507,7 +6511,7 @@ WHERE
   meters.guid_types_meters = types_meters.guid AND
   objects.name = '%s' AND 
   daily_values.date = '%s' and
-  (types_meters.name='%s' or types_meters.name='%s')
+  (types_meters.name like '%s' or types_meters.name like '%s')
 ORDER BY
   abonents.name ASC) as z1
 on water_pulsar_abons.factory_number_manual=z1.factory_number_manual
@@ -6526,7 +6530,7 @@ water_pulsar_abons.ab_guid,
     return sQuery
     
 def get_data_table_pulsar_water_for_period(obj_parent_title, obj_title, electric_data_start, electric_data_end, isAbon):
-    my_params=['Пульсар ГВС', 'Пульсар ХВС', 'ГВС', 'ХВС']
+    my_params=['Пульс%%ГВС', 'Пульс%%ХВС', 'ГВС', 'ХВС']
     cursor = connection.cursor()
     data_table=[]
     if (isAbon):
@@ -12049,10 +12053,11 @@ parent_objects_for_progruz.obj_name2,
   order by parent_objects_for_progruz.obj_name2, 
   parent_objects_for_progruz.obj_name1, 
   parent_objects_for_progruz.obj_name0, 
+  parent_objects_for_progruz.ab_name, 
   tcpip_settings.ip_address, 
   tcpip_settings.ip_port, 
-    meters.address, 
-  parent_objects_for_progruz.ab_name
+    meters.address
+
     """
     cursor.execute(sQuery)  
     data_table = cursor.fetchall()

@@ -44,7 +44,13 @@ CREATE OR REPLACE VIEW public.water_pulsar_abons
             taken_params,
             meters,
             types_meters
-          WHERE (((abonents.guid_objects)::text = (objects.guid)::text) AND ((link_abonents_taken_params.guid_abonents)::text = (abonents.guid)::text) AND ((link_abonents_taken_params.guid_taken_params)::text = (taken_params.guid)::text) AND ((taken_params.guid_meters)::text = (meters.guid)::text) AND ((meters.guid_types_meters)::text = (types_meters.guid)::text) AND (((types_meters.name)::text = 'Пульсар ГВС'::text) OR ((types_meters.name)::text = 'Пульсар ХВС'::text)))) z1
+          WHERE (((abonents.guid_objects)::text = (objects.guid)::text) AND 
+				 ((link_abonents_taken_params.guid_abonents)::text = (abonents.guid)::text) AND 
+				 ((link_abonents_taken_params.guid_taken_params)::text = (taken_params.guid)::text) AND 
+				 ((taken_params.guid_meters)::text = (meters.guid)::text) AND
+				 ((meters.guid_types_meters)::text = (types_meters.guid)::text) AND 
+				 (((types_meters.name)::text = 'Пульс%ГВС'::text) OR 
+				  ((types_meters.name)::text = 'Пульс%ХВС'::text)))) z1
      LEFT JOIN last_comment ON (((last_comment.guid_abonents)::text = (z1.ab_guid)::text)));
 
 ALTER TABLE public.water_pulsar_abons
