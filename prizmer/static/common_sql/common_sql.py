@@ -6250,7 +6250,8 @@ left join
    
   meters.attr1,
   meters.factory_number_manual,   
-  daily_values.value,   
+  (Case when (types_meters.name = 'Пульс СТК ХВС' or types_meters.name = 'Пульс СТК ГВС') then daily_values.value/1000 else daily_values.value end)
+             AS value,   
   abonents.guid
 FROM 
   public.abonents, 
@@ -6287,7 +6288,8 @@ left join
    
   meters.attr1,
   meters.factory_number_manual,   
-  daily_values.value,   
+  (Case when (types_meters.name = 'Пульс СТК ХВС' or types_meters.name = 'Пульс СТК ГВС') then daily_values.value/1000 else daily_values.value end)
+             AS value,   
   abonents.guid
 FROM 
   public.abonents, 
@@ -6336,7 +6338,8 @@ Left join
   objects.name, 
   abonents.name, 
   daily_values.date, 
-  daily_values.value, 
+  (Case when (types_meters.name = 'Пульс СТК ХВС' or types_meters.name = 'Пульс СТК ГВС') then daily_values.value/1000 else daily_values.value end)
+             AS value, 
   meters.name,
   meters.factory_number_manual, 
   resources.name
@@ -6349,8 +6352,10 @@ FROM
   public.daily_values, 
   public.params, 
   public.names_params, 
-  public.resources
+  public.resources,
+  types_meters
 WHERE 
+  ((meters.guid_types_meters)::text = (types_meters.guid)::text) AND
   abonents.guid_objects = objects.guid AND
   link_abonents_taken_params.guid_abonents = abonents.guid AND
   link_abonents_taken_params.guid_taken_params = taken_params.guid AND
@@ -6373,7 +6378,8 @@ Left join
   objects.name, 
   abonents.name, 
   daily_values.date, 
-  daily_values.value, 
+  (Case when (types_meters.name = 'Пульс СТК ХВС' or types_meters.name = 'Пульс СТК ГВС') then daily_values.value/1000 else daily_values.value end)
+             AS value, 
   meters.name,
   meters.factory_number_manual, 
   resources.name
@@ -6386,8 +6392,10 @@ FROM
   public.daily_values, 
   public.params, 
   public.names_params, 
-  public.resources
-WHERE 
+  public.resources,
+  types_meters
+WHERE
+  ((meters.guid_types_meters)::text = (types_meters.guid)::text) AND 
   abonents.guid_objects = objects.guid AND
   link_abonents_taken_params.guid_abonents = abonents.guid AND
   link_abonents_taken_params.guid_taken_params = taken_params.guid AND
@@ -6414,7 +6422,7 @@ order by z_start.ab_name, z_start.attr1, z_start.type_meter
     return sQuery
     
 def get_data_table_pulsar_water_daily(obj_parent_title, obj_title, electric_data_end, isAbon):
-    my_params=['Пуль%%ГВС', 'Пульс%%ХВС']
+    my_params=['Пульc%%ГВС', 'Пульс%%ХВС']
     cursor = connection.cursor()
     data_table=[]
     
@@ -6438,8 +6446,10 @@ left join
   abonents.name, 
   substring(types_meters.name from 9 for 11),   
   meters.attr1,
-  meters.factory_number_manual,   
-  daily_values.value,   
+  meters.factory_number_manual,
+  (Case when (types_meters.name = 'Пульс СТК ХВС' or types_meters.name = 'Пульс СТК ГВС') then daily_values.value/1000 else daily_values.value end)
+             AS value,   
+    
   abonents.guid
 FROM 
   public.abonents, 
@@ -6492,7 +6502,8 @@ left join
              AS type_meter,   
   meters.attr1,
   meters.factory_number_manual,   
-  daily_values.value,   
+  (Case when (types_meters.name = 'Пульс СТК ХВС' or types_meters.name = 'Пульс СТК ГВС') then daily_values.value/1000 else daily_values.value end)
+             AS value,   
   abonents.guid
 FROM 
   public.abonents, 

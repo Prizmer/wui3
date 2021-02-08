@@ -12,7 +12,8 @@ CREATE OR REPLACE VIEW public.water_pulsar_abons
             comments.date AS date_comment,
             comments.guid_resources
            FROM comments
-          WHERE ((comments.guid_resources = '47f0b64c-2bf6-45b4-972b-601f473a3752'::uuid) OR (comments.guid_resources = '57ec8f42-69c6-4f79-81bb-8ea139407aa9'::uuid))
+          WHERE ((comments.guid_resources = '47f0b64c-2bf6-45b4-972b-601f473a3752'::uuid) 
+				 OR (comments.guid_resources = '57ec8f42-69c6-4f79-81bb-8ea139407aa9'::uuid))
 	 		order by comments.name, comments.date DESC
         )
  SELECT z1.obj_guid,
@@ -36,7 +37,8 @@ CREATE OR REPLACE VIEW public.water_pulsar_abons
             meters.name AS meter_name,
             meters.factory_number_manual,
             types_meters.name,
-            "substring"((types_meters.name)::text, 9, 11) AS type_meter,
+		  	(Case when (types_meters.name = 'Пульс СТК ХВС' or types_meters.name = 'Пульс СТК ГВС') then "substring"((types_meters.name)::text, 11, 13) else "substring"((types_meters.name)::text, 9, 11) end)
+             AS type_meter,
             meters.attr1
            FROM abonents,
             objects,
@@ -49,10 +51,21 @@ CREATE OR REPLACE VIEW public.water_pulsar_abons
 				 ((link_abonents_taken_params.guid_taken_params)::text = (taken_params.guid)::text) AND 
 				 ((taken_params.guid_meters)::text = (meters.guid)::text) AND
 				 ((meters.guid_types_meters)::text = (types_meters.guid)::text) AND 
-				 (((types_meters.name)::text = 'Пульс%ГВС'::text) OR 
-				  ((types_meters.name)::text = 'Пульс%ХВС'::text)))) z1
+				 (((types_meters.name)::text like 'Пульс%ГВС'::text) OR 
+				  ((types_meters.name)::text like 'Пульс%ХВС'::text)))
+		 group by 
+		  objects.guid,
+            objects.name,
+            abonents.guid,
+            abonents.name,
+            meters.name,
+            meters.factory_number_manual,
+            types_meters.name,
+            types_meters.name,
+            meters.attr1
+		 ) z1
      LEFT JOIN last_comment ON (((last_comment.guid_abonents)::text = (z1.ab_guid)::text)));
 
-ALTER TABLE public.water_pulsar_abons
-    OWNER TO postgres;
+--ALTER TABLE public.water_pulsar_abons
+--    OWNER TO postgres;
 
