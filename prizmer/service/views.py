@@ -632,6 +632,12 @@ def LoadElectricMeters(sPath, sSheet):
                 add_meter = Meters(name = str(type_meter) + ' ' + str(meter), address = str(adr), factory_number_manual = str(meter), guid_types_meters = TypesMeters.objects.get(guid = "82b96b1c-31cf-4753-9d64-d22e2f4d036e") )
                 add_meter.save()
                 writeToLog('Device added' + ' --->   ' + 'Пульсар Теплосчётчик')
+
+            elif str(type_meter) == 'Пульс СТК Теплосчётчик':
+                add_meter = Meters(name = str(type_meter) + ' ' + str(meter), address = str(adr), factory_number_manual = str(meter), guid_types_meters = TypesMeters.objects.get(guid = "bb111ede-e00b-4e1d-a8ba-1ef61dba1caa") )
+                add_meter.save()
+                writeToLog('Device added' + ' --->   ' + 'Пульс СТК Теплосчётчик')
+
             elif str(type_meter) == 'Карат 307':
                 add_meter = Meters(name = str(type_meter) + ' ' + str(meter), address = str(adr), factory_number_manual = str(meter), guid_types_meters = TypesMeters.objects.get(guid = "84fb7a85-ab91-4e93-9154-76ddee35a316") )
                 add_meter.save()
@@ -2537,6 +2543,22 @@ def add_taken_param_no_signals(instance, isR, isHalfs): # Добавляем с�
         add_param.save()
         #------------Месячные
         add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "49f1197f-c6ae-4081-afbc-587ac614a3c3"))
+        add_param.save()
+
+    elif instance.guid_types_meters.name == 'Пульс СТК Теплосчётчик':
+        #Добавляем параметры для водосчётчика Пульс СТК Теплосчётчик.
+        #------------Суточные
+        # "Показание Энергии" Q, Гкал
+        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "14275dc3-eebb-4b95-aaf1-066ee4edab4e"))
+        add_param.save()
+        # "Показание Расход воды" Объем, м3
+        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "9a97d8b8-992f-4e43-a6e0-9f1dc89d2dec"))
+        add_param.save()
+        # "Показание Температура подачи" Ti, C0
+        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "27b8f3a1-b10d-4327-9505-31f730a3b62b"))
+        add_param.save()
+        # "Показание Температура выхода" To, C0
+        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "1944aeec-58a6-48d4-bbcb-24d0ce3a3e1a"))
         add_param.save()
 
     elif instance.guid_types_meters.name == 'Карат 307':
