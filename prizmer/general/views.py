@@ -8687,7 +8687,7 @@ def pulsar_heat_period_with_graphic(request):
 #*********************************************************************************************************************************************************************
            
             if (bool(is_abonent_level.search(obj_key))):
-                data_table = common_sql.get_data_table_pulsar_teplo_for_period(obj_parent_title, obj_title,electric_data_end, electric_data_start, True)
+                data_table = common_sql.(obj_parent_title, obj_title,electric_data_end, electric_data_start, True)
                 data_table_graphic = common_sql.get_data_table_heat_between(obj_parent_title, obj_title,electric_data_start, electric_data_end,True)
             elif (bool(is_object_level_2.search(obj_key))):
                 data_table = common_sql.get_data_table_pulsar_teplo_for_period(obj_parent_title, obj_title, electric_data_end,electric_data_start, False)

@@ -4569,13 +4569,13 @@ def ReplaceMeters_v2(meter1, meter2):
         #print 'row[2], meter1, meter2', row[2], meter1, meter2
         common_sql.update_table_with_replace('link_abonents_taken_params', 'name', 'guid', row[2], meter2, meter1)
         #print row[2], guid_abonent1, guid_abonent2
-        common_sql.update_table_with_replace('link_abonents_taken_params', 'guid_abonents', 'guid', row[2], guid_abonent1, guid_abonent2)
+        common_sql.update_table_with_replace_guid('link_abonents_taken_params', 'guid_abonents', 'guid', row[2], guid_abonent1, guid_abonent2)
         #print 'taken_params', 'name', 'guid', row[6], meter1, meter2
         common_sql.update_table_with_replace('taken_params', 'name', 'guid', row[6], meter2, meter1)
        
     for row in dt_link2:
         common_sql.update_table_with_replace('link_abonents_taken_params', 'name', 'guid', row[2], meter1, meter2)
-        common_sql.update_table_with_replace('link_abonents_taken_params', 'guid_abonents', 'guid', row[2], guid_abonent2, guid_abonent1)
+        common_sql.update_table_with_replace_guid('link_abonents_taken_params', 'guid_abonents', 'guid', row[2], guid_abonent2, guid_abonent1)
         common_sql.update_table_with_replace('taken_params', 'name', 'guid', row[6], meter1, meter2)
     
     result = result + ' Привязки счётчиков успешно изменены '

@@ -7160,8 +7160,8 @@ def report_forma_80020(request):
                 pass
             result = common_sql.get_taken_param_by_guid_meters_and_guid_params(meters_guid_list[x], guid_params)
             result_list = []
-            result_list.append(unicode(result[0][0]))
-            result_list.append(unicode(result[0][1]))
+            result_list.append(str(result[0][0]))
+            result_list.append(str(result[0][1]))
             list_of_taken_params.append(result_list)
             #R+
             if name_of_type_meters[0][0] == u'Меркурий 230-УМ':
@@ -7297,7 +7297,7 @@ def report_forma_80020(request):
         name_of_document = '80020'
         name_of_file_80020 =name_of_document + '_'+ inn_sender_from_base + '_' + str(list_of_dates[dates].strftime('%Y%m%d')) + '_1' + '.xml'
         zf.writestr(name_of_file_80020, myxml_IO.getvalue())
-       
+        print(name_of_file_80020)
     zf.close()
     
     response=HttpResponse(response.getvalue())
