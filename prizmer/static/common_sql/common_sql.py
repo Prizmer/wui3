@@ -10156,14 +10156,28 @@ def update_table_with_replace(table, update_field, where_field, where_value, old
   cursor = connection.cursor()
   sQuery="""
   UPDATE %s
-   SET %s=replace(%s, '%s', '%s')
+   SET %s = replace(%s, '%s', '%s')
  WHERE %s='%s'
   """%(table, update_field, update_field, old_value, new_value, where_field, where_value)
-  #print sQuery
+  #print(sQuery)
   #print '_________________________________'
   cursor.execute(sQuery)
   #connection.commit()
   cursor.close()
+
+def update_table_with_replace_guid(table, update_field, where_field, where_value, old_value, new_value):
+  cursor = connection.cursor()
+  sQuery="""
+  UPDATE %s
+   SET %s = replace(%s::text, '%s'::text, '%s'::text)::uuid
+ WHERE %s='%s'
+  """%(table, update_field, update_field, old_value, new_value, where_field, where_value)
+  #print(sQuery)
+  #print '_________________________________'
+  cursor.execute(sQuery)
+  #connection.commit()
+  cursor.close()
+
 def MakeQuery_water_digital_pulsar_statistic(obj,  electric_data_end, my_params):
   sQuery="""
   Select obj_name, Count(z.volume), Count(z.ab_name), round((count(volume)*100/count(ab_name))::numeric,2) as percent_val, (count (ab_name)-count (volume)) as no_val
@@ -10747,7 +10761,7 @@ WHERE
   various_values.time ASC) z1
   on z1.date_time = z_date.c_date
     """ %(electric_data_start, electric_data_end,params[0], params[1], electric_data_start, electric_data_end, obj_title, obj_parent_title)
-    #print sQuery
+    #print(sQuery)
     cursor.execute(sQuery)  
     data_table = cursor.fetchall()
     return data_table
@@ -13313,4 +13327,73 @@ def get_tem104_consumption(obj_parent_title, obj_title, electric_data_start, ele
     cursor.execute(make_sql_query_tem104_consumption(obj_parent_title, obj_title, electric_data_start,  electric_data_end,param, isAbon))
     data_table = cursor.fetchall()    
     if len(data_table)>0: data_table=ChangeNull(data_table, None)
+    return data_table
+
+def make_sql_query_30_by_meter_for_period(guid_meter, electric_data_start, electric_data_end):
+    sQuery = """
+    Select
+       factory_number_manual,
+       ktt,
+       date,
+       time,
+       c_date,
+       activ,
+       reactiv,
+       '30',
+       (EXTRACT(EPOCH FROM c_date) * 1000)::text as utc,
+       row_number() over(ORDER BY meter_name) num
+from
+(select c_date
+from
+generate_series('%s 00:00:00'::timestamp without time zone, '%s 23:30:00'::timestamp without time zone, interval '30 minutes') as c_date) as z_date
+left join
+(SELECT
+  objects.name as obj_name,
+  abonents.name as ab_name,
+  meters.name as meter_name,
+  meters.factory_number_manual,
+  link_abonents_taken_params.coefficient as ktt,
+  various_values.date,
+  various_values.time,
+  (various_values.date + various_values.time)::timestamp as date_time,
+  SUM (CASE when names_params.name = 'A+ Профиль' then various_values.value else 0 end) as activ,
+  SUM (CASE when names_params.name = 'R+ Профиль' then various_values.value else 0 end) as reactiv
+FROM
+  public.abonents,
+  public.objects,
+  public.link_abonents_taken_params,
+  public.taken_params,
+  public.meters,
+  public.various_values,
+  public.params,
+  public.names_params
+WHERE
+  abonents.guid_objects = objects.guid AND
+  link_abonents_taken_params.guid_abonents = abonents.guid AND
+  link_abonents_taken_params.guid_taken_params = taken_params.guid AND
+  taken_params.guid_meters = meters.guid AND
+  taken_params.guid_params = params.guid AND
+  various_values.id_taken_params = taken_params.id AND
+  params.guid_names_params = names_params.guid AND
+  various_values.date between '%s' and '%s' AND
+  meters.guid = '%s'
+  group by
+  objects.name,
+  abonents.name,
+  meters.name,
+  meters.factory_number_manual,
+  link_abonents_taken_params.coefficient,
+  various_values.date,
+  various_values.time
+  ) z1
+  on z1.date_time = z_date.c_date
+  order by c_date
+    """%(electric_data_start, electric_data_end, electric_data_start, electric_data_end, guid_meter)
+    return sQuery
+def get_30_by_meter_for_period(guid_meter, electric_data_start, electric_data_end):
+    data_table = []
+    cursor = connection.cursor()
+    cursor.execute(make_sql_query_30_by_meter_for_period(guid_meter, electric_data_start, electric_data_end))
+    data_table = cursor.fetchall()    
+    #if len(data_table)>0: data_table=ChangeNull(data_table, None)
     return data_table
