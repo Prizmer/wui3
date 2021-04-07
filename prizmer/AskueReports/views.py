@@ -21,6 +21,9 @@ import decimal
 from lxml import etree
 from django.conf import settings
 #from io import StringIO
+import time as pt
+import zipfile
+
 separator = getattr(settings, 'SEPARATOR', ',') #'.' #separator = '.' or ','
 
 
@@ -7309,6 +7312,176 @@ def report_forma_80020(request):
   
     return response
 
+def report_forma_80020_fast(request):
+    """Отчёт для формирования формы 80020 для МосЭнергоСбыта"""
+
+    #TODO: сделать логирование формирования данного отчёта
+    #print("Вызвали отчёт быстрого формирования 80020")
+
+    # Для подсчёта времени работы отчёта
+    #time_start_report_log = pt.time()
+
+    response = io.BytesIO()
+    
+    #Запрашиваем данные для отчета
+    group_80020_name    = request.session['obj_title']
+    electric_data_end   = request.session['electric_data_end']
+    electric_data_start   = request.session['electric_data_start']                        
+   
+    # Формируем список дат на основе начальной и конечной даты полученной от web-календарей
+    end_date   = datetime.datetime.strptime(electric_data_end, "%d.%m.%Y")
+    start_date = datetime.datetime.strptime(electric_data_start, "%d.%m.%Y")
+    list_of_dates = [x for x in common_sql.daterange(start_date,
+                  end_date,
+                  step=datetime.timedelta(days=1),
+                  inclusive=True)]
+    
+    info_group_80020 = common_sql.get_info_group_80020(group_80020_name)
+    inn_sender_from_base      = info_group_80020[0][0]
+    name_sender_from_base     = info_group_80020[0][1]
+    inn_postavshik_from_base  = info_group_80020[0][2]
+    name_postavshik_from_base = info_group_80020[0][3]
+    dogovor_number_from_base  = info_group_80020[0][4]
+    
+    #Узнаем GUID счётчиков, которые входят в группу 80020
+    meters_guid_list = common_sql.get_meters_guid_list_by_group_name(group_80020_name)
+      
+    #Создаем архив
+    zf = zipfile.ZipFile(response, mode='w', compression=zipfile.ZIP_DEFLATED)
+
+    # Проходимся по датам... на каждую дату создаём свой xml файл и у паковываем его в архив
+    for dates in range(len(list_of_dates)):
+    #Формируем файл xml по форме Мосэнергосбыт 80020   
+        
+        # Создание корневого элемента message
+        root = etree.Element('message', {'class': '80020', 'version': '2', 'number': '1' })
+        
+        # Добавление дочерних элементов - <datetime> <sender> <area> в <root>
+        datetimeElt = etree.SubElement(root, 'datetime')
+        senderElt = etree.SubElement(root, 'sender')
+        areaElt = etree.SubElement(root, 'area')
+        
+        # Присваиваем значения в <day> <timestamp> <daylightsavingtime>
+        day = etree.SubElement(datetimeElt, 'day')
+        timestamp = etree.SubElement(datetimeElt, 'timestamp')
+        daylightsavingtime = etree.SubElement(datetimeElt, 'daylightsavingtime')
+        
+        day.text = str(list_of_dates[dates].strftime('%Y%m%d'))
+        timestamp.text = datetime.datetime.now().strftime('%Y%m%d%H%M%S')
+        daylightsavingtime.text = '0'
+        
+        # Присваиваем значения <name> <inn> для <sender>
+        inn_sender = etree.SubElement(senderElt, 'inn')
+        name_sender = etree.SubElement(senderElt, 'name')
+        
+        inn_sender.text  = inn_sender_from_base
+        name_sender.text = name_sender_from_base
+        
+        # Присваиваем значения для <area>
+        inn_area = etree.SubElement(areaElt, 'inn')
+        name_abonent_area = etree.SubElement(areaElt, 'name_abonent')
+        
+        inn_area.text = inn_postavshik_from_base
+        name_abonent_area.text = name_postavshik_from_base
+
+
+        # Добавление дочерних элементов
+        
+        for meter in range(len(meters_guid_list)):
+            # Запрашиваем таблицу с данными по профилям мощности за одни сутки по guid счётчика
+            new_data_table_of_a_plus_r_plus = common_sql.get_30_by_meter_for_period(meters_guid_list[meter][0], list_of_dates[dates].date(), list_of_dates[dates].date())
+            
+            # Присваиваем значения code и name для счётчика
+            my_measure_code = str(new_data_table_of_a_plus_r_plus[0][8])
+            my_measure_name = str(new_data_table_of_a_plus_r_plus[0][9])
+            
+            # Создаём элемент в xml для счётчика
+            measurepointElt = etree.SubElement(areaElt, 'measuringpoint', code = my_measure_code , name = my_measure_name )
+        
+
+            # Каналы
+            # A+ профиль-------------------------------------------------------------------------------        
+            my_measuring_channel_desc = str(my_measure_name + ' А+ Профиль ')            
+            measuringchannelElt = etree.SubElement(measurepointElt, 'measuringchannel', code = '01', desc = my_measuring_channel_desc )
+            
+            # Диапазон времени с 00:00 до 23:30                                    
+            for z in range(47):
+                if new_data_table_of_a_plus_r_plus[z][11] is not None:
+                    periodElt = etree.SubElement(measuringchannelElt, 'period', start = str(new_data_table_of_a_plus_r_plus[z][10]).replace(':',''), end = str(new_data_table_of_a_plus_r_plus[z+1][10]).replace(':',''))
+                    value  = etree.SubElement(periodElt, 'value', status = '0')
+                    value.text = str(new_data_table_of_a_plus_r_plus[z][11])
+                else:
+                    periodElt = etree.SubElement(measuringchannelElt, 'period', start = str(new_data_table_of_a_plus_r_plus[z][10]).replace(':',''), end = str(new_data_table_of_a_plus_r_plus[z+1][10]).replace(':',''))
+                    value  = etree.SubElement(periodElt, 'value', status = '1')
+                    value.text = "0"
+                    value.attrib['status'] = '1'
+
+
+            # Диапазон времени с 23:30 до 00:00  
+            if new_data_table_of_a_plus_r_plus[47][11] is not None:
+                periodElt = etree.SubElement(measuringchannelElt, 'period', start = str(new_data_table_of_a_plus_r_plus[47][10]).replace(':',''), end = str(new_data_table_of_a_plus_r_plus[0][10]).replace(':','') )
+                value  = etree.SubElement(periodElt, 'value', status = '0')
+                value.text = str(new_data_table_of_a_plus_r_plus[47][11])
+            else:
+                periodElt = etree.SubElement(measuringchannelElt, 'period', start = str(new_data_table_of_a_plus_r_plus[47][10]).replace(':',''), end = str(new_data_table_of_a_plus_r_plus[0][10]).replace(':','') )
+                value  = etree.SubElement(periodElt, 'value', status = '1')
+                value.text = "0"
+                value.attrib['status'] = '1'
+            
+            # R+ профиль-------------------------------------------------------------------------------
+            my_measuring_channel_desc = str(my_measure_name + ' R+ Профиль ')            
+            measuringchannelElt = etree.SubElement(measurepointElt, 'measuringchannel', code = '03', desc = my_measuring_channel_desc )
+            
+            # Диапазон времени с 00:00 до 23:30                                    
+            for z in range(47):
+                if new_data_table_of_a_plus_r_plus[z][11] is not None:
+                    periodElt = etree.SubElement(measuringchannelElt, 'period', start = str(new_data_table_of_a_plus_r_plus[z][10]).replace(':',''), end = str(new_data_table_of_a_plus_r_plus[z+1][10]).replace(':',''))
+                    value  = etree.SubElement(periodElt, 'value', status = '0')
+                    value.text = str(new_data_table_of_a_plus_r_plus[z][12])
+                else:
+                    periodElt = etree.SubElement(measuringchannelElt, 'period', start = str(new_data_table_of_a_plus_r_plus[z][10]).replace(':',''), end = str(new_data_table_of_a_plus_r_plus[z+1][10]).replace(':',''))
+                    value  = etree.SubElement(periodElt, 'value', status = '1')
+                    value.text = "0"
+                    value.attrib['status'] = '1'
+
+
+            # Диапазон времени с 23:30 до 00:00  
+            if new_data_table_of_a_plus_r_plus[47][11] is not None:
+                periodElt = etree.SubElement(measuringchannelElt, 'period', start = str(new_data_table_of_a_plus_r_plus[47][10]).replace(':',''), end = str(new_data_table_of_a_plus_r_plus[0][10]).replace(':','') )
+                value  = etree.SubElement(periodElt, 'value', status = '0')
+                value.text = str(new_data_table_of_a_plus_r_plus[47][12])
+            else:
+                periodElt = etree.SubElement(measuringchannelElt, 'period', start = str(new_data_table_of_a_plus_r_plus[47][10]).replace(':',''), end = str(new_data_table_of_a_plus_r_plus[0][10]).replace(':','') )
+                value  = etree.SubElement(periodElt, 'value', status = '1')
+                value.text = "0"
+                value.attrib['status'] = '1'            
+        
+        # Создание и сохранение документа
+        doc = etree.ElementTree(root) 
+        myxml_IO=io.BytesIO()   
+        doc.write(myxml_IO, xml_declaration=True, encoding='UTF-8')
+
+        # Формируем имя документа
+        name_of_document = '80020'
+        name_of_file_80020 =name_of_document + '_'+ inn_sender_from_base + '_' + str(list_of_dates[dates].strftime('%Y%m%d')) + '_1' + '.xml'
+        zf.writestr(name_of_file_80020, myxml_IO.getvalue())
+        
+        #TODO: сделать информатор для пользователя, сколько файлов уже готово...   
+        #print(name_of_file_80020)
+    zf.close()
+    
+    #Подсчёт времени работы отчёта
+    #print(time_start_report_log - pt.time())
+
+    response=HttpResponse(response.getvalue())
+    response['Content-Type'] = 'application/x-zip-compressed'
+    
+    #Формируем имя выгружаемого архива с получасовками
+    output_name = '80020_' + str(dogovor_number_from_base) + '_' + start_date.strftime('%Y%m%d') + '-'+ end_date.strftime('%Y%m%d')
+    file_ext = 'zip'
+    response['Content-Disposition'] = 'attachment;filename="%s.%s"' % (output_name.replace('"', '\"'), file_ext)   
+  
+    return response
 
 
 def report_elf_hvs_by_date(request):
