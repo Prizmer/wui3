@@ -13331,46 +13331,72 @@ def get_tem104_consumption(obj_parent_title, obj_title, electric_data_start, ele
 
 def make_sql_query_30_by_meter_for_period(guid_meter, electric_data_start, electric_data_end):
     sQuery = """
-    Select
-       factory_number_manual,
-       ktt,
-       date,
-       time,
-       c_date,
-       activ,
-       reactiv,
-       '30',
-       (EXTRACT(EPOCH FROM c_date) * 1000)::text as utc,
-       row_number() over(ORDER BY meter_name) num
+ Select main.factory_number_manual,
+      ktt,
+      ktn,
+      date,
+      time,
+      c_date,
+      activ,
+      reactiv,
+      measuringpoint_code,
+      measuringpoint_name,
+      substring(hm::text from 1 for 5) as hm,
+      round((activ*ktt*ktn)::numeric,4) as act_energy,
+      round((reactiv*ktt*ktn)::numeric,4) as react_energy
+from
+(SELECT
+  meters.factory_number_manual,
+  link_abonents_taken_params.coefficient as ktt,
+ link_abonents_taken_params.coefficient_2 as ktn,  
+  link_groups_80020_meters.measuringpoint_code,
+  link_groups_80020_meters.measuringpoint_name
+FROM
+
+  public.link_abonents_taken_params,
+  public.taken_params,
+  public.meters,  
+  link_groups_80020_meters
+WHERE
+  link_groups_80020_meters.guid_meters = meters.guid ANd 
+  link_abonents_taken_params.guid_taken_params = taken_params.guid AND
+  taken_params.guid_meters = meters.guid AND 
+  meters.guid = '%s'
+  group by 
+  meters.factory_number_manual,
+  link_abonents_taken_params.coefficient,  
+  link_abonents_taken_params.coefficient_2,
+  link_groups_80020_meters.measuringpoint_code,
+  link_groups_80020_meters.measuringpoint_name) as main
+Cross join
+(
+Select
+      factory_number_manual,  
+  date,
+  time,
+      c_date,
+      activ,
+      reactiv,      
+      substring(c_date::text from 12 for 16) as hm
 from
 (select c_date
 from
 generate_series('%s 00:00:00'::timestamp without time zone, '%s 23:30:00'::timestamp without time zone, interval '30 minutes') as c_date) as z_date
 left join
 (SELECT
-  objects.name as obj_name,
-  abonents.name as ab_name,
-  meters.name as meter_name,
-  meters.factory_number_manual,
-  link_abonents_taken_params.coefficient as ktt,
+  meters.factory_number_manual, 
   various_values.date,
   various_values.time,
   (various_values.date + various_values.time)::timestamp as date_time,
   SUM (CASE when names_params.name = 'A+ Профиль' then various_values.value else 0 end) as activ,
   SUM (CASE when names_params.name = 'R+ Профиль' then various_values.value else 0 end) as reactiv
 FROM
-  public.abonents,
-  public.objects,
-  public.link_abonents_taken_params,
   public.taken_params,
   public.meters,
   public.various_values,
   public.params,
   public.names_params
 WHERE
-  abonents.guid_objects = objects.guid AND
-  link_abonents_taken_params.guid_abonents = abonents.guid AND
-  link_abonents_taken_params.guid_taken_params = taken_params.guid AND
   taken_params.guid_meters = meters.guid AND
   taken_params.guid_params = params.guid AND
   various_values.id_taken_params = taken_params.id AND
@@ -13378,17 +13404,15 @@ WHERE
   various_values.date between '%s' and '%s' AND
   meters.guid = '%s'
   group by
-  objects.name,
-  abonents.name,
   meters.name,
-  meters.factory_number_manual,
-  link_abonents_taken_params.coefficient,
+  meters.factory_number_manual, 
   various_values.date,
   various_values.time
+  
   ) z1
   on z1.date_time = z_date.c_date
-  order by c_date
-    """%(electric_data_start, electric_data_end, electric_data_start, electric_data_end, guid_meter)
+  order by c_date ) as val_data
+    """%(guid_meter, electric_data_start, electric_data_end, electric_data_start, electric_data_end, guid_meter)
     return sQuery
 def get_30_by_meter_for_period(guid_meter, electric_data_start, electric_data_end):
     data_table = []

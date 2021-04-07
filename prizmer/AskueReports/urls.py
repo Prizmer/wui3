@@ -44,7 +44,7 @@ urlpatterns = [
     
     url(r'^38/$', views.report_water_by_date, name = '38'), #для Фили, выгрузка данных на дату по воде Импульсные
     url(r'^39/$', views.report_water_potreblenie_pulsar, name = '39'), #для Фили, выгрузка данных за период по воде Импульсные
-    url(r'^41/$', views.report_forma_80020, name = '41'), #Выгрузка архива с файлами xml по форме Мосэнергосбыт 80020
+    url(r'^41/$', views.report_forma_80020_fast, name = '41'), #Выгрузка архива с файлами xml по форме Мосэнергосбыт 80020
     
     url(r'^42/$', views.report_all_res_by_date, name = '42'), #отчёт по всем ресурсам на дату
     url(r'^44/$', views.report_electric_all_by_date, name = '44'), #отчёт электрике ресурсам на дату
