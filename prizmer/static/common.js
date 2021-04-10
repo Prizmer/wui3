@@ -363,12 +363,11 @@ var refresh_data_table = function(xyz){
 	 $.ajax({
 		type: "GET",
 		url:  my_url,
-		beforeSend: function(){show_loader();},
+		beforeSend: function(){show_loader();
+                           show_info_loader();},
 		data: {obj_parent_title:obj_parent_title, obj_key: obj_key, obj_title: obj_title, is_electric_monthly: is_electric_monthly, is_electric_daily: is_electric_daily, is_electric_current: is_electric_current,  is_electric_delta: is_electric_delta, is_electric_period:is_electric_period, electric_data_start: electric_data_start, electric_data_end: electric_data_end},
 	   })
 	 
-     
-
 	 
      .done(function( msg ) {
         $('#data-table').html(msg); // Пишем в div ответ от страницы /askue/?номер отчёта
@@ -399,6 +398,19 @@ var refresh_all = function(){
         refresh_data_table($("#choice_report").val());
     };
 
+var show_info_loader = function(){
+  // Показываем дополнительную информацию во время ожидания ответа от сервера
+  $.ajax({
+    type: "GET",
+    url: "../../report/loader_info",
+   })
+ 
+ .done(function( loader_info ) {
+    $('#loader_info').html(loader_info); // Пишем в div ответ от страницы /report/loader_info
+    });
+
+}
+
 var show_loader = function(){
     $("#fadingBarsG_1").show();
     $("#fadingBarsG_2").show();
@@ -420,6 +432,8 @@ var hide_loader = function(){
     $("#fadingBarsG_7").hide();
     $("#fadingBarsG_8").hide();
     };
+
+
     
  $(function() {
     $( "#datepickerStart" ).datepicker({ dateFormat: 'dd.mm.yy', defaultDate:+0 });

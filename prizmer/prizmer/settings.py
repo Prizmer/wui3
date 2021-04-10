@@ -102,8 +102,8 @@ WSGI_APPLICATION = 'prizmer.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE':'django.db.backends.postgresql_psycopg2',
-        'NAME': 'prizmer',
-        #'NAME': 'test',
+        #'NAME': 'prizmer',
+        'NAME': 'test',
         'USER': 'postgres',
         'PASSWORD': '1',
         'HOST': '192.168.88.19',

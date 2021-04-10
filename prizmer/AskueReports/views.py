@@ -15701,3 +15701,11 @@ def report_heat_tem104_daily(request):
     
     response['Content-Disposition'] = 'attachment;filename="%s.%s"' % (output_name.replace('"', '\"'), file_ext)   
     return response
+
+def loader_info(request):
+    status = '0'
+    with open("static/log/loader_info.txt", 'rb') as f:
+        #global status
+        status = f.read()
+        print(status)
+    return HttpResponse(status)

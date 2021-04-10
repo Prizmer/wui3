@@ -146,4 +146,8 @@ urlpatterns = [
 
     url(r'^113/$', views.report_electric_potreblenie_3_zones_v2, name = '113'), # отчёт - Электрика. Отчет по потреблению за период по двум датам. 3 Тарифа.
     # Наличие в комментарии *, говорит о том, что он реагирует на свойства SHOW_LIC_NUM,SEPARATOR и ROUND_SIZE
+
+    url(r'^loader_info/$', views.loader_info, name = 'loader_info'), # отчёт - Электрика. Отчет по потреблению за период по двум датам. 3 Тарифа.
+
+
 ]
