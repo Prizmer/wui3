@@ -106,7 +106,7 @@ DATABASES = {
         #'NAME': 'test',
         'USER': 'postgres',
         'PASSWORD': '1',
-        'HOST': '192.168.88.19',
+        'HOST': 'localhost',
         'PORT': '5432',
         'OPTIONS': {
             'client_encoding': 'UTF8',            
