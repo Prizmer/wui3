@@ -10018,6 +10018,88 @@ def electric_3_zones(request):
 
     return render(request,"data_table/electric/102.html", args)
 
+def electric_3_zones_v2(request):
+    args = {}
+    is_abonent_level = re.compile(r'abonent')
+    is_object_level = re.compile(r'level')
+    is_group_level = re.compile(r'group')
+    data_table = []
+    obj_title = u'Не выбран'
+    obj_key = u'Не выбран'
+    obj_parent_title = u'Не выбран'
+    is_electric_monthly = u''
+    is_electric_daily = u''
+    electric_data_start = u''
+    electric_data_end = u''
+    dates = None
+    is_electric_period = None
+
+    if request.is_ajax():
+        if request.method == 'GET':
+            request.session["obj_title"]           = obj_title           = request.GET['obj_title']
+            request.session["obj_key"]             = obj_key             = request.GET['obj_key']
+            request.session["obj_parent_title"]    = obj_parent_title    = request.GET['obj_parent_title']
+            request.session["is_electric_monthly"] = is_electric_monthly = request.GET['is_electric_monthly']
+            request.session["is_electric_daily"]   = is_electric_daily   = request.GET['is_electric_daily']
+            request.session["electric_data_start"] = electric_data_start = request.GET['electric_data_start']
+            request.session["electric_data_end"]   = electric_data_end   = request.GET['electric_data_end']
+            request.session["is_electric_period"]  = is_electric_period  = request.GET['is_electric_period']
+            
+            #print('!!!!!!!',obj_key, bool(is_group_level.search(obj_key)), bool(is_abonent_level.search(obj_key)), bool(is_object_level.search(obj_key)) )
+
+            if (is_electric_monthly == '1') & (bool(is_abonent_level.search(obj_key))):   # месячные для абонента
+                data_table = common_sql.get_electric_by_date(obj_parent_title, obj_title, electric_data_end, 'monthly', True)
+                
+            elif (is_electric_daily == '1') & (is_electric_period == "0") & (bool(is_abonent_level.search(obj_key))):   # суточные для абонента
+                data_table = common_sql.get_electric_by_date(obj_parent_title, obj_title, electric_data_end, 'daily', True)
+
+#*********************************************************************************************************************************************************************      
+            elif (is_electric_monthly == '1') & (bool(is_object_level.search(obj_key))): # месячные для объекта
+                    data_table = common_sql.get_electric_by_date(obj_parent_title, obj_title, electric_data_end, 'monthly', False)
+                    if obj_key == 'level1-0':
+                        data_table = common_sql.get_electric_by_date_level2(obj_parent_title, obj_title, electric_data_end, 'monthly')
+                    if not data_table:
+                        data_table = [[electric_data_end, obj_title, u'Н/Д', u'Н/Д', u'Н/Д', u'Н/Д', u'Н/Д']]        
+
+#*********************************************************************************************************************************************************************
+            elif (is_electric_daily == '1') & (bool(is_object_level.search(obj_key))): # daily for object
+                    data_table= common_sql.get_electric_by_date(obj_parent_title, obj_title, electric_data_end, 'daily', False)
+                    #print(obj_key, obj_key == 'level2-0')
+                    if obj_key == 'level1-0':
+                        data_table = common_sql.get_electric_by_date_level2(obj_parent_title, obj_title, electric_data_end, 'daily')
+                    if not data_table:
+                        data_table = [[electric_data_end, obj_title, u'Н/Д', u'Н/Д', u'Н/Д', u'Н/Д', u'Н/Д']]
+
+            elif (is_electric_daily == '1') & (bool(is_group_level.search(obj_key))): # показания по баланскной группе                    
+                    data_table = common_sql.get_electric_by_date_balance(obj_parent_title, obj_title, electric_data_end, 'daily')
+                   
+              
+            elif (is_electric_monthly == '1') & (bool(is_group_level.search(obj_key))): # показания по баланскной группе месячные
+                    data_table = common_sql.get_electric_by_date_balance(obj_parent_title, obj_title, electric_data_end, 'monthly')
+
+#*********************************************************************************************************************************************************************
+            else:
+                pass
+        else:
+            obj_title = u'Не выбран'
+            obj_parent_title = u'Не выбран'
+            obj_key = u'Не выбран'
+            is_electric_monthly = 0
+            is_electric_daily = 0 
+
+    args['data_table'] = data_table
+    args['obj_title'] = obj_title
+    args['obj_key'] = obj_key
+    args['obj_parent_title'] = obj_parent_title
+    args['is_electric_monthly'] = is_electric_monthly
+    args['is_electric_daily'] = is_electric_daily
+    args['electric_data_start'] = electric_data_start
+    args['electric_data_end'] = electric_data_end
+    args['is_electric_period'] = is_electric_period
+    args['dates'] = dates    
+
+    return render(request,"data_table/electric/114.html", args)
+
 def electric_2_zones(request):
     args = {}
     is_abonent_level = re.compile(r'abonent')

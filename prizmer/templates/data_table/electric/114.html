@@ -1,0 +1,90 @@
+<html>
+    <head>
+
+	<script>
+
+$(document).ready(function(){
+$(".comment").click(LoadComments);   
+$(".add_comment").click(AddComments);   
+});
+//AddComments(form=null, guid_abonents=$(this).attr('id'))
+	</script>
+    </head>
+    <body>
+<script src="/static/libs/liHighLight.js" type=text/javascript></script>
+<span>Показания потребленной электроэнергии на <strong>{{electric_data_end}}</strong> по 3-ём тарифам</span>
+<br>
+<span>Абонент: <strong>{{obj_title}}</strong></span>
+<br>
+
+<!--Комментарии -->
+<div id='comment-block' style="overflow-y:scroll;">
+ <span id="modal_close">X</span> <!-- Кнoпкa зaкрыть -->
+	
+</div>
+<div id="overlay"></div><!-- Пoдлoжкa -->
+
+<!--Добавление нового Комментария -->
+<div id='comment-add-block'>
+ <!--Форма для Добавления нового Комментария -->
+</div>
+
+
+{% if data_table %}
+<table class="content" id="data-table" >
+<tr>
+<th>Объект</th>
+<th>Абонент</th>
+<th>Заводской номер</th>
+<th>КТТ</th>
+<th>КТН</th>
+<th>T0 A+, кВт*ч</th>
+<th>T1 A+</th>
+<th>T2 A+</th>
+<th>T3 A+</th>
+<th class="th_hvs">Комментарий</th>
+<th class="th_hvs"></th>
+</tr>
+{% for value in data_table %}
+<tr>
+<td>{{value.7}}</td>
+<td>{{value.1}}</td>
+<td>{{value.2}}</td>
+<td>{{value.8}}</td>
+<td>{{value.9}}</td>
+<td><strong>{{value.3}}</strong></td>
+<td>{{value.4}}</td>
+<td>{{value.5}}</td>
+<td>{{value.6}}</td>
+<td class="th_hvs"> 
+{% if value.11 %} 
+<div class="comment" id={{value.13}} data-resource='electric'> 
+ {{value.11}}
+ {% load static %} <img src="{%static "images/comment-ico24.png" %}" >
+</div>
+{% endif %}
+</td>
+<td class="th_hvs"> 
+<div class="add_comment" id={{value.13}}  data-resource='electric'> 
+ {% load static %} <img src="{%static "images/add_comment-ico16.png" %}" >
+</div>
+</td>
+<!--<td><strong>{{value.8}}</strong></td>-->
+</tr>
+{% endfor %}
+</table>
+{% else %}
+<span><strong>Нет данных.</strong></span>
+<br>
+{% endif %}
+
+
+
+</div>
+<br>
+<br>
+<br>
+<br>
+<br>
+</body>
+</html>

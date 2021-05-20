@@ -1763,11 +1763,15 @@ def add_taken_param_no_signals(instance, isR, isHalfs): # Добавляем с�
     #print(instance.guid_types_meters.name, isR, isHalfs)
     if instance.guid_types_meters.name == 'Меркурий 230':
         #Добавляем параметры для Меркурия 230
+        #print(instance, isR, isHalfs)
     # T0 A+
         add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "bdcd1268-37f3-4579-a9d9-5becb2ba8aa3")) # A+ T0 месячные
+        #print(TakenParams.objects.aggregate(Max('id'))['id__max']+1, add_param)
         add_param.save()
+        #print('1111')
         add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "99cd6002-f81c-4ad6-9cb0-53a92a498519")) # A+ T0 суточные
         add_param.save()
+        #print('22222')
         #add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = u"e8c20ce7-bdb6-4ea6-8401-cee28049a7d7")) # A+ T0 текущие
         #add_param.save()
     # T0 R+

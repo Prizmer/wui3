@@ -13395,7 +13395,8 @@ def report_electric_3_zones(request):
         except:
             ws.cell('E%s'%(row)).style = "ali_white"
             next
-
+        
+        #print(get_val_by_round(data_table[row-6][3], ROUND_SIZE, separator), data_table[row-6][3], ROUND_SIZE, separator)
         try:
             ws.cell('F%s'%(row)).value = '%s' % get_val_by_round(data_table[row-6][3], ROUND_SIZE, separator)  #str(val).replace('.', separator)
             ws.cell('F%s'%(row)).style = "ali_white"
@@ -15700,4 +15701,293 @@ def report_heat_tem104_daily(request):
     file_ext = 'xlsx'
     
     response['Content-Disposition'] = 'attachment;filename="%s.%s"' % (output_name.replace('"', '\"'), file_ext)   
+    return response
+
+
+def report_electric_3_zones_v2(request):
+    SHOW_LIC_NUM = getattr(settings, 'SHOW_LIC_NUM', 'False')
+    ROUND_SIZE = getattr(settings, 'ROUND_SIZE', 3)
+    response = io.StringIO()
+    wb = Workbook()
+    wb.add_named_style(ali_grey)
+    wb.add_named_style(ali_white)
+    wb.add_named_style(ali_yellow)
+    wb.add_named_style(ali_pink)
+    wb.add_named_style(ali_blue)
+    ws = wb.active
+    wb.guess_types = True
+    
+    obj_title         = request.GET.get('obj_title')
+    electric_data_end   = request.GET.get('electric_data_end')
+
+# Шапка отчета    
+    ws.merge_cells('A2:E2')
+    ws['A2'] = obj_title+' . Срез показаний с коэффициентами на дату' + ' ' + electric_data_end
+    
+    ws.merge_cells('A4:A5')
+    ws['A4'] = 'Наименование объекта'
+    ws['A4'].style = "ali_grey"
+    ws['A5'].style = "ali_grey"
+
+    ws.merge_cells('B4:B5')
+    ws['B4'] = 'Наименование абонента'
+    ws['B4'].style = "ali_grey"
+    ws['B5'].style = "ali_grey"
+    
+    ws.merge_cells('C4:C5')
+    ws['C4'] = 'Заводской номер'
+    ws['C4'].style = "ali_grey"
+    ws['C5'].style = "ali_grey"
+    
+    ws.merge_cells('D4:F4')
+    ws['D4'] = 'Коэффициенты'
+    ws['D4'].style = "ali_grey"
+    ws['F4'].style = "ali_grey"
+    ws['E4'].style = "ali_grey"
+    
+    ws['D5'] = 'Ктн'
+    ws['D5'].style = "ali_grey"
+    ws['E5'] = 'Ктт'
+    ws['E5'].style = "ali_grey"
+    ws['F5'] = 'А'
+    ws['F5'].style = "ali_grey" 
+    
+    # Сумма
+    ws.merge_cells('G4:H4')
+    ws['G4'] = 'Сумма'
+    ws['G4'].style = "ali_grey"
+    ws['G4'].style = "ali_grey"
+    ws['I4'].style = "ali_grey"
+    ws['K4'].style = "ali_grey"
+    ws['G5'] = 'Показания A+ на ' + electric_data_end
+    ws['G5'].style = "ali_grey"
+    
+    ws['H5'] = 'Энергия A+ на ' + electric_data_end
+    ws['H5'].style = "ali_yellow"
+    
+    # Тариф 1
+    ws.merge_cells('I4:J4')
+    ws['I4'] = 'Тариф 1'
+    ws['I4'].style = "ali_grey"
+    ws['J4'].style = "ali_grey"
+    ws['I4'].style = "ali_grey"
+    ws['J4'].style = "ali_grey"
+    ws['I5'] = 'Показания A+ на ' +  electric_data_end
+    ws['I5'].style = "ali_grey"
+    
+    ws['J5'] = 'Энергия A+ на ' +  electric_data_end
+    ws['J5'].style = "ali_yellow"
+    
+    # Тариф 2
+    ws.merge_cells('K4:L4')
+    ws['K4'] = 'Тариф 2'
+    ws['K4'].style = "ali_grey"
+    #ws['K5'].style = "ali_grey"
+    ws['L4'].style = "ali_grey"
+    #ws['K4'].style = "ali_grey"
+    ws['K5'] = 'Показания A+ на ' +  electric_data_end
+    ws['K5'].style = "ali_grey"
+    
+    ws['L5'] = 'Энергия A+ на ' +  electric_data_end
+    ws['L5'].style = "ali_yellow"
+    
+    # Тариф 3
+    ws.merge_cells('M4:N4')
+    ws['M4'] = 'Тариф 3'
+    ws['M4'].style = "ali_grey"
+    ws['N4'].style = "ali_grey"
+    #ws['L4'].style = "ali_grey"
+    #ws['M4'].style = "ali_grey"
+    ws['M5'] = 'Показания A+ на ' +  electric_data_end
+    ws['M5'].style = "ali_grey"
+    
+    ws['N5'] = 'Энергия A+ на ' +  electric_data_end
+    ws['N5'].style = "ali_yellow"
+
+    if SHOW_LIC_NUM:
+        ws.merge_cells('O4:O5')
+        ws['O4'] = 'Лицевой номер абонента'
+        ws['O4'].style = "ali_grey"
+        ws['O5'].style = "ali_grey"
+    
+    ws.column_dimensions['O'].width = 17
+    ws.row_dimensions[5].height = 43
+    ws.column_dimensions['A'].width = 20
+    ws.column_dimensions['B'].width = 30 
+    ws.column_dimensions['C'].width = 17
+    ws.column_dimensions['G'].width = 13
+    ws.column_dimensions['H'].width = 13
+    ws.column_dimensions['I'].width = 13
+    ws.column_dimensions['J'].width = 13
+    ws.column_dimensions['K'].width = 13
+    ws.column_dimensions['L'].width = 13
+    ws.column_dimensions['M'].width = 13
+    ws.column_dimensions['N'].width = 13
+        
+# Шапка отчета конец
+    
+    #выборка данных из БД
+    is_abonent_level = re.compile(r'abonent')
+    is_object_level = re.compile(r'level')
+    is_group_level = re.compile(r'group')
+    data_table = []
+    
+    obj_title           = request.GET['obj_title']
+    obj_key             = request.GET['obj_key']
+    obj_parent_title    = request.GET['obj_parent_title']
+    is_electric_monthly = request.GET['is_electric_monthly']
+    is_electric_daily   = request.GET['is_electric_daily']
+    electric_data_start = request.GET['electric_data_start']
+    electric_data_end   = request.GET['electric_data_end']
+    is_electric_period  = request.GET['is_electric_period']
+
+    if (is_electric_monthly == '1') & (bool(is_abonent_level.search(obj_key))):   # месячные для абонента
+        data_table = common_sql.get_electric_by_date(obj_parent_title, obj_title, electric_data_end, 'monthly', True)
+        
+    elif (is_electric_daily == '1') & (is_electric_period == "0") & (bool(is_abonent_level.search(obj_key))):   # суточные для абонента
+        data_table = common_sql.get_electric_by_date(obj_parent_title, obj_title, electric_data_end, 'daily', True)
+
+#*********************************************************************************************************************************************************************      
+    elif (is_electric_monthly == '1') & (bool(is_object_level.search(obj_key))): # месячные для объекта
+            data_table = common_sql.get_electric_by_date(obj_parent_title, obj_title, electric_data_end, 'monthly', False)
+            if obj_key == 'level1-0':
+                data_table = common_sql.get_electric_by_date_level2(obj_parent_title, obj_title, electric_data_end, 'monthly')
+            if not data_table:
+                data_table = [[electric_data_end, obj_title, u'Н/Д', u'Н/Д', u'Н/Д', u'Н/Д', u'Н/Д']]        
+
+#*********************************************************************************************************************************************************************
+    elif (is_electric_daily == '1') & (bool(is_object_level.search(obj_key))): # daily for object
+            data_table= common_sql.get_electric_by_date(obj_parent_title, obj_title, electric_data_end, 'daily', False)
+            #print(obj_key, obj_key == 'level2-0')
+            if obj_key == 'level1-0':
+                data_table = common_sql.get_electric_by_date_level2(obj_parent_title, obj_title, electric_data_end, 'daily')
+            if not data_table:
+                data_table = [[electric_data_end, obj_title, u'Н/Д', u'Н/Д', u'Н/Д', u'Н/Д', u'Н/Д']]
+
+    elif (is_electric_daily == '1') & (bool(is_group_level.search(obj_key))): # показания по баланскной группе                    
+            data_table = common_sql.get_electric_by_date_balance(obj_parent_title, obj_title, electric_data_end, 'daily')
+            
+        
+    elif (is_electric_monthly == '1') & (bool(is_group_level.search(obj_key))): # показания по баланскной группе месячные
+            data_table = common_sql.get_electric_by_date_balance(obj_parent_title, obj_title, electric_data_end, 'monthly')
+
+# Заполняем отчет значениями
+    for row in range(6, len(data_table)+6):
+        try:
+            ws.cell('A%s'%(row)).value = '%s' % (data_table[row-6][7])  # Наименование
+            ws.cell('A%s'%(row)).style = "ali_white"
+        except:
+            ws.cell('A%s'%(row)).style = "ali_white"
+            next
+        
+        try:
+            ws.cell('B%s'%(row)).value = '%s' % (data_table[row-6][1])  # Наименование
+            ws.cell('B%s'%(row)).style = "ali_white"
+        except:
+            ws.cell('B%s'%(row)).style = "ali_white"
+            next
+            
+        try:            
+            ws.cell('C%s'%(row)).value = '%s' % str(data_table[row-6][2]) #заводской номер #.replace('.', separator)# Ктн
+            ws.cell('C%s'%(row)).style = "ali_white"
+        except:
+            ws.cell('C%s'%(row)).style = "ali_white"
+            next
+            
+        try:
+            ws.cell('D%s'%(row)).value = '%s' % str(data_table[row-6][9]).replace('.', separator)  # Ктн
+            ws.cell('D%s'%(row)).style = "ali_white"
+        except:
+            ws.cell('D%s'%(row)).style = "ali_white"
+            next
+
+        try:
+            ws.cell('E%s'%(row)).value = '%s' % str(data_table[row-6][8]).replace('.', separator)  # Ктт
+            ws.cell('E%s'%(row)).style = "ali_white"
+        except:
+            ws.cell('E%s'%(row)).style = "ali_white"
+            next
+
+        try:
+            ws.cell('F%s'%(row)).value = '%s' % str(data_table[row-6][10]).replace('.', separator)  # Ка
+            ws.cell('F%s'%(row)).style = "ali_white"
+        except:
+            ws.cell('F%s'%(row)).style = "ali_white"
+            next
+
+        try:
+            ws.cell('G%s'%(row)).value = '%s' % get_val_by_round(data_table[row-6][3], ROUND_SIZE, separator)  #str(val).replace('.', separator)
+            ws.cell('G%s'%(row)).style = "ali_white"
+            
+        except:
+            ws.cell('G%s'%(row)).style = "ali_white"
+            next
+    
+        try:            
+            ws.cell('H%s'%(row)).value = '%s' % get_val_by_round((data_table[row-6][3]*data_table[row-6][8]*data_table[row-6][9]),ROUND_SIZE, separator)  # "Энергия Сумма А+
+            ws.cell('H%s'%(row)).style = "ali_yellow"
+        except:
+            ws.cell('H%s'%(row)).style = "ali_yellow"
+            next
+            
+        try:
+            ws.cell('I%s'%(row)).value = '%s' % get_val_by_round((data_table[row-6][4]),ROUND_SIZE, separator)  # Тариф 1 А+
+            ws.cell('I%s'%(row)).style = "ali_white"
+        except:
+            ws.cell('I%s'%(row)).style = "ali_white"
+            next
+            
+        try:
+            #val = round((data_table[row-6][4]*data_table[row-6][8]*data_table[row-6][9]),ROUND_SIZE)            
+            ws.cell('J%s'%(row)).value = '%s' % get_val_by_round((data_table[row-6][4]*data_table[row-6][8]*data_table[row-6][9]),ROUND_SIZE, separator)  # "Энергия Тариф 1 А+
+            ws.cell('J%s'%(row)).style = "ali_yellow"
+        except:
+            ws.cell('J%s'%(row)).style = "ali_yellow"
+            next
+            
+        try:
+            ws.cell('K%s'%(row)).value = '%s' % get_val_by_round(data_table[row-6][5],ROUND_SIZE, separator)  # Тариф 2 А+
+            ws.cell('K%s'%(row)).style = "ali_white"
+        except:
+            ws.cell('K%s'%(row)).style = "ali_white"
+            next
+            
+        try:
+            ws.cell('L%s'%(row)).value = '%s' % get_val_by_round((data_table[row-6][5]*data_table[row-6][8]*data_table[row-6][9]),ROUND_SIZE, separator) # "Энергия Тариф 2 А+
+            ws.cell('L%s'%(row)).style = "ali_yellow"
+        except:
+            ws.cell('L%s'%(row)).style = "ali_yellow"
+            next
+            
+        try:
+            ws.cell('M%s'%(row)).value = '%s' % get_val_by_round((data_table[row-6][6]),ROUND_SIZE, separator)  # Тариф 3 А+
+            ws.cell('M%s'%(row)).style = "ali_white"
+        except:
+            ws.cell('M%s'%(row)).style = "ali_white"
+            next
+            
+        try:
+            ws.cell('N%s'%(row)).value = '%s' % get_val_by_round((data_table[row-6][6]*data_table[row-6][8]*data_table[row-6][9]),ROUND_SIZE, separator)  # "Энергия Тариф 3 А+
+            ws.cell('N%s'%(row)).style = "ali_yellow"
+        except:
+            ws.cell('N%s'%(row)).style = "ali_yellow"
+            next
+        
+        if SHOW_LIC_NUM:
+            try:                
+                ws.cell('O%s'%(row)).value = '%s' % (data_table[row-6][15])   # Лицевой нмоер абонента
+                ws.cell('O%s'%(row)).style = "ali_white"
+            except:
+                ws.cell('O%s'%(row)).style = "ali_white"
+                next
+
+# Сохраняем в ecxel  
+    #wb.save(response)
+    response.seek(0)
+    response = HttpResponse(save_virtual_workbook(wb), content_type="application/vnd.ms-excel")
+        
+    output_name = u'3_tariffa_'+translate(obj_title)+'_'+electric_data_end
+    file_ext = u'xlsx'
+    
+    response['Content-Disposition'] = 'attachment;filename="%s.%s"' % (output_name.replace('"', '\"'), file_ext)    
     return response

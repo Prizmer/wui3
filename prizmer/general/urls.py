@@ -181,4 +181,5 @@ urlpatterns = [
 
     url(r'^113/$', views.electric_consumption_3_zones_with_limit, name = 'electric_consumption_with_limit'), # Потребление по электричеству за период. 3 тарифа с выделением строк, где потребление было меньше порога
 
+    url(r'^114/$', views.electric_3_zones_v2, name = 'electric_3_zones_v2'), # Показания по электричеству на дату. 3 тарифа с комментарием + выгрузка в эксель с именем объекта
 ]

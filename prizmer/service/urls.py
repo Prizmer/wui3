@@ -49,7 +49,7 @@ urlpatterns = [
     url(r'^get_users_account_template/$', views.get_users_account_template, name = 'get_user_account_template'), #возвращает excel форму образец для прогрузочной ведомости get_users_account_template
     url(r'^service_del_meters/$', views.service_del_meters, name = 'del_meters'), # удаление приборов через прогрузочную ведомость
 
-    url(r'^load_80020_group/$', views.load_80020_group, name = 'load_80020_group'), # удаление приборов через прогрузочную ведомость
+    url(r'^load_80020_group/$', views.load_80020_group, name = 'load_80020_group'), # 
     url(r'^get_80020_template/$', views.get_80020_template, name = 'get_80020_template'), #возвращает excel форму образец для прогрузочной ведомости
 
     url(r'^del_meters/$', views.del_meters, name = 'del_meters'), #Удаление приборов из БД по прогрузочной ведомости

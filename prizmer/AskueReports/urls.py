@@ -145,5 +145,7 @@ urlpatterns = [
     url(r'^112/$', views.report_heat_tem104_daily, name = '112'), #*показания по теплу ТЭМ-104 на дату
 
     url(r'^113/$', views.report_electric_potreblenie_3_zones_v2, name = '113'), # отчёт - Электрика. Отчет по потреблению за период по двум датам. 3 Тарифа.
+
+    url(r'^114/$', views.report_electric_3_zones_v2, name = '114'), # *Показания по электричеству на дату. 3 тарифа
     # Наличие в комментарии *, говорит о том, что он реагирует на свойства SHOW_LIC_NUM,SEPARATOR и ROUND_SIZE
 ]
