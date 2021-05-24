@@ -2745,10 +2745,10 @@ def add_link_abonents_taken_params2(sender, instance, created, **kwargs):
         return None
     dtAll=GetTableFromExcel(cfg_excel_name,cfg_sheet_name) #получили из excel все строки до первой пустой строки (проверка по колонке А)
     for i in range(2,len(dtAll)):
-        abon=str(dtAll[i][2])
-        type_pulsar=str(dtAll[i][6])
-        channel=str(dtAll[i][4])
-        num_pulsar=str(dtAll[i][5])
+        abon=str(dtAll[i][2]).strip()
+        type_pulsar=str(dtAll[i][6]).strip()
+        channel=str(dtAll[i][4]).strip()
+        num_pulsar=str(dtAll[i][5]).strip()
         taken_param = type_pulsar+' '+num_pulsar+' '+type_pulsar+' Канал '+channel+' Суточный -- adress: '+channel+'  channel: 0'
         #print taken_param
         if (taken_param==instance.name):
@@ -2759,12 +2759,12 @@ def add_link_abonents_taken_params2(sender, instance, created, **kwargs):
                 #guidAbon=GetSimpleTable('abonents','name',abon)[0][0]
                 t = Abonents.objects.filter(name = abon)
                 guidAbon = t[0].guid
-                print(guidAbon)
+                #print(guidAbon)
                 linkName=abon+' Канал '+channel+' Суточный'
                 writeToLog(linkName)
                 try:
                     common_sql.InsertInLinkAbonentsTakenParams(name = linkName,coefficient=1, coefficient_2 = 1,coefficient_3 = 1, guid_abonents = Abonents.objects.get(guid=guidAbon) , guid_taken_params = instance.guid )
-                    add_link_abonents_taken_param.save()
+                    #add_link_abonents_taken_param.save()
                     writeToLog('Связь добавлена: '+abon+' -- '+taken_param)
                 except:
                     writeToLog('ошибка')
@@ -2802,9 +2802,9 @@ def add_link_abonent_taken_params_from_excel_cfg_electric(sender, instance, crea
     dtAll=GetTableFromExcel(cfg_excel_name,cfg_sheet_name) #получили из excel все строки до первой пустой строки (проверка по колонке А)
     #print dtAll[0][0]
     for i in range(1,len(dtAll)):
-        meter=dtAll[i][6]
-        abon=str(dtAll[i][3])
-        obj=str(dtAll[i][2])
+        meter=str(dtAll[i][6]).strip()
+        abon=str(dtAll[i][3]).strip()
+        obj=str(dtAll[i][2]).strip()
         if meter is not None:
             cursor = connection.cursor()
             sQuery="""SELECT abonents.guid FROM public.objects, public.abonents
@@ -2816,7 +2816,7 @@ def add_link_abonent_taken_params_from_excel_cfg_electric(sender, instance, crea
             guid_abonent_by_excel = cursor.fetchall()
             #print guid_abonent_by_excel
 
-            if str(meter) == instance.guid_meters.factory_number_manual:
+            if meter == instance.guid_meters.factory_number_manual:
                 writeToLog('Абонент найден' + ' ' + str(instance.name))
                 #print guid_abonent_by_excel 
                 dtAbon = GetSimpleCrossTable('objects', 'name', obj, 'abonents','name', abon)
