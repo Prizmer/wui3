@@ -355,7 +355,7 @@ def GetSimpleTable(table,fieldName1,value1, fieldName2='', value2=''):
             from %s
             where %s.%s='%s'
             and %s.%s='%s' """%(table, table, fieldName1, value1, table, fieldName2, value2)
-    #print sQuery
+    #print(sQuery)
     cursor.execute(sQuery)
     dt = cursor.fetchall()
     return dt
@@ -934,7 +934,7 @@ def add_taken_param(sender, instance, created, **kwargs): # Добавляем �
         #Добавляем параметры для Пульсар10
         pass
     elif instance.guid_types_meters.name == 'Пульсар 16M':
-    
+        print('add_taken_params_16m')
     # Суточные
       # Канал 1
         add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "fc4a9568-4674-4a80-b497-e4f34399acd5"))
@@ -2745,10 +2745,10 @@ def add_link_abonents_taken_params2(sender, instance, created, **kwargs):
         return None
     dtAll=GetTableFromExcel(cfg_excel_name,cfg_sheet_name) #получили из excel все строки до первой пустой строки (проверка по колонке А)
     for i in range(2,len(dtAll)):
-        abon=str(dtAll[i][2]).strip()
-        type_pulsar=str(dtAll[i][6]).strip()
-        channel=str(dtAll[i][4]).strip()
-        num_pulsar=str(dtAll[i][5]).strip()
+        abon=str(dtAll[i][2])
+        type_pulsar=str(dtAll[i][6])
+        channel=str(dtAll[i][4])
+        num_pulsar=str(dtAll[i][5])
         taken_param = type_pulsar+' '+num_pulsar+' '+type_pulsar+' Канал '+channel+' Суточный -- adress: '+channel+'  channel: 0'
         #print taken_param
         if (taken_param==instance.name):
@@ -2759,12 +2759,12 @@ def add_link_abonents_taken_params2(sender, instance, created, **kwargs):
                 #guidAbon=GetSimpleTable('abonents','name',abon)[0][0]
                 t = Abonents.objects.filter(name = abon)
                 guidAbon = t[0].guid
-                #print(guidAbon)
+                print(guidAbon)
                 linkName=abon+' Канал '+channel+' Суточный'
                 writeToLog(linkName)
                 try:
                     common_sql.InsertInLinkAbonentsTakenParams(name = linkName,coefficient=1, coefficient_2 = 1,coefficient_3 = 1, guid_abonents = Abonents.objects.get(guid=guidAbon) , guid_taken_params = instance.guid )
-                    #add_link_abonents_taken_param.save()
+                    add_link_abonents_taken_param.save()
                     writeToLog('Связь добавлена: '+abon+' -- '+taken_param)
                 except:
                     writeToLog('ошибка')
@@ -2802,9 +2802,9 @@ def add_link_abonent_taken_params_from_excel_cfg_electric(sender, instance, crea
     dtAll=GetTableFromExcel(cfg_excel_name,cfg_sheet_name) #получили из excel все строки до первой пустой строки (проверка по колонке А)
     #print dtAll[0][0]
     for i in range(1,len(dtAll)):
-        meter=str(dtAll[i][6]).strip()
-        abon=str(dtAll[i][3]).strip()
-        obj=str(dtAll[i][2]).strip()
+        meter=dtAll[i][6]
+        abon=str(dtAll[i][3])
+        obj=str(dtAll[i][2])
         if meter is not None:
             cursor = connection.cursor()
             sQuery="""SELECT abonents.guid FROM public.objects, public.abonents
@@ -2816,7 +2816,7 @@ def add_link_abonent_taken_params_from_excel_cfg_electric(sender, instance, crea
             guid_abonent_by_excel = cursor.fetchall()
             #print guid_abonent_by_excel
 
-            if meter == instance.guid_meters.factory_number_manual:
+            if str(meter) == instance.guid_meters.factory_number_manual:
                 writeToLog('Абонент найден' + ' ' + str(instance.name))
                 #print guid_abonent_by_excel 
                 dtAbon = GetSimpleCrossTable('objects', 'name', obj, 'abonents','name', abon)
@@ -3029,29 +3029,31 @@ def LoadWaterPulsar(sPath, sSheet):
     #print 'str(len(dtAll))', str(len(dtAll))
     for i in range(2,len(dtAll)):
         obj_l0='Вода' # всегда будет Вода как объект-родитель
-        obj_l1=dtAll[i][0] #корпус
-        obj_l2=dtAll[i][1] #квартира
+        obj_l1=str(dtAll[i][0]).strip() #корпус
+        obj_l2=str(dtAll[i][1]).strip() #квартира
         if not dtAll[i][1] or dtAll[i][1]==None:
             j=i
             while not obj_l2 or obj_l2==None:
                 j-=1
                 obj_l2=dtAll[j][1]
-        abon=str(dtAll[i][2]) #абонент он же счётчик по воде
-        numPulsar=str(dtAll[i][5]) #номер пульсара
-        typePulsar=str(dtAll[i][6]) #тип пульсара
+        abon=str(dtAll[i][2]).strip() #абонент он же счётчик по воде
+        numPulsar=str(dtAll[i][5]).strip() #номер пульсара
+        typePulsar=str(dtAll[i][6]).strip() #тип пульсара
         
         isNewAbon=SimpleCheckIfExist('objects','name', obj_l2,'abonents', 'name', abon)
         isNewPulsar=SimpleCheckIfExist('meters','address', numPulsar,'','','')
-        #writeToLog(u'пульсар существует '+ unicode(isNewPulsar)+ typePulsar+ numPulsar)
+        #print(u'пульсар существует ',str(isNewPulsar),typePulsar,numPulsar)
         if not (isNewAbon):
             return "Нет структуры объектов и счётчиков для "+ obj_l2 + " " +abon
         if not (isNewPulsar):
-            #print (u'Обрабатываем строку '+unicode(obj_l2) +' '+ unicode(numPulsar))
+            #print (u'Обрабатываем строку ',obj_l2,numPulsar)
             if str(typePulsar) == 'Пульсар 10M':
                     signals.post_save.disconnect(add_link_taken_params, sender=TakenParams)  
                     add_meter = Meters(name = str(typePulsar) + ' ' + str(numPulsar), address = str(numPulsar), factory_number_manual = str(numPulsar), guid_types_meters = TypesMeters.objects.get(guid = "cae994a2-6ab9-4ffa-aac3-f21491a2de0b") )
                     add_meter.save()
                     print ('OK Device 10M added in DB')
+                    #Если экземпляр был создан, то добавляем считываемые параметры
+                    add_taken_param_no_signals(instance = add_meter, isR = False, isHalfs = False)
                     met+=1
                     
             elif str(typePulsar) == 'Пульсар 16M':
@@ -3059,6 +3061,9 @@ def LoadWaterPulsar(sPath, sSheet):
                    add_meter = Meters(name = str(str(typePulsar) + ' ' + str(numPulsar)), address = str(numPulsar),  factory_number_manual = str(numPulsar), guid_types_meters = TypesMeters.objects.get(guid = "7cd88751-d232-410c-a0ef-6354a79112f1") )
                    add_meter.save()
                    print ('OK Device 16M added in DB')
+                   #Если экземпляр был создан, то добавляем считываемые параметры
+                   add_taken_param_no_signals(instance = add_meter, isR = False, isHalfs = False)
+            
                    met+=1
                    
             elif str(typePulsar) == 'Пульсар 2M':
@@ -3066,6 +3071,8 @@ def LoadWaterPulsar(sPath, sSheet):
                    add_meter = Meters(name = str(str(typePulsar) + ' ' + str(numPulsar)), address = str(numPulsar),  factory_number_manual = str(numPulsar), guid_types_meters = TypesMeters.objects.get(guid = "6599be9a-1f4d-4a6e-a3d9-fb054b8d44e8") )
                    add_meter.save()
                    print ('OK Device 2M added in DB')
+                   #Если экземпляр был создан, то добавляем считываемые параметры
+                   add_taken_param_no_signals(instance = add_meter, isR = False, isHalfs = False)
                    met+=1
             else:
                 print('Pulsar already exists or you incorrectly indicated the type of device in the loading list')        
@@ -3080,9 +3087,10 @@ def LoadWaterPulsar(sPath, sSheet):
         #Sravnenie(taken_param)
         dtTakenParam=GetSimpleTable('taken_params','name',taken_param)
         #writeToLog(bool(dtTakenParam))
+        #print(dtTakenParam)
         if dtTakenParam:                
             #print(u'taken param найден')
-            guid_taken_param=dtTakenParam[0][1]
+            guid_taken_param=dtTakenParam[0][2]
             dtLink=GetSimpleTable('link_abonents_taken_params','guid_taken_params',guid_taken_param)
             #print dtLink
             if (dtLink):
@@ -3098,11 +3106,12 @@ def LoadWaterPulsar(sPath, sSheet):
                 #print abonent_name, guidAbon, guid_taken_param
                 common_sql.InsertInLinkAbonentsTakenParams(name = abonent_name+' Канал '+chanel+' Суточный',coefficient=1, coefficient_2 = 1,coefficient_3 = 1, guid_abonents = guidAbon, guid_taken_params = guid_taken_param)
                 #add_link_abonents_taken_param.save()
-                #print u'Abonent connected with taken param'
+                print (u'Abonent connected with taken param')
                 con+=1
     result+='Прогружено новых пульсаров '+str(met)
     if con>0:
         result+='Созданы новые связи '
+    #print('1111111111')
     signals.post_save.connect(add_link_taken_params, sender=TakenParams)  
     return result
 
@@ -4412,7 +4421,7 @@ def add_current_taken_params_pulsar16m(request):
         count10m+=1
 
     result = 'Добавлены параметры для ' + str(count16m) + ' ПУ Пульсар 16М и ' + str(count10m) + ' ПУ Пульcар 10М'  
-    #print result
+    #print(result)
     args['pulsar16m_status'] = result
     return render(request,"service/service_get_info.html", args)
 
@@ -5037,15 +5046,15 @@ def make_80020_report(sPath, sSheet):
     for row in dtAll:
         i+=1
         if i<3: continue
-        group_name = str(row[0])
-        contract_number = str(row[1])
-        measuringpoint_code = str(row[2])
-        measuringpoint_name = str(row[3])
-        meter_number = str(row[4])
-        inn_sender = str(row[5])
-        name_sender = str(row[6])
-        area_inn = str(row[7])
-        abonent_name = str(row[8])
+        group_name = str(row[0]).strip()
+        contract_number = str(row[1]).strip()
+        measuringpoint_code = str(row[2]).strip()
+        measuringpoint_name = str(row[3]).strip()
+        meter_number = str(row[4]).strip()
+        inn_sender = str(row[5]).strip()
+        name_sender = str(row[6]).strip()
+        area_inn = str(row[7]).strip()
+        abonent_name =  name_sender #str(row[8]).strip()
         
         guid_groups_80020 = ''
         dt = common_sql.get_80020_group_by_name(group_name)

@@ -5054,7 +5054,7 @@ WHERE
   and obj_name='%s'
   order by obj_name, names_params.name   
     """%(my_param[0],electric_data_end, parent_name, meters_name)
-    #print sQuery
+    #print(sQuery)
     # if dc == u'current':
     #   sQuery=sQuery.replace('daily', dc)
       #print sQuery

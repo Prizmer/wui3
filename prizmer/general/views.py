@@ -8733,7 +8733,8 @@ def instruction_user(request):
 
 def instruction_admin(request):
     from django.contrib.staticfiles import finders
-    result_url = finders.find('Admin_manual_Prizmer.pdf')
+    result_url = finders.find('Instruction_2021.pdf')
+    #result_url = finders.find('Admin_manual_Prizmer.pdf')
 
     with open(result_url, 'rb') as pdf:
         response = HttpResponse(pdf.read(), content_type='application/pdf')
