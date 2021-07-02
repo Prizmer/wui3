@@ -8488,6 +8488,8 @@ def report_pulsar_heat_daily(request):
     return response
     
 def report_pulsar_heat_period(request):
+    #SHOW_LIC_NUM = getattr(settings, 'SHOW_LIC_NUM', 'False')
+    ROUND_SIZE = getattr(settings, 'ROUND_SIZE', 3)
     response = io.StringIO()
     wb = Workbook()
     wb.add_named_style(ali_grey)
@@ -8565,42 +8567,42 @@ def report_pulsar_heat_period(request):
             next
             
         try:
-            ws.cell('C%s'%(row)).value = '%s' % get_val(round(float(data_table[row-6][2]),7)) # '%s' % (data_table[row-6][2])  # Показания по теплу на начало
+            ws.cell('C%s'%(row)).value = '%s' % get_val_by_round(float(data_table[row-6][2]),ROUND_SIZE, separator)  # '%s' % get_val(round(float(data_table[row-6][2]),7)) # '%s' % (data_table[row-6][2])  # Показания по теплу на начало
             ws.cell('C%s'%(row)).style = "ali_white"
         except:
             ws.cell('C%s'%(row)).style = "ali_white"
             next
             
         try:
-            ws.cell('D%s'%(row)).value = '%s' % get_val(round(float(data_table[row-6][3]),7)) # '%s' % (data_table[row-6][3])  # Показания по теплу на конец
+            ws.cell('D%s'%(row)).value = '%s' % get_val_by_round(float(data_table[row-6][3]),ROUND_SIZE, separator)  # '%s' % get_val(round(float(data_table[row-6][3]),7)) # '%s' % (data_table[row-6][3])  # Показания по теплу на конец
             ws.cell('D%s'%(row)).style = "ali_white"
         except:
             ws.cell('D%s'%(row)).style = "ali_white"
             next
             
         try:
-            ws.cell('E%s'%(row)).value =  '%s' % get_val(round(float(data_table[row-6][4]),7))  # '%s' % (data_table[row-6][4])  # Потребление
+            ws.cell('E%s'%(row)).value = '%s' % get_val_by_round(float(data_table[row-6][4]),ROUND_SIZE, separator)  # '%s' % get_val(round(float(data_table[row-6][4]),7))  # '%s' % (data_table[row-6][4])  # Потребление
             ws.cell('E%s'%(row)).style = "ali_white"
         except:
             ws.cell('E%s'%(row)).style = "ali_white"
             next
         
         try:
-            ws.cell('F%s'%(row)).value =  '%s' % get_val(round(float(data_table[row-6][5]),7)) # '%s' % (data_table[row-6][5])  # Время работы
+            ws.cell('F%s'%(row)).value = '%s' % get_val_by_round(float(data_table[row-6][5]),ROUND_SIZE, separator)  #  '%s' % get_val(round(float(data_table[row-6][5]),7)) # '%s' % (data_table[row-6][5])  # Время работы
             ws.cell('F%s'%(row)).style = "ali_white"
         except:
             ws.cell('F%s'%(row)).style = "ali_white"
             next
             
         try:
-            ws.cell('G%s'%(row)).value = '%s' % get_val(round(float(data_table[row-6][6]),7)) # '%s' % (data_table[row-6][6])  # Время работы
+            ws.cell('G%s'%(row)).value = '%s' % get_val_by_round(float(data_table[row-6][6]),ROUND_SIZE, separator)  # '%s' % get_val(round(float(data_table[row-6][6]),7)) # '%s' % (data_table[row-6][6])  # Время работы
             ws.cell('G%s'%(row)).style = "ali_white"
         except:
             ws.cell('G%s'%(row)).style = "ali_white"
             next
             
         try:
-            ws.cell('H%s'%(row)).value =  '%s' % get_val(round(float(data_table[row-6][7]),7))  #'%s' % (data_table[row-6][7])  # Время работы
+            ws.cell('H%s'%(row)).value =  '%s' % get_val_by_round(float(data_table[row-6][7]),ROUND_SIZE, separator)  # '%s' % get_val(round(float(data_table[row-6][7]),7))  #'%s' % (data_table[row-6][7])  # Время работы
             ws.cell('H%s'%(row)).style = "ali_white"
         except:
             ws.cell('H%s'%(row)).style = "ali_white"
