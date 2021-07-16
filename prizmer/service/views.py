@@ -559,7 +559,7 @@ def LoadElectricMeters(sPath, sSheet):
             #print('Need create struct!')
             return "Сначала создайте структуру объектов и абонентов"
         if not (isNewMeter):
-            #print(str(type_meter))
+            print(str(type_meter))
             if str(type_meter) == 'М-200':
                 add_meter = Meters(name = str(type_meter) + ' ' + str(meter), address = str(adr), factory_number_manual = str(meter), guid_types_meters = TypesMeters.objects.get(guid = "6224d20b-1781-4c39-8799-b1446b60774d") )
                 add_meter.save()
@@ -659,6 +659,7 @@ def LoadElectricMeters(sPath, sSheet):
                 add_taken_param_no_signals(instance = add_meter, isR = isR, isHalfs = isHalfs)
             except:
                 e = sys.exc_info()[0]
+                #print(e)
                 return( "Ошибка: %s" % e )
             
             met+=1

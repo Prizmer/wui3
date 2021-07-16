@@ -5008,6 +5008,16 @@ WHERE
   resources.name='%s'
   and date='%s' and
   water_abons_report.name='%s'
+  group by
+	daily_values.date,
+  obj_name,
+  abonents.name,
+  meters.name,  
+  names_params.name,
+  daily_values.value,    
+  abonents.guid,
+  water_abons_report.name,
+  resources.name 
   order by obj_name, names_params.name ) z2
   on z2.meters=water_abons_report.ab_name
   where water_abons_report.name='%s'  
@@ -5052,6 +5062,16 @@ WHERE
   and date='%s' and
   water_abons_report.name='%s'
   and obj_name='%s'
+  group by
+	daily_values.date,
+  obj_name,
+  abonents.name,
+  meters.name,  
+  names_params.name,
+  daily_values.value,    
+  abonents.guid,
+  water_abons_report.name,
+  resources.name 
   order by obj_name, names_params.name   
     """%(my_param[0],electric_data_end, parent_name, meters_name)
     #print(sQuery)
