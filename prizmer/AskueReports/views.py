@@ -11165,17 +11165,17 @@ def report_heat_res_status(request):
     ws2['C5'] = 'Счётчик '
     ws2['C5'].style = "ali_grey"
     
-    ws2['d5'] = 'Энергия, Гкал'
-    ws2['d5'].style = "ali_grey"
+    # ws2['d5'] = 'Энергия, Гкал'
+    # ws2['d5'].style = "ali_grey"
     
-    ws2['e5'] = 'Объем, м3'
-    ws2['e5'].style = "ali_grey"
+    # # ws2['e5'] = 'Объем, м3'
+    # # ws2['e5'].style = "ali_grey"
     
-    ws2['f5'] = 'Температура входа, С'
-    ws2['f5'].style = "ali_grey"
+    # ws2['f5'] = 'Температура входа, С'
+    # ws2['f5'].style = "ali_grey"
     
-    ws2['g5'] = 'Температура выхода, С'
-    ws2['g5'].style = "ali_grey"
+    # ws2['g5'] = 'Температура выхода, С'
+    # ws2['g5'].style = "ali_grey"
     
         #print val
     row = 5
@@ -11203,38 +11203,39 @@ def report_heat_res_status(request):
                 ws2.cell('c%s'%(row)).style = "ali_white"
                 next
                 
-            try:
-                ws2.cell('d%s'%(row)).value = '%s' % (val[3])  # Абонент
-                ws2.cell('d%s'%(row)).style = "ali_white"
-            except:
-                ws2.cell('d%s'%(row)).style = "ali_white"
-                next
+            # try:
+            #     ws2.cell('d%s'%(row)).value = '%s' % (val[3])  # Абонент
+            #     ws2.cell('d%s'%(row)).style = "ali_white"
+            # except:
+            #     ws2.cell('d%s'%(row)).style = "ali_white"
+            #     next
                 
-            try:
-                ws2.cell('e%s'%(row)).value = '%s' % (val[4])  # Абонент
-                ws2.cell('e%s'%(row)).style = "ali_white"
-            except:
-                ws2.cell('e%s'%(row)).style = "ali_white"
-                next
+            # try:
+            #     ws2.cell('e%s'%(row)).value = '%s' % (val[5])  # Абонент
+            #     ws2.cell('e%s'%(row)).style = "ali_white"
+            # except:
+            #     ws2.cell('e%s'%(row)).style = "ali_white"
+            #     next
                 
-            try:
-                ws2.cell('f%s'%(row)).value = '%s' % (val[5])  # Абонент
-                ws2.cell('f%s'%(row)).style = "ali_white"
-            except:
-                ws2.cell('f%s'%(row)).style = "ali_white"
-                next
+            # try:
+            #     ws2.cell('f%s'%(row)).value = '%s' % (val[6])  # Абонент
+            #     ws2.cell('f%s'%(row)).style = "ali_white"
+            # except:
+            #     ws2.cell('f%s'%(row)).style = "ali_white"
+            #     next
                 
-            try:
-                ws2.cell('g%s'%(row)).value = '%s' % (val[6])  # Абонент
-                ws2.cell('g%s'%(row)).style = "ali_white"
-            except:
-                ws2.cell('g%s'%(row)).style = "ali_white"
-                next
+            # try:
+            #     ws2.cell('g%s'%(row)).value = '%s' % (val[6])  # Абонент
+            #     ws2.cell('g%s'%(row)).style = "ali_white"
+            # except:
+            #     ws2.cell('g%s'%(row)).style = "ali_white"
+            #     next
             
    
     ws2.row_dimensions[5].height = 51
     ws2.column_dimensions['A'].width = 30 
-    ws2.column_dimensions['b'].width = 20 
+    ws2.column_dimensions['b'].width = 20
+    ws2.column_dimensions['C'].width = 30 
     #ws2.column_dimensions['c'].width = 20 
     
     #wb.save(response)
@@ -11245,7 +11246,8 @@ def report_heat_res_status(request):
     output_name = 'report_heat_statistic_'+str(electric_data_end)
     file_ext = 'xlsx'    
     response['Content-Disposition'] = 'attachment;filename="%s.%s"' % (output_name.replace('"', '\"'), file_ext)   
-    return response
+    return response 
+    
     
 def report_water_impulse_res_status(request):
     response = io.StringIO()
@@ -11432,7 +11434,7 @@ def report_water_impulse_res_status(request):
     return response
     
     
-def report_heat_res_status(request):
+"""def report_heat_res_status(request):
     response = io.StringIO()
     wb = Workbook()
     wb.add_named_style(ali_grey)
@@ -11626,6 +11628,7 @@ def report_heat_res_status(request):
     file_ext = 'xlsx'    
     response['Content-Disposition'] = 'attachment;filename="%s.%s"' % (output_name.replace('"', '\"'), file_ext)   
     return response
+    """
     
 def report_balance_period_water_impulse(request):
     response = io.StringIO()
