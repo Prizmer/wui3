@@ -6000,7 +6000,7 @@ left join
 on z2.number_manual=heat_abons.factory_number_manual
 where heat_abons.obj_name='%s'
 order by heat_abons.ab_name""" % (params[0],params[1],params[2],params[3], obj_title,params[4], electric_data, obj_title )
-    print(sQuery)    
+    #print(sQuery)    
     return sQuery
 
 
