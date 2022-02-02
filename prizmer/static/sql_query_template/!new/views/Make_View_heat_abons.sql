@@ -1,5 +1,6 @@
 -- View: public.heat_abons
 
+
 DROP VIEW public.heat_abons;
 
 CREATE OR REPLACE VIEW public.heat_abons

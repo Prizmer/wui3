@@ -5896,7 +5896,9 @@ round(z2.volume::numeric,7),
 round(z2.t_in::numeric,1),
 round(z2.t_out::numeric,1),
 heat_abons.comment,
-heat_abons.ab_guid
+heat_abons.ab_guid,
+
+round((z2.energy::numeric*0.0008604206500956)::numeric,3) as energy_gkal
 from heat_abons
 left join
 (SELECT z1.daily_date, z1.name_objects, z1.name_abonents, z1.number_manual, 
@@ -5937,6 +5939,14 @@ left join
                     abonents.name = '%s' AND            			  
             			  types_meters.name like '%%%s%%' AND 
             			  daily_values.date = '%s' 
+                          GROUP BY
+                    daily_values.date, 
+            			  objects.name , 
+            			  abonents.name, 
+            			  daily_values.value, 
+            			  meters.factory_number_manual, 
+            			  names_params.name, 
+            			  types_meters.name
                                     ) z1
             group by z1.name_abonents, z1.daily_date, z1.name_objects, z1.number_manual
             order by z1.name_abonents) as z2
@@ -5954,7 +5964,9 @@ round(z2.volume::numeric,7),
 round(z2.t_in::numeric,1),
 round(z2.t_out::numeric,1),
 heat_abons.comment,
-heat_abons.ab_guid
+heat_abons.ab_guid,
+
+round((z2.energy::numeric*0.0008604206500956)::numeric,3) as energy_gkal
 from heat_abons
 left join
 (SELECT z1.daily_date, z1.name_objects, z1.name_abonents, z1.number_manual, 
@@ -5994,6 +6006,14 @@ left join
             			  objects.name = '%s' AND            			  
             			  types_meters.name like '%%%s%%' AND 
             			  daily_values.date = '%s' 
+                           GROUP BY
+                          daily_values.date, 
+            			  objects.name , 
+            			  abonents.name, 
+            			  daily_values.value, 
+            			  meters.factory_number_manual, 
+            			  names_params.name, 
+            			  types_meters.name
                                     ) z1
             group by z1.name_abonents, z1.daily_date, z1.name_objects, z1.number_manual
             order by z1.name_abonents) as z2
@@ -6027,7 +6047,11 @@ round(z5.energy_end::numeric,7)as energy_e,
 round((z5.energy_end-z5.energy_start)::numeric,7) as energy_delta,
 round((z5.volume_start)::numeric,7),
 round((z5.volume_end)::numeric,7),
-round((z5.volume_end-z5.volume_start)::numeric,7) as volume_delta
+round((z5.volume_end-z5.volume_start)::numeric,7) as volume_delta,
+
+round((z5.energy_start::numeric*0.0008604206500956)::numeric,3) as energy_st_gkal,
+round((z5.energy_end::numeric*0.0008604206500956)::numeric,3)as energy_e_gkal,
+round(((z5.energy_end-z5.energy_start)::numeric*0.0008604206500956)::numeric,3) as energy_delta_gkal
 FROM
 (Select z3.obj_name, z3.ab_name,z3.factory_number_manual, z3.energy_start,z3.volume_start , z4.energy_end,z4.volume_end
 from
@@ -6072,6 +6096,14 @@ left join
                     abonents.name = '%s' and            			  
             			  types_meters.name like '%%%s%%' AND 
             			  daily_values.date = '%s' 
+                           GROUP BY
+                          daily_values.date, 
+            			  objects.name , 
+            			  abonents.name, 
+            			  daily_values.value, 
+            			  meters.factory_number_manual, 
+            			  names_params.name, 
+            			  types_meters.name
                                     ) z1
             group by z1.name_abonents, z1.daily_date, z1.name_objects, z1.number_manual
             order by z1.name_abonents) as z2
@@ -6118,6 +6150,14 @@ left join
                     abonents.name = '%s' and           			  
             			  types_meters.name like '%%%s%%' AND 
             			  daily_values.date = '%s' 
+                           GROUP BY
+                          daily_values.date, 
+            			  objects.name , 
+            			  abonents.name, 
+            			  daily_values.value, 
+            			  meters.factory_number_manual, 
+            			  names_params.name, 
+            			  types_meters.name
                                     ) z1
             group by z1.name_abonents, z1.daily_date, z1.name_objects, z1.number_manual
             order by z1.name_abonents) as z2
@@ -6138,7 +6178,11 @@ round(z5.energy_end::numeric,7)as energy_e,
 round((z5.energy_end-z5.energy_start)::numeric,7) as energy_delta,
 round((z5.volume_start)::numeric,7),
 round((z5.volume_end)::numeric,7),
-round((z5.volume_end-z5.volume_start)::numeric,7) as volume_delta
+round((z5.volume_end-z5.volume_start)::numeric,7) as volume_delta,
+
+round((z5.energy_start::numeric*0.0008604206500956)::numeric,3) as energy_st_gkal,
+round((z5.energy_end::numeric*0.0008604206500956)::numeric,3)as energy_e_gkal,
+round(((z5.energy_end-z5.energy_start)::numeric*0.0008604206500956)::numeric,3) as energy_delta_gkal
 FROM
 (Select z3.obj_name, z3.ab_name,z3.factory_number_manual, z3.energy_start,z3.volume_start , z4.energy_end,z4.volume_end
 from
@@ -6182,6 +6226,14 @@ left join
             			  objects.name = '%s' AND            			  
             			  types_meters.name like '%%%s%%' AND 
             			  daily_values.date = '%s' 
+                           GROUP BY
+                          daily_values.date, 
+            			  objects.name , 
+            			  abonents.name, 
+            			  daily_values.value, 
+            			  meters.factory_number_manual, 
+            			  names_params.name, 
+            			  types_meters.name
                                     ) z1
             group by z1.name_abonents, z1.daily_date, z1.name_objects, z1.number_manual
             order by z1.name_abonents) as z2
@@ -6227,6 +6279,14 @@ left join
             			  objects.name = '%s' AND            			  
             			  types_meters.name like '%%%s%%' AND 
             			  daily_values.date = '%s' 
+                           GROUP BY
+                          daily_values.date, 
+            			  objects.name , 
+            			  abonents.name, 
+            			  daily_values.value, 
+            			  meters.factory_number_manual, 
+            			  names_params.name, 
+            			  types_meters.name
                                     ) z1
             group by z1.name_abonents, z1.daily_date, z1.name_objects, z1.number_manual
             order by z1.name_abonents) as z2
@@ -6557,7 +6617,7 @@ water_pulsar_abons.ab_guid,
  water_pulsar_abons.comment
   order by water_pulsar_abons.ab_name, z1.type_meter, z1.attr1
     """%(obj_title, electric_data_end, my_params[0],my_params[1],obj_title)
-    #print sQuery
+    #print(sQuery)
     return sQuery
     
 def get_data_table_pulsar_water_for_period(obj_parent_title, obj_title, electric_data_start, electric_data_end, isAbon):
@@ -9324,14 +9384,14 @@ def MakeSqlQuery_heat_no_data( obj_title, electric_data_end, my_params):
     sQuery="""
     Select heat_abons.obj_name, heat_abons.ab_name, heat_abons.factory_number_manual, 
 round(z2.energy::numeric,7),
-round(z2.volume::numeric,7),
+
 round(z2.t_in::numeric,1),
 round(z2.t_out::numeric,1), heat_abons.name
 from heat_abons
 left join
 (SELECT z1.daily_date, z1.name_objects, z1.name_abonents, z1.number_manual, 
             sum(Case when z1.params_name = '%s' then z1.value_daily  end) as energy,
-            sum(Case when z1.params_name = '%s' then z1.value_daily  end) as volume,
+            
             sum(Case when z1.params_name = '%s' then z1.value_daily  end) as t_in,
             sum(Case when z1.params_name = '%s' then z1.value_daily  end) as t_out, res
             
@@ -9374,9 +9434,10 @@ left join
             order by z1.name_abonents) as z2
 on z2.number_manual=heat_abons.factory_number_manual
 where heat_abons.obj_name='%s'
-and (z2.energy is null or z2.volume is null)
+and (z2.energy is null)
 order by heat_abons.obj_name, heat_abons.ab_name
-    """%(my_params[0],my_params[1],my_params[2],my_params[3], obj_title,my_params[4],electric_data_end, obj_title)
+    """%(my_params[0],my_params[2],my_params[3], obj_title,my_params[4],electric_data_end, obj_title)
+    #print(sQuery)
     return sQuery    
 def get_heat_no_data(obj_title,  electric_data_end):
     my_params=['Энергия','Объем','Ti','To', 'Тепло']   
@@ -9446,6 +9507,7 @@ where heat_abons.obj_name='%s'
 order by heat_abons.ab_name) as z
 group by obj_name
     """%(electric_data_end,my_params[0],my_params[1],my_params[2],my_params[3], obj_title,my_params[4],electric_data_end, obj_title)
+    #print(sQuery)
     return sQuery
 def get_heat_count(obj_title,  electric_data_end):
     my_params=['Энергия','Объем','Ti','To', 'Тепло']   
@@ -10240,7 +10302,7 @@ left join
             			  meters.guid_types_meters = types_meters.guid AND
             			  names_params.guid_resources=resources.guid and
             			  objects.name = '%s' AND            			  
-            			  (types_meters.name::text = '%s'::text OR types_meters.name::text = '%s'::text)
+            			  (types_meters.name::text like '%s'::text OR types_meters.name::text like '%s'::text)
             			  AND
             			  daily_values.date = '%s' 
                                     ) z1
@@ -10254,7 +10316,7 @@ group by obj_name
   #print sQuery
   return sQuery
 def get_water_digital_pulsar_count(obj,  electric_data_end):
-    my_params=['Пульсар ГВС', 'Пульсар ХВС']
+    my_params=['%%Пульс%%ГВС%%', '%%Пульс%%ХВС%%']
     cursor = connection.cursor()
     data_table=[]      
     cursor.execute(MakeQuery_water_digital_pulsar_statistic(obj,  electric_data_end, my_params))  
@@ -10300,8 +10362,8 @@ left join
             			  params.guid_names_params = names_params.guid AND
             			  meters.guid_types_meters = types_meters.guid AND
             			  names_params.guid_resources=resources.guid and
-            			  objects.name = '%s' AND            			  
-            			  (types_meters.name::text = '%s'::text OR types_meters.name::text = '%s'::text)
+            			  objects.name = '%s' AND            
+            			  (types_meters.name::text like '%s'::text OR types_meters.name::text like '%s'::text)
             			  AND
             			  daily_values.date = '%s' 
                                     ) z1
@@ -10312,11 +10374,11 @@ where water_pulsar_abons.obj_name='%s'
   and value_daily is null
   order by obj_name, water_pulsar_abons.ab_name
   """%(obj, my_params[0],my_params[1], electric_data_end, obj)
-  #print sQuery
+  #print(sQuery)
   return sQuery
 
 def get_water_digital_pulsar_no_data(obj,  electric_data_end):
-    my_params=['Пульсар ГВС', 'Пульсар ХВС']
+    my_params=['%%Пульс%%ГВС%%', '%%Пульс%%ХВС%%']
     cursor = connection.cursor()
     data_table=[]      
     cursor.execute(MakeQuery_water_digital_pulsar_no_data(obj,  electric_data_end, my_params))  
