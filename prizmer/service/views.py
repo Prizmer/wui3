@@ -633,6 +633,11 @@ def LoadElectricMeters(sPath, sSheet):
                 add_meter.save()
                 writeToLog('Device added' + ' --->   ' + 'Пульсар Теплосчётчик')
 
+            elif str(type_meter) == 'Пульсар Холодосчётчик':
+                add_meter = Meters(name = str(type_meter) + ' ' + str(meter), address = str(adr), factory_number_manual = str(meter), guid_types_meters = TypesMeters.objects.get(guid = "c1ae0de6-f071-4e07-8452-09059eef187b") )
+                add_meter.save()
+                writeToLog('Device added' + ' --->   ' + 'Пульсар Холодосчётчик')
+
             elif str(type_meter) == 'Пульс СТК Теплосчётчик':
                 add_meter = Meters(name = str(type_meter) + ' ' + str(meter), address = str(adr), factory_number_manual = str(meter), guid_types_meters = TypesMeters.objects.get(guid = "bb111ede-e00b-4e1d-a8ba-1ef61dba1caa") )
                 add_meter.save()
@@ -2514,6 +2519,21 @@ def add_taken_param_no_signals(instance, isR, isHalfs): # Добавляем с�
         add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "d3433b80-cb8c-4038-a682-947e6d05955e"))
         add_param.save()
 
+    elif instance.guid_types_meters.name == 'Пульсар Холодосчётчик':
+        #Добавляем параметры для Холодосчётчика Пульсар.
+        #------------Суточные
+        # "Показание Энергии" Q, Гкал
+        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "ba344ec3-d390-48e0-811c-991b25d9734d"))
+        add_param.save()
+        # "Показание Расход воды" Объем, м3
+        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "8fd07daa-4ad0-4124-acbe-aca6da2301d0"))
+        add_param.save()
+        # "Показание Температура подачи" Ti, C0
+        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "6a50c871-8101-4a44-82c6-6214bd7a5ddd"))
+        add_param.save()
+        # "Показание Температура выхода" To, C0
+        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "244de93e-4dcd-41e2-bcc4-db1a113ead0a"))
+        add_param.save()
         
     elif instance.guid_types_meters.name == 'Пульсар ХВС':
         #Добавляем параметры для водосчётчика Пульсар ХВС.
