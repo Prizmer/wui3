@@ -1,5 +1,24 @@
 <html>
     <head>
+		<script>
+		var net_addr = '';
+		var load_current = function(page){
+			// console.log("Hi");
+			net_addr=$('#setevoi').text();
+			$.ajax({
+				type: "GET",
+				url: "/polling/current_m230",
+				// beforeSend: alert(net_addr),
+				data:{net_addr: net_addr},        
+			   })
+			   
+		   .done(function( msg ) {
+			$('#current').html(msg); // Пишем в div ответ от страницы 
+			//hide_loader();
+			});			
+
+		};
+      </script>
     </head>
     <body>
 <script src="/static/libs/liHighLight.js" type=text/javascript></script>
@@ -25,19 +44,28 @@
 				</div>
 				<div class="col-md-6"><strong>{{data_table.0.7}}</strong>
 				</div>
-				<div class="col-md-4"> сет. №: <strong>{{data_table.0.6}}</strong>
+				<div class="col-md-4"> сет. №: <strong id="setevoi">{{data_table.0.6}}</strong>
 				</div>
 			</div>
 		</div>		
 	</div>
 
 	<br>
+	
+	<!-- Информация о приборе. Запрос текущих показаний -->
 	<div class="row justify-content-center radius"  style="border-radius: 10px 40px">
 		<div class="col-md-1" > 
 		{% load static %} <img src="{%static "images/place-ico64.png" %}">
 		</div>
 		<div class="col-11 align-self-center"  > <strong>{{data_table.0.0}}<img src="{%static "images/right-ico20.png" %}">  {{data_table.0.1}} </strong>
-		</div>		
+		</div>
+		<div id="current values">
+			<strong>Здесь будет запрос на текущие показания счётчика</strong>
+			<div id = current>
+				<p>Нажмите кнопку для запроса данных</p>
+			</div>
+			<span onclick="load_current('service_replace_electric')" class="button" id="polling_current_values"><b>Текущие</b></span>
+		</div>	
 	</div>
 	<br>
 	<div class="row justify-content-center radius" style="border-radius: 10px 60px" >

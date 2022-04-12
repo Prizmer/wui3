@@ -46,6 +46,7 @@ STATICFILES_DIRS = (os.path.join(BASE_DIR, "../prizmer/static"),
 
 import sys
 sys.path.append(os.path.join(BASE_DIR, "static/common_sql"))
+sys.path.append(os.path.join(BASE_DIR, "polling/drivers"))
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.6/howto/deployment/checklist/
@@ -78,6 +79,7 @@ INSTALLED_APPS = (
    # 'AskueViz',
     'service',
     'account_prizmer',
+    'polling',
 
 )
 
@@ -107,13 +109,15 @@ DATABASES = {
         #'NAME': 'seliger2',
         #'NAME': 'skladk1',
         #'NAME': 'seliger2_test',        
-        'NAME': 'fso',
+        #'NAME': 'fso',
         #'NAME': 'test',
         #'NAME': 'metro',
         #'NAME': 'sovet',
+        'NAME': 'power_limit_test',
         'USER': 'postgres',
         'PASSWORD': '1',
-        'HOST': 'localhost',
+        #'HOST': 'localhost',
+        'HOST': '192.168.88.20',
         'PORT': '5432',
         'OPTIONS': {
             'client_encoding': 'UTF8',            
