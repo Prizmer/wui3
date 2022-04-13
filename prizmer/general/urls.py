@@ -94,7 +94,7 @@ urlpatterns = [
     url(r'^55/$', views.water_elf_gvs_potreblenie, name = 'period_water_elf_gvs'), # потребление по гвс -Эльф
 
     url(r'^56/$', views.pulsar_heat_daily, name = 'heat_pulsar'), # Показание на дату с теплосчётчиков Пульсар
-    url(r'^59/$', views.pulsar_heat_period, name = 'period_heat_pulsar'), # Показание на дату с теплосчётчиков Пульсар
+    url(r'^59/$', views.pulsar_heat_period, name = 'period_heat_pulsar'), # Потребление за период с теплосчётчиков Пульсар
     url(r'^62/$', views.pulsar_heat_daily_2, name = 'heat_pulsar2'), # Показание на дату с теплосчётчиков Пульсар
     url(r'^61/$', views.pulsar_heat_period_2, name = 'period_heat_pulsar'), # Показание на дату с теплосчётчиков Пульсар
     
@@ -183,7 +183,10 @@ urlpatterns = [
 
     url(r'^114/$', views.electric_3_zones_v2, name = 'electric_3_zones_v2'), # Показания по электричеству на дату. 3 тарифа с комментарием + выгрузка в эксель с именем объекта
 
-    url(r'^115/$', views.stk_heat_period, name = 'period_heat_stk'), # Потребление за период с водосчётчиков Пульсар
-    url(r'^116/$', views.stk_heat_daily, name = 'heat_stk'), # Показание на дату с водосчётчиков Пульсар
+    url(r'^115/$', views.stk_heat_period, name = 'period_heat_stk'), # Потребление за период с теплосчётчиков Пульс СТК
+    url(r'^116/$', views.stk_heat_daily, name = 'heat_stk'), # Показания на дату теплосчётчиков Пульс СТК
+
+    url(r'^118/$', views.pulsar_frost_daily, name = 'frost_pulsar'), # Показание на дату с холодосчётчиков Пульсар
+    url(r'^117/$', views.pulsar_frost_period, name = 'period_frost_pulsar'), # Потребление за период с холодосчётчиков Пульсар
 
 ]

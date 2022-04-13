@@ -5951,8 +5951,8 @@ left join
             group by z1.name_abonents, z1.daily_date, z1.name_objects, z1.number_manual
             order by z1.name_abonents) as z2
 on z2.number_manual=heat_abons.factory_number_manual
-where heat_abons.obj_name='%s' and heat_abons.ab_name  = '%s'
-order by heat_abons.ab_name""" % (params[0],params[1],params[2],params[3], obj_parent_title, obj_title,params[4], electric_data,obj_parent_title, obj_title )
+where heat_abons.obj_name='%s' and heat_abons.ab_name  = '%s' and heat_abons.type_meter  like '%%%s%%'
+order by heat_abons.ab_name""" % (params[0],params[1],params[2],params[3], obj_parent_title, obj_title,params[4], electric_data,obj_parent_title, obj_title, params[4] )
     #print(sQuery)
     return sQuery
 
@@ -6018,8 +6018,8 @@ left join
             group by z1.name_abonents, z1.daily_date, z1.name_objects, z1.number_manual
             order by z1.name_abonents) as z2
 on z2.number_manual=heat_abons.factory_number_manual
-where heat_abons.obj_name='%s'
-order by heat_abons.ab_name""" % (params[0],params[1],params[2],params[3], obj_title,params[4], electric_data, obj_title )
+where heat_abons.obj_name='%s' and heat_abons.type_meter  like '%%%s%%'
+order by heat_abons.ab_name""" % (params[0],params[1],params[2],params[3], obj_title,params[4], electric_data, obj_title, params[4])
     #print(sQuery)    
     return sQuery
 
@@ -6028,6 +6028,19 @@ order by heat_abons.ab_name""" % (params[0],params[1],params[2],params[3], obj_t
 def get_data_table_by_date_daily_pulsar_teplo(obj_parent_title, obj_title, electric_data, isAbon):
     data_table = []
     params=['Энергия','Объем','Ti','To', 'Теплосчётчик']
+    cursor = connection.cursor()
+    if isAbon:
+        cursor.execute(makeSqlQuery_heat_daily_pulsar_teplo_abon(obj_parent_title,obj_title, electric_data, params))
+    else:
+        cursor.execute(makeSqlQuery_heat_daily_pulsar_teplo_all(obj_title, electric_data, params))
+    data_table = cursor.fetchall()   
+    
+    if len(data_table)>0: data_table=ChangeNull_and_LeaveEmptyCol(data_table, electric_data, 7) 
+    return data_table
+
+def get_data_table_by_date_daily_pulsar_frost(obj_parent_title, obj_title, electric_data, isAbon):
+    data_table = []
+    params=['Энергия','Объем','Ti','To', 'Холодосчётчик']
     cursor = connection.cursor()
     if isAbon:
         cursor.execute(makeSqlQuery_heat_daily_pulsar_teplo_abon(obj_parent_title,obj_title, electric_data, params))
@@ -6108,7 +6121,7 @@ left join
             group by z1.name_abonents, z1.daily_date, z1.name_objects, z1.number_manual
             order by z1.name_abonents) as z2
 on z2.number_manual=heat_abons.factory_number_manual
-where heat_abons.obj_name='%s' and heat_abons.ab_name = '%s') as z3,
+where heat_abons.obj_name='%s' and heat_abons.ab_name = '%s' and heat_abons.type_meter  like '%%%s%%') as z3,
 (Select z2.daily_date, heat_abons.obj_name, heat_abons.ab_name, heat_abons.factory_number_manual, z2.energy as energy_end,z2.volume as volume_end,z2.t_in as t_in_end,z2.t_out as t_out_end
 from heat_abons
 left join
@@ -6162,12 +6175,12 @@ left join
             group by z1.name_abonents, z1.daily_date, z1.name_objects, z1.number_manual
             order by z1.name_abonents) as z2
 on z2.number_manual=heat_abons.factory_number_manual
-where heat_abons.obj_name='%s' and heat_abons.ab_name = '%s') as z4
+where heat_abons.obj_name='%s' and heat_abons.ab_name = '%s' and heat_abons.type_meter  like '%%%s%%') as z4
 where z3.factory_number_manual=z4.factory_number_manual
 ) as z5
 order by ab_name
-    """%(params[0],params[1],params[2],params[3],obj_parent_title, obj_title,params[4], electric_data_start, obj_parent_title, obj_title,
-         params[0],params[1],params[2],params[3], obj_parent_title, obj_title,params[4], electric_data_end, obj_parent_title, obj_title)
+    """%(params[0],params[1],params[2],params[3],obj_parent_title, obj_title,params[4], electric_data_start, obj_parent_title, obj_title, params[4],
+         params[0],params[1],params[2],params[3], obj_parent_title, obj_title,params[4], electric_data_end, obj_parent_title, obj_title, params[4])
     return sQuery
 
 def makeSqlQuery_heat_pulsar_teplo_all_period(obj_title, electric_data_end,electric_data_start, params):
@@ -6238,7 +6251,7 @@ left join
             group by z1.name_abonents, z1.daily_date, z1.name_objects, z1.number_manual
             order by z1.name_abonents) as z2
 on z2.number_manual=heat_abons.factory_number_manual
-where heat_abons.obj_name='%s') as z3,
+where heat_abons.obj_name='%s' and heat_abons.type_meter  like '%%%s%%') as z3,
 (Select z2.daily_date, heat_abons.obj_name, heat_abons.ab_name, heat_abons.factory_number_manual, z2.energy as energy_end,z2.volume as volume_end,z2.t_in as t_in_end,z2.t_out as t_out_end
 from heat_abons
 left join
@@ -6291,18 +6304,31 @@ left join
             group by z1.name_abonents, z1.daily_date, z1.name_objects, z1.number_manual
             order by z1.name_abonents) as z2
 on z2.number_manual=heat_abons.factory_number_manual
-where heat_abons.obj_name='%s') as z4
+where heat_abons.obj_name='%s' and heat_abons.type_meter  like '%%%s%%') as z4
 where z3.factory_number_manual=z4.factory_number_manual
 ) as z5
 order by ab_name
-    """%(params[0],params[1],params[2],params[3], obj_title,params[4], electric_data_start,obj_title,
-         params[0],params[1],params[2],params[3], obj_title,params[4], electric_data_end, obj_title)
+    """%(params[0],params[1],params[2],params[3], obj_title,params[4], electric_data_start,obj_title, params[4],
+         params[0],params[1],params[2],params[3], obj_title,params[4], electric_data_end, obj_title, params[4])
     #print sQuery   
     return sQuery
 
 def get_data_table_pulsar_teplo_for_period(obj_parent_title, obj_title, electric_data_end,electric_data_start, isAbon):
     data_table = []
     params=['Энергия','Объем','Ti','To', 'Теплосчётчик']
+    cursor = connection.cursor()
+    if isAbon:
+        cursor.execute(makeSqlQuery_heat_pulsar_teplo_abon_period(obj_parent_title,obj_title, electric_data_end,electric_data_start, params))
+    else:
+        cursor.execute(makeSqlQuery_heat_pulsar_teplo_all_period(obj_title, electric_data_end,electric_data_start, params))
+    data_table = cursor.fetchall()   
+    
+    if len(data_table)>0: data_table=ChangeNull(data_table, None)
+    return data_table
+
+def get_data_table_pulsar_frost_for_period(obj_parent_title, obj_title, electric_data_end,electric_data_start, isAbon):
+    data_table = []
+    params=['Энергия','Объем','Ti','To', 'Холодосчётчик']
     cursor = connection.cursor()
     if isAbon:
         cursor.execute(makeSqlQuery_heat_pulsar_teplo_abon_period(obj_parent_title,obj_title, electric_data_end,electric_data_start, params))

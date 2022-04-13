@@ -107,7 +107,7 @@ DATABASES = {
         #'NAME': 'seliger2',
         #'NAME': 'skladk1',
         #'NAME': 'seliger2_test',        
-        'NAME': 'fso',
+        'NAME': 'frost',
         #'NAME': 'test',
         #'NAME': 'metro',
         #'NAME': 'sovet',
