@@ -151,7 +151,8 @@ urlpatterns = [
     url(r'^115/$', views.report_stk_heat_period, name = '115'), # Потребление за период с теплосчётчиков Пульс СТК
     url(r'^116/$', views.report_stk_heat_daily, name = '116'), # Показание на дату с теплосчётчиков Пульс СТК
 
-
+    url(r'^118/$', views.report_pulsar_frost_daily, name = '118'), # Показание на дату с холодосчётчика Пульсар
+    url(r'^117/$', views.report_pulsar_frost_period, name = '117'), # Потребление за период с холодосчётчиков Пульсар
 
     # Наличие в комментарии *, говорит о том, что он реагирует на свойства SHOW_LIC_NUM,SEPARATOR и ROUND_SIZE
 ]
