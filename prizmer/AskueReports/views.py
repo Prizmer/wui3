@@ -10981,6 +10981,18 @@ def report_electric_res_status(request):
     
     ws2['g5'] = 'T3, кВт*ч'
     ws2['g5'].style = "ali_grey"
+
+    ws2['h5'] = 'Сетевой адрес'
+    ws2['h5'].style = "ali_grey"
+
+    ws2['i5'] = 'IP адрес'
+    ws2['i5'].style = "ali_grey"
+
+    ws2['j5'] = 'IP порт'
+    ws2['j5'].style = "ali_grey"
+
+    ws2['k5'] = 'Тип прибора'
+    ws2['k5'].style = "ali_grey"
     
         #print val
     row = 5
@@ -11036,11 +11048,40 @@ def report_electric_res_status(request):
                 ws2.cell('g%s'%(row)).style = "ali_white"
                 next
             
+            try:
+                ws2.cell('h%s'%(row)).value = '%s' % (val[7])  # Абонент
+                ws2.cell('h%s'%(row)).style = "ali_white"
+            except:
+                ws2.cell('h%s'%(row)).style = "ali_white"
+                next
+
+            try:
+                ws2.cell('i%s'%(row)).value = '%s' % (val[8])  # Абонент
+                ws2.cell('i%s'%(row)).style = "ali_white"
+            except:
+                ws2.cell('i%s'%(row)).style = "ali_white"
+                next
+
+            try:
+                ws2.cell('j%s'%(row)).value = '%s' % (val[9])  # Абонент
+                ws2.cell('j%s'%(row)).style = "ali_white"
+            except:
+                ws2.cell('j%s'%(row)).style = "ali_white"
+                next
+
+            try:
+                ws2.cell('k%s'%(row)).value = '%s' % (val[10])  # Абонент
+                ws2.cell('k%s'%(row)).style = "ali_white"
+            except:
+                ws2.cell('k%s'%(row)).style = "ali_white"
+                next
    
     ws2.row_dimensions[5].height = 51
     ws2.column_dimensions['A'].width = 30 
     ws2.column_dimensions['b'].width = 20 
-    #ws2.column_dimensions['c'].width = 20 
+    ws2.column_dimensions['c'].width = 20 
+    ws2.column_dimensions['i'].width = 20 
+    ws2.column_dimensions['k'].width = 20 
     
     #wb.save(response)
     response.seek(0)

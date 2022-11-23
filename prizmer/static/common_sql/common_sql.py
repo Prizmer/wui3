@@ -9259,7 +9259,12 @@ def MakeSqlQuery_electric_no_data( obj_title,  electric_data_end, my_params):
     sQuery="""
     Select 
   electric_abons.obj_name, electric_abons.ab_name, 
-    electric_abons.factory_number_manual, z2.t0, z2.t1, z2.t2, z2.t3
+    electric_abons.factory_number_manual, z2.t0, z2.t1, z2.t2, z2.t3,
+  electric_abons.address, 
+  electric_abons.ip_address, 
+  electric_abons.ip_port,
+    electric_abons.type_meter
+
     
 from electric_abons
 LEFT JOIN 
@@ -9312,6 +9317,7 @@ where  electric_abons.obj_name= '%s'
 and z2.t0 is null
    
 ORDER BY electric_abons.obj_name, electric_abons.ab_name ASC """%(my_params[0],my_params[1],my_params[2],my_params[3],my_params[4],obj_title,electric_data_end,obj_title)
+    print(sQuery)
     return sQuery
     
 def get_electric_no_data(obj_title, electric_data_end):
