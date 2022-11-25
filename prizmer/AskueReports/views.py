@@ -16554,3 +16554,2246 @@ def report_pulsar_frost_period(request):
     file_ext = 'xlsx'    
     response['Content-Disposition'] = 'attachment;filename="%s.%s"' % (output_name.replace('"', '\"'), file_ext)   
     return response
+
+def get_month_name(date): #по дате возвращает рускоязычное название месяца
+    datem = datetime.datetime.strptime(date, "%Y-%m-%d")
+    num = datem.month
+    month = ['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь']
+    #print(str(num))
+    #print(month[num-1])
+    return str(month[num-1])
+
+def report_electric_by_day_for_year(request):
+    #SHOW_LIC_NUM = getattr(settings, 'SHOW_LIC_NUM', 'False')
+    ROUND_SIZE = getattr(settings, 'ROUND_SIZE', 3)
+    response = io.StringIO()
+    wb = Workbook()
+    wb.add_named_style(ali_grey)
+    wb.add_named_style(ali_white)
+    wb.add_named_style(ali_yellow)
+    wb.add_named_style(ali_pink)
+    wb.add_named_style(ali_blue)
+    ws = wb.active
+    wb.guess_types = True
+    
+    obj_parent_title         = request.GET.get('obj_parent_title')
+    obj_title         = request.GET.get('obj_title')
+    electric_data_end   = request.GET.get('electric_data_end')
+
+# Шапка отчета    
+    ws.merge_cells('A1:E1')
+    ws['A1'] = obj_parent_title+'. ' + obj_title + '.'
+    ws.merge_cells('A2:E2')
+    ws['A2'] = 'Электрика. Срез показаний с коэффициентами за год по ' + electric_data_end
+    
+    ws.merge_cells('A4:A5')
+    ws['A4'] = 'Наименование абонента'
+    ws['A4'].style = "ali_grey"
+    ws['A5'].style = "ali_grey"
+    
+    ws.merge_cells('B4:B5')
+    ws['B4'] = 'Заводской номер счётчика'
+    ws['B4'].style = "ali_grey"
+    ws['B5'].style = "ali_grey"
+
+    ws.merge_cells('C4:C5')
+    ws['C4'] = 'Тип прибора'
+    ws['C4'].style = "ali_grey"
+    ws['C5'].style = "ali_grey"
+    
+    ws.merge_cells('D4:F4')
+    ws['D4'] = 'Коэффициенты'
+    ws['D4'].style = "ali_grey"
+    ws['E4'].style = "ali_grey"
+    ws['F4'].style = "ali_grey"
+    
+    ws['D5'] = 'Ктн'
+    ws['D5'].style = "ali_grey"
+    ws['E5'] = 'Ктт'
+    ws['E5'].style = "ali_grey"
+    ws['F5'] = 'А'
+    ws['F5'].style = "ali_grey" 
+    
+    data_table_dates_list = common_sql.get_data_table_12month(electric_data_end) #список дат по месяцам, начиная от выбранной даты
+    #month0
+    ws.merge_cells('G3:N3')
+    ws['G3'] = get_month_name(str(data_table_dates_list[0][0]))
+    ws['G3'].style = "ali_blue"
+    ws['N3'].style = "ali_blue"
+    # Сумма
+    ws.merge_cells('G4:H4')
+    ws['G4'] = 'Сумма'
+    ws['G4'].style = "ali_grey"
+    ws['H4'].style = "ali_grey"
+    ws['G5'] = 'Показания A+ на ' + str(data_table_dates_list[0][0])
+    ws['G5'].style = "ali_grey"
+    
+    ws['H5'] = 'Энергия A+ на ' + str(data_table_dates_list[0][0])
+    ws['H5'].style = "ali_yellow"
+    
+    # Тариф 1
+    ws.merge_cells('I4:J4')
+    ws['I4'] = 'Тариф 1'
+    ws['I4'].style = "ali_grey"
+    ws['J4'].style = "ali_grey"
+    ws['I5'] = 'Показания A+ на ' +  str(data_table_dates_list[0][0])
+    ws['I5'].style = "ali_grey"
+    
+    ws['J5'] = 'Энергия A+ на ' +  str(data_table_dates_list[0][0])
+    ws['J5'].style = "ali_yellow"
+    
+    # Тариф 2
+    ws.merge_cells('K4:L4')
+    ws['K4'] = 'Тариф 2'
+    ws['K4'].style = "ali_grey"
+    ws['L4'].style = "ali_grey"
+    ws['K5'] = 'Показания A+ на ' +  str(data_table_dates_list[0][0])
+    ws['K5'].style = "ali_grey"
+    
+    ws['L5'] = 'Энергия A+ на ' +  str(data_table_dates_list[0][0])
+    ws['L5'].style = "ali_yellow"
+    
+    # Тариф 3
+    ws.merge_cells('M4:N4')
+    ws['M4'] = 'Тариф 3'
+    ws['M4'].style = "ali_grey"
+    ws['N4'].style = "ali_grey"
+    ws['M5'] = 'Показания A+ на ' +  str(data_table_dates_list[0][0])
+    ws['M5'].style = "ali_grey"
+    
+    ws['N5'] = 'Энергия A+ на ' +  str(data_table_dates_list[0][0])
+    ws['N5'].style = "ali_yellow"
+
+#month1
+    ws.merge_cells('O3:V3')
+    ws['O3'] = get_month_name(str(data_table_dates_list[0][1]))
+    ws['O3'].style = "ali_blue"
+    ws['V3'].style = "ali_blue"
+        # Сумма
+    ws.merge_cells('O4:P4')
+    ws['O4'] = 'Сумма'
+    ws['O4'].style = "ali_grey"
+    ws['P4'].style = "ali_grey"
+    ws['O5'] = 'Показания A+ на ' + str(data_table_dates_list[0][1])
+    ws['O5'].style = "ali_grey"
+    
+    ws['P5'] = 'Энергия A+ на ' + str(data_table_dates_list[0][1])
+    ws['P5'].style = "ali_yellow"
+    
+    # Тариф 1
+    ws.merge_cells('Q4:R4')
+    ws['Q4'] = 'Тариф 1'
+    ws['Q4'].style = "ali_grey"
+    ws['R4'].style = "ali_grey"
+    ws['Q5'] = 'Показания A+ на ' +  str(data_table_dates_list[0][1])
+    ws['Q5'].style = "ali_grey"
+    
+    ws['R5'] = 'Энергия A+ на ' +  str(data_table_dates_list[0][1])
+    ws['R5'].style = "ali_yellow"
+    
+    # Тариф 2
+    ws.merge_cells('S4:T4')
+    ws['S4'] = 'Тариф 2'
+    ws['S4'].style = "ali_grey"
+    ws['T4'].style = "ali_grey"
+    ws['S5'] = 'Показания A+ на ' +  str(data_table_dates_list[0][1])
+    ws['S5'].style = "ali_grey"
+    
+    ws['T5'] = 'Энергия A+ на ' +  str(data_table_dates_list[0][1])
+    ws['T5'].style = "ali_yellow"
+    
+    # Тариф 3
+    ws.merge_cells('U4:V4')
+    ws['U4'] = 'Тариф 3'
+    ws['U4'].style = "ali_grey"
+    ws['V4'].style = "ali_grey"
+    ws['U5'] = 'Показания A+ на ' +  str(data_table_dates_list[0][1])
+    ws['U5'].style = "ali_grey"
+    
+    ws['V5'] = 'Энергия A+ на ' +  str(data_table_dates_list[0][1])
+    ws['V5'].style = "ali_yellow"
+        
+#month2
+    ws.merge_cells('W3:AD3')
+    ws['W3'] = get_month_name(str(data_table_dates_list[0][2]))
+    ws['W3'].style = "ali_blue"
+    ws['AD3'].style = "ali_blue"
+        # Сумма
+    ws.merge_cells('W4:X4')
+    ws['W4'] = 'Сумма'
+    ws['W4'].style = "ali_grey"
+    ws['X4'].style = "ali_grey"
+    ws['W5'] = 'Показания A+ на ' + str(data_table_dates_list[0][2])
+    ws['W5'].style = "ali_grey"
+    
+    ws['X5'] = 'Энергия A+ на ' + str(data_table_dates_list[0][2])
+    ws['X5'].style = "ali_yellow"
+    
+    # Тариф 1
+    ws.merge_cells('Y4:Z4')
+    ws['Y4'] = 'Тариф 1'
+    ws['Y4'].style = "ali_grey"
+    ws['Z4'].style = "ali_grey"
+    ws['Y5'] = 'Показания A+ на ' +  str(data_table_dates_list[0][2])
+    ws['Y5'].style = "ali_grey"
+    
+    ws['Z5'] = 'Энергия A+ на ' +  str(data_table_dates_list[0][2])
+    ws['Z5'].style = "ali_yellow"
+    
+    # Тариф 2
+    ws.merge_cells('AA4:AB4')
+    ws['AA4'] = 'Тариф 2'
+    ws['AA4'].style = "ali_grey"
+    ws['AB4'].style = "ali_grey"
+    ws['AA5'] = 'Показания A+ на ' +  str(data_table_dates_list[0][2])
+    ws['AA5'].style = "ali_grey"
+    
+    ws['AB5'] = 'Энергия A+ на ' +  str(data_table_dates_list[0][2])
+    ws['AB5'].style = "ali_yellow"
+    
+    # Тариф 3
+    ws.merge_cells('AC4:AD4')
+    ws['AC4'] = 'Тариф 3'
+    ws['AC4'].style = "ali_grey"
+    ws['AD4'].style = "ali_grey"
+    ws['AC5'] = 'Показания A+ на ' +  str(data_table_dates_list[0][2])
+    ws['AC5'].style = "ali_grey"
+    
+    ws['AD5'] = 'Энергия A+ на ' +  str(data_table_dates_list[0][2])
+    ws['AD5'].style = "ali_yellow"
+
+#month3
+    ws.merge_cells('AE3:AL3')
+    ws['AE3'] = get_month_name(str(data_table_dates_list[0][3]))
+    ws['AE3'].style = "ali_blue"
+    ws['AL3'].style = "ali_blue"
+        # Сумма
+    ws.merge_cells('AE4:AF4')
+    ws['AE4'] = 'Сумма'
+    ws['AE4'].style = "ali_grey"
+    ws['AF4'].style = "ali_grey"
+    ws['AE5'] = 'Показания A+ на ' + str(data_table_dates_list[0][3])
+    ws['AE5'].style = "ali_grey"
+    
+    ws['AF5'] = 'Энергия A+ на ' + str(data_table_dates_list[0][3])
+    ws['AF5'].style = "ali_yellow"
+    
+    # Тариф 1
+    ws.merge_cells('AG4:AH4')
+    ws['AG4'] = 'Тариф 1'
+    ws['AG4'].style = "ali_grey"
+    ws['AH4'].style = "ali_grey"
+    ws['AG5'] = 'Показания A+ на ' +  str(data_table_dates_list[0][3])
+    ws['AG5'].style = "ali_grey"
+    
+    ws['AH5'] = 'Энергия A+ на ' +  str(data_table_dates_list[0][3])
+    ws['AH5'].style = "ali_yellow"
+    
+    # Тариф 2
+    ws.merge_cells('AI4:AJ4')
+    ws['AI4'] = 'Тариф 2'
+    ws['AI4'].style = "ali_grey"
+    ws['AJ4'].style = "ali_grey"
+    ws['AI5'] = 'Показания A+ на ' +  str(data_table_dates_list[0][3])
+    ws['AI5'].style = "ali_grey"
+    
+    ws['AJ5'] = 'Энергия A+ на ' +  str(data_table_dates_list[0][3])
+    ws['AJ5'].style = "ali_yellow"
+    
+    # Тариф 3
+    ws.merge_cells('AK4:AL4')
+    ws['AK4'] = 'Тариф 3'
+    ws['AK4'].style = "ali_grey"
+    ws['AK4'].style = "ali_grey"
+    ws['AK5'] = 'Показания A+ на ' +  str(data_table_dates_list[0][3])
+    ws['AK5'].style = "ali_grey"
+    
+    ws['AL5'] = 'Энергия A+ на ' +  str(data_table_dates_list[0][3])
+    ws['AL5'].style = "ali_yellow"
+
+#month4
+    ws.merge_cells('AM3:AT3')
+    ws['AM3'] = get_month_name(str(data_table_dates_list[0][4]))
+    ws['AM3'].style = "ali_blue"
+    ws['AT3'].style = "ali_blue"
+        # Сумма
+    ws.merge_cells('AM4:AN4')
+    ws['AM4'] = 'Сумма'
+    ws['AM4'].style = "ali_grey"
+    ws['AN4'].style = "ali_grey"
+    ws['AM5'] = 'Показания A+ на ' + str(data_table_dates_list[0][4])
+    ws['AM5'].style = "ali_grey"
+    
+    ws['AN5'] = 'Энергия A+ на ' + str(data_table_dates_list[0][4])
+    ws['AN5'].style = "ali_yellow"
+    
+    # Тариф 1
+    ws.merge_cells('AO4:AP4')
+    ws['AO4'] = 'Тариф 1'
+    ws['AO4'].style = "ali_grey"
+    ws['AP4'].style = "ali_grey"
+    ws['AO5'] = 'Показания A+ на ' +  str(data_table_dates_list[0][4])
+    ws['AO5'].style = "ali_grey"
+    
+    ws['AP5'] = 'Энергия A+ на ' +  str(data_table_dates_list[0][4])
+    ws['AP5'].style = "ali_yellow"
+    
+    # Тариф 2
+    ws.merge_cells('AQ4:AR4')
+    ws['AQ4'] = 'Тариф 2'
+    ws['AQ4'].style = "ali_grey"
+    ws['AR4'].style = "ali_grey"
+    ws['AQ5'] = 'Показания A+ на ' +  str(data_table_dates_list[0][4])
+    ws['AQ5'].style = "ali_grey"
+    
+    ws['AR5'] = 'Энергия A+ на ' +  str(data_table_dates_list[0][4])
+    ws['AR5'].style = "ali_yellow"
+    
+    # Тариф 3
+    ws.merge_cells('AS4:AT4')
+    ws['AS4'] = 'Тариф 3'
+    ws['AS4'].style = "ali_grey"
+    ws['AT4'].style = "ali_grey"
+    ws['AS5'] = 'Показания A+ на ' +  str(data_table_dates_list[0][4])
+    ws['AS5'].style = "ali_grey"
+    
+    ws['AT5'] = 'Энергия A+ на ' +  str(data_table_dates_list[0][4])
+    ws['AT5'].style = "ali_yellow"
+
+#month5
+    ws.merge_cells('AU3:BB3')
+    ws['AU3'] = get_month_name(str(data_table_dates_list[0][5]))
+    ws['AU3'].style = "ali_blue"
+    ws['BB3'].style = "ali_blue"
+        # Сумма
+    ws.merge_cells('AU4:AV4')
+    ws['AU4'] = 'Сумма'
+    ws['AU4'].style = "ali_grey"
+    ws['AV4'].style = "ali_grey"
+    ws['AU5'] = 'Показания A+ на ' + str(data_table_dates_list[0][5])
+    ws['AU5'].style = "ali_grey"
+    
+    ws['AV5'] = 'Энергия A+ на ' + str(data_table_dates_list[0][5])
+    ws['AV5'].style = "ali_yellow"
+    
+    # Тариф 1
+    ws.merge_cells('AW4:AX4')
+    ws['AW4'] = 'Тариф 1'
+    ws['AW4'].style = "ali_grey"
+    ws['AX4'].style = "ali_grey"
+    ws['AW5'] = 'Показания A+ на ' +  str(data_table_dates_list[0][5])
+    ws['AW5'].style = "ali_grey"
+    
+    ws['AX5'] = 'Энергия A+ на ' +  str(data_table_dates_list[0][5])
+    ws['AX5'].style = "ali_yellow"
+    
+    # Тариф 2
+    ws.merge_cells('AY4:AZ4')
+    ws['AY4'] = 'Тариф 2'
+    ws['AY4'].style = "ali_grey"
+    ws['AZ4'].style = "ali_grey"
+    ws['AY5'] = 'Показания A+ на ' +  str(data_table_dates_list[0][5])
+    ws['AY5'].style = "ali_grey"
+    
+    ws['AZ5'] = 'Энергия A+ на ' +  str(data_table_dates_list[0][5])
+    ws['AZ5'].style = "ali_yellow"
+    
+    # Тариф 3
+    ws.merge_cells('BA4:BB4')
+    ws['BA4'] = 'Тариф 3'
+    ws['BA4'].style = "ali_grey"
+    ws['BB4'].style = "ali_grey"
+    ws['BA5'] = 'Показания A+ на ' +  str(data_table_dates_list[0][5])
+    ws['BA5'].style = "ali_grey"
+    
+    ws['BB5'] = 'Энергия A+ на ' +  str(data_table_dates_list[0][5])
+    ws['BB5'].style = "ali_yellow"
+
+#month6
+    ws.merge_cells('BC3:BJ3')
+    ws['BC3'] = get_month_name(str(data_table_dates_list[0][6]))
+    ws['BC3'].style = "ali_blue"
+    ws['BJ3'].style = "ali_blue"
+
+     # Сумма
+    ws.merge_cells('BC4:BD4')
+    ws['BC4'] = 'Сумма'
+    ws['BC4'].style = "ali_grey"
+    ws['BD4'].style = "ali_grey"
+    ws['BC5'] = 'Показания A+ на ' + str(data_table_dates_list[0][6])
+    ws['BC5'].style = "ali_grey"
+    
+    ws['BD5'] = 'Энергия A+ на ' + str(data_table_dates_list[0][6])
+    ws['BD5'].style = "ali_yellow"
+    
+    # Тариф 1
+    ws.merge_cells('BE4:BF4')
+    ws['BE4'] = 'Тариф 1'
+    ws['BE4'].style = "ali_grey"
+    ws['BF4'].style = "ali_grey"
+    ws['BE5'] = 'Показания A+ на ' +  str(data_table_dates_list[0][6])
+    ws['BE5'].style = "ali_grey"
+    
+    ws['BF5'] = 'Энергия A+ на ' +  str(data_table_dates_list[0][6])
+    ws['BF5'].style = "ali_yellow"
+    
+    # Тариф 2
+    ws.merge_cells('BG4:BH4')
+    ws['BG4'] = 'Тариф 2'
+    ws['BG4'].style = "ali_grey"
+    ws['BH4'].style = "ali_grey"
+    ws['BG5'] = 'Показания A+ на ' +  str(data_table_dates_list[0][6])
+    ws['BG5'].style = "ali_grey"
+    
+    ws['BH5'] = 'Энергия A+ на ' +  str(data_table_dates_list[0][6])
+    ws['BH5'].style = "ali_yellow"
+    
+    # Тариф 3
+    ws.merge_cells('BI4:BJ4')
+    ws['BI4'] = 'Тариф 3'
+    ws['BI4'].style = "ali_grey"
+    ws['BJ4'].style = "ali_grey"
+    ws['BI5'] = 'Показания A+ на ' +  str(data_table_dates_list[0][6])
+    ws['BI5'].style = "ali_grey"
+    
+    ws['BJ5'] = 'Энергия A+ на ' +  str(data_table_dates_list[0][6])
+    ws['BJ5'].style = "ali_yellow"
+
+#month7
+    ws.merge_cells('BK3:BR3')
+    ws['BK3'] = get_month_name(str(data_table_dates_list[0][7]))
+    ws['BK3'].style = "ali_blue"
+    ws['BR3'].style = "ali_blue"
+
+            # Сумма
+    ws.merge_cells('BK4:BL4')
+    ws['BK4'] = 'Сумма'
+    ws['BK4'].style = "ali_grey"
+    ws['BL4'].style = "ali_grey"
+    ws['BK5'] = 'Показания A+ на ' + str(data_table_dates_list[0][7])
+    ws['BK5'].style = "ali_grey"
+    
+    ws['BL5'] = 'Энергия A+ на ' + str(data_table_dates_list[0][7])
+    ws['BL5'].style = "ali_yellow"
+    
+    # Тариф 1
+    ws.merge_cells('BM4:BN4')
+    ws['BM4'] = 'Тариф 1'
+    ws['BM4'].style = "ali_grey"
+    ws['BN4'].style = "ali_grey"
+    ws['BM5'] = 'Показания A+ на ' +  str(data_table_dates_list[0][7])
+    ws['BM5'].style = "ali_grey"
+    
+    ws['BN5'] = 'Энергия A+ на ' +  str(data_table_dates_list[0][7])
+    ws['BN5'].style = "ali_yellow"
+    
+    # Тариф 2
+    ws.merge_cells('BO4:BP4')
+    ws['BO4'] = 'Тариф 2'
+    ws['BO4'].style = "ali_grey"
+    ws['BP4'].style = "ali_grey"
+    ws['BO5'] = 'Показания A+ на ' +  str(data_table_dates_list[0][7])
+    ws['BO5'].style = "ali_grey"
+    
+    ws['BP5'] = 'Энергия A+ на ' +  str(data_table_dates_list[0][7])
+    ws['BP5'].style = "ali_yellow"
+    
+    # Тариф 3
+    ws.merge_cells('BQ4:BR4')
+    ws['BQ4'] = 'Тариф 3'
+    ws['BQ4'].style = "ali_grey"
+    ws['BR4'].style = "ali_grey"
+    ws['BQ5'] = 'Показания A+ на ' +  str(data_table_dates_list[0][7])
+    ws['BQ5'].style = "ali_grey"
+    
+    ws['BR5'] = 'Энергия A+ на ' +  str(data_table_dates_list[0][7])
+    ws['BR5'].style = "ali_yellow"
+
+#month8
+    ws.merge_cells('BS3:BZ3')
+    ws['BS3'] = get_month_name(str(data_table_dates_list[0][8]))
+    ws['BS3'].style = "ali_blue"
+    ws['BZ3'].style = "ali_blue"
+
+        # Сумма
+    ws.merge_cells('BS4:BT4')
+    ws['BS4'] = 'Сумма'
+    ws['BS4'].style = "ali_grey"
+    ws['BT4'].style = "ali_grey"
+    ws['BS5'] = 'Показания A+ на ' + str(data_table_dates_list[0][8])
+    ws['BS5'].style = "ali_grey"
+    
+    ws['BT5'] = 'Энергия A+ на ' + str(data_table_dates_list[0][8])
+    ws['BT5'].style = "ali_yellow"
+    
+    # Тариф 1
+    ws.merge_cells('BU4:BV4')
+    ws['BU4'] = 'Тариф 1'
+    ws['BU4'].style = "ali_grey"
+    ws['BV4'].style = "ali_grey"
+    ws['BU5'] = 'Показания A+ на ' +  str(data_table_dates_list[0][8])
+    ws['BU5'].style = "ali_grey"
+    
+    ws['BV5'] = 'Энергия A+ на ' +  str(data_table_dates_list[0][8])
+    ws['BV5'].style = "ali_yellow"
+    
+    # Тариф 2
+    ws.merge_cells('BW4:BX4')
+    ws['BW4'] = 'Тариф 2'
+    ws['BW4'].style = "ali_grey"
+    ws['BX4'].style = "ali_grey"
+    ws['BW5'] = 'Показания A+ на ' +  str(data_table_dates_list[0][8])
+    ws['BW5'].style = "ali_grey"
+    
+    ws['BX5'] = 'Энергия A+ на ' +  str(data_table_dates_list[0][8])
+    ws['BX5'].style = "ali_yellow"
+    
+    # Тариф 3
+    ws.merge_cells('BY4:BZ4')
+    ws['BY4'] = 'Тариф 3'
+    ws['BY4'].style = "ali_grey"
+    ws['BZ4'].style = "ali_grey"
+    ws['BY5'] = 'Показания A+ на ' +  str(data_table_dates_list[0][8])
+    ws['BY5'].style = "ali_grey"
+    
+    ws['BZ5'] = 'Энергия A+ на ' +  str(data_table_dates_list[0][8])
+    ws['BZ5'].style = "ali_yellow"
+
+    #month9
+    ws.merge_cells('CA3:CH3')
+    ws['CA3'] = get_month_name(str(data_table_dates_list[0][9]))
+    ws['CA3'].style = "ali_blue"
+    ws['CH3'].style = "ali_blue"
+
+            # Сумма
+    ws.merge_cells('CA4:CB4')
+    ws['CA4'] = 'Сумма'
+    ws['CA4'].style = "ali_grey"
+    ws['CB4'].style = "ali_grey"
+    ws['CA5'] = 'Показания A+ на ' + str(data_table_dates_list[0][9])
+    ws['CA5'].style = "ali_grey"
+    
+    ws['CB5'] = 'Энергия A+ на ' + str(data_table_dates_list[0][9])
+    ws['CB5'].style = "ali_yellow"
+    
+    # Тариф 1
+    ws.merge_cells('CC4:CD4')
+    ws['CC4'] = 'Тариф 1'
+    ws['CC4'].style = "ali_grey"
+    ws['CD4'].style = "ali_grey"
+    ws['CC5'] = 'Показания A+ на ' +  str(data_table_dates_list[0][9])
+    ws['CC5'].style = "ali_grey"
+    
+    ws['CD5'] = 'Энергия A+ на ' +  str(data_table_dates_list[0][9])
+    ws['CD5'].style = "ali_yellow"
+    
+    # Тариф 2
+    ws.merge_cells('CE4:CF4')
+    ws['CE4'] = 'Тариф 2'
+    ws['CE4'].style = "ali_grey"
+    ws['CF4'].style = "ali_grey"
+    ws['CE5'] = 'Показания A+ на ' +  str(data_table_dates_list[0][9])
+    ws['CE5'].style = "ali_grey"
+    
+    ws['CF5'] = 'Энергия A+ на ' +  str(data_table_dates_list[0][9])
+    ws['CF5'].style = "ali_yellow"
+    
+    # Тариф 3
+    ws.merge_cells('CG4:CH4')
+    ws['CG4'] = 'Тариф 3'
+    ws['CG4'].style = "ali_grey"
+    ws['CH4'].style = "ali_grey"
+    ws['CG5'] = 'Показания A+ на ' +  str(data_table_dates_list[0][9])
+    ws['CG5'].style = "ali_grey"
+    
+    ws['CH5'] = 'Энергия A+ на ' +  str(data_table_dates_list[0][9])
+    ws['CH5'].style = "ali_yellow"
+
+#month10
+    ws.merge_cells('Ci3:CP3')
+    ws['CI3'] = get_month_name(str(data_table_dates_list[0][10]))
+    ws['CI3'].style = "ali_blue"
+    ws['CP3'].style = "ali_blue"
+
+        # Сумма
+    ws.merge_cells('CI4:CJ4')
+    ws['CI4'] = 'Сумма'
+    ws['CI4'].style = "ali_grey"
+    ws['CJ4'].style = "ali_grey"
+    ws['CI5'] = 'Показания A+ на ' + str(data_table_dates_list[0][10])
+    ws['CI5'].style = "ali_grey"
+    
+    ws['CJ5'] = 'Энергия A+ на ' + str(data_table_dates_list[0][10])
+    ws['CJ5'].style = "ali_yellow"
+    
+    # Тариф 1
+    ws.merge_cells('CK4:CL4')
+    ws['CK4'] = 'Тариф 1'
+    ws['CK4'].style = "ali_grey"
+    ws['CL4'].style = "ali_grey"
+    ws['CK5'] = 'Показания A+ на ' +  str(data_table_dates_list[0][10])
+    ws['CK5'].style = "ali_grey"
+    
+    ws['CL5'] = 'Энергия A+ на ' +  str(data_table_dates_list[0][10])
+    ws['CL5'].style = "ali_yellow"
+    
+    # Тариф 2
+    ws.merge_cells('CM4:CN4')
+    ws['CM4'] = 'Тариф 2'
+    ws['CM4'].style = "ali_grey"
+    ws['CN4'].style = "ali_grey"
+    ws['CM5'] = 'Показания A+ на ' +  str(data_table_dates_list[0][10])
+    ws['CM5'].style = "ali_grey"
+    
+    ws['CN5'] = 'Энергия A+ на ' +  str(data_table_dates_list[0][10])
+    ws['CN5'].style = "ali_yellow"
+    
+    # Тариф 3
+    ws.merge_cells('CO4:CP4')
+    ws['CO4'] = 'Тариф 3'
+    ws['CO4'].style = "ali_grey"
+    ws['CP4'].style = "ali_grey"
+    ws['CO5'] = 'Показания A+ на ' +  str(data_table_dates_list[0][10])
+    ws['CO5'].style = "ali_grey"
+    
+    ws['CP5'] = 'Энергия A+ на ' +  str(data_table_dates_list[0][10])
+    ws['CP5'].style = "ali_yellow"
+
+    #month11
+    ws.merge_cells('CQ3:CX3')
+    ws['CQ3'] = get_month_name(str(data_table_dates_list[0][11]))
+    ws['CQ3'].style = "ali_blue"
+    ws['CX3'].style = "ali_blue"
+
+            # Сумма
+    ws.merge_cells('CQ4:CR4')
+    ws['CQ4'] = 'Сумма'
+    ws['CQ4'].style = "ali_grey"
+    ws['CR4'].style = "ali_grey"
+    ws['CQ5'] = 'Показания A+ на ' + str(data_table_dates_list[0][11])
+    ws['CQ5'].style = "ali_grey"
+    
+    ws['CR5'] = 'Энергия A+ на ' + str(data_table_dates_list[0][11])
+    ws['CR5'].style = "ali_yellow"
+    
+    # Тариф 1
+    ws.merge_cells('CS4:CT4')
+    ws['CS4'] = 'Тариф 1'
+    ws['CS4'].style = "ali_grey"
+    ws['CT4'].style = "ali_grey"
+    ws['CS5'] = 'Показания A+ на ' +  str(data_table_dates_list[0][11])
+    ws['CS5'].style = "ali_grey"
+    
+    ws['CT5'] = 'Энергия A+ на ' +  str(data_table_dates_list[0][11])
+    ws['CT5'].style = "ali_yellow"
+    
+    # Тариф 2
+    ws.merge_cells('CU4:CV4')
+    ws['CU4'] = 'Тариф 2'
+    ws['CU4'].style = "ali_grey"
+    ws['CV4'].style = "ali_grey"
+    ws['CU5'] = 'Показания A+ на ' +  str(data_table_dates_list[0][11])
+    ws['CU5'].style = "ali_grey"
+    
+    ws['CV5'] = 'Энергия A+ на ' +  str(data_table_dates_list[0][11])
+    ws['CV5'].style = "ali_yellow"
+    
+    # Тариф 3
+    ws.merge_cells('CW4:CX4')
+    ws['CW4'] = 'Тариф 3'
+    ws['CW4'].style = "ali_grey"
+    ws['CX4'].style = "ali_grey"
+    ws['CW5'] = 'Показания A+ на ' +  str(data_table_dates_list[0][11])
+    ws['CW5'].style = "ali_grey"
+    
+    ws['CX5'] = 'Энергия A+ на ' +  str(data_table_dates_list[0][11])
+    ws['CX5'].style = "ali_yellow"
+
+    #month12
+    ws.merge_cells('CY3:DF3')
+    ws['CY3'] = get_month_name(str(data_table_dates_list[0][12]))
+    ws['CY3'].style = "ali_blue"
+    ws['DF3'].style = "ali_blue"
+
+            # Сумма
+    ws.merge_cells('CY4:CZ4')
+    ws['CY4'] = 'Сумма'
+    ws['CY4'].style = "ali_grey"
+    ws['CZ4'].style = "ali_grey"
+    ws['CY5'] = 'Показания A+ на ' + str(data_table_dates_list[0][12])
+    ws['CY5'].style = "ali_grey"
+    
+    ws['CZ5'] = 'Энергия A+ на ' + str(data_table_dates_list[0][12])
+    ws['CZ5'].style = "ali_yellow"
+    
+    # Тариф 1
+    ws.merge_cells('DA4:DB4')
+    ws['DA4'] = 'Тариф 1'
+    ws['DA4'].style = "ali_grey"
+    ws['DB4'].style = "ali_grey"
+    ws['DA5'] = 'Показания A+ на ' +  str(data_table_dates_list[0][12])
+    ws['DA5'].style = "ali_grey"
+    
+    ws['DB5'] = 'Энергия A+ на ' +  str(data_table_dates_list[0][12])
+    ws['DB5'].style = "ali_yellow"
+    
+    # Тариф 2
+    ws.merge_cells('DC4:DD4')
+    ws['DC4'] = 'Тариф 2'
+    ws['DC4'].style = "ali_grey"
+    ws['DD4'].style = "ali_grey"
+    ws['DC5'] = 'Показания A+ на ' +  str(data_table_dates_list[0][12])
+    ws['DC5'].style = "ali_grey"
+    
+    ws['DD5'] = 'Энергия A+ на ' +  str(data_table_dates_list[0][12])
+    ws['DD5'].style = "ali_yellow"
+    
+    # Тариф 3
+    ws.merge_cells('DE4:DF4')
+    ws['DE4'] = 'Тариф 3'
+    ws['DE4'].style = "ali_grey"
+    ws['DF4'].style = "ali_grey"
+    ws['DE5'] = 'Показания A+ на ' +  str(data_table_dates_list[0][12])
+    ws['DE5'].style = "ali_grey"
+    
+    ws['DF5'] = 'Энергия A+ на ' +  str(data_table_dates_list[0][12])
+    ws['DF5'].style = "ali_yellow"
+
+# Шапка отчета конец
+    
+    #выборка данных из БД
+    is_abonent_level = re.compile(r'abonent')
+    is_object_level = re.compile(r'level')
+    is_group_level = re.compile(r'group')
+    data_table = []
+    
+    obj_title           = request.GET['obj_title']
+    obj_key             = request.GET['obj_key']
+    obj_parent_title    = request.GET['obj_parent_title']
+    is_electric_monthly = request.GET['is_electric_monthly']
+    is_electric_daily   = request.GET['is_electric_daily']
+    electric_data_start = request.GET['electric_data_start']
+    electric_data_end   = request.GET['electric_data_end']
+    is_electric_period  = request.GET['is_electric_period']
+    
+    #электрика
+    data_table = common_sql.get_data_table_electric_for_year_by_day(obj_parent_title, obj_title, electric_data_end)
+
+    #data_table_water = common_sql.get_data_table_water_for_year_by_day(obj_parent_title, obj_title, electric_data_end)
+    #data_table_heat = common_sql.get_data_table_heat_for_year_by_day(obj_parent_title, obj_title, electric_data_end)
+
+#Заполняем отчет значениями
+    for row in range(6, len(data_table)+6):
+        try:
+            ws.cell('A%s'%(row)).value = '%s' % (data_table[row-6][1])  # Наименование фбонента
+            ws.cell('A%s'%(row)).style = "ali_white"
+        except:
+            ws.cell('A%s'%(row)).style = "ali_white"
+            next
+        
+        try:
+            ws.cell('B%s'%(row)).value = '%s' % (data_table[row-6][2])  # заводской номер
+            ws.cell('B%s'%(row)).style = "ali_white"
+        except:
+            ws.cell('B%s'%(row)).style = "ali_white"
+            next
+            
+        try:            
+            ws.cell('C%s'%(row)).value = '%s' % str(data_table[row-6][3])# тип прибора
+            ws.cell('C%s'%(row)).style = "ali_white"
+        except:
+            ws.cell('C%s'%(row)).style = "ali_white"
+            next
+
+        try:            
+            ws.cell('D%s'%(row)).value = '%s' % str(data_table[row-6][4]).replace('.', separator)# Ктн
+            ws.cell('D%s'%(row)).style = "ali_white"
+        except:
+            ws.cell('D%s'%(row)).style = "ali_white"
+            next
+            
+        try:
+            ws.cell('E%s'%(row)).value = '%s' % str(data_table[row-6][5]).replace('.', separator)  # Ктт
+            ws.cell('E%s'%(row)).style = "ali_white"
+        except:
+            ws.cell('E%s'%(row)).style = "ali_white"
+            next
+            
+        try:
+            ws.cell('F%s'%(row)).value = '%s' % str(data_table[row-6][6]).replace('.', separator)  # Ка
+            ws.cell('F%s'%(row)).style = "ali_white"
+        except:
+            ws.cell('F%s'%(row)).style = "ali_white"
+            next
+        
+        #print(get_val_by_round(data_table[row-6][3], ROUND_SIZE, separator), data_table[row-6][3], ROUND_SIZE, separator)
+        try:
+            ws.cell('G%s'%(row)).value = '%s' % get_val_by_round(data_table[row-6][7], ROUND_SIZE, separator)  #str(val).replace('.', separator)
+            ws.cell('G%s'%(row)).style = "ali_white"
+            
+        except:
+            ws.cell('G%s'%(row)).style = "ali_white"
+            next
+    
+        try:            
+            ws.cell('H%s'%(row)).value = '%s' % get_val_by_round((data_table[row-6][7]*data_table[row-6][4]*data_table[row-6][5]),ROUND_SIZE, separator)  # "Энергия Сумма А+
+            ws.cell('H%s'%(row)).style = "ali_yellow"
+        except:
+            ws.cell('H%s'%(row)).style = "ali_yellow"
+            next
+            
+        try:
+            ws.cell('I%s'%(row)).value = '%s' % get_val_by_round((data_table[row-6][8]),ROUND_SIZE, separator)  # Тариф 1 А+
+            ws.cell('I%s'%(row)).style = "ali_white"
+        except:
+            ws.cell('I%s'%(row)).style = "ali_white"
+            next
+            
+        try:
+            #val = round((data_table[row-6][4]*data_table[row-6][8]*data_table[row-6][9]),ROUND_SIZE)            
+            ws.cell('J%s'%(row)).value = '%s' % get_val_by_round((data_table[row-6][8]*data_table[row-6][4]*data_table[row-6][5]),ROUND_SIZE, separator)  # "Энергия Тариф 1 А+
+            ws.cell('J%s'%(row)).style = "ali_yellow"
+        except:
+            ws.cell('J%s'%(row)).style = "ali_yellow"
+            next
+            
+        try:
+            ws.cell('K%s'%(row)).value = '%s' % get_val_by_round(data_table[row-6][9],ROUND_SIZE, separator)  # Тариф 2 А+
+            ws.cell('K%s'%(row)).style = "ali_white"
+        except:
+            ws.cell('K%s'%(row)).style = "ali_white"
+            next
+            
+        try:
+            ws.cell('L%s'%(row)).value = '%s' % get_val_by_round((data_table[row-6][9]*data_table[row-6][4]*data_table[row-6][5]),ROUND_SIZE, separator) # "Энергия Тариф 2 А+
+            ws.cell('L%s'%(row)).style = "ali_yellow"
+        except:
+            ws.cell('L%s'%(row)).style = "ali_yellow"
+            next
+            
+        try:
+            ws.cell('M%s'%(row)).value = '%s' % get_val_by_round((data_table[row-6][10]),ROUND_SIZE, separator)  # Тариф 3 А+
+            ws.cell('M%s'%(row)).style = "ali_white"
+        except:
+            ws.cell('M%s'%(row)).style = "ali_white"
+            next
+            
+        try:
+            ws.cell('N%s'%(row)).value = '%s' % get_val_by_round((data_table[row-6][10]*data_table[row-6][4]*data_table[row-6][5]),ROUND_SIZE, separator)  # "Энергия Тариф 3 А+
+            ws.cell('N%s'%(row)).style = "ali_yellow"
+        except:
+            ws.cell('N%s'%(row)).style = "ali_yellow"
+            next
+
+        #month1
+        try:
+            ws.cell('O%s'%(row)).value = '%s' % get_val_by_round(data_table[row-6][11], ROUND_SIZE, separator)  #str(val).replace('.', separator)
+            ws.cell('O%s'%(row)).style = "ali_white"
+            
+        except:
+            ws.cell('O%s'%(row)).style = "ali_white"
+            next
+    
+        try:            
+            ws.cell('P%s'%(row)).value = '%s' % get_val_by_round((data_table[row-6][11]*data_table[row-6][4]*data_table[row-6][5]),ROUND_SIZE, separator)  # "Энергия Сумма А+
+            ws.cell('P%s'%(row)).style = "ali_yellow"
+        except:
+            ws.cell('p%s'%(row)).style = "ali_yellow"
+            next
+            
+        try:
+            ws.cell('Q%s'%(row)).value = '%s' % get_val_by_round((data_table[row-6][12]),ROUND_SIZE, separator)  # Тариф 1 А+
+            ws.cell('Q%s'%(row)).style = "ali_white"
+        except:
+            ws.cell('Q%s'%(row)).style = "ali_white"
+            next
+            
+        try:           
+            ws.cell('R%s'%(row)).value = '%s' % get_val_by_round((data_table[row-6][12]*data_table[row-6][4]*data_table[row-6][5]),ROUND_SIZE, separator)  # "Энергия Тариф 1 А+
+            ws.cell('R%s'%(row)).style = "ali_yellow"
+        except:
+            ws.cell('R%s'%(row)).style = "ali_yellow"
+            next
+            
+        try:
+            ws.cell('S%s'%(row)).value = '%s' % get_val_by_round(data_table[row-6][13],ROUND_SIZE, separator)  # Тариф 2 А+
+            ws.cell('S%s'%(row)).style = "ali_white"
+        except:
+            ws.cell('S%s'%(row)).style = "ali_white"
+            next
+            
+        try:
+            ws.cell('T%s'%(row)).value = '%s' % get_val_by_round((data_table[row-6][13]*data_table[row-6][4]*data_table[row-6][5]),ROUND_SIZE, separator) # "Энергия Тариф 2 А+
+            ws.cell('T%s'%(row)).style = "ali_yellow"
+        except:
+            ws.cell('T%s'%(row)).style = "ali_yellow"
+            next
+            
+        try:
+            ws.cell('U%s'%(row)).value = '%s' % get_val_by_round((data_table[row-6][14]),ROUND_SIZE, separator)  # Тариф 3 А+
+            ws.cell('U%s'%(row)).style = "ali_white"
+        except:
+            ws.cell('U%s'%(row)).style = "ali_white"
+            next
+            
+        try:
+            ws.cell('V%s'%(row)).value = '%s' % get_val_by_round((data_table[row-6][14]*data_table[row-6][4]*data_table[row-6][5]),ROUND_SIZE, separator)  # "Энергия Тариф 3 А+
+            ws.cell('V%s'%(row)).style = "ali_yellow"
+        except:
+            ws.cell('V%s'%(row)).style = "ali_yellow"
+            next
+
+#month2
+        try:
+            ws.cell('W%s'%(row)).value = '%s' % get_val_by_round(data_table[row-6][15], ROUND_SIZE, separator)  #str(val).replace('.', separator)
+            ws.cell('W%s'%(row)).style = "ali_white"
+            
+        except:
+            ws.cell('W%s'%(row)).style = "ali_white"
+            next
+    
+        try:            
+            ws.cell('X%s'%(row)).value = '%s' % get_val_by_round((data_table[row-6][15]*data_table[row-6][4]*data_table[row-6][5]),ROUND_SIZE, separator)  # "Энергия Сумма А+
+            ws.cell('X%s'%(row)).style = "ali_yellow"
+        except:
+            ws.cell('X%s'%(row)).style = "ali_yellow"
+            next
+            
+        try:
+            ws.cell('Y%s'%(row)).value = '%s' % get_val_by_round((data_table[row-6][16]),ROUND_SIZE, separator)  # Тариф 1 А+
+            ws.cell('Y%s'%(row)).style = "ali_white"
+        except:
+            ws.cell('Y%s'%(row)).style = "ali_white"
+            next
+            
+        try:           
+            ws.cell('Z%s'%(row)).value = '%s' % get_val_by_round((data_table[row-6][16]*data_table[row-6][4]*data_table[row-6][5]),ROUND_SIZE, separator)  # "Энергия Тариф 1 А+
+            ws.cell('Z%s'%(row)).style = "ali_yellow"
+        except:
+            ws.cell('Z%s'%(row)).style = "ali_yellow"
+            next
+            
+        try:
+            ws.cell('AA%s'%(row)).value = '%s' % get_val_by_round(data_table[row-6][17],ROUND_SIZE, separator)  # Тариф 2 А+
+            ws.cell('AA%s'%(row)).style = "ali_white"
+        except:
+            ws.cell('AA%s'%(row)).style = "ali_white"
+            next
+            
+        try:
+            ws.cell('AB%s'%(row)).value = '%s' % get_val_by_round((data_table[row-6][17]*data_table[row-6][4]*data_table[row-6][5]),ROUND_SIZE, separator) # "Энергия Тариф 2 А+
+            ws.cell('AB%s'%(row)).style = "ali_yellow"
+        except:
+            ws.cell('AB%s'%(row)).style = "ali_yellow"
+            next
+            
+        try:
+            ws.cell('AC%s'%(row)).value = '%s' % get_val_by_round((data_table[row-6][18]),ROUND_SIZE, separator)  # Тариф 3 А+
+            ws.cell('AC%s'%(row)).style = "ali_white"
+        except:
+            ws.cell('AC%s'%(row)).style = "ali_white"
+            next
+            
+        try:
+            ws.cell('AD%s'%(row)).value = '%s' % get_val_by_round((data_table[row-6][18]*data_table[row-6][4]*data_table[row-6][5]),ROUND_SIZE, separator)  # "Энергия Тариф 3 А+
+            ws.cell('AD%s'%(row)).style = "ali_yellow"
+        except:
+            ws.cell('AD%s'%(row)).style = "ali_yellow"
+            next
+
+            #MONTH3
+        try:
+            ws.cell('AE%s'%(row)).value = '%s' % get_val_by_round(data_table[row-6][19], ROUND_SIZE, separator)  #str(val).replace('.', separator)
+            ws.cell('AE%s'%(row)).style = "ali_white"
+            
+        except:
+            ws.cell('AE%s'%(row)).style = "ali_white"
+            next
+    
+        try:            
+            ws.cell('AF%s'%(row)).value = '%s' % get_val_by_round((data_table[row-6][19]*data_table[row-6][4]*data_table[row-6][5]),ROUND_SIZE, separator)  # "Энергия Сумма А+
+            ws.cell('AF%s'%(row)).style = "ali_yellow"
+        except:
+            ws.cell('AF%s'%(row)).style = "ali_yellow"
+            next
+            
+        try:
+            ws.cell('AG%s'%(row)).value = '%s' % get_val_by_round((data_table[row-6][20]),ROUND_SIZE, separator)  # Тариф 1 А+
+            ws.cell('AG%s'%(row)).style = "ali_white"
+        except:
+            ws.cell('AG%s'%(row)).style = "ali_white"
+            next
+            
+        try:           
+            ws.cell('AH%s'%(row)).value = '%s' % get_val_by_round((data_table[row-6][20]*data_table[row-6][4]*data_table[row-6][5]),ROUND_SIZE, separator)  # "Энергия Тариф 1 А+
+            ws.cell('AH%s'%(row)).style = "ali_yellow"
+        except:
+            ws.cell('AH%s'%(row)).style = "ali_yellow"
+            next
+            
+        try:
+            ws.cell('AI%s'%(row)).value = '%s' % get_val_by_round(data_table[row-6][21],ROUND_SIZE, separator)  # Тариф 2 А+
+            ws.cell('AI%s'%(row)).style = "ali_white"
+        except:
+            ws.cell('AI%s'%(row)).style = "ali_white"
+            next
+            
+        try:
+            ws.cell('AJ%s'%(row)).value = '%s' % get_val_by_round((data_table[row-6][21]*data_table[row-6][4]*data_table[row-6][5]),ROUND_SIZE, separator) # "Энергия Тариф 2 А+
+            ws.cell('AJ%s'%(row)).style = "ali_yellow"
+        except:
+            ws.cell('AJ%s'%(row)).style = "ali_yellow"
+            next
+            
+        try:
+            ws.cell('AK%s'%(row)).value = '%s' % get_val_by_round((data_table[row-6][22]),ROUND_SIZE, separator)  # Тариф 3 А+
+            ws.cell('AK%s'%(row)).style = "ali_white"
+        except:
+            ws.cell('AK%s'%(row)).style = "ali_white"
+            next
+            
+        try:
+            ws.cell('AL%s'%(row)).value = '%s' % get_val_by_round((data_table[row-6][22]*data_table[row-6][4]*data_table[row-6][5]),ROUND_SIZE, separator)  # "Энергия Тариф 3 А+
+            ws.cell('AL%s'%(row)).style = "ali_yellow"
+        except:
+            ws.cell('AL%s'%(row)).style = "ali_yellow"
+            next
+
+            #MONTH4
+        try:
+            ws.cell('Am%s'%(row)).value = '%s' % get_val_by_round(data_table[row-6][23], ROUND_SIZE, separator)  #str(val).replace('.', separator)
+            ws.cell('AM%s'%(row)).style = "ali_white"
+            
+        except:
+            ws.cell('AM%s'%(row)).style = "ali_white"
+            next
+    
+        try:            
+            ws.cell('AN%s'%(row)).value = '%s' % get_val_by_round((data_table[row-6][23]*data_table[row-6][4]*data_table[row-6][5]),ROUND_SIZE, separator)  # "Энергия Сумма А+
+            ws.cell('AN%s'%(row)).style = "ali_yellow"
+        except:
+            ws.cell('AN%s'%(row)).style = "ali_yellow"
+            next
+            
+        try:
+            ws.cell('AO%s'%(row)).value = '%s' % get_val_by_round((data_table[row-6][24]),ROUND_SIZE, separator)  # Тариф 1 А+
+            ws.cell('AO%s'%(row)).style = "ali_white"
+        except:
+            ws.cell('AO%s'%(row)).style = "ali_white"
+            next
+            
+        try:           
+            ws.cell('AP%s'%(row)).value = '%s' % get_val_by_round((data_table[row-6][24]*data_table[row-6][4]*data_table[row-6][5]),ROUND_SIZE, separator)  # "Энергия Тариф 1 А+
+            ws.cell('AP%s'%(row)).style = "ali_yellow"
+        except:
+            ws.cell('AP%s'%(row)).style = "ali_yellow"
+            next
+            
+        try:
+            ws.cell('AQ%s'%(row)).value = '%s' % get_val_by_round(data_table[row-6][25],ROUND_SIZE, separator)  # Тариф 2 А+
+            ws.cell('AQ%s'%(row)).style = "ali_white"
+        except:
+            ws.cell('AQ%s'%(row)).style = "ali_white"
+            next
+            
+        try:
+            ws.cell('AR%s'%(row)).value = '%s' % get_val_by_round((data_table[row-6][25]*data_table[row-6][4]*data_table[row-6][5]),ROUND_SIZE, separator) # "Энергия Тариф 2 А+
+            ws.cell('AR%s'%(row)).style = "ali_yellow"
+        except:
+            ws.cell('AR%s'%(row)).style = "ali_yellow"
+            next
+            
+        try:
+            ws.cell('AS%s'%(row)).value = '%s' % get_val_by_round((data_table[row-6][26]),ROUND_SIZE, separator)  # Тариф 3 А+
+            ws.cell('AS%s'%(row)).style = "ali_white"
+        except:
+            ws.cell('AS%s'%(row)).style = "ali_white"
+            next
+            
+        try:
+            ws.cell('AT%s'%(row)).value = '%s' % get_val_by_round((data_table[row-6][26]*data_table[row-6][4]*data_table[row-6][5]),ROUND_SIZE, separator)  # "Энергия Тариф 3 А+
+            ws.cell('AT%s'%(row)).style = "ali_yellow"
+        except:
+            ws.cell('AT%s'%(row)).style = "ali_yellow"
+            next
+
+            #MONTH5
+        try:
+            ws.cell('AU%s'%(row)).value = '%s' % get_val_by_round(data_table[row-6][27], ROUND_SIZE, separator)  #str(val).replace('.', separator)
+            ws.cell('AU%s'%(row)).style = "ali_white"
+            
+        except:
+            ws.cell('AU%s'%(row)).style = "ali_white"
+            next
+    
+        try:            
+            ws.cell('AV%s'%(row)).value = '%s' % get_val_by_round((data_table[row-6][27]*data_table[row-6][4]*data_table[row-6][5]),ROUND_SIZE, separator)  # "Энергия Сумма А+
+            ws.cell('AV%s'%(row)).style = "ali_yellow"
+        except:
+            ws.cell('AV%s'%(row)).style = "ali_yellow"
+            next
+            
+        try:
+            ws.cell('AW%s'%(row)).value = '%s' % get_val_by_round((data_table[row-6][28]),ROUND_SIZE, separator)  # Тариф 1 А+
+            ws.cell('AW%s'%(row)).style = "ali_white"
+        except:
+            ws.cell('AW%s'%(row)).style = "ali_white"
+            next
+            
+        try:           
+            ws.cell('AX%s'%(row)).value = '%s' % get_val_by_round((data_table[row-6][28]*data_table[row-6][4]*data_table[row-6][5]),ROUND_SIZE, separator)  # "Энергия Тариф 1 А+
+            ws.cell('AX%s'%(row)).style = "ali_yellow"
+        except:
+            ws.cell('AX%s'%(row)).style = "ali_yellow"
+            next
+            
+        try:
+            ws.cell('AY%s'%(row)).value = '%s' % get_val_by_round(data_table[row-6][29],ROUND_SIZE, separator)  # Тариф 2 А+
+            ws.cell('AY%s'%(row)).style = "ali_white"
+        except:
+            ws.cell('AY%s'%(row)).style = "ali_white"
+            next
+            
+        try:
+            ws.cell('AZ%s'%(row)).value = '%s' % get_val_by_round((data_table[row-6][29]*data_table[row-6][4]*data_table[row-6][5]),ROUND_SIZE, separator) # "Энергия Тариф 2 А+
+            ws.cell('AZ%s'%(row)).style = "ali_yellow"
+        except:
+            ws.cell('AZ%s'%(row)).style = "ali_yellow"
+            next
+            
+        try:
+            ws.cell('BA%s'%(row)).value = '%s' % get_val_by_round((data_table[row-6][30]),ROUND_SIZE, separator)  # Тариф 3 А+
+            ws.cell('BA%s'%(row)).style = "ali_white"
+        except:
+            ws.cell('BA%s'%(row)).style = "ali_white"
+            next
+            
+        try:
+            ws.cell('BB%s'%(row)).value = '%s' % get_val_by_round((data_table[row-6][30]*data_table[row-6][4]*data_table[row-6][5]),ROUND_SIZE, separator)  # "Энергия Тариф 3 А+
+            ws.cell('BB%s'%(row)).style = "ali_yellow"
+        except:
+            ws.cell('BB%s'%(row)).style = "ali_yellow"
+            next
+
+            #MONTH6
+        try:
+            ws.cell('BC%s'%(row)).value = '%s' % get_val_by_round(data_table[row-6][31], ROUND_SIZE, separator)  #str(val).replace('.', separator)
+            ws.cell('BC%s'%(row)).style = "ali_white"
+            
+        except:
+            ws.cell('BC%s'%(row)).style = "ali_white"
+            next
+    
+        try:            
+            ws.cell('BD%s'%(row)).value = '%s' % get_val_by_round((data_table[row-6][31]*data_table[row-6][4]*data_table[row-6][5]),ROUND_SIZE, separator)  # "Энергия Сумма А+
+            ws.cell('BD%s'%(row)).style = "ali_yellow"
+        except:
+            ws.cell('BD%s'%(row)).style = "ali_yellow"
+            next
+            
+        try:
+            ws.cell('BE%s'%(row)).value = '%s' % get_val_by_round((data_table[row-6][32]),ROUND_SIZE, separator)  # Тариф 1 А+
+            ws.cell('BE%s'%(row)).style = "ali_white"
+        except:
+            ws.cell('BE%s'%(row)).style = "ali_white"
+            next
+            
+        try:           
+            ws.cell('BF%s'%(row)).value = '%s' % get_val_by_round((data_table[row-6][32]*data_table[row-6][4]*data_table[row-6][5]),ROUND_SIZE, separator)  # "Энергия Тариф 1 А+
+            ws.cell('BF%s'%(row)).style = "ali_yellow"
+        except:
+            ws.cell('BF%s'%(row)).style = "ali_yellow"
+            next
+            
+        try:
+            ws.cell('BG%s'%(row)).value = '%s' % get_val_by_round(data_table[row-6][33],ROUND_SIZE, separator)  # Тариф 2 А+
+            ws.cell('BG%s'%(row)).style = "ali_white"
+        except:
+            ws.cell('BG%s'%(row)).style = "ali_white"
+            next
+            
+        try:
+            ws.cell('BH%s'%(row)).value = '%s' % get_val_by_round((data_table[row-6][33]*data_table[row-6][4]*data_table[row-6][5]),ROUND_SIZE, separator) # "Энергия Тариф 2 А+
+            ws.cell('BH%s'%(row)).style = "ali_yellow"
+        except:
+            ws.cell('BH%s'%(row)).style = "ali_yellow"
+            next
+            
+        try:
+            ws.cell('BI%s'%(row)).value = '%s' % get_val_by_round((data_table[row-6][34]),ROUND_SIZE, separator)  # Тариф 3 А+
+            ws.cell('BI%s'%(row)).style = "ali_white"
+        except:
+            ws.cell('BI%s'%(row)).style = "ali_white"
+            next
+            
+        try:
+            ws.cell('BJ%s'%(row)).value = '%s' % get_val_by_round((data_table[row-6][34]*data_table[row-6][4]*data_table[row-6][5]),ROUND_SIZE, separator)  # "Энергия Тариф 3 А+
+            ws.cell('BJ%s'%(row)).style = "ali_yellow"
+        except:
+            ws.cell('BJ%s'%(row)).style = "ali_yellow"
+            next
+
+            #MONTH7
+        try:
+            ws.cell('BK%s'%(row)).value = '%s' % get_val_by_round(data_table[row-6][35], ROUND_SIZE, separator)  #str(val).replace('.', separator)
+            ws.cell('BK%s'%(row)).style = "ali_white"
+            
+        except:
+            ws.cell('BK%s'%(row)).style = "ali_white"
+            next
+    
+        try:            
+            ws.cell('BL%s'%(row)).value = '%s' % get_val_by_round((data_table[row-6][35]*data_table[row-6][4]*data_table[row-6][5]),ROUND_SIZE, separator)  # "Энергия Сумма А+
+            ws.cell('BL%s'%(row)).style = "ali_yellow"
+        except:
+            ws.cell('BL%s'%(row)).style = "ali_yellow"
+            next
+            
+        try:
+            ws.cell('BM%s'%(row)).value = '%s' % get_val_by_round((data_table[row-6][36]),ROUND_SIZE, separator)  # Тариф 1 А+
+            ws.cell('BM%s'%(row)).style = "ali_white"
+        except:
+            ws.cell('BM%s'%(row)).style = "ali_white"
+            next
+            
+        try:           
+            ws.cell('BN%s'%(row)).value = '%s' % get_val_by_round((data_table[row-6][36]*data_table[row-6][4]*data_table[row-6][5]),ROUND_SIZE, separator)  # "Энергия Тариф 1 А+
+            ws.cell('BN%s'%(row)).style = "ali_yellow"
+        except:
+            ws.cell('BN%s'%(row)).style = "ali_yellow"
+            next
+            
+        try:
+            ws.cell('BO%s'%(row)).value = '%s' % get_val_by_round(data_table[row-6][37],ROUND_SIZE, separator)  # Тариф 2 А+
+            ws.cell('BO%s'%(row)).style = "ali_white"
+        except:
+            ws.cell('BO%s'%(row)).style = "ali_white"
+            next
+            
+        try:
+            ws.cell('BP%s'%(row)).value = '%s' % get_val_by_round((data_table[row-6][37]*data_table[row-6][4]*data_table[row-6][5]),ROUND_SIZE, separator) # "Энергия Тариф 2 А+
+            ws.cell('BP%s'%(row)).style = "ali_yellow"
+        except:
+            ws.cell('BP%s'%(row)).style = "ali_yellow"
+            next
+            
+        try:
+            ws.cell('BQ%s'%(row)).value = '%s' % get_val_by_round((data_table[row-6][38]),ROUND_SIZE, separator)  # Тариф 3 А+
+            ws.cell('BQ%s'%(row)).style = "ali_white"
+        except:
+            ws.cell('BQ%s'%(row)).style = "ali_white"
+            next
+            
+        try:
+            ws.cell('BR%s'%(row)).value = '%s' % get_val_by_round((data_table[row-6][38]*data_table[row-6][4]*data_table[row-6][5]),ROUND_SIZE, separator)  # "Энергия Тариф 3 А+
+            ws.cell('BR%s'%(row)).style = "ali_yellow"
+        except:
+            ws.cell('BR%s'%(row)).style = "ali_yellow"
+            next
+
+
+            #MONTH8
+        try:
+            ws.cell('BS%s'%(row)).value = '%s' % get_val_by_round(data_table[row-6][39], ROUND_SIZE, separator)  #str(val).replace('.', separator)
+            ws.cell('BS%s'%(row)).style = "ali_white"
+            
+        except:
+            ws.cell('BS%s'%(row)).style = "ali_white"
+            next
+    
+        try:            
+            ws.cell('BT%s'%(row)).value = '%s' % get_val_by_round((data_table[row-6][39]*data_table[row-6][4]*data_table[row-6][5]),ROUND_SIZE, separator)  # "Энергия Сумма А+
+            ws.cell('BT%s'%(row)).style = "ali_yellow"
+        except:
+            ws.cell('BT%s'%(row)).style = "ali_yellow"
+            next
+            
+        try:
+            ws.cell('BU%s'%(row)).value = '%s' % get_val_by_round((data_table[row-6][40]),ROUND_SIZE, separator)  # Тариф 1 А+
+            ws.cell('BU%s'%(row)).style = "ali_white"
+        except:
+            ws.cell('BU%s'%(row)).style = "ali_white"
+            next
+            
+        try:           
+            ws.cell('BV%s'%(row)).value = '%s' % get_val_by_round((data_table[row-6][40]*data_table[row-6][4]*data_table[row-6][5]),ROUND_SIZE, separator)  # "Энергия Тариф 1 А+
+            ws.cell('BV%s'%(row)).style = "ali_yellow"
+        except:
+            ws.cell('BV%s'%(row)).style = "ali_yellow"
+            next
+            
+        try:
+            ws.cell('Bw%s'%(row)).value = '%s' % get_val_by_round(data_table[row-6][41],ROUND_SIZE, separator)  # Тариф 2 А+
+            ws.cell('BW%s'%(row)).style = "ali_white"
+        except:
+            ws.cell('BW%s'%(row)).style = "ali_white"
+            next
+            
+        try:
+            ws.cell('BX%s'%(row)).value = '%s' % get_val_by_round((data_table[row-6][41]*data_table[row-6][4]*data_table[row-6][5]),ROUND_SIZE, separator) # "Энергия Тариф 2 А+
+            ws.cell('BX%s'%(row)).style = "ali_yellow"
+        except:
+            ws.cell('BX%s'%(row)).style = "ali_yellow"
+            next
+            
+        try:
+            ws.cell('BY%s'%(row)).value = '%s' % get_val_by_round((data_table[row-6][42]),ROUND_SIZE, separator)  # Тариф 3 А+
+            ws.cell('BY%s'%(row)).style = "ali_white"
+        except:
+            ws.cell('BY%s'%(row)).style = "ali_white"
+            next
+            
+        try:
+            ws.cell('BZ%s'%(row)).value = '%s' % get_val_by_round((data_table[row-6][42]*data_table[row-6][4]*data_table[row-6][5]),ROUND_SIZE, separator)  # "Энергия Тариф 3 А+
+            ws.cell('BZ%s'%(row)).style = "ali_yellow"
+        except:
+            ws.cell('BZ%s'%(row)).style = "ali_yellow"
+            next
+
+
+            #MONTH9
+        try:
+            ws.cell('CA%s'%(row)).value = '%s' % get_val_by_round(data_table[row-6][43], ROUND_SIZE, separator)  #str(val).replace('.', separator)
+            ws.cell('CA%s'%(row)).style = "ali_white"
+            
+        except:
+            ws.cell('CA%s'%(row)).style = "ali_white"
+            next
+    
+        try:            
+            ws.cell('CB%s'%(row)).value = '%s' % get_val_by_round((data_table[row-6][43]*data_table[row-6][4]*data_table[row-6][5]),ROUND_SIZE, separator)  # "Энергия Сумма А+
+            ws.cell('CB%s'%(row)).style = "ali_yellow"
+        except:
+            ws.cell('CB%s'%(row)).style = "ali_yellow"
+            next
+            
+        try:
+            ws.cell('CC%s'%(row)).value = '%s' % get_val_by_round((data_table[row-6][44]),ROUND_SIZE, separator)  # Тариф 1 А+
+            ws.cell('CC%s'%(row)).style = "ali_white"
+        except:
+            ws.cell('CC%s'%(row)).style = "ali_white"
+            next
+            
+        try:           
+            ws.cell('CD%s'%(row)).value = '%s' % get_val_by_round((data_table[row-6][44]*data_table[row-6][4]*data_table[row-6][5]),ROUND_SIZE, separator)  # "Энергия Тариф 1 А+
+            ws.cell('CD%s'%(row)).style = "ali_yellow"
+        except:
+            ws.cell('CD%s'%(row)).style = "ali_yellow"
+            next
+            
+        try:
+            ws.cell('CE%s'%(row)).value = '%s' % get_val_by_round(data_table[row-6][45],ROUND_SIZE, separator)  # Тариф 2 А+
+            ws.cell('CE%s'%(row)).style = "ali_white"
+        except:
+            ws.cell('CE%s'%(row)).style = "ali_white"
+            next
+            
+        try:
+            ws.cell('CF%s'%(row)).value = '%s' % get_val_by_round((data_table[row-6][45]*data_table[row-6][4]*data_table[row-6][5]),ROUND_SIZE, separator) # "Энергия Тариф 2 А+
+            ws.cell('CF%s'%(row)).style = "ali_yellow"
+        except:
+            ws.cell('CF%s'%(row)).style = "ali_yellow"
+            next
+            
+        try:
+            ws.cell('CG%s'%(row)).value = '%s' % get_val_by_round((data_table[row-6][46]),ROUND_SIZE, separator)  # Тариф 3 А+
+            ws.cell('CG%s'%(row)).style = "ali_white"
+        except:
+            ws.cell('CG%s'%(row)).style = "ali_white"
+            next
+            
+        try:
+            ws.cell('CH%s'%(row)).value = '%s' % get_val_by_round((data_table[row-6][46]*data_table[row-6][4]*data_table[row-6][5]),ROUND_SIZE, separator)  # "Энергия Тариф 3 А+
+            ws.cell('CH%s'%(row)).style = "ali_yellow"
+        except:
+            ws.cell('CH%s'%(row)).style = "ali_yellow"
+            next
+
+
+            #MONTH10
+        try:
+            ws.cell('CI%s'%(row)).value = '%s' % get_val_by_round(data_table[row-6][47], ROUND_SIZE, separator)  #str(val).replace('.', separator)
+            ws.cell('CI%s'%(row)).style = "ali_white"
+            
+        except:
+            ws.cell('CI%s'%(row)).style = "ali_white"
+            next
+    
+        try:            
+            ws.cell('CJ%s'%(row)).value = '%s' % get_val_by_round((data_table[row-6][47]*data_table[row-6][4]*data_table[row-6][5]),ROUND_SIZE, separator)  # "Энергия Сумма А+
+            ws.cell('CJ%s'%(row)).style = "ali_yellow"
+        except:
+            ws.cell('CJ%s'%(row)).style = "ali_yellow"
+            next
+            
+        try:
+            ws.cell('CK%s'%(row)).value = '%s' % get_val_by_round((data_table[row-6][48]),ROUND_SIZE, separator)  # Тариф 1 А+
+            ws.cell('CK%s'%(row)).style = "ali_white"
+        except:
+            ws.cell('CK%s'%(row)).style = "ali_white"
+            next
+            
+        try:           
+            ws.cell('CL%s'%(row)).value = '%s' % get_val_by_round((data_table[row-6][48]*data_table[row-6][4]*data_table[row-6][5]),ROUND_SIZE, separator)  # "Энергия Тариф 1 А+
+            ws.cell('CL%s'%(row)).style = "ali_yellow"
+        except:
+            ws.cell('CL%s'%(row)).style = "ali_yellow"
+            next
+            
+        try:
+            ws.cell('CM%s'%(row)).value = '%s' % get_val_by_round(data_table[row-6][49],ROUND_SIZE, separator)  # Тариф 2 А+
+            ws.cell('CM%s'%(row)).style = "ali_white"
+        except:
+            ws.cell('CM%s'%(row)).style = "ali_white"
+            next
+            
+        try:
+            ws.cell('CN%s'%(row)).value = '%s' % get_val_by_round((data_table[row-6][49]*data_table[row-6][4]*data_table[row-6][5]),ROUND_SIZE, separator) # "Энергия Тариф 2 А+
+            ws.cell('CN%s'%(row)).style = "ali_yellow"
+        except:
+            ws.cell('CN%s'%(row)).style = "ali_yellow"
+            next
+            
+        try:
+            ws.cell('CO%s'%(row)).value = '%s' % get_val_by_round((data_table[row-6][50]),ROUND_SIZE, separator)  # Тариф 3 А+
+            ws.cell('CO%s'%(row)).style = "ali_white"
+        except:
+            ws.cell('CO%s'%(row)).style = "ali_white"
+            next
+            
+        try:
+            ws.cell('CP%s'%(row)).value = '%s' % get_val_by_round((data_table[row-6][50]*data_table[row-6][4]*data_table[row-6][5]),ROUND_SIZE, separator)  # "Энергия Тариф 3 А+
+            ws.cell('CP%s'%(row)).style = "ali_yellow"
+        except:
+            ws.cell('CP%s'%(row)).style = "ali_yellow"
+            next
+
+
+            #MONTH11
+        try:
+            ws.cell('CQ%s'%(row)).value = '%s' % get_val_by_round(data_table[row-6][51], ROUND_SIZE, separator)  #str(val).replace('.', separator)
+            ws.cell('CQ%s'%(row)).style = "ali_white"
+            
+        except:
+            ws.cell('CQ%s'%(row)).style = "ali_white"
+            next
+    
+        try:            
+            ws.cell('CR%s'%(row)).value = '%s' % get_val_by_round((data_table[row-6][51]*data_table[row-6][4]*data_table[row-6][5]),ROUND_SIZE, separator)  # "Энергия Сумма А+
+            ws.cell('CR%s'%(row)).style = "ali_yellow"
+        except:
+            ws.cell('CR%s'%(row)).style = "ali_yellow"
+            next
+            
+        try:
+            ws.cell('CS%s'%(row)).value = '%s' % get_val_by_round((data_table[row-6][52]),ROUND_SIZE, separator)  # Тариф 1 А+
+            ws.cell('CS%s'%(row)).style = "ali_white"
+        except:
+            ws.cell('CS%s'%(row)).style = "ali_white"
+            next
+            
+        try:           
+            ws.cell('CT%s'%(row)).value = '%s' % get_val_by_round((data_table[row-6][52]*data_table[row-6][4]*data_table[row-6][5]),ROUND_SIZE, separator)  # "Энергия Тариф 1 А+
+            ws.cell('CT%s'%(row)).style = "ali_yellow"
+        except:
+            ws.cell('CT%s'%(row)).style = "ali_yellow"
+            next
+            
+        try:
+            ws.cell('CU%s'%(row)).value = '%s' % get_val_by_round(data_table[row-6][53],ROUND_SIZE, separator)  # Тариф 2 А+
+            ws.cell('CU%s'%(row)).style = "ali_white"
+        except:
+            ws.cell('CU%s'%(row)).style = "ali_white"
+            next
+            
+        try:
+            ws.cell('CV%s'%(row)).value = '%s' % get_val_by_round((data_table[row-6][53]*data_table[row-6][4]*data_table[row-6][5]),ROUND_SIZE, separator) # "Энергия Тариф 2 А+
+            ws.cell('CV%s'%(row)).style = "ali_yellow"
+        except:
+            ws.cell('CV%s'%(row)).style = "ali_yellow"
+            next
+            
+        try:
+            ws.cell('CW%s'%(row)).value = '%s' % get_val_by_round((data_table[row-6][54]),ROUND_SIZE, separator)  # Тариф 3 А+
+            ws.cell('CW%s'%(row)).style = "ali_white"
+        except:
+            ws.cell('CW%s'%(row)).style = "ali_white"
+            next
+            
+        try:
+            ws.cell('CX%s'%(row)).value = '%s' % get_val_by_round((data_table[row-6][54]*data_table[row-6][4]*data_table[row-6][5]),ROUND_SIZE, separator)  # "Энергия Тариф 3 А+
+            ws.cell('CX%s'%(row)).style = "ali_yellow"
+        except:
+            ws.cell('CX%s'%(row)).style = "ali_yellow"
+            next
+
+
+            #MONTH12
+        try:
+            ws.cell('CY%s'%(row)).value = '%s' % get_val_by_round(data_table[row-6][55], ROUND_SIZE, separator)  #str(val).replace('.', separator)
+            ws.cell('CY%s'%(row)).style = "ali_white"
+            
+        except:
+            ws.cell('CY%s'%(row)).style = "ali_white"
+            next
+    
+        try:            
+            ws.cell('CZ%s'%(row)).value = '%s' % get_val_by_round((data_table[row-6][55]*data_table[row-6][4]*data_table[row-6][5]),ROUND_SIZE, separator)  # "Энергия Сумма А+
+            ws.cell('CZ%s'%(row)).style = "ali_yellow"
+        except:
+            ws.cell('CZ%s'%(row)).style = "ali_yellow"
+            next
+            
+        try:
+            ws.cell('DA%s'%(row)).value = '%s' % get_val_by_round((data_table[row-6][56]),ROUND_SIZE, separator)  # Тариф 1 А+
+            ws.cell('DA%s'%(row)).style = "ali_white"
+        except:
+            ws.cell('DA%s'%(row)).style = "ali_white"
+            next
+            
+        try:           
+            ws.cell('DB%s'%(row)).value = '%s' % get_val_by_round((data_table[row-6][56]*data_table[row-6][4]*data_table[row-6][5]),ROUND_SIZE, separator)  # "Энергия Тариф 1 А+
+            ws.cell('DB%s'%(row)).style = "ali_yellow"
+        except:
+            ws.cell('DB%s'%(row)).style = "ali_yellow"
+            next
+            
+        try:
+            ws.cell('DC%s'%(row)).value = '%s' % get_val_by_round(data_table[row-6][57],ROUND_SIZE, separator)  # Тариф 2 А+
+            ws.cell('DC%s'%(row)).style = "ali_white"
+        except:
+            ws.cell('DC%s'%(row)).style = "ali_white"
+            next
+            
+        try:
+            ws.cell('DD%s'%(row)).value = '%s' % get_val_by_round((data_table[row-6][57]*data_table[row-6][4]*data_table[row-6][5]),ROUND_SIZE, separator) # "Энергия Тариф 2 А+
+            ws.cell('DD%s'%(row)).style = "ali_yellow"
+        except:
+            ws.cell('DD%s'%(row)).style = "ali_yellow"
+            next
+            
+        try:
+            ws.cell('DE%s'%(row)).value = '%s' % get_val_by_round((data_table[row-6][58]),ROUND_SIZE, separator)  # Тариф 3 А+
+            ws.cell('DE%s'%(row)).style = "ali_white"
+        except:
+            ws.cell('DE%s'%(row)).style = "ali_white"
+            next
+            
+        try:
+            ws.cell('DF%s'%(row)).value = '%s' % get_val_by_round((data_table[row-6][58]*data_table[row-6][4]*data_table[row-6][5]),ROUND_SIZE, separator)  # "Энергия Тариф 3 А+
+            ws.cell('DF%s'%(row)).style = "ali_yellow"
+        except:
+            ws.cell('DF%s'%(row)).style = "ali_yellow"
+            next
+# Сохраняем в ecxel  
+
+    ws.row_dimensions[5].height = 60
+    ws.column_dimensions['A'].width = 20
+    ws.column_dimensions['B'].width = 20
+    ws.column_dimensions['C'].width = 20
+
+    response.seek(0)
+    response = HttpResponse(save_virtual_workbook(wb), content_type="application/vnd.ms-excel")
+        
+    output_name = u'electric_year_'+translate(obj_title)+'_' + electric_data_end
+    file_ext = u'xlsx'
+    
+    response['Content-Disposition'] = 'attachment;filename="%s.%s"' % (output_name.replace('"', '\"'), file_ext)    
+    return response
+
+def report_water_by_day_for_year(request):
+    ROUND_SIZE = getattr(settings, 'ROUND_SIZE', 'False')
+    response = io.StringIO()
+    wb = Workbook()
+    wb.add_named_style(ali_grey)
+    wb.add_named_style(ali_white)
+    wb.add_named_style(ali_yellow)
+    wb.add_named_style(ali_pink)
+    wb.add_named_style(ali_blue)
+    ws = wb.active
+    
+    obj_parent_title         = request.GET.get('obj_parent_title')
+    obj_title         = request.GET.get('obj_title')
+    electric_data_end   = request.GET.get('electric_data_end')
+    
+#Шапка
+    ws.merge_cells('A1:E1')
+    ws['A1'] = obj_parent_title+'. ' + obj_title + '.'
+    ws.merge_cells('A2:E2')
+    ws['A2'] = 'Вода. Срез показаний за год по ' + electric_data_end
+    
+    ws.merge_cells('A4:A5')
+    ws['A4'] = 'Наименование абонента'
+    ws['A4'].style = "ali_grey"
+    ws['A5'].style = "ali_grey"
+    
+    ws.merge_cells('B4:B5')
+    ws['B4'] = 'Заводской номер счётчика'
+    ws['B4'].style = "ali_grey"
+    ws['B5'].style = "ali_grey"
+
+    ws.merge_cells('C4:C5')
+    ws['C4'] = 'Тип прибора'
+    ws['C4'].style = "ali_grey"
+    ws['C5'].style = "ali_grey"
+ 
+    data_table_dates_list = common_sql.get_data_table_12month(electric_data_end) #список дат по месяцам, начиная от выбранной даты
+    #month0
+    ws['d4'] = get_month_name(str(data_table_dates_list[0][0]))
+    ws['d4'].style = "ali_blue"
+    ws['d5'] = 'Объём на '  + str(data_table_dates_list[0][0]) + ', м3'
+    ws['d5'].style = "ali_grey"
+    
+    #month1
+    ws['e4'] = get_month_name(str(data_table_dates_list[0][1]))
+    ws['E4'].style = "ali_blue"
+    ws['E5'] = 'Объём на '  + str(data_table_dates_list[0][1]) + ', м3'
+    ws['E5'].style = "ali_grey"
+
+        #month2
+    ws['F4'] = get_month_name(str(data_table_dates_list[0][2]))
+    ws['F4'].style = "ali_blue"
+    ws['F5'] = 'Объём на '  + str(data_table_dates_list[0][2]) + ', м3'
+    ws['F5'].style = "ali_grey"
+    
+        #month3
+    ws['G4'] = get_month_name(str(data_table_dates_list[0][3]))
+    ws['G4'].style = "ali_blue"
+    ws['G5'] = 'Объём на '  + str(data_table_dates_list[0][3]) + ', м3'
+    ws['G5'].style = "ali_grey"
+
+        #month4
+    ws['H4'] = get_month_name(str(data_table_dates_list[0][4]))
+    ws['H4'].style = "ali_blue"
+    ws['H5'] = 'Объём на '  + str(data_table_dates_list[0][4]) + ', м3'
+    ws['H5'].style = "ali_grey"
+        #month5
+    ws['I4'] = get_month_name(str(data_table_dates_list[0][5]))
+    ws['I4'].style = "ali_blue"
+    ws['I5'] = 'Объём на '  + str(data_table_dates_list[0][5]) + ', м3'
+    ws['I5'].style = "ali_grey"
+        #month6
+    ws['J4'] = get_month_name(str(data_table_dates_list[0][6]))
+    ws['J4'].style = "ali_blue"
+    ws['J5'] = 'Объём на '  + str(data_table_dates_list[0][6]) + ', м3'
+    ws['J5'].style = "ali_grey"
+        #month7
+    ws['K4'] = get_month_name(str(data_table_dates_list[0][7]))
+    ws['K4'].style = "ali_blue"
+    ws['K5'] = 'Объём на '  + str(data_table_dates_list[0][7]) + ', м3'
+    ws['K5'].style = "ali_grey"
+        #month8
+    ws['L4'] = get_month_name(str(data_table_dates_list[0][8]))
+    ws['L4'].style = "ali_blue"
+    ws['L5'] = 'Объём на '  + str(data_table_dates_list[0][8]) + ', м3'
+    ws['L5'].style = "ali_grey"
+        #month9
+    ws['M4'] = get_month_name(str(data_table_dates_list[0][9]))
+    ws['M4'].style = "ali_blue"
+    ws['M5'] = 'Объём на '  + str(data_table_dates_list[0][9]) + ', м3'
+    ws['M5'].style = "ali_grey"
+        #month10
+    ws['N4'] = get_month_name(str(data_table_dates_list[0][10]))
+    ws['N4'].style = "ali_blue"
+    ws['N5'] = 'Объём на '  + str(data_table_dates_list[0][10]) + ', м3'
+    ws['N5'].style = "ali_grey"
+        #month11
+    ws['O4'] = get_month_name(str(data_table_dates_list[0][11]))
+    ws['O4'].style = "ali_blue"
+    ws['O5'] = 'Объём на '  + str(data_table_dates_list[0][11]) + ', м3'
+    ws['O5'].style = "ali_grey"
+        #month12
+    ws['P4'] = get_month_name(str(data_table_dates_list[0][12]))
+    ws['P4'].style = "ali_blue"
+    ws['P5'] = 'Объём на '  + str(data_table_dates_list[0][12]) + ', м3'
+    ws['P5'].style = "ali_grey"
+
+    
+#Запрашиваем данные для отчета
+    is_abonent_level = re.compile(r'abonent')
+    is_object_level = re.compile(r'level')
+    is_group_level = re.compile(r'group')
+    obj_title           = request.GET['obj_title']
+    obj_key             = request.GET['obj_key']
+    obj_parent_title    = request.GET['obj_parent_title']    
+    is_electric_daily   = request.GET['is_electric_daily']
+    electric_data_start = request.GET['electric_data_start']
+    electric_data_end   = request.GET['electric_data_end']
+    is_electric_period  = request.GET['is_electric_period']
+    isWater = True
+    data_table = []
+    data_table = common_sql.get_data_table_water_for_year_by_day(obj_parent_title, obj_title, electric_data_end)
+        
+# Заполняем отчет значениями
+    for row in range(6, len(data_table)+6):
+        try:
+            ws.cell('A%s'%(row)).value = '%s' % (data_table[row-6][0])  # Абонент
+            ws.cell('A%s'%(row)).style = "ali_white"
+        except:
+            ws.cell('A%s'%(row)).style = "ali_white"
+            next
+        
+        try:
+            ws.cell('B%s'%(row)).value = '%s' % (data_table[row-6][2])  # заводской номер
+            ws.cell('B%s'%(row)).style = "ali_white"
+        except:
+            ws.cell('B%s'%(row)).style = "ali_white"
+            next
+            
+        try:
+            ws.cell('C%s'%(row)).value = '%s' % (data_table[row-6][1])  # тип прибора
+            ws.cell('C%s'%(row)).style = "ali_white"
+        except:
+            ws.cell('C%s'%(row)).style = "ali_white"
+            next
+            
+        try:
+            ws.cell('d%s'%(row)).value = '%s' % get_val_by_round(float(data_table[row-6][3]),ROUND_SIZE, separator)
+            ws.cell('d%s'%(row)).style = "ali_white"
+        except:
+            ws.cell('d%s'%(row)).style = "ali_white"
+            next
+            
+        try:
+            ws.cell('e%s'%(row)).value = '%s' % get_val_by_round(float(data_table[row-6][4]),ROUND_SIZE, separator)  # 
+            ws.cell('e%s'%(row)).style = "ali_white"
+        except:
+            ws.cell('e%s'%(row)).style = "ali_white"
+            next
+            
+        try:
+            ws.cell('f%s'%(row)).value = '%s' % get_val_by_round(float(data_table[row-6][5]),ROUND_SIZE, separator)  # 
+            ws.cell('f%s'%(row)).style = "ali_white"
+        except:
+            ws.cell('f%s'%(row)).style = "ali_white"
+            next
+            
+        try:
+            ws.cell('G%s'%(row)).value = '%s' % get_val_by_round(float(data_table[row-6][6]),ROUND_SIZE, separator)  # 
+            ws.cell('G%s'%(row)).style = "ali_white"
+        except:
+            ws.cell('G%s'%(row)).style = "ali_white"
+            next
+            
+        try:
+            ws.cell('H%s'%(row)).value = '%s' % get_val_by_round(float(data_table[row-6][7]),ROUND_SIZE, separator)  # 
+            ws.cell('%s'%(row)).style = "ali_white"
+        except:
+            ws.cell('H%s'%(row)).style = "ali_white"
+            next
+            
+        try:
+            ws.cell('I%s'%(row)).value = '%s' % get_val_by_round(float(data_table[row-6][8]),ROUND_SIZE, separator)  # 
+            ws.cell('I%s'%(row)).style = "ali_white"
+        except:
+            ws.cell('I%s'%(row)).style = "ali_white"
+            next
+            
+        try:
+            ws.cell('J%s'%(row)).value = '%s' % get_val_by_round(float(data_table[row-6][9]),ROUND_SIZE, separator)  # 
+            ws.cell('J%s'%(row)).style = "ali_white"
+        except:
+            ws.cell('J%s'%(row)).style = "ali_white"
+            next
+            
+        try:
+            ws.cell('K%s'%(row)).value = '%s' % get_val_by_round(float(data_table[row-6][10]),ROUND_SIZE, separator)  # 
+            ws.cell('K%s'%(row)).style = "ali_white"
+        except:
+            ws.cell('K%s'%(row)).style = "ali_white"
+            next
+            
+        try:
+            ws.cell('L%s'%(row)).value = '%s' % get_val_by_round(float(data_table[row-6][11]),ROUND_SIZE, separator)  # 
+            ws.cell('L%s'%(row)).style = "ali_white"
+        except:
+            ws.cell('L%s'%(row)).style = "ali_white"
+            next
+            
+        try:
+            ws.cell('M%s'%(row)).value = '%s' % get_val_by_round(float(data_table[row-6][12]),ROUND_SIZE, separator)  # 
+            ws.cell('M%s'%(row)).style = "ali_white"
+        except:
+            ws.cell('M%s'%(row)).style = "ali_white"
+            next
+            
+        try:
+            ws.cell('N%s'%(row)).value = '%s' % get_val_by_round(float(data_table[row-6][13]),ROUND_SIZE, separator)  # 
+            ws.cell('N%s'%(row)).style = "ali_white"
+        except:
+            ws.cell('N%s'%(row)).style = "ali_white"
+            next
+            
+        try:
+            ws.cell('O%s'%(row)).value = '%s' % get_val_by_round(float(data_table[row-6][14]),ROUND_SIZE, separator)  # 
+            ws.cell('%s'%(row)).style = "ali_white"
+        except:
+            ws.cell('O%s'%(row)).style = "ali_white"
+            next
+            
+        try:
+            ws.cell('P%s'%(row)).value = '%s' % get_val_by_round(float(data_table[row-6][15]),ROUND_SIZE, separator)  # 
+            ws.cell('P%s'%(row)).style = "ali_white"
+        except:
+            ws.cell('P%s'%(row)).style = "ali_white"
+            next
+        
+
+    ws.row_dimensions[5].height = 41
+    ws.column_dimensions['A'].width = 35 
+    ws.column_dimensions['B'].width = 17 
+    ws.column_dimensions['C'].width = 12
+    ws.column_dimensions['D'].width = 12
+    ws.column_dimensions['E'].width = 12
+    ws.column_dimensions['F'].width = 12
+    ws.column_dimensions['G'].width = 12
+    ws.column_dimensions['H'].width = 12
+    ws.column_dimensions['I'].width = 12
+    ws.column_dimensions['J'].width = 12
+    ws.column_dimensions['K'].width = 12
+    ws.column_dimensions['L'].width = 12
+    ws.column_dimensions['M'].width = 12
+    ws.column_dimensions['N'].width = 12
+    ws.column_dimensions['O'].width = 12
+    ws.column_dimensions['P'].width = 12
+
+    
+    #wb.save(response)
+    response.seek(0)
+    response = HttpResponse(save_virtual_workbook(wb),content_type="application/vnd.ms-excel")
+    
+    output_name = 'water_year_' + translate(obj_title) + '_' + electric_data_end
+    file_ext = 'xlsx'
+    
+    response['Content-Disposition'] = 'attachment;filename="%s.%s"' % (output_name.replace('"', '\"'), file_ext)   
+    return response
+
+def report_heat_by_day_for_year(request):
+    ROUND_SIZE = getattr(settings, 'ROUND_SIZE', 'False')
+    response = io.StringIO()
+    wb = Workbook()
+    wb.add_named_style(ali_grey)
+    wb.add_named_style(ali_white)
+    wb.add_named_style(ali_yellow)
+    wb.add_named_style(ali_pink)
+    wb.add_named_style(ali_blue)
+    ws = wb.active
+    
+    obj_parent_title         = request.GET.get('obj_parent_title')
+    obj_title         = request.GET.get('obj_title')
+    electric_data_end   = request.GET.get('electric_data_end')
+    
+#Шапка
+    ws.merge_cells('A1:E1')
+    ws['A1'] = obj_parent_title+'. ' + obj_title + '.'
+    ws.merge_cells('A2:E2')
+    ws['A2'] = 'Тепло. Срез показаний за год по ' + electric_data_end
+    
+    ws.merge_cells('A4:A5')
+    ws['A4'] = 'Наименование абонента'
+    ws['A4'].style = "ali_grey"
+    ws['A5'].style = "ali_grey"
+    
+    ws.merge_cells('B4:B5')
+    ws['B4'] = 'Заводской номер счётчика'
+    ws['B4'].style = "ali_grey"
+    ws['B5'].style = "ali_grey"
+
+    ws.merge_cells('C4:C5')
+    ws['C4'] = 'Тип прибора'
+    ws['C4'].style = "ali_grey"
+    ws['C5'].style = "ali_grey"
+ 
+    data_table_dates_list = common_sql.get_data_table_12month(electric_data_end) #список дат по месяцам, начиная от выбранной даты
+    #month0
+    ws.merge_cells('d4:e4')
+    ws['d4'] = get_month_name(str(data_table_dates_list[0][0]))
+    ws['d4'].style = "ali_blue"
+    ws['e4'].style = "ali_blue"
+    ws['d5'] = 'Энергия на '  + str(data_table_dates_list[0][0]) + ', Гкал'
+    ws['d5'].style = "ali_grey"
+    ws['E5'] = 'Объём на '  + str(data_table_dates_list[0][0]) + ', м3'
+    ws['E5'].style = "ali_grey"
+
+    #month1
+    ws.merge_cells('F4:G4')
+    ws['F4'] = get_month_name(str(data_table_dates_list[0][1]))
+    ws['F4'].style = "ali_blue"
+    ws['G4'].style = "ali_blue"
+    ws['F5'] = 'Энергия на '  + str(data_table_dates_list[0][1]) + ', Гкал'
+    ws['F5'].style = "ali_grey"
+    ws['G5'] = 'Объём на '  + str(data_table_dates_list[0][1]) + ', м3'
+    ws['G5'].style = "ali_grey"
+
+    #month2
+    ws.merge_cells('H4:I4')
+    ws['H4'] = get_month_name(str(data_table_dates_list[0][2]))
+    ws['H4'].style = "ali_blue"
+    ws['I4'].style = "ali_blue"
+    ws['H5'] = 'Энергия на '  + str(data_table_dates_list[0][2]) + ', Гкал'
+    ws['H5'].style = "ali_grey"
+    ws['I5'] = 'Объём на '  + str(data_table_dates_list[0][2]) + ', м3'
+    ws['I5'].style = "ali_grey"
+
+    #month0
+    ws.merge_cells('J4:K4')
+    ws['J4'] = get_month_name(str(data_table_dates_list[0][3]))
+    ws['J4'].style = "ali_blue"
+    ws['K4'].style = "ali_blue"
+    ws['J5'] = 'Энергия на '  + str(data_table_dates_list[0][3]) + ', Гкал'
+    ws['J5'].style = "ali_grey"
+    ws['K5'] = 'Объём на '  + str(data_table_dates_list[0][3]) + ', м3'
+    ws['K5'].style = "ali_grey"
+
+    #month0
+    ws.merge_cells('L4:M4')
+    ws['L4'] = get_month_name(str(data_table_dates_list[0][4]))
+    ws['L4'].style = "ali_blue"
+    ws['M4'].style = "ali_blue"
+    ws['L5'] = 'Энергия на '  + str(data_table_dates_list[0][4]) + ', Гкал'
+    ws['L5'].style = "ali_grey"
+    ws['M5'] = 'Объём на '  + str(data_table_dates_list[0][4]) + ', м3'
+    ws['M5'].style = "ali_grey"
+
+    #month0
+    ws.merge_cells('N4:O4')
+    ws['N4'] = get_month_name(str(data_table_dates_list[0][5]))
+    ws['N4'].style = "ali_blue"
+    ws['O4'].style = "ali_blue"
+    ws['N5'] = 'Энергия на '  + str(data_table_dates_list[0][5]) + ', Гкал'
+    ws['N5'].style = "ali_grey"
+    ws['O5'] = 'Объём на '  + str(data_table_dates_list[0][5]) + ', м3'
+    ws['O5'].style = "ali_grey"
+
+    #month0
+    ws.merge_cells('P4:Q4')
+    ws['P4'] = get_month_name(str(data_table_dates_list[0][6]))
+    ws['P4'].style = "ali_blue"
+    ws['Q4'].style = "ali_blue"
+    ws['P5'] = 'Энергия на '  + str(data_table_dates_list[0][6]) + ', Гкал'
+    ws['P5'].style = "ali_grey"
+    ws['Q5'] = 'Объём на '  + str(data_table_dates_list[0][6]) + ', м3'
+    ws['Q5'].style = "ali_grey"
+
+    #month0
+    ws.merge_cells('R4:S4')
+    ws['R4'] = get_month_name(str(data_table_dates_list[0][7]))
+    ws['R4'].style = "ali_blue"
+    ws['S4'].style = "ali_blue"
+    ws['R5'] = 'Энергия на '  + str(data_table_dates_list[0][7]) + ', Гкал'
+    ws['R5'].style = "ali_grey"
+    ws['S5'] = 'Объём на '  + str(data_table_dates_list[0][7]) + ', м3'
+    ws['S5'].style = "ali_grey"
+
+    #month0
+    ws.merge_cells('T4:U4')
+    ws['T4'] = get_month_name(str(data_table_dates_list[0][8]))
+    ws['T4'].style = "ali_blue"
+    ws['U4'].style = "ali_blue"
+    ws['T5'] = 'Энергия на '  + str(data_table_dates_list[0][8]) + ', Гкал'
+    ws['T5'].style = "ali_grey"
+    ws['U5'] = 'Объём на '  + str(data_table_dates_list[0][8]) + ', м3'
+    ws['U5'].style = "ali_grey"
+
+    #month0
+    ws.merge_cells('V4:W4')
+    ws['V4'] = get_month_name(str(data_table_dates_list[0][9]))
+    ws['V4'].style = "ali_blue"
+    ws['W4'].style = "ali_blue"
+    ws['V5'] = 'Энергия на '  + str(data_table_dates_list[0][9]) + ', Гкал'
+    ws['V5'].style = "ali_grey"
+    ws['W5'] = 'Объём на '  + str(data_table_dates_list[0][9]) + ', м3'
+    ws['W5'].style = "ali_grey"
+
+    #month0
+    ws.merge_cells('X4:Y4')
+    ws['X4'] = get_month_name(str(data_table_dates_list[0][10]))
+    ws['X4'].style = "ali_blue"
+    ws['Y4'].style = "ali_blue"
+    ws['X5'] = 'Энергия на '  + str(data_table_dates_list[0][10]) + ', Гкал'
+    ws['X5'].style = "ali_grey"
+    ws['Y5'] = 'Объём на '  + str(data_table_dates_list[0][10]) + ', м3'
+    ws['Y5'].style = "ali_grey"
+
+    #month0
+    ws.merge_cells('Z4:AA4')
+    ws['Z4'] = get_month_name(str(data_table_dates_list[0][11]))
+    ws['Z4'].style = "ali_blue"
+    ws['AA4'].style = "ali_blue"
+    ws['Z5'] = 'Энергия на '  + str(data_table_dates_list[0][11]) + ', Гкал'
+    ws['Z5'].style = "ali_grey"
+    ws['AA5'] = 'Объём на '  + str(data_table_dates_list[0][11]) + ', м3'
+    ws['AA5'].style = "ali_grey"
+
+    #month0
+    ws.merge_cells('AB4:AC4')
+    ws['AB4'] = get_month_name(str(data_table_dates_list[0][12]))
+    ws['AB4'].style = "ali_blue"
+    ws['AC4'].style = "ali_blue"
+    ws['AB5'] = 'Энергия на '  + str(data_table_dates_list[0][12]) + ', Гкал'
+    ws['AB5'].style = "ali_grey"
+    ws['AC5'] = 'Объём на '  + str(data_table_dates_list[0][12]) + ', м3'
+    ws['AC5'].style = "ali_grey"
+
+    
+#Запрашиваем данные для отчета
+    is_abonent_level = re.compile(r'abonent')
+    is_object_level = re.compile(r'level')
+    is_group_level = re.compile(r'group')
+    obj_title           = request.GET['obj_title']
+    obj_key             = request.GET['obj_key']
+    obj_parent_title    = request.GET['obj_parent_title']    
+    is_electric_daily   = request.GET['is_electric_daily']
+    electric_data_start = request.GET['electric_data_start']
+    electric_data_end   = request.GET['electric_data_end']
+    is_electric_period  = request.GET['is_electric_period']
+    isWater = True
+    data_table = []
+    data_table = common_sql.get_data_table_heat_for_year_by_day(obj_parent_title, obj_title, electric_data_end)
+        
+# Заполняем отчет значениями
+    for row in range(6, len(data_table)+6):
+        try:
+            ws.cell('A%s'%(row)).value = '%s' % (data_table[row-6][1])  # Абонент
+            ws.cell('A%s'%(row)).style = "ali_white"
+        except:
+            ws.cell('A%s'%(row)).style = "ali_white"
+            next
+        
+        try:
+            ws.cell('B%s'%(row)).value = '%s' % (data_table[row-6][2])  # заводской номер
+            ws.cell('B%s'%(row)).style = "ali_white"
+        except:
+            ws.cell('B%s'%(row)).style = "ali_white"
+            next
+            
+        try:
+            ws.cell('C%s'%(row)).value = '%s' % (data_table[row-6][3])  # тип прибора
+            ws.cell('C%s'%(row)).style = "ali_white"
+        except:
+            ws.cell('C%s'%(row)).style = "ali_white"
+            next
+            
+        try:
+            ws.cell('d%s'%(row)).value = '%s' % get_val_by_round(float(data_table[row-6][4]),ROUND_SIZE, separator)
+            ws.cell('d%s'%(row)).style = "ali_white"
+        except:
+            ws.cell('d%s'%(row)).style = "ali_white"
+            next
+            
+        try:
+            ws.cell('e%s'%(row)).value = '%s' % get_val_by_round(float(data_table[row-6][5]),ROUND_SIZE, separator)  # 
+            ws.cell('e%s'%(row)).style = "ali_white"
+        except:
+            ws.cell('e%s'%(row)).style = "ali_white"
+            next
+            
+        try:
+            ws.cell('f%s'%(row)).value = '%s' % get_val_by_round(float(data_table[row-6][6]),ROUND_SIZE, separator)  # 
+            ws.cell('f%s'%(row)).style = "ali_white"
+        except:
+            ws.cell('f%s'%(row)).style = "ali_white"
+            next
+            
+        try:
+            ws.cell('G%s'%(row)).value = '%s' % get_val_by_round(float(data_table[row-6][7]),ROUND_SIZE, separator)  # 
+            ws.cell('G%s'%(row)).style = "ali_white"
+        except:
+            ws.cell('G%s'%(row)).style = "ali_white"
+            next
+            
+        try:
+            ws.cell('H%s'%(row)).value = '%s' % get_val_by_round(float(data_table[row-6][8]),ROUND_SIZE, separator)  # 
+            ws.cell('%s'%(row)).style = "ali_white"
+        except:
+            ws.cell('H%s'%(row)).style = "ali_white"
+            next
+            
+        try:
+            ws.cell('I%s'%(row)).value = '%s' % get_val_by_round(float(data_table[row-6][8]),ROUND_SIZE, separator)  # 
+            ws.cell('I%s'%(row)).style = "ali_white"
+        except:
+            ws.cell('I%s'%(row)).style = "ali_white"
+            next
+            
+        try:
+            ws.cell('J%s'%(row)).value = '%s' % get_val_by_round(float(data_table[row-6][10]),ROUND_SIZE, separator)  # 
+            ws.cell('J%s'%(row)).style = "ali_white"
+        except:
+            ws.cell('J%s'%(row)).style = "ali_white"
+            next
+            
+        try:
+            ws.cell('K%s'%(row)).value = '%s' % get_val_by_round(float(data_table[row-6][11]),ROUND_SIZE, separator)  # 
+            ws.cell('K%s'%(row)).style = "ali_white"
+        except:
+            ws.cell('K%s'%(row)).style = "ali_white"
+            next
+            
+        try:
+            ws.cell('L%s'%(row)).value = '%s' % get_val_by_round(float(data_table[row-6][12]),ROUND_SIZE, separator)  # 
+            ws.cell('L%s'%(row)).style = "ali_white"
+        except:
+            ws.cell('L%s'%(row)).style = "ali_white"
+            next
+            
+        try:
+            ws.cell('M%s'%(row)).value = '%s' % get_val_by_round(float(data_table[row-6][13]),ROUND_SIZE, separator)  # 
+            ws.cell('M%s'%(row)).style = "ali_white"
+        except:
+            ws.cell('M%s'%(row)).style = "ali_white"
+            next
+            
+        try:
+            ws.cell('N%s'%(row)).value = '%s' % get_val_by_round(float(data_table[row-6][14]),ROUND_SIZE, separator)  # 
+            ws.cell('N%s'%(row)).style = "ali_white"
+        except:
+            ws.cell('N%s'%(row)).style = "ali_white"
+            next
+            
+        try:
+            ws.cell('O%s'%(row)).value = '%s' % get_val_by_round(float(data_table[row-6][15]),ROUND_SIZE, separator)  # 
+            ws.cell('%s'%(row)).style = "ali_white"
+        except:
+            ws.cell('O%s'%(row)).style = "ali_white"
+            next
+            
+        try:
+            ws.cell('P%s'%(row)).value = '%s' % get_val_by_round(float(data_table[row-6][16]),ROUND_SIZE, separator)  # 
+            ws.cell('P%s'%(row)).style = "ali_white"
+        except:
+            ws.cell('P%s'%(row)).style = "ali_white"
+            next
+            
+        try:
+            ws.cell('q%s'%(row)).value = '%s' % get_val_by_round(float(data_table[row-6][17]),ROUND_SIZE, separator)  # 
+            ws.cell('q%s'%(row)).style = "ali_white"
+        except:
+            ws.cell('q%s'%(row)).style = "ali_white"
+            next
+            
+        try:
+            ws.cell('r%s'%(row)).value = '%s' % get_val_by_round(float(data_table[row-6][18]),ROUND_SIZE, separator)  # 
+            ws.cell('r%s'%(row)).style = "ali_white"
+        except:
+            ws.cell('r%s'%(row)).style = "ali_white"
+            next
+            
+        try:
+            ws.cell('s%s'%(row)).value = '%s' % get_val_by_round(float(data_table[row-6][19]),ROUND_SIZE, separator)  # 
+            ws.cell('s%s'%(row)).style = "ali_white"
+        except:
+            ws.cell('s%s'%(row)).style = "ali_white"
+            next
+            
+        try:
+            ws.cell('t%s'%(row)).value = '%s' % get_val_by_round(float(data_table[row-6][20]),ROUND_SIZE, separator)  # 
+            ws.cell('t%s'%(row)).style = "ali_white"
+        except:
+            ws.cell('t%s'%(row)).style = "ali_white"
+            next
+            
+        try:
+            ws.cell('u%s'%(row)).value = '%s' % get_val_by_round(float(data_table[row-6][21]),ROUND_SIZE, separator)  # 
+            ws.cell('u%s'%(row)).style = "ali_white"
+        except:
+            ws.cell('u%s'%(row)).style = "ali_white"
+            next
+            
+        try:
+            ws.cell('v%s'%(row)).value = '%s' % get_val_by_round(float(data_table[row-6][22]),ROUND_SIZE, separator)  # 
+            ws.cell('v%s'%(row)).style = "ali_white"
+        except:
+            ws.cell('v%s'%(row)).style = "ali_white"
+            next
+            
+        try:
+            ws.cell('w%s'%(row)).value = '%s' % get_val_by_round(float(data_table[row-6][23]),ROUND_SIZE, separator)  # 
+            ws.cell('w%s'%(row)).style = "ali_white"
+        except:
+            ws.cell('w%s'%(row)).style = "ali_white"
+            next
+            
+        try:
+            ws.cell('x%s'%(row)).value = '%s' % get_val_by_round(float(data_table[row-6][24]),ROUND_SIZE, separator)  # 
+            ws.cell('x%s'%(row)).style = "ali_white"
+        except:
+            ws.cell('x%s'%(row)).style = "ali_white"
+            next
+            
+        try:
+            ws.cell('y%s'%(row)).value = '%s' % get_val_by_round(float(data_table[row-6][25]),ROUND_SIZE, separator)  # 
+            ws.cell('y%s'%(row)).style = "ali_white"
+        except:
+            ws.cell('y%s'%(row)).style = "ali_white"
+            next
+            
+        try:
+            ws.cell('z%s'%(row)).value = '%s' % get_val_by_round(float(data_table[row-6][26]),ROUND_SIZE, separator)  # 
+            ws.cell('z%s'%(row)).style = "ali_white"
+        except:
+            ws.cell('z%s'%(row)).style = "ali_white"
+            next
+            
+        try:
+            ws.cell('aa%s'%(row)).value = '%s' % get_val_by_round(float(data_table[row-6][27]),ROUND_SIZE, separator)  # 
+            ws.cell('aa%s'%(row)).style = "ali_white"
+        except:
+            ws.cell('aa%s'%(row)).style = "ali_white"
+            next
+            
+        try:
+            ws.cell('ab%s'%(row)).value = '%s' % get_val_by_round(float(data_table[row-6][28]),ROUND_SIZE, separator)  # 
+            ws.cell('ab%s'%(row)).style = "ali_white"
+        except:
+            ws.cell('ab%s'%(row)).style = "ali_white"
+            next
+        
+        try:
+            ws.cell('ac%s'%(row)).value = '%s' % get_val_by_round(float(data_table[row-6][29]),ROUND_SIZE, separator)  # 
+            ws.cell('ac%s'%(row)).style = "ali_white"
+        except:
+            ws.cell('ac%s'%(row)).style = "ali_white"
+            next
+
+    ws.row_dimensions[5].height = 41
+    ws.column_dimensions['A'].width = 30 
+    ws.column_dimensions['B'].width = 17 
+    ws.column_dimensions['C'].width = 24
+    ws.column_dimensions['D'].width = 12
+    ws.column_dimensions['E'].width = 12
+    ws.column_dimensions['F'].width = 12
+    ws.column_dimensions['G'].width = 12
+    ws.column_dimensions['H'].width = 12
+    ws.column_dimensions['I'].width = 12
+    ws.column_dimensions['J'].width = 12
+    ws.column_dimensions['K'].width = 12
+    ws.column_dimensions['L'].width = 12
+    ws.column_dimensions['M'].width = 12
+    ws.column_dimensions['N'].width = 12
+    ws.column_dimensions['O'].width = 12
+    ws.column_dimensions['P'].width = 12    
+    ws.column_dimensions['q'].width = 12    
+    ws.column_dimensions['r'].width = 12    
+    ws.column_dimensions['s'].width = 12    
+    ws.column_dimensions['t'].width = 12    
+    ws.column_dimensions['u'].width = 12    
+    ws.column_dimensions['v'].width = 12    
+    ws.column_dimensions['w'].width = 12    
+    ws.column_dimensions['x'].width = 12    
+    ws.column_dimensions['y'].width = 12    
+    ws.column_dimensions['z'].width = 12
+    ws.column_dimensions['aa'].width = 12    
+    ws.column_dimensions['ab'].width = 12    
+    ws.column_dimensions['ac'].width = 12
+
+    
+    #wb.save(response)
+    response.seek(0)
+    response = HttpResponse(save_virtual_workbook(wb),content_type="application/vnd.ms-excel")
+    
+    output_name = 'heat_year_' + translate(obj_title) + '_' + electric_data_end
+    file_ext = 'xlsx'
+    
+    response['Content-Disposition'] = 'attachment;filename="%s.%s"' % (output_name.replace('"', '\"'), file_ext)   
+    return response

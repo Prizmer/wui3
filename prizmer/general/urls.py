@@ -189,4 +189,8 @@ urlpatterns = [
     url(r'^118/$', views.pulsar_frost_daily, name = 'frost_pulsar'), # Показание на дату с холодосчётчиков Пульсар
     url(r'^117/$', views.pulsar_frost_period, name = 'period_frost_pulsar'), # Потребление за период с холодосчётчиков Пульсар
 
+    url(r'^120/$', views.all_res_by_day_for_year, name = 'all_res_by_day_for_year'), # Показание на выбранный день за каждый месяц в течении года по электрике Цифровые приборы(!)
+    url(r'^122/$', views.all_res_by_day_for_year, name = 'all_res_by_day_for_year'), # Показание на выбранный день за каждый месяц в течении года по воде. Цифровые приборы(!)
+    url(r'^124/$', views.all_res_by_day_for_year, name = 'all_res_by_day_for_year'), # Показание на выбранный день за каждый месяц в течении года по теплу. Цифровые приборы(!)
+
 ]

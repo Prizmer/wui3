@@ -13680,3 +13680,499 @@ and a.id <> b.id)    """%(electric_data_start,electric_data_end,electric_data_st
     connection.commit()
     cursor.close()
     return
+
+def make_sql_query_electric_by_day_for_year(obj_parent_title, obj_title, electric_data_end):
+    sQuery = """
+    Select  
+	electric_abons_2.obj_name,
+    electric_abons_2.ab_name,
+    electric_abons_2.factory_number_manual,
+	 electric_abons_2.type_meter,
+	    
+    electric_abons_2.ktt::numeric,
+    electric_abons_2.ktn::numeric,
+    electric_abons_2.a::numeric,
+    round(z2.t0::numeric,5),
+    round(z2.t1::numeric,5),
+    round(z2.t2::numeric,5),
+    round(z2.t3::numeric,5),
+	
+	round(z2.t0_1::numeric,5),
+    round(z2.t1_1::numeric,5),
+    round(z2.t2_1::numeric,5),
+    round(z2.t3_1::numeric,5),
+	
+	round(z2.t0_2::numeric,5),
+    round(z2.t1_2::numeric,5),
+    round(z2.t2_2::numeric,5),
+    round(z2.t3_2::numeric,5),
+	
+	round(z2.t0_3::numeric,5),
+    round(z2.t1_3::numeric,5),
+    round(z2.t2_3::numeric,5),
+    round(z2.t3_3::numeric,5),
+	
+	round(z2.t0_4::numeric,5),
+    round(z2.t1_4::numeric,5),
+    round(z2.t2_4::numeric,5),
+    round(z2.t3_4::numeric,5),
+	
+	round(z2.t0_5::numeric,5),
+    round(z2.t1_5::numeric,5),
+    round(z2.t2_5::numeric,5),
+    round(z2.t3_5::numeric,5),
+	
+	round(z2.t0_6::numeric,5),
+    round(z2.t1_6::numeric,5),
+    round(z2.t2_6::numeric,5),
+    round(z2.t3_6::numeric,5),
+	
+	round(z2.t0_7::numeric,5),
+    round(z2.t1_7::numeric,5),
+    round(z2.t2_7::numeric,5),
+    round(z2.t3_7::numeric,5),
+	
+	round(z2.t0_8::numeric,5),
+    round(z2.t1_8::numeric,5),
+    round(z2.t2_8::numeric,5),
+    round(z2.t3_8::numeric,5),
+	
+	round(z2.t0_9::numeric,5),
+    round(z2.t1_9::numeric,5),
+    round(z2.t2_9::numeric,5),
+    round(z2.t3_9::numeric,5),
+	
+	round(z2.t0_10::numeric,5),
+    round(z2.t1_10::numeric,5),
+    round(z2.t2_10::numeric,5),
+    round(z2.t3_10::numeric,5),
+	
+	round(z2.t0_11::numeric,5),
+    round(z2.t1_11::numeric,5),
+    round(z2.t2_11::numeric,5),
+    round(z2.t3_11::numeric,5),
+	
+	round(z2.t0_12::numeric,5),
+    round(z2.t1_12::numeric,5),
+    round(z2.t2_12::numeric,5),
+    round(z2.t3_12::numeric,5)
+	
+from electric_abons_2
+LEFT JOIN
+	(SELECT z1.name_objects, z1.name_abonents, z1.factory_number_manual, z1.type_meter,
+	sum(Case when z1.params_name = 'T0 A+' and daily_date = '%s' then z1.value_daily  end) as t0,
+	sum(Case when z1.params_name = 'T1 A+' and daily_date = '%s' then z1.value_daily  end) as t1,
+	sum(Case when z1.params_name = 'T2 A+' and daily_date = '%s' then z1.value_daily  end) as t2,
+	sum(Case when z1.params_name = 'T3 A+' and daily_date = '%s' then z1.value_daily  end) as t3,
+	sum(Case when z1.params_name = 'T0 A+' and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '1 month') then z1.value_daily  end) as t0_1,
+	sum(Case when z1.params_name = 'T1 A+' and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '1 month') then z1.value_daily  end) as t1_1,
+	sum(Case when z1.params_name = 'T2 A+' and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '1 month') then z1.value_daily  end) as t2_1,
+	sum(Case when z1.params_name = 'T3 A+' and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '1 month') then z1.value_daily  end) as t3_1,
+	 
+	 sum(Case when z1.params_name = 'T0 A+' and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '2 month') then z1.value_daily  end) as t0_2,
+	sum(Case when z1.params_name = 'T1 A+' and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '2 month') then z1.value_daily  end) as t1_2,
+	sum(Case when z1.params_name = 'T2 A+' and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '2 month') then z1.value_daily  end) as t2_2,
+	sum(Case when z1.params_name = 'T3 A+' and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '2 month') then z1.value_daily  end) as t3_2,
+	 
+	 sum(Case when z1.params_name = 'T0 A+' and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '3 month') then z1.value_daily  end) as t0_3,
+	sum(Case when z1.params_name = 'T1 A+' and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '3 month') then z1.value_daily  end) as t1_3,
+	sum(Case when z1.params_name = 'T2 A+' and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '3 month') then z1.value_daily  end) as t2_3,
+	sum(Case when z1.params_name = 'T3 A+' and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '3 month') then z1.value_daily  end) as t3_3,
+	 
+	 sum(Case when z1.params_name = 'T0 A+' and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '4 month') then z1.value_daily  end) as t0_4,
+	sum(Case when z1.params_name = 'T1 A+' and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '4 month') then z1.value_daily  end) as t1_4,
+	sum(Case when z1.params_name = 'T2 A+' and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '4 month') then z1.value_daily  end) as t2_4,
+	sum(Case when z1.params_name = 'T3 A+' and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '4 month') then z1.value_daily  end) as t3_4,
+	 
+	 sum(Case when z1.params_name = 'T0 A+' and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '5 month') then z1.value_daily  end) as t0_5,
+	sum(Case when z1.params_name = 'T1 A+' and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '5 month') then z1.value_daily  end) as t1_5,
+	sum(Case when z1.params_name = 'T2 A+' and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '5 month') then z1.value_daily  end) as t2_5,
+	sum(Case when z1.params_name = 'T3 A+' and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '5 month') then z1.value_daily  end) as t3_5,
+	 
+	 sum(Case when z1.params_name = 'T0 A+' and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '6 month') then z1.value_daily  end) as t0_6,
+	sum(Case when z1.params_name = 'T1 A+' and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '6 month') then z1.value_daily  end) as t1_6,
+	sum(Case when z1.params_name = 'T2 A+' and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '6 month') then z1.value_daily  end) as t2_6,
+	sum(Case when z1.params_name = 'T3 A+' and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '6 month') then z1.value_daily  end) as t3_6,
+	 
+	 sum(Case when z1.params_name = 'T0 A+' and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '7 month') then z1.value_daily  end) as t0_7,
+	sum(Case when z1.params_name = 'T1 A+' and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '7 month') then z1.value_daily  end) as t1_7,
+	sum(Case when z1.params_name = 'T2 A+' and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '7 month') then z1.value_daily  end) as t2_7,
+	sum(Case when z1.params_name = 'T3 A+' and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '7 month') then z1.value_daily  end) as t3_7,
+	 
+	 sum(Case when z1.params_name = 'T0 A+' and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '8 month') then z1.value_daily  end) as t0_8,
+	sum(Case when z1.params_name = 'T1 A+' and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '8 month') then z1.value_daily  end) as t1_8,
+	sum(Case when z1.params_name = 'T2 A+' and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '8 month') then z1.value_daily  end) as t2_8,
+	sum(Case when z1.params_name = 'T3 A+' and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '8 month') then z1.value_daily  end) as t3_8,
+	 
+	 sum(Case when z1.params_name = 'T0 A+' and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '9 month') then z1.value_daily  end) as t0_9,
+	sum(Case when z1.params_name = 'T1 A+' and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '9 month') then z1.value_daily  end) as t1_9,
+	sum(Case when z1.params_name = 'T2 A+' and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '9 month') then z1.value_daily  end) as t2_9,
+	sum(Case when z1.params_name = 'T3 A+' and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '9 month') then z1.value_daily  end) as t3_9,
+	 
+	 sum(Case when z1.params_name = 'T0 A+' and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '10 month') then z1.value_daily  end) as t0_10,
+	sum(Case when z1.params_name = 'T1 A+' and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '10 month') then z1.value_daily  end) as t1_10,
+	sum(Case when z1.params_name = 'T2 A+' and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '10 month') then z1.value_daily  end) as t2_10,
+	sum(Case when z1.params_name = 'T3 A+' and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '10 month') then z1.value_daily  end) as t3_10,
+	 
+	 sum(Case when z1.params_name = 'T0 A+' and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '11 month') then z1.value_daily  end) as t0_11,
+	sum(Case when z1.params_name = 'T1 A+' and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '11 month') then z1.value_daily  end) as t1_11,
+	sum(Case when z1.params_name = 'T2 A+' and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '11 month') then z1.value_daily  end) as t2_11,
+	sum(Case when z1.params_name = 'T3 A+' and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '11 month') then z1.value_daily  end) as t3_11,
+	 
+	 sum(Case when z1.params_name = 'T0 A+' and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '12 month') then z1.value_daily  end) as t0_12,
+	sum(Case when z1.params_name = 'T1 A+' and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '12 month') then z1.value_daily  end) as t1_12,
+	sum(Case when z1.params_name = 'T2 A+' and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '12 month') then z1.value_daily  end) as t2_12,
+	sum(Case when z1.params_name = 'T3 A+' and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '12 month') then z1.value_daily  end) as t3_12
+	 
+	
+	from
+			(SELECT 
+			  objects.name as name_objects, 
+			  abonents.name as name_abonents, 
+			  names_params.name as params_name,  
+			  types_meters.name as type_meter,
+			  meters.factory_number_manual,
+			  daily_values.date as daily_date, 
+			  daily_values.value as value_daily
+			FROM
+			  public.meters, 
+			  public.resources, 
+			  public.types_meters, 
+			  public.taken_params, 
+			  public.types_params, 
+			  public.link_abonents_taken_params, 
+			  public.abonents, 
+			  public.objects, 
+			  public.params, 
+			  public.names_params,
+			  public.daily_values  
+			WHERE 
+			  meters.guid_types_meters = types_meters.guid AND
+			  taken_params.guid_meters = meters.guid AND
+			  taken_params.guid_params = params.guid AND
+			  link_abonents_taken_params.guid_abonents = abonents.guid AND
+			  link_abonents_taken_params.guid_taken_params = taken_params.guid AND
+			  abonents.guid_objects = objects.guid AND
+			  params.guid_names_params = names_params.guid AND
+			  params.guid_types_params = types_params.guid AND
+			  names_params.guid_resources = resources.guid AND
+			  daily_values.id_taken_params = taken_params.id AND
+			   types_params.name = 'Суточный' AND
+			   resources.name = 'Электричество' AND
+			   objects.name = '%s' AND
+			   (daily_values.date = '%s' or 
+				daily_values.date = (to_date('%s','dd.mm.YYYY') - INTERVAL '1 month') or 
+				daily_values.date = (to_date('%s','dd.mm.YYYY') - INTERVAL '2 month') or 
+				daily_values.date = (to_date('%s','dd.mm.YYYY') - INTERVAL '3 month') or 
+				daily_values.date = (to_date('%s','dd.mm.YYYY') - INTERVAL '4 month') or 
+				daily_values.date = (to_date('%s','dd.mm.YYYY') - INTERVAL '5 month') or 
+				daily_values.date = (to_date('%s','dd.mm.YYYY') - INTERVAL '6 month') or 
+				daily_values.date = (to_date('%s','dd.mm.YYYY') - INTERVAL '7 month') or 
+				daily_values.date = (to_date('%s','dd.mm.YYYY') - INTERVAL '8 month') or 
+				daily_values.date = (to_date('%s','dd.mm.YYYY') - INTERVAL '9 month') or 
+				daily_values.date = (to_date('%s','dd.mm.YYYY') - INTERVAL '10 month') or 
+				daily_values.date = (to_date('%s','dd.mm.YYYY') - INTERVAL '11 month') or 
+				daily_values.date = (to_date('%s','dd.mm.YYYY') - INTERVAL '12 month') 				
+			   )
+			) as z1
+	group by z1.name_objects, z1.name_objects, z1.name_abonents, z1.factory_number_manual,z1.type_meter) as z2
+on electric_abons_2.factory_number_manual=z2.factory_number_manual
+where electric_abons_2.obj_name='%s' and electric_abons_2.name_parent='%s'
+ORDER BY electric_abons_2.ab_name ASC;
+    """%(electric_data_end,electric_data_end,electric_data_end,electric_data_end,
+        electric_data_end,electric_data_end,electric_data_end,electric_data_end,
+        electric_data_end,electric_data_end,electric_data_end,electric_data_end,
+        electric_data_end,electric_data_end,electric_data_end,electric_data_end,
+        electric_data_end,electric_data_end,electric_data_end,electric_data_end,
+        electric_data_end,electric_data_end,electric_data_end,electric_data_end,
+        electric_data_end,electric_data_end,electric_data_end,electric_data_end,
+        electric_data_end,electric_data_end,electric_data_end,electric_data_end,
+        electric_data_end,electric_data_end,electric_data_end,electric_data_end,
+        electric_data_end,electric_data_end,electric_data_end,electric_data_end,
+        electric_data_end,electric_data_end,electric_data_end,electric_data_end,
+        electric_data_end,electric_data_end,electric_data_end,electric_data_end,
+        electric_data_end,electric_data_end,electric_data_end,electric_data_end,        
+        obj_title,
+        electric_data_end,electric_data_end,electric_data_end,electric_data_end,electric_data_end,electric_data_end,electric_data_end,
+        electric_data_end,electric_data_end,electric_data_end,electric_data_end,electric_data_end,electric_data_end,
+    obj_title,obj_parent_title)
+    #print(sQuery)
+    return sQuery
+def get_data_table_electric_for_year_by_day(obj_parent_title, obj_title, electric_data_end):
+    data_table = []
+    cursor = connection.cursor()
+    cursor.execute(make_sql_query_electric_by_day_for_year(obj_parent_title, obj_title, electric_data_end))
+    data_table = cursor.fetchall()    
+
+    return data_table
+
+def get_data_table_12month(electric_data_end):
+    data_table = []
+    cursor = connection.cursor()
+    sQuery = """
+    Select DATE('%s'),
+DATE((to_date('%s','dd.mm.YYYY') - INTERVAL '1 month')),
+DATE((to_date('%s','dd.mm.YYYY') - INTERVAL '2 month')) ,
+DATE((to_date('%s','dd.mm.YYYY') - INTERVAL '3 month')) ,
+DATE((to_date('%s','dd.mm.YYYY') - INTERVAL '4 month')) ,
+DATE((to_date('%s','dd.mm.YYYY') - INTERVAL '5 month') ),
+DATE((to_date('%s','dd.mm.YYYY') - INTERVAL '6 month') ),
+DATE((to_date('%s','dd.mm.YYYY') - INTERVAL '7 month') ),
+DATE((to_date('%s','dd.mm.YYYY') - INTERVAL '8 month') ),
+DATE((to_date('%s','dd.mm.YYYY') - INTERVAL '9 month') ),
+DATE((to_date('%s','dd.mm.YYYY') - INTERVAL '10 month') ),
+DATE((to_date('%s','dd.mm.YYYY') - INTERVAL '11 month') ),
+DATE((to_date('%s','dd.mm.YYYY') - INTERVAL '12 month') )
+    """%(electric_data_end,electric_data_end,electric_data_end,electric_data_end,electric_data_end,electric_data_end,electric_data_end,electric_data_end,
+         electric_data_end,electric_data_end,electric_data_end,electric_data_end,electric_data_end)
+    cursor.execute(sQuery)
+    data_table = cursor.fetchall()
+    #print(data_table)    
+    return data_table
+
+
+def make_sql_query_water_by_day_for_year(obj_parent_title, obj_title, electric_data_end):
+    sQuery = """
+      Select  water_pulsar_abons.ab_name, z1.type_meter, water_pulsar_abons.factory_number_manual, 
+  round(z1.volume::numeric,4),
+  round(z1.volume1::numeric,4),
+  round(z1.volume2::numeric,4),
+  round(z1.volume3::numeric,4),
+  round(z1.volume4::numeric,4),
+  round(z1.volume5::numeric,4),
+  round(z1.volume6::numeric,4),
+  round(z1.volume7::numeric,4),
+  round(z1.volume8::numeric,4),
+  round(z1.volume9::numeric,4),
+  round(z1.volume10::numeric,4),
+  round(z1.volume11::numeric,4),
+  round(z1.volume12::numeric,4)
+from water_pulsar_abons
+left join
+(Select z.ab_name, z.factory_number_manual, z.type_meter,
+ sum(Case when daily_date = '%s' then z.value end) as volume,
+ sum(Case when daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '1 month')  then z.value end) as volume1,
+  sum(Case when daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '2 month')  then z.value end) as volume2,
+  sum(Case when daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '3 month')  then z.value end) as volume3,
+  sum(Case when daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '4 month')  then z.value end) as volume4,
+  sum(Case when daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '5 month')  then z.value end) as volume5,
+  sum(Case when daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '6 month')  then z.value end) as volume6,
+  sum(Case when daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '7 month')  then z.value end) as volume7,
+  sum(Case when daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '8 month')  then z.value end) as volume8,
+  sum(Case when daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '9 month')  then z.value end) as volume9,
+  sum(Case when daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '10 month')  then z.value end) as volume10,
+  sum(Case when daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '11 month')  then z.value end) as volume11,
+  sum(Case when daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '12 month')  then z.value end) as volume12 
+ 
+ from
+		(SELECT
+		 daily_values.date as daily_date,
+		 abonents.name as ab_name,
+		  (Case when (types_meters.name = 'Пульс СТК ХВС' or types_meters.name = 'Пульс СТК ГВС') then "substring"((types_meters.name)::text, 11, 13) else "substring"((types_meters.name)::text, 9, 11) end)
+					 AS type_meter,
+		  meters.factory_number_manual,
+		  (Case when (types_meters.name = 'Пульс СТК ХВС' or types_meters.name = 'Пульс СТК ГВС') then daily_values.value/1000 else daily_values.value end)
+					 AS value
+		FROM
+		  public.abonents,
+		  public.objects,
+		  public.link_abonents_taken_params,
+		  public.taken_params,
+		  public.daily_values,
+		  public.meters,
+		  public.types_meters
+		WHERE
+		  abonents.guid_objects = objects.guid AND
+		  link_abonents_taken_params.guid_abonents = abonents.guid AND
+		  link_abonents_taken_params.guid_taken_params = taken_params.guid AND
+		  taken_params.guid_meters = meters.guid AND
+		  daily_values.id_taken_params = taken_params.id AND
+		  meters.guid_types_meters = types_meters.guid AND
+		  objects.name = '%s' AND 
+		  (types_meters.name like 'Пульс%%ГВС' or types_meters.name like 'Пульс%%ХВС') and
+			( daily_values.date = '%s' or
+			daily_values.date = (to_date('%s','dd.mm.YYYY') - INTERVAL '1 month') or
+			daily_values.date = (to_date('%s','dd.mm.YYYY') - INTERVAL '2 month') or 
+			daily_values.date = (to_date('%s','dd.mm.YYYY') - INTERVAL '3 month') or 
+			daily_values.date = (to_date('%s','dd.mm.YYYY') - INTERVAL '4 month') or 
+			daily_values.date = (to_date('%s','dd.mm.YYYY') - INTERVAL '5 month') or 
+			daily_values.date = (to_date('%s','dd.mm.YYYY') - INTERVAL '6 month') or 
+			daily_values.date = (to_date('%s','dd.mm.YYYY') - INTERVAL '7 month') or 
+			daily_values.date = (to_date('%s','dd.mm.YYYY') - INTERVAL '8 month') or 
+			daily_values.date = (to_date('%s','dd.mm.YYYY') - INTERVAL '9 month') or 
+			daily_values.date = (to_date('%s','dd.mm.YYYY') - INTERVAL '10 month') or 
+			daily_values.date = (to_date('%s','dd.mm.YYYY') - INTERVAL '11 month') or 
+			daily_values.date = (to_date('%s','dd.mm.YYYY') - INTERVAL '12 month') 	
+			)
+		Group by daily_values.date, abonents.name, meters.factory_number_manual,types_meters.name, daily_values.value
+		) as z
+ GROUP BY z.ab_name, z.factory_number_manual, z.type_meter
+) as z1
+on water_pulsar_abons.factory_number_manual=z1.factory_number_manual
+  where water_pulsar_abons.obj_name='%s'
+  order by water_pulsar_abons.ab_name,  water_pulsar_abons.factory_number_manual, z1.type_meter
+    """%(electric_data_end,electric_data_end,electric_data_end,electric_data_end,electric_data_end,electric_data_end,electric_data_end,
+        electric_data_end,electric_data_end,electric_data_end,electric_data_end,electric_data_end,electric_data_end,
+        obj_title, 
+        electric_data_end,electric_data_end,electric_data_end,electric_data_end,electric_data_end,electric_data_end,electric_data_end,
+        electric_data_end,electric_data_end,electric_data_end,electric_data_end,electric_data_end,electric_data_end,
+        obj_title)
+    #print(sQuery)
+    return sQuery
+
+def get_data_table_water_for_year_by_day(obj_parent_title, obj_title, electric_data_end):
+    data_table = []
+    cursor = connection.cursor()
+    cursor.execute(make_sql_query_water_by_day_for_year(obj_parent_title, obj_title, electric_data_end))
+    data_table = cursor.fetchall()    
+
+    return data_table
+
+def make_sql_query_heat_by_day_for_year(obj_parent_title, obj_title, electric_data_end):
+    sQuery = """
+     Select heat_abons.obj_name, heat_abons.ab_name, heat_abons.factory_number_manual, heat_abons.type_meter,
+round(z2.energy::numeric,7),
+round(z2.volume::numeric,7),
+round(z2.energy1::numeric,7),
+round(z2.volume1::numeric,7),
+round(z2.energy2::numeric,7),
+round(z2.volume2::numeric,7),
+round(z2.energy3::numeric,7),
+round(z2.volume3::numeric,7),
+round(z2.energy4::numeric,7),
+round(z2.volume4::numeric,7),
+round(z2.energy5::numeric,7),
+round(z2.volume5::numeric,7),
+round(z2.energy6::numeric,7),
+round(z2.volume6::numeric,7),
+round(z2.energy7::numeric,7),
+round(z2.volume7::numeric,7),
+round(z2.energy8::numeric,7),
+round(z2.volume8::numeric,7),
+round(z2.energy9::numeric,7),
+round(z2.volume9::numeric,7),
+round(z2.energy10::numeric,7),
+round(z2.volume10::numeric,7),
+round(z2.energy11::numeric,7),
+round(z2.volume11::numeric,7),
+round(z2.energy12::numeric,7),
+round(z2.volume12::numeric,7)
+from heat_abons
+left join
+(SELECT z1.name_objects, z1.name_abonents, z1.number_manual,
+            sum(Case when z1.params_name = 'Энергия' and daily_date = '%s' then z1.value_daily  end) as energy,
+            sum(Case when z1.params_name = 'Объем' and daily_date = '%s' then z1.value_daily  end) as volume,
+ 
+            sum(Case when z1.params_name = 'Энергия'  and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '1 month') then z1.value_daily  end) as energy1,
+            sum(Case when z1.params_name = 'Объем'  and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '1 month') then z1.value_daily  end) as volume1,
+ 
+            sum(Case when z1.params_name = 'Энергия'  and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '2 month') then z1.value_daily  end) as energy2,
+            sum(Case when z1.params_name = 'Объем'  and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '2 month') then z1.value_daily  end) as volume2,
+ 
+            sum(Case when z1.params_name = 'Энергия'  and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '3 month') then z1.value_daily  end) as energy3,
+            sum(Case when z1.params_name = 'Объем'  and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '3 month') then z1.value_daily  end) as volume3,
+ 
+            sum(Case when z1.params_name = 'Энергия'  and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '4 month') then z1.value_daily  end) as energy4,
+            sum(Case when z1.params_name = 'Объем'  and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '4 month') then z1.value_daily  end) as volume4,
+ 
+            sum(Case when z1.params_name = 'Энергия'  and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '5 month') then z1.value_daily  end) as energy5,
+            sum(Case when z1.params_name = 'Объем'  and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '5 month') then z1.value_daily  end) as volume5,
+ 
+            sum(Case when z1.params_name = 'Энергия'  and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '6 month') then z1.value_daily  end) as energy6,
+            sum(Case when z1.params_name = 'Объем'  and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '6 month') then z1.value_daily  end) as volume6,
+ 
+            sum(Case when z1.params_name = 'Энергия'  and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '7 month') then z1.value_daily  end) as energy7,
+            sum(Case when z1.params_name = 'Объем'  and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '7 month') then z1.value_daily  end) as volume7,
+ 
+            sum(Case when z1.params_name = 'Энергия'  and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '8 month') then z1.value_daily  end) as energy8,
+            sum(Case when z1.params_name = 'Объем'  and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '8 month') then z1.value_daily  end) as volume8,
+ 
+            sum(Case when z1.params_name = 'Энергия'  and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '9 month') then z1.value_daily  end) as energy9,
+            sum(Case when z1.params_name = 'Объем'  and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '9 month') then z1.value_daily  end) as volume9,
+ 
+            sum(Case when z1.params_name = 'Энергия'  and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '10 month') then z1.value_daily  end) as energy10,
+            sum(Case when z1.params_name = 'Объем'  and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '10 month') then z1.value_daily  end) as volume10,
+ 
+            sum(Case when z1.params_name = 'Энергия'  and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '11 month') then z1.value_daily  end) as energy11,
+            sum(Case when z1.params_name = 'Объем'  and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '11 month') then z1.value_daily  end) as volume11,
+ 
+            sum(Case when z1.params_name = 'Энергия'  and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '12 month') then z1.value_daily  end) as energy12,
+            sum(Case when z1.params_name = 'Объем'  and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '12 month') then z1.value_daily  end) as volume12
+            
+
+                                    FROM
+                                    (SELECT
+                                  daily_values.date as daily_date,
+                                  objects.name as name_objects,
+                                  abonents.name as name_abonents,
+                                  daily_values.value as value_daily,
+                                  meters.factory_number_manual as number_manual,
+                                  names_params.name as params_name,
+                                  types_meters.name as meter_type
+                                FROM
+                                  public.daily_values,
+                                  public.taken_params,
+                                  public.abonents,
+                                  public.link_abonents_taken_params,
+                                  public.objects,
+                                  public.params,
+                                  public.names_params,
+                                  public.meters,
+                                  public.types_meters
+                                WHERE
+                                  daily_values.id_taken_params = taken_params.id AND
+                                  taken_params.guid_params = params.guid AND
+                                  taken_params.guid_meters = meters.guid AND
+                                  abonents.guid_objects = objects.guid AND
+                                  link_abonents_taken_params.guid_abonents = abonents.guid AND
+                                  link_abonents_taken_params.guid_taken_params = taken_params.guid AND
+                                  params.guid_names_params = names_params.guid AND
+                                  meters.guid_types_meters = types_meters.guid AND
+                                  objects.name = '%s' AND
+                                  types_meters.name like '%%Теплосчётчик%%' AND
+                                  ( daily_values.date = '%s' or
+								    daily_values.date = (to_date('%s','dd.mm.YYYY') - INTERVAL '1 month') or
+								    daily_values.date = (to_date('%s','dd.mm.YYYY') - INTERVAL '2 month') or 
+									daily_values.date = (to_date('%s','dd.mm.YYYY') - INTERVAL '3 month') or 
+									daily_values.date = (to_date('%s','dd.mm.YYYY') - INTERVAL '4 month') or 
+									daily_values.date = (to_date('%s','dd.mm.YYYY') - INTERVAL '5 month') or 
+									daily_values.date = (to_date('%s','dd.mm.YYYY') - INTERVAL '6 month') or 
+									daily_values.date = (to_date('%s','dd.mm.YYYY') - INTERVAL '7 month') or 
+									daily_values.date = (to_date('%s','dd.mm.YYYY') - INTERVAL '8 month') or 
+									daily_values.date = (to_date('%s','dd.mm.YYYY') - INTERVAL '9 month') or 
+									daily_values.date = (to_date('%s','dd.mm.YYYY') - INTERVAL '10 month') or 
+									daily_values.date = (to_date('%s','dd.mm.YYYY') - INTERVAL '11 month') or 
+									daily_values.date = (to_date('%s','dd.mm.YYYY') - INTERVAL '12 month') 	
+								  )
+                           GROUP BY
+                          daily_values.date,
+                                  objects.name ,
+                                  abonents.name,
+                                  daily_values.value,
+                                  meters.factory_number_manual,
+                                  names_params.name,
+                                  types_meters.name
+                                    ) z1
+            group by z1.name_abonents, z1.name_objects, z1.number_manual
+            order by z1.name_abonents) as z2
+on z2.number_manual=heat_abons.factory_number_manual
+where heat_abons.obj_name='%s' and heat_abons.type_meter  like '%%Теплосчётчик%%'
+order by heat_abons.ab_name
+    """%(electric_data_end,electric_data_end,electric_data_end,electric_data_end,electric_data_end,electric_data_end,electric_data_end,
+        electric_data_end,electric_data_end,electric_data_end,electric_data_end,electric_data_end,electric_data_end,
+      electric_data_end,electric_data_end,electric_data_end,electric_data_end,electric_data_end,electric_data_end,electric_data_end,
+        electric_data_end,electric_data_end,electric_data_end,electric_data_end,electric_data_end,electric_data_end,
+      obj_title, 
+        electric_data_end,electric_data_end,electric_data_end,electric_data_end,electric_data_end,electric_data_end,electric_data_end,
+        electric_data_end,electric_data_end,electric_data_end,electric_data_end,electric_data_end,electric_data_end,
+        obj_title)
+    #print(sQuery)
+    return sQuery
+
+def get_data_table_heat_for_year_by_day(obj_parent_title, obj_title, electric_data_end):
+    data_table = []
+    cursor = connection.cursor()
+    cursor.execute(make_sql_query_heat_by_day_for_year(obj_parent_title, obj_title, electric_data_end))
+    data_table = cursor.fetchall()    
+
+    return data_table

@@ -11234,3 +11234,55 @@ def pulsar_frost_period(request):
     
 
     return render(request, "data_table/heat/117.html", args)
+
+def all_res_by_day_for_year(request):
+    args = {}
+    is_abonent_level = re.compile(r'abonent')
+    is_object_level_2 = re.compile(r'level2')
+
+    data_table = []
+    obj_title = 'Не выбран'
+    obj_key = 'Не выбран'
+    obj_parent_title = 'Не выбран'
+    is_electric_monthly = ''
+    is_electric_daily = ''
+    is_electric_current = ''
+    is_electric_delta = ''
+    electric_data_start = ''
+    electric_data_end = ''
+    dates = None
+    is_electric_period = None
+    if request.is_ajax():
+        if request.method == 'GET':
+            request.session["obj_title"]           = obj_title           = request.GET['obj_title']
+            request.session["obj_key"]             = obj_key             = request.GET['obj_key']
+            request.session["obj_parent_title"]    = obj_parent_title    = request.GET['obj_parent_title']
+            request.session["electric_data_start"] = electric_data_start = request.GET['electric_data_start']
+            request.session["electric_data_end"]   = electric_data_end   = request.GET['electric_data_end']
+            
+#*********************************************************************************************************************************************************************
+            if (bool(is_abonent_level.search(obj_key))): #выбран абонент
+                pass
+            elif (bool(is_object_level_2.search(obj_key))):#выбран объект
+                pass
+                #data_table_dates_list = common_sql.get_data_table_12month(electric_data_end) #список дат по месяцам, начиная от выбранной даты
+                #data_table_electric = common_sql.get_data_table_electric_for_year_by_day(obj_parent_title, obj_title, electric_data_end)
+                #data_table_water = common_sql.get_data_table_water_for_year_by_day(obj_parent_title, obj_title, electric_data_end)
+                #data_table_heat = common_sql.get_data_table_heat_for_year_by_day(obj_parent_title, obj_title, electric_data_end)
+                
+                
+    args['data_table'] = data_table
+    args['obj_title'] = obj_title
+    args['obj_key'] = obj_key
+    args['obj_parent_title'] = obj_parent_title
+    args['is_electric_monthly'] = is_electric_monthly
+    args['is_electric_daily'] = is_electric_daily
+    args['is_electric_current'] = is_electric_current
+    args['is_electric_delta'] = is_electric_delta
+    args['electric_data_start'] = electric_data_start
+    args['electric_data_end'] = electric_data_end
+    args['is_electric_period'] = is_electric_period
+    args['dates'] = dates
+    
+
+    return render(request, "data_table/120.html", args)
