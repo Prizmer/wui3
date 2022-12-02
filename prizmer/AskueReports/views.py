@@ -23,6 +23,9 @@ from django.conf import settings
 #from io import StringIO
 import time as pt
 import zipfile
+from multiprocessing import Process, Manager, Semaphore, Barrier
+import random
+import time
 
 separator = getattr(settings, 'SEPARATOR', ',') #'.' #separator = '.' or ','
 
@@ -16512,4 +16515,62 @@ def report_pulsar_frost_period(request):
     output_name = 'report_frost_pulsar_period_'+translate(obj_parent_title)+'_'+translate(obj_title)+'_'+str(electric_data_start)+'-'+str(electric_data_end)
     file_ext = 'xlsx'    
     response['Content-Disposition'] = 'attachment;filename="%s.%s"' % (output_name.replace('"', '\"'), file_ext)   
+    return response
+
+def create_file(m_l, bar):
+    '''В отдельном потоке создаем объект файла. Объект добавляем в список, который существует в общей памяти для всех потоков.'''
+    #print('Вошли в поток')
+    # sm.acquire()
+    file_like_io = io.StringIO('Hello World!\n'*1000)
+    m_l.append(file_like_io)
+    bar.wait()
+    # sm.release()
+
+def report_zip_multiprocess(request):
+
+    response = io.BytesIO()
+
+    #Создаем архив
+    zf = zipfile.ZipFile(response, mode='w', compression=zipfile.ZIP_DEFLATED)
+
+    with Manager() as m:
+        sm = Semaphore(4)
+        b = Barrier(2)
+        prc = []
+        files = m.list()
+        for x in range(24):
+            pr = Process(target=create_file, args=(files, b))
+            prc.append(pr)
+            pr.start()
+            print(x)
+
+        for p in prc:
+            p.join()
+        
+        print('всего объектов ',len(files))
+        for file in files:
+            name_of_document = '80020-'
+            name_of_file_80020 =name_of_document + str(random.randint(1,10000)) + '.txt'
+            zf.writestr(name_of_file_80020, file.getvalue( ))
+
+        print('done')
+
+    # # Формируем имя документа
+    # name_of_document = '80020'
+    # myxml_IO = io.StringIO('Hello World!\n'*1000)
+    # name_of_file_80020 =name_of_document + '_' + '.txt'
+
+    # zf.writestr(name_of_file_80020, myxml_IO.getvalue())
+
+    zf.close()
+    
+
+    response=HttpResponse(response.getvalue())
+    response['Content-Type'] = 'application/x-zip-compressed'
+    
+    #Формируем имя выгружаемого архива с получасовками
+    output_name = '80020_'
+    file_ext = 'zip'
+    response['Content-Disposition'] = 'attachment;filename="%s.%s"' % (output_name.replace('"', '\"'), file_ext)
+  
     return response

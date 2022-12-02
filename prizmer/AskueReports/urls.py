@@ -154,5 +154,7 @@ urlpatterns = [
     url(r'^118/$', views.report_pulsar_frost_daily, name = '118'), # Показание на дату с холодосчётчика Пульсар
     url(r'^117/$', views.report_pulsar_frost_period, name = '117'), # Потребление за период с холодосчётчиков Пульсар
 
+    
+    url(r'^404/$', views.report_zip_multiprocess, name = '404'),
     # Наличие в комментарии *, говорит о том, что он реагирует на свойства SHOW_LIC_NUM,SEPARATOR и ROUND_SIZE
 ]
