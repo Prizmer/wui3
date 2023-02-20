@@ -1,2 +1,3 @@
-prizmer/account_prizmer/__pycache__/__init__.cpython-39.pyc
-prizmer/static/cfg/electric_tro_sud.xlsx
+*.pyc
+*.xlsx
+
