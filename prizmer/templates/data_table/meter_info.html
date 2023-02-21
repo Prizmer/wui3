@@ -124,17 +124,24 @@
 		<div class="col-1" > 
 		{% load static %} <img src="{%static "images/place-ico64.png" %}">
 		</div>
-		<div class="col-11 align-self-center"  > <strong>{{data_table.0.0}}<img src="{%static "images/right-ico20.png" %}">  {{data_table.0.1}} </strong>
+		<div class="col-11 align-self-center"  > 
+			<strong>{{data_table.0.0}}<img src="{%static "images/right-ico20.png" %}">  {{data_table.0.1}} </strong>
+			<div id = "status_info"> Состояние счётчика</div>
 			<div class="row">			
 				<div class="col-md-3">
-					<div class="row justify-content-center radius"  style="border-radius: 20px 20px">
-						<div id="current values">
-						<strong>Запрос данных</strong>
-							<div id = current>
-								<p>Нажмите кнопку для запроса данных</p>
-							</div>
-						<span onclick="load_current('service_replace_electric')" class="button" id="polling_current_values"><b>Текущие</b></span>
-					</div>
+					<div class="row justify-content-center radius"  id="current values" style="border-radius: 20px 20px">
+						
+						<div class="col-12"><strong>Запрос данных</strong> </div>
+						<div class="col-12"><strong></strong> </div>
+						<div id = "current">			
+						</div>
+						<p>
+						<div class="col-12">
+						<button onclick="load_current('service_replace_electric')" class="btn btn-outline-primary btn-sm" type="button" id="button-addon1">Текущие</button>
+						</div>
+
+						<!-- <span onclick="load_current('service_replace_electric')" class="button" id="polling_current_values"><b>Текущие</b></span> -->
+					
 				</div>
 				</div>
 		<div class="col-md-5">
@@ -146,65 +153,77 @@
 						</div>
 					</div>									
 					<p>
-					<div class="row justify-content-center">
-						<div class = "col-7">					
-							<label class="form-check-label">Активно</label>						
-						</div>
-						<div class = "col-5">
-							<span onclick="load_current('')" class="button" id=""><b>Прочитать</b></span>						
+					<div class="row justify-content-center">						
+						<p>
+						<div class = "col-12">
+							<div class="input-group mb-3">								
+								<input type="text" class="form-control btn-sm" aria-label="Активно"  placeholder="Активно" aria-describedby="button-addon1">
+								<button class="btn btn-outline-primary btn-sm" type="button" id="button-addon1" onclick="">Прочитать</button>
+							</div>
 						</div>
 					</div>
 
 <p>
 					<div class="row">
-						<div class="col-12 align-items-center"> 
+						<div class="col-12 align-items-center "> 
 							<strong>Лимит мощности, Вт</strong>
-						</div>														
-					<p>					
-						<div class = "col-5 offset-7">
-							<span onclick="get_active_power_value('')" class="button" id=""><b> Прочитать </b></span>						
+						</div>
+						<p>						
+						<div class = "col-12">
+							<div class="input-group mb-3">								
+								<input type="text" class="form-control btn-sm" placeholder="0000" aria-label="Статус лимита мощности" aria-describedby="button-addon1">
+								<select class="form-select btn-sm" id="inputGroupSelectLimitStatus">
+									<option selected><b>Не определён</b></option>
+									<option value="1">Установлен</option>
+									<option value="2">Отсутствует</option>								
+								  </select>
+								<!-- <button class="btn btn-outline-secondary" type="button" id="button-addon1" checked>Установлен/Отсутствует</button> -->
+							</div>
+						</div>
+					<p>
+					
+						<div class = "col-5 offset-2">
+							<button onclick="load_current('')" class="btn btn-outline-primary btn-sm" type="button" id="button-addon1">Прочитать</button>
+							<!-- <span onclick="load_current('')" class="button" id=""><b> Прочитать </b></span>						 -->
 						</div> 			
 					
-						<div class = "col-7">					
-							<input type="text" class="form-control-plaintext" id="power_value" name = "power_value" value="0000">					
-						</div>			
-										
-						<div class = "col-5 offset-7">
-							<span onclick="set_active_power_value('')" class="button" id="set_active_power_value_cmd"><b> Записать </b></span>						
+						<div class = "col-5">
+							<button onclick="load_current('')" class="btn btn-outline-primary btn-sm" type="button" id="button-addon1">Записать</button>
+							<!-- <span onclick="load_current('')" class="button" id=""><b> Записать </b></span>						 -->
 						</div>
 					</div>
 				
-<p>
-					<div class="row">
-						</br>
-						 <div class="col-8 mx-auto "> 							
-							<span onclick="load_current('')" class="button" id=""><b> Установить лимит мощности </b></span>
-						</div>
-						<div class="col-8 mx-auto "> 
-							<span onclick="load_current('')" class="button" id=""><b> ___Снять лимит мощности___ </b></span>
-						</div>
-						
-					</div>
 				</div>
 			</div>
 		</div>
 			
 			<div class="col-md-4">
 				<div class="row justify-content-center radius"  style="border-radius: 20px 20px">
-				<strong>Ручное управление нагрузкой</strong>
-			</br>
-			</br>
-				<span onclick="power_on('service_replace_electric')" class="button" id="power_on_cmd"><b>Включить  нагрузку</b></span>
-			</br>
-		    </br>
-				<span onclick="power_off('service_replace_electric')" class="button" id="power_off_cmd"><b>Выключить нагрузку</b></span>
+					<div class ="col-12"> <strong>Ручное управление нагрузкой</strong> </div>
+					<p>
+					<div class ="col-12">  </div>
+					<p>
+					<div class ="col-10 offset-2">
+						<button onclick="power_on('service_replace_electric')" class="btn btn-outline-primary btn-sm" type="button" id="button-addon1">&nbsp;Включить нагрузку &nbsp;</button>
+						<!-- <span onclick="power_on('service_replace_electric')" class="button" id="power_on_cmd"><b>Включить  нагрузку</b></span> -->
+					</div>
+				
+			<p>
+				<div class ="col-12">  </div>
+					<p>
+				<div class ="col-10 offset-2">
+				<button onclick="power_off('service_replace_electric')" class="btn btn-outline-primary btn-sm"  type="button" id="button-addon1">Выключить нагрузку</button>
+				<!-- <span onclick="power_off('service_replace_electric')" class="button" id="power_off_cmd"><b>Выключить нагрузку</b></span> -->
+				</div>
 		</br>
 	    </br>
+		
 			<strong id = "res_power_on_off">  </strong>
 				</div>
 			</div>
 		</div>
 	</div>
+
 	</div>
 	<br>
 	<div class="row justify-content-center radius" style="border-radius: 10px 60px" >
