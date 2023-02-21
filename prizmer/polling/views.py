@@ -46,8 +46,23 @@ def current_m230(request):
         except:
             return HttpResponse('Нет связи c прибором')
                 
+    
+    sRec = f"""    		<p>
+							<div class="row">
+								<div class="col-md-6">Сумма</div>
+								<div  class="col-md-6">{curr_t0}</div>
+                                <div class="col-md-6">T1</div>
+								<div  class="col-md-6">{curr_t1}</div>
+                                <div class="col-md-6">T2</div>
+								<div  class="col-md-6">{curr_t2}</div>
+                                <div class="col-md-6">T3</div>
+								<div  class="col-md-6">{curr_t3}</div>								
+							</div> <p>
+							
+    """
+    return HttpResponse(sRec)
+    #return HttpResponse("Сумма= "+str(args['curr_t0']) + " Тариф 1= "+str(args['curr_t1']) + " Тариф 2= "+str(args['curr_t2']))
     #return render(request, "polling/current_m23x.html", args)
-    return HttpResponse("Сумма= "+str(args['curr_t0']) + " Тариф 1= "+str(args['curr_t1']) + " Тариф 2= "+str(args['curr_t2']))
 
 
 def power_on(request):
