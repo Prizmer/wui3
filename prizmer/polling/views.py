@@ -101,5 +101,61 @@ def power_off(request):
         except:
             return HttpResponse(str(result))
                 
-    #return render(request, "polling/current_m23x.html", args)
+    return HttpResponse(str(result))
+
+def set_active_power_limit_value(request):
+    result = 'Нет связи c прибором'
+
+    if request.is_ajax():
+        if request.method == 'GET':
+            print("Запрос на установку значения контроля мощности")
+            value = request.GET.get('power_value')
+            value = str(value)
+            print(value)
+            factory_number = request.GET.get('factory_number')
+            factory_number = int(factory_number)
+            conn = get_connection_by_serial_number(factory_number)
+            host = conn[0][0]
+            port = conn[0][1]
+            net_addr = conn[0][2]
+        try:
+
+            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+                sock.settimeout(m23x_driver.SOCKET_TIMEOUT)
+                sock.connect((host, int(port)))
+                time.sleep(0.2)
+                print("000000")
+                result = m23x_driver.set_active_power_limit(sock, net_addr, value) 
+                print("111111")
+
+        except Exception as e:
+            print(e)
+            return HttpResponse(str(result))
+                
+    return HttpResponse(str(result))
+
+def get_active_power_limit_value(request):
+    result = 'Нет связи c прибором'
+
+    if request.is_ajax():
+        if request.method == 'GET':
+            print("Запрос на чтение значения контроля мощности")
+            factory_number = request.GET.get('factory_number')
+            factory_number = int(factory_number)
+            conn = get_connection_by_serial_number(factory_number)
+            host = conn[0][0]
+            port = conn[0][1]
+            net_addr = conn[0][2]
+        try:
+
+            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+                sock.settimeout(m23x_driver.SOCKET_TIMEOUT)
+                sock.connect((host, int(port)))
+                time.sleep(0.2)
+                result = m23x_driver.get_active_power_limit(sock, net_addr)
+
+        except Exception as e:
+            # print(e)
+            return HttpResponse(str(result))
+                
     return HttpResponse(str(result))

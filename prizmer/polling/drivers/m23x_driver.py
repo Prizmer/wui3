@@ -32,6 +32,7 @@ PROFIL_LAST_ADDRESS        = '0813'
 
 # Power limit
 SET_ACTIVE_POWER_LIMIT     = '032C'   # установить лимит активной мощности
+GET_ACTIVE_POWER_LIMIT     = '0819'   # прочитать  лимит активной мощности
 SET_ACTIVE_POWER_LIMIT_ON  = '032D01' # включить контроль превышения активной мощности
 SET_ACTIVE_POWER_LIMIT_OFF = '032D00' # выключить контроль превышения активной мощности
 SET_POWER_ON               = '033100' # включить нагрузку
@@ -125,9 +126,10 @@ def set_active_power_limit(sock, net_address, active_power_limit):
     if open_link(sock, net_address):
         command = SET_ACTIVE_POWER_LIMIT
         number_hex = "%02X" % net_address
-        active_power_limit = active_power_limit
+        active_power_limit = "%06X" % (int(active_power_limit)*100)
         cmd_without_crc = number_hex + command + active_power_limit
         request = cmd_without_crc + calc_crc_modbus(bytes.fromhex(cmd_without_crc))
+        print(request)
         sock.sendall(bytes.fromhex(request))
         time.sleep(DELAY_WAIT_DATA)
         received = (sock.recv(80).hex())
@@ -139,6 +141,29 @@ def set_active_power_limit(sock, net_address, active_power_limit):
         return "Успешная установка лимита мощности"            
     else:
         print(f"Канал связи с {addr} не открыт")
+        return ''
+
+def get_active_power_limit(sock, net_address):
+    """Запрос на чтение лимита активной мощности"""
+    if open_link(sock, net_address):
+        command = GET_ACTIVE_POWER_LIMIT
+        number_hex = "%02X" % net_address
+        cmd_without_crc = number_hex + command
+        request = cmd_without_crc + calc_crc_modbus(bytes.fromhex(cmd_without_crc))
+        sock.sendall(bytes.fromhex(request))
+        time.sleep(DELAY_WAIT_DATA)
+        received = (sock.recv(80).hex())
+    else:
+        #print(f"Канал с прибором {net_address} не открыт")
+        return ''
+
+    if len(received) == 12:
+        print("Успешная установка лимита мощности")
+        print(received)
+        print(received[2:-4])
+
+    else:
+        print(f"Канал связи с {net_address} не открыт")
         return ''
 
 def set_power_on(sock, net_address):

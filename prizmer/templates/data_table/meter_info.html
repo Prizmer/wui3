@@ -1,7 +1,7 @@
 <html>
     <head>
 		<script>
-		var net_addr = '';
+		// var net_addr = '';
 		var load_current = function(page){
 			// console.log("Hi");
 			factory_number=$('#factory_number').text();
@@ -49,7 +49,41 @@
 			console.log(msg);
 			$('#res_power_on_off').html(msg); // Пишем в div ответ от страницы 
 			//hide_loader();
-			});			
+			});	
+		};
+
+		var set_active_power_value = function(page){
+			factory_number=$('#factory_number').text();
+			power_value=$("#power_value").val();//$('#power_value').text();
+			// console.log(power_value);
+			$('#res_power_on_off').html('');
+			$.ajax({
+				type: "GET",
+				url: "/polling/set_active_power_limit_value",
+				data:{factory_number: factory_number, power_value: power_value},
+			   })
+			   
+		   .done(function( msg ) {
+			console.log(msg);
+			$('#res_power_on_off').html(msg); // Пишем в div ответ от страницы 
+			//hide_loader();
+			});
+		};
+
+		var get_active_power_value = function(page){
+			factory_number=$('#factory_number').text();
+			$('#res_power_on_off').html('');
+			$.ajax({
+				type: "GET",
+				url: "/polling/get_active_power_limit_value",
+				data:{factory_number: factory_number},
+			   })
+			   
+		   .done(function( msg ) {
+			console.log(msg);
+			$('#res_power_on_off').html(msg); // Пишем в div ответ от страницы 
+			//hide_loader();
+			});		
 		};
       </script>
     </head>
@@ -124,19 +158,19 @@
 <p>
 					<div class="row">
 						<div class="col-12 align-items-center"> 
-							<strong>Лимит мощности, ВТ</strong>
+							<strong>Лимит мощности, Вт</strong>
 						</div>														
 					<p>					
 						<div class = "col-5 offset-7">
-							<span onclick="load_current('')" class="button" id=""><b> Прочитать </b></span>						
+							<span onclick="get_active_power_value('')" class="button" id=""><b> Прочитать </b></span>						
 						</div> 			
 					
 						<div class = "col-7">					
-							<input type="text" class="form-control-plaintext" id="" value="0000">					
+							<input type="text" class="form-control-plaintext" id="power_value" name = "power_value" value="0000">					
 						</div>			
 										
 						<div class = "col-5 offset-7">
-							<span onclick="load_current('')" class="button" id=""><b> Записать </b></span>						
+							<span onclick="set_active_power_value('')" class="button" id="set_active_power_value_cmd"><b> Записать </b></span>						
 						</div>
 					</div>
 				
