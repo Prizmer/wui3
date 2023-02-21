@@ -14176,3 +14176,22 @@ def get_data_table_heat_for_year_by_day(obj_parent_title, obj_title, electric_da
     data_table = cursor.fetchall()    
 
     return data_table
+
+def get_connection_by_serial_number(serial):
+    """Получаем настройки соединения по заводскому номеру"""
+    cursor = connection.cursor()
+    cursor.execute("""SELECT 
+      tcpip_settings.ip_address, 
+      tcpip_settings.ip_port, 
+      meters.address
+    FROM 
+      public.tcpip_settings, 
+      public.meters, 
+      public.link_meters_tcpip_settings
+    WHERE 
+      link_meters_tcpip_settings.guid_meters = meters.guid AND
+      link_meters_tcpip_settings.guid_tcpip_settings = tcpip_settings.guid AND
+      meters.factory_number_manual = '%s';
+    """%serial)
+    data_table = cursor.fetchall()
+    return data_table
