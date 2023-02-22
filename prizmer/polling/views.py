@@ -127,8 +127,6 @@ def set_active_power_limit_value(request):
             value = request.GET.get('power_value')
             value = str(value)
             control_state = request.GET.get('control_state')
-            print(f'...{control_state}...')
-
             factory_number = request.GET.get('factory_number')
             factory_number = int(factory_number)
             conn = get_connection_by_serial_number(factory_number)
@@ -153,7 +151,7 @@ def set_active_power_limit_value(request):
                     pass 
 
         except Exception as e:
-            print(e)
+            # print(e)
             return HttpResponse(str(result))
                 
     return HttpResponse(str(result))
@@ -192,7 +190,7 @@ def get_power_state(request):
 
     if request.is_ajax():
         if request.method == 'GET':
-            print("Запрос на чтение сотояния реле нагрузки")
+            # print("Запрос на чтение сотояния реле нагрузки")
             factory_number = request.GET.get('factory_number')
             factory_number = int(factory_number)
             conn = get_connection_by_serial_number(factory_number)
