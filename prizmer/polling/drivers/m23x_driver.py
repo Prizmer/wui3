@@ -79,7 +79,7 @@ def polling_serial(sock, net_address) -> str:
         #print(f"Заводской номер запрошен с прибора {net_address}")
         return str(calc_serial(received))              
     else:
-        print(f"Канал связи с {addr} не открыт")
+        # print(f"Канал связи с {addr} не открыт")
         return ""
 
 def polling_daily(sock, net_address, command) -> str:
@@ -99,7 +99,7 @@ def polling_daily(sock, net_address, command) -> str:
     if len(received) == 38:
         return str(calc_energy_daily(received))            
     else:
-        print(f"Канал связи с {addr} не открыт")
+        # print(f"Канал связи с {addr} не открыт")
         return ''
 
 def get_profil_last_address(sock, net_address):
@@ -119,7 +119,7 @@ def get_profil_last_address(sock, net_address):
     if len(received) == 24:
         return str(received)            
     else:
-        print(f"Канал связи с {addr} не открыт")
+        # print(f"Канал связи с {addr} не открыт")
         return ''
 
 def set_active_power_limit(sock, net_address, active_power_limit):
@@ -141,7 +141,7 @@ def set_active_power_limit(sock, net_address, active_power_limit):
     if len(received) == 8:
         return "Успешная установка лимита мощности"            
     else:
-        print(f"Канал связи с {addr} не открыт")
+        # print(f"Канал связи с {addr} не открыт")
         return ''
 
 def get_active_power_limit(sock, net_address):
@@ -162,7 +162,7 @@ def get_active_power_limit(sock, net_address):
         res = int(received[2:4] + received[6:8] + received[4:6], 16)//100
         return res
     else:
-        print(f"Канал связи с {net_address} не открыт")
+        # print(f"Канал связи с {net_address} не открыт")
         return ''
 
 def set_power_on(sock, net_address):
@@ -182,7 +182,7 @@ def set_power_on(sock, net_address):
     if len(received) == 8:
         return "Нагрузка включена"            
     else:
-        print(f"Канал связи с {addr} не открыт")
+        # print(f"Канал связи с {addr} не открыт")
         return ''
 
 def set_power_off(sock, net_address):
@@ -202,7 +202,7 @@ def set_power_off(sock, net_address):
     if len(received) == 8:
         return "Нагрузка выключена"            
     else:
-        print(f"Канал связи с {addr} не открыт")
+        # print(f"Канал связи с {addr} не открыт")
         return ''
 
 def set_active_power_limit_on(sock, net_address):
@@ -222,7 +222,7 @@ def set_active_power_limit_on(sock, net_address):
     if len(received) == 8:
         return "Контроль лимита активной мощности включен"            
     else:
-        print(f"Канал связи с {addr} не открыт")
+        # print(f"Канал связи с {addr} не открыт")
         return ''
 
 def set_active_power_limit_off(sock, net_address):
@@ -243,7 +243,7 @@ def set_active_power_limit_off(sock, net_address):
     if len(received) == 8:
         return "Контроль лимита активной мощности выключен"            
     else:
-        print(f"Канал связи с {addr} не открыт")
+        # print(f"Канал связи с {addr} не открыт")
         return ''
 
 def get_power_state(sock, net_address):
@@ -266,7 +266,7 @@ def get_power_state(sock, net_address):
         # 9 bit должен отвечать за состояние нагрузки 1-выкл 0-вкл
         return res_big[9]
     else:
-        print(f"Канал связи с {net_address} не открыт")
+        # print(f"Канал связи с {net_address} не открыт")
         return ''
 
 def get_power_limit_state(sock, net_address):
@@ -290,5 +290,5 @@ def get_power_limit_state(sock, net_address):
         # print(res_big)
         return res_big[6]
     else:
-        print(f"Канал связи с {net_address} не открыт")
+        # print(f"Канал связи с {net_address} не открыт")
         return ''

@@ -56,7 +56,6 @@
 			factory_number=$('#factory_number').text();
 			power_value=$("#power_value").val();
 			control_state=$("#inputGroupSelectLimitStatus").val();
-			console.log(control_state);
 
 			$('#status_info').html('>>>');
 			$.ajax({
@@ -66,7 +65,6 @@
 			   })
 			   
 		   .done(function( msg ) {
-			console.log(msg);
 			$('#status_info').html(msg); // Пишем в div ответ от страницы 
 			});
 		};
@@ -91,11 +89,9 @@
 				$('#status_info').html(msg_arr[0]); // Пишем в div ответ от страницы
 			}
 			if(msg_arr[1]=='0'){
-				console.log('запрещён')
 				$("#inputGroupSelectLimitStatus").val(1)
 
 			} else if (msg_arr[1]) {
-				console.log('разрешён')
 				$("#inputGroupSelectLimitStatus").val(2)
 			}
 			});		
