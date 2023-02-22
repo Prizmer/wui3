@@ -32,6 +32,7 @@ PROFIL_LAST_ADDRESS        = '0813'
 
 # Power limit
 SET_ACTIVE_POWER_LIMIT     = '032C'   # установить лимит активной мощности
+GET_STATE_POWER_LIMIT      = '0818'   # прочитать  слово состояния лимита активной мощности
 GET_ACTIVE_POWER_LIMIT     = '0819'   # прочитать  лимит активной мощности
 SET_ACTIVE_POWER_LIMIT_ON  = '032D01' # включить контроль превышения активной мощности
 SET_ACTIVE_POWER_LIMIT_OFF = '032D00' # выключить контроль превышения активной мощности
@@ -158,10 +159,8 @@ def get_active_power_limit(sock, net_address):
         return ''
 
     if len(received) == 12:
-        print("Успешная установка лимита мощности")
-        print(received)
-        print(received[2:-4])
-
+        res = int(received[2:4] + received[6:8] + received[4:6], 16)//100
+        return res
     else:
         print(f"Канал связи с {net_address} не открыт")
         return ''
@@ -245,4 +244,51 @@ def set_active_power_limit_off(sock, net_address):
         return "Контроль лимита активной мощности выключен"            
     else:
         print(f"Канал связи с {addr} не открыт")
+        return ''
+
+def get_power_state(sock, net_address):
+    """Запрос слово состояния управления нагрузкой"""
+    if open_link(sock, net_address):
+        command = GET_STATE_POWER_LIMIT
+        number_hex = "%02X" % net_address
+        cmd_without_crc = number_hex + command
+        request = cmd_without_crc + calc_crc_modbus(bytes.fromhex(cmd_without_crc))
+        sock.sendall(bytes.fromhex(request))
+        time.sleep(DELAY_WAIT_DATA)
+        received = (sock.recv(80).hex())
+    else:
+        #print(f"Канал с прибором {net_address} не открыт")
+        return ''
+
+    if len(received) == 10:
+        state_big_1 = received[2:6]
+        res_big = bin(int(state_big_1,16))[2:].zfill(16)
+        # 9 bit должен отвечать за состояние нагрузки 1-выкл 0-вкл
+        return res_big[9]
+    else:
+        print(f"Канал связи с {net_address} не открыт")
+        return ''
+
+def get_power_limit_state(sock, net_address):
+    """Запрос флага контроля лимита мощности"""
+    if open_link(sock, net_address):
+        command = GET_STATE_POWER_LIMIT
+        number_hex = "%02X" % net_address
+        cmd_without_crc = number_hex + command
+        request = cmd_without_crc + calc_crc_modbus(bytes.fromhex(cmd_without_crc))
+        sock.sendall(bytes.fromhex(request))
+        time.sleep(DELAY_WAIT_DATA)
+        received = (sock.recv(80).hex())
+    else:
+        #print(f"Канал с прибором {net_address} не открыт")
+        return ''
+
+    if len(received) == 10:
+        state_big_1 = received[2:6]
+        res_big = bin(int(state_big_1,16))[2:].zfill(16)
+        # 6 bit должен отвечать за состояние контроля мощности
+        # print(res_big)
+        return res_big[6]
+    else:
+        print(f"Канал связи с {net_address} не открыт")
         return ''

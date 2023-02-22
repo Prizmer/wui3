@@ -51,11 +51,11 @@ def current_m230(request):
 							<div class="row">
 								<div class="col-md-6">Сумма</div>
 								<div  class="col-md-6">{curr_t0}</div>
-                                <div class="col-md-6">T1</div>
+                                <div class="col-md-6">Tариф 1</div>
 								<div  class="col-md-6">{curr_t1}</div>
-                                <div class="col-md-6">T2</div>
+                                <div class="col-md-6">Tариф 2</div>
 								<div  class="col-md-6">{curr_t2}</div>
-                                <div class="col-md-6">T3</div>
+                                <div class="col-md-6">Tариф 3</div>
 								<div  class="col-md-6">{curr_t3}</div>								
 							</div> <p>
 							
@@ -126,7 +126,9 @@ def set_active_power_limit_value(request):
             print("Запрос на установку значения контроля мощности")
             value = request.GET.get('power_value')
             value = str(value)
-            print(value)
+            control_state = request.GET.get('control_state')
+            print(f'...{control_state}...')
+
             factory_number = request.GET.get('factory_number')
             factory_number = int(factory_number)
             conn = get_connection_by_serial_number(factory_number)
@@ -139,9 +141,16 @@ def set_active_power_limit_value(request):
                 sock.settimeout(m23x_driver.SOCKET_TIMEOUT)
                 sock.connect((host, int(port)))
                 time.sleep(0.2)
-                print("000000")
-                result = m23x_driver.set_active_power_limit(sock, net_addr, value) 
-                print("111111")
+                result = m23x_driver.set_active_power_limit(sock, net_addr, value)
+
+                if control_state == '1':
+                    print("Включаем контроль")
+                    m23x_driver.set_active_power_limit_off(sock, net_addr)
+                elif control_state == '2':
+                    print("Отключаем контроль")
+                    m23x_driver.set_active_power_limit_on(sock, net_addr)
+                else:
+                    pass 
 
         except Exception as e:
             print(e)
@@ -154,7 +163,7 @@ def get_active_power_limit_value(request):
 
     if request.is_ajax():
         if request.method == 'GET':
-            print("Запрос на чтение значения контроля мощности")
+            # print("Запрос на чтение значения контроля мощности")
             factory_number = request.GET.get('factory_number')
             factory_number = int(factory_number)
             conn = get_connection_by_serial_number(factory_number)
@@ -168,6 +177,35 @@ def get_active_power_limit_value(request):
                 sock.connect((host, int(port)))
                 time.sleep(0.2)
                 result = m23x_driver.get_active_power_limit(sock, net_addr)
+                time.sleep(0.1)
+                status = m23x_driver.get_power_limit_state(sock, net_addr)
+
+        except Exception as e:
+            # print(e)
+            return HttpResponse(str(result), str(status))
+                
+    # return HttpResponse(str(result), "1")
+    return HttpResponse(str(result)+ ','+ str(status))
+
+def get_power_state(request):
+    result = 'Нет связи c прибором'
+
+    if request.is_ajax():
+        if request.method == 'GET':
+            print("Запрос на чтение сотояния реле нагрузки")
+            factory_number = request.GET.get('factory_number')
+            factory_number = int(factory_number)
+            conn = get_connection_by_serial_number(factory_number)
+            host = conn[0][0]
+            port = conn[0][1]
+            net_addr = conn[0][2]
+        try:
+
+            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+                sock.settimeout(m23x_driver.SOCKET_TIMEOUT)
+                sock.connect((host, int(port)))
+                time.sleep(0.2)
+                result = m23x_driver.get_power_state(sock, net_addr)
 
         except Exception as e:
             # print(e)
