@@ -11782,8 +11782,8 @@ def report_balance_period_water_impulse(request):
 
 def report_forma_80040(request):
     import zipfile
-    response = io.StringIO()
-    
+    # response = io.StringIO()
+    response = io.BytesIO()
     
     #Запрашиваем данные для отчета
     
@@ -12025,7 +12025,8 @@ def report_forma_80040(request):
         
         # Создание и сохранение документа
         doc = etree.ElementTree(root) 
-        myxml_IO=io.StringIO()   
+        #myxml_IO=io.StringIO()
+        myxml_IO=io.BytesIO()   
         doc.write(myxml_IO, xml_declaration=True, encoding='UTF-8')
         # Формируем имя документа
         name_of_document = '80040'
