@@ -12021,7 +12021,7 @@ def report_forma_80040(request):
                 for z in range (len(my_dict_of_profil_hour)):
                     periodElt = etree.SubElement(measuringchannelElt, 'period', start = str(my_dict_of_profil_hour[z][0]), end = str(my_dict_of_profil_hour[z][1]))
                     value  = etree.SubElement(periodElt, 'value', status = str(my_dict_of_profil_hour[z][3]))
-                    value.text = str(my_dict_of_profil_hour[z][2])
+                    value.text = str(round(my_dict_of_profil_hour[z][2],2))
         
         # Создание и сохранение документа
         doc = etree.ElementTree(root) 
