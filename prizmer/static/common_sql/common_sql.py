@@ -9416,14 +9416,14 @@ def MakeSqlQuery_heat_no_data( obj_title, electric_data_end, my_params):
     sQuery="""
     Select heat_abons.obj_name, heat_abons.ab_name, heat_abons.factory_number_manual, 
 round(z2.energy::numeric,7),
-
+round(z2.vol::numeric,7),
 round(z2.t_in::numeric,1),
 round(z2.t_out::numeric,1), heat_abons.name
 from heat_abons
 left join
 (SELECT z1.daily_date, z1.name_objects, z1.name_abonents, z1.number_manual, 
             sum(Case when z1.params_name = '%s' then z1.value_daily  end) as energy,
-            
+            sum(Case when z1.params_name = '%s' then z1.value_daily  end) as vol,
             sum(Case when z1.params_name = '%s' then z1.value_daily  end) as t_in,
             sum(Case when z1.params_name = '%s' then z1.value_daily  end) as t_out, res
             
@@ -9468,7 +9468,7 @@ on z2.number_manual=heat_abons.factory_number_manual
 where heat_abons.obj_name='%s'
 and (z2.energy is null)
 order by heat_abons.obj_name, heat_abons.ab_name
-    """%(my_params[0],my_params[2],my_params[3], obj_title,my_params[4],electric_data_end, obj_title)
+    """%(my_params[0],my_params[1],my_params[2],my_params[3], obj_title,my_params[4],electric_data_end, obj_title)
     #print(sQuery)
     return sQuery    
 def get_heat_no_data(obj_title,  electric_data_end):
