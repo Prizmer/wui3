@@ -1,0 +1,56 @@
+<html>
+    <head>
+    </head>
+    <body>
+<script src="/static/libs/liHighLight.js" type=text/javascript></script>
+<br>
+<span>Показания приборов учета электрической энергии (интегральная форма первичного учета), кВт.ч. A+ с учётом КТТ, КТН и А</span>
+<br>
+<strong><span>{{month_name}}</span></strong>
+<br>
+<span>Абонент: <strong>{{obj_title}}</strong></span>
+<br>
+
+
+{% if data_table%}
+
+<br><br>
+<table class="content" id="data-table">
+<tr>
+<th>№ ПУ</th>
+<th>на начало месяца</th>
+<th>на конец месяца</th>
+<th>Разница показаний</th>
+<th>КТТ</th>
+<th>Потери до границы, %</th>
+<th>Потери ТП, кВт.ч.</th>
+<th>Итого расход</th>
+
+</tr>
+{% for value in data_table%}
+<tr>
+<td>{{value.1}}</td>
+<td>{{value.2}}</td>
+<td>{{value.7}}</td>
+<td>{{value.12}}</td>
+<td>{{value.20}}</td>
+<td>2,51</td>
+<td>{{value.26}}</td>
+<td>{{value.27}}</td>
+
+
+</tr>
+{% endfor %}
+</table>
+
+{% else %}
+<span><strong>Нет данных.</strong></span>
+<br>
+{% endif %}
+
+
+
+<br>
+<br>
+</body>
+</html>

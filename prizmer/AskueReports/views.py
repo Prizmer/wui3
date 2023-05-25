@@ -23,6 +23,8 @@ from django.conf import settings
 #from io import StringIO
 import time as pt
 import zipfile
+from datetime import date, datetime, timedelta
+import random 
 
 separator = getattr(settings, 'SEPARATOR', ',') #'.' #separator = '.' or ','
 
@@ -18795,5 +18797,886 @@ def report_heat_by_day_for_year(request):
     output_name = 'heat_year_' + translate(obj_title) + '_' + electric_data_end
     file_ext = 'xlsx'
     
+    response['Content-Disposition'] = 'attachment;filename="%s.%s"' % (output_name.replace('"', '\"'), file_ext)   
+    return response
+
+def electric_integral_month_hours(request):
+    #SHOW_LIC_NUM = getattr(settings, 'SHOW_LIC_NUM', 'False')
+    ROUND_SIZE = 0 #getattr(settings, 'ROUND_SIZE', 3)
+    response = io.StringIO()
+    wb = Workbook()
+    wb.add_named_style(ali_grey)
+    wb.add_named_style(ali_white)
+    wb.add_named_style(ali_yellow)
+    wb.add_named_style(ali_pink)
+    wb.add_named_style(ali_blue)
+    ws_1 = wb.create_sheet('Приложение №5', 0)
+    del wb['Sheet']
+
+    # Шрифты
+    font_1 = Font(name='Times New Roman',
+                    size=12,
+                    bold=True,
+                    italic=False,
+                    vertAlign=None,
+                    underline='none',
+                    strike=False,
+                    color='FF000000')
+
+    font_2 = Font(name='Times New Roman',
+                    size=10,
+                    bold=True,
+                    italic=False,
+                    vertAlign=None,
+                    underline='none',
+                    strike=False,
+                    color='FF000000')
+
+    font_3 = Font(name='Times New Roman',
+                    size=9,
+                    bold=True,
+                    italic=False,
+                    vertAlign=None,
+                    underline='none',
+                    strike=False,
+                    color='FF000000')
+
+    font_4 = Font(name='Times New Roman',
+                    size=11,
+                    bold=True,
+                    italic=False,
+                    vertAlign=None,
+                    underline='none',
+                    strike=False,
+                    color='FF000000')
+
+    # Форматирование
+    alignment_1 = Alignment(horizontal='center',
+                        vertical='center',
+                        text_rotation=0,
+                        wrap_text=True,
+                        shrink_to_fit=False,
+                        indent=0)
+
+    alignment_1_2 = Alignment(horizontal='center',
+                        vertical='center',
+                        text_rotation=0,
+                        wrap_text=False,
+                        shrink_to_fit=False,
+                        indent=0)
+
+    alignment_2 = Alignment(horizontal='left',
+                        vertical='center',
+                        text_rotation=0,
+                        wrap_text=False,
+                        shrink_to_fit=False,
+                        indent=0)
+
+    alignment_3 = Alignment(horizontal='general',
+                        vertical='center',
+                        text_rotation=0,
+                        wrap_text=False,
+                        shrink_to_fit=False,
+                        indent=0)
+
+    alignment_4 = Alignment(horizontal='right',
+                        vertical='center',
+                        text_rotation=0,
+                        wrap_text=False,
+                        shrink_to_fit=False,
+                        indent=0)
+
+    alignment_5 = Alignment(horizontal='center',
+                        vertical='center',
+                        text_rotation=90,
+                        wrap_text=True,
+                        shrink_to_fit=False,
+                        indent=0)
+
+    alignment_6 = Alignment(horizontal='center',
+                        vertical='bottom',
+                        text_rotation=0,
+                        wrap_text=True,
+                        shrink_to_fit=False,
+                        indent=0)
+
+    alignment_7 = Alignment(horizontal='left',
+                        vertical='bottom',
+                        text_rotation=0,
+                        wrap_text=True,
+                        shrink_to_fit=False,
+                        indent=0)
+
+    alignment_8 = Alignment(horizontal='right',
+                        vertical='bottom',
+                        text_rotation=0,
+                        wrap_text=False,
+                        shrink_to_fit=False,
+                        indent=0)
+
+    # Размерность строк и столбцов
+    ws_1.row_dimensions[11].height = 27.75
+    ws_1.row_dimensions[12].height = 71.25
+    ws_1.row_dimensions[13].height = 21
+    ws_1.row_dimensions[14].height = 32.25
+    ws_1.row_dimensions[15].height = 33
+    ws_1.row_dimensions[16].height = 39
+    ws_1.row_dimensions[19].height = 16.5
+    ws_1.row_dimensions[22].height = 17.22
+    ws_1.row_dimensions[25].height = 16.5
+
+    ws_1.column_dimensions['A'].width = 4.71
+    ws_1.column_dimensions['B'].width = 12.29
+    ws_1.column_dimensions['C'].width = 24.86
+    ws_1.column_dimensions['D'].width = 12.43
+    ws_1.column_dimensions['E'].width = 12
+    ws_1.column_dimensions['F'].width = 12.86
+    ws_1.column_dimensions['G'].width = 11.71
+    ws_1.column_dimensions['H'].width = 7.71
+    ws_1.column_dimensions['I'].width = 6.43
+    ws_1.column_dimensions['J'].width = 6.43
+    ws_1.column_dimensions['K'].width = 9.43
+    ws_1.column_dimensions['L'].width = 16.14
+    ws_1.column_dimensions['M'].width = 11
+
+    # Границы
+    brdr_1 = Border(left=Side(style='thin'), 
+                    right=Side(style='thin'), 
+                    top=Side(style='thick'), 
+                    bottom=Side(style='thin'))
+
+    brdr_2 = Border(left=Side(style='thin'), 
+                    right=Side(style='thin'), 
+                    top=Side(style='thin'), 
+                    bottom=Side(style='thick'))
+
+    brdr_3 = Border(left=Side(style='thin'), 
+                    right=Side(style='thin'), 
+                    top=Side(style='thin'), 
+                    bottom=Side(style='thin'))
+
+    brdr_4 = Border(bottom=Side(style='thin'))
+
+    # Отчёт
+    ws_1['G3'] = 'АКТ'
+    ws_1['G3'].font = font_1
+    ws_1['G3'].alignment = alignment_1_2
+    ws_1['G4'] = 'снятия показаний приборов учета электрической энергии (интегральная форма первичного учета)'
+    ws_1['G4'].font = font_1
+    ws_1['G4'].alignment = alignment_1_2
+    ws_1.merge_cells('A7:B7')
+    ws_1['A7'] = 'Договор:  '
+    ws_1['A7'].font = font_1
+    ws_1['A7'].alignment = alignment_2
+    ws_1['C7'] = '№2016-Э/Дх-МЦ-5002'
+    ws_1['C7'].font = font_1
+    ws_1['C7'].alignment = alignment_3
+    ws_1.merge_cells('A9:B9')
+    ws_1['A9'] = 'Потребитель:'
+    ws_1['A9'].font = font_1
+    ws_1['A9'].alignment = alignment_2
+    ws_1['C9'] = 'ООО "ПромТраст"'
+    ws_1['C9'].font = font_1
+    ws_1['C9'].alignment = alignment_3
+    ws_1['J9'] = 'месяц:'
+    ws_1['J9'].font = font_1
+    ws_1['J9'].alignment = alignment_4
+    ws_1['K9'] = '-'
+    ws_1['K9'].font = font_1
+    ws_1['K9'].alignment = alignment_3
+    ws_1.merge_cells('A11:A12')
+    ws_1.merge_cells('B11:C12')
+    ws_1['B11'] = 'Место установки (наименование присоединения)'
+    ws_1['B11'].font = font_2
+    ws_1['B11'].alignment = alignment_1
+    ws_1.merge_cells('D11:D12')
+    ws_1['D11'] = '№ счетчика'
+    ws_1['D11'].font = font_2
+    ws_1['D11'].alignment = alignment_1
+    ws_1.merge_cells('E11:F11')
+    ws_1['E11'] = 'показания счетчика'
+    ws_1['E11'].font = font_2
+    ws_1['E11'].alignment = alignment_1
+    ws_1['E12'] = 'на начало месяца'
+    ws_1['E12'].font = font_2
+    ws_1['E12'].alignment = alignment_1
+    ws_1['F12'] = 'на конец месяца'
+    ws_1['F12'].font = font_2
+    ws_1['F12'].alignment = alignment_1
+    ws_1.merge_cells('G11:G12')
+    ws_1['G11'] = 'Разница показаний'
+    ws_1['G11'].font = font_2
+    ws_1['G11'].alignment = alignment_1
+    ws_1.merge_cells('H11:H12')
+    ws_1['H11'] = 'Коэффициент ИК'
+    ws_1['H11'].font = font_2
+    ws_1['H11'].alignment = alignment_5
+    ws_1.merge_cells('I11:J11')
+    ws_1['I11'] = 'Потери до границы'
+    ws_1['I11'].font = font_2
+    ws_1['I11'].alignment = alignment_1
+    ws_1['I12'] = '%'
+    ws_1['I12'].font = font_2
+    ws_1['I12'].alignment = alignment_1
+    ws_1['J12'] = 'кВт ч'
+    ws_1['J12'].font = font_2
+    ws_1['J12'].alignment = alignment_1
+    ws_1.merge_cells('K11:K12')
+    ws_1['K11'] = 'Потери в ТП, кВт ч'
+    ws_1['K11'].font = font_2
+    ws_1['K11'].alignment = alignment_5
+    ws_1.merge_cells('L11:L12')
+    ws_1['L11'] = 'Итого расход электроэнергии, кВт ч'
+    ws_1['L11'].font = font_2
+    ws_1['L11'].alignment = alignment_1
+    ws_1.merge_cells('M11:M12')
+    ws_1['M11'] = 'Мощность, кВт'
+    ws_1['M11'].font = font_2
+    ws_1['M11'].alignment = alignment_5
+    ws_1['A13'] = '1.'
+    ws_1['A13'].font = font_3
+    ws_1['A13'].alignment = alignment_1
+    ws_1['B13'] = '(Наименование объекта)'
+    ws_1['B13'].font = font_3
+    ws_1['B13'].alignment = alignment_3
+    ws_1['A14'] = '1'
+    ws_1['A14'].font = font_4
+    ws_1['A14'].alignment = alignment_6
+    ws_1.merge_cells('B14:C14')
+    ws_1['B14'] = ' РУ 0,4 кВ, ул. Дубининская, д.31А'
+    ws_1['B14'].font = font_4
+    ws_1['B14'].alignment = alignment_7
+    ws_1['D14'] = ''#'0803136386'
+    ws_1['D14'].font = font_4
+    ws_1['D14'].alignment = alignment_8
+    ws_1['E14'] = ''#'75097,0297'
+    ws_1['E14'].font = font_4
+    ws_1['E14'].alignment = alignment_8
+    ws_1['F14'] = '' #'75830,6113'
+    ws_1['F14'].font = font_4
+    ws_1['F14'].alignment = alignment_8
+    ws_1['G14'] = ''#'=F14-E14'
+    ws_1['G14'].font = font_4
+    ws_1['G14'].alignment = alignment_8
+    ws_1['H14'] = ''#'500'
+    ws_1['H14'].font = font_4
+    ws_1['H14'].alignment = alignment_8
+    ws_1['I14'] = '2,51'
+    ws_1['I14'].font = font_4
+    ws_1['I14'].alignment = alignment_8
+    ws_1['J14'].font = font_4
+    ws_1['J14'].alignment = alignment_8
+    ws_1['K14'] = ''#'=G14*H14*0.0251'
+    ws_1['K14'].font = font_4
+    ws_1['K14'].alignment = alignment_8
+    ws_1['L14'] = ''#'=G14*H14+K14'
+    ws_1['L14'].font = font_4
+    ws_1['L14'].alignment = alignment_8
+    ws_1['M14'].font = font_4
+    ws_1['M14'].alignment = alignment_8
+    ws_1['A15'] = '2'
+    ws_1['A15'].font = font_4
+    ws_1['A15'].alignment = alignment_6
+    ws_1.merge_cells('B15:C15')
+    ws_1['B15'] = ' РУ 0,4 кВ, ул. Дубининская, д.31А'
+    ws_1['B15'].font = font_4
+    ws_1['B15'].alignment = alignment_7
+    ws_1['D15'] = ''#'0803136290'
+    ws_1['D15'].font = font_4
+    ws_1['D15'].alignment = alignment_8
+    ws_1['E15'] = ''#'59495,3285'
+    ws_1['E15'].font = font_4
+    ws_1['E15'].alignment = alignment_8
+    ws_1['F15'] = ''#'59988,3705'
+    ws_1['F15'].font = font_4
+    ws_1['F15'].alignment = alignment_8
+    ws_1['G15'] = ''#'=F15-E15'
+    ws_1['G15'].font = font_4
+    ws_1['G15'].alignment = alignment_8
+    ws_1['H15'] = ''#'500'
+    ws_1['H15'].font = font_4
+    ws_1['H15'].alignment = alignment_8
+    ws_1['I15'] = '2,51'
+    ws_1['I15'].font = font_4
+    ws_1['I15'].alignment = alignment_8
+    ws_1['J15'].font = font_4
+    ws_1['J15'].alignment = alignment_8
+    ws_1['K15'] = ''#'=G15*H15*0.0251'
+    ws_1['K15'].font = font_4
+    ws_1['K15'].alignment = alignment_8
+    ws_1['L15'] = ''#'=G15*H15+K15'
+    ws_1['L15'].font = font_4
+    ws_1['L15'].alignment = alignment_8
+    ws_1.merge_cells('B16:C16')
+    ws_1['B16'] = 'Расход абонента, кВт ч'
+    ws_1['B16'].font = font_4
+    ws_1['B16'].alignment = alignment_7
+    ws_1['L16'] = '=SUM(L14:L15)'
+    ws_1['L16'].font = font_4
+    ws_1['L16'].alignment = alignment_8
+    ws_1['A19'] = 'Представитель Потребителя'
+    ws_1['A19'].font = font_4
+    ws_1['A19'].alignment = alignment_2
+    ws_1['F19'] = '    /  Мальцев С.Ю.'
+    ws_1['F19'].font = font_4
+    ws_1['F19'].alignment = alignment_2
+    ws_1['I19'] = '(дата)'
+    ws_1['I19'].font = font_4
+    ws_1['I19'].alignment = alignment_1
+    ws_1['A22'] = 'Представитель  Сетевой Организации'
+    ws_1['A22'].font = font_4
+    ws_1['A22'].alignment = alignment_2
+    ws_1['F22'] = '    /'
+    ws_1['F22'].font = font_4
+    ws_1['F22'].alignment = alignment_2
+    ws_1['I22'] = '(дата)'
+    ws_1['I22'].font = font_4
+    ws_1['I22'].alignment = alignment_1
+    ws_1['A25'] = 'Представитель  Продавца'
+    ws_1['A25'].font = font_4
+    ws_1['A25'].alignment = alignment_2
+    ws_1['F25'] = '    /'
+    ws_1['F25'].font = font_4
+    ws_1['F25'].alignment = alignment_2
+    ws_1['I25'] = '(дата)'
+    ws_1['I25'].font = font_4
+    ws_1['I25'].alignment = alignment_1
+
+    border_range_1 = ws_1['A11':'M11']
+    border_range_2 = ws_1['A12':'M12']
+    border_range_3 = ws_1['A14':'M14']
+    border_range_4 = ws_1['A15':'M15']
+    border_range_5 = ws_1['A16':'M16']
+    border_range_6 = ws_1['D19':'J19']
+    border_range_7 = ws_1['D22':'J22']
+    border_range_8 = ws_1['D25':'J25']
+
+    for cell in border_range_1:
+        for x in cell:
+            x.border = brdr_1
+
+    for cell in border_range_2:
+        for x in cell:
+            x.border = brdr_2
+
+    for cell in border_range_3:
+        for x in cell:
+            x.border = brdr_1
+
+    for cell in border_range_4:
+        for x in cell:
+            x.border = brdr_3
+
+    for cell in border_range_5:
+        for x in cell:
+            x.border = brdr_2
+
+    for cell in border_range_6:
+        for x in cell:
+            x.border = brdr_4
+
+    for cell in border_range_7:
+        for x in cell:
+            x.border = brdr_4
+
+    for cell in border_range_8:
+        for x in cell:
+            x.border = brdr_4
+
+    ws_1['M11'].border = Border(left=Side(style='thin'), 
+                                right=Side(style='thick'), 
+                                top=Side(style='thick'), 
+                                bottom=Side(style='thin'))
+
+    ws_1['M12'].border = Border(left=Side(style='thin'), 
+                                right=Side(style='thick'), 
+                                top=Side(style='thin'), 
+                                bottom=Side(style='thick'))
+
+    ws_1['M13'].border = Border(left=Side(style=None), 
+                                right=Side(style='thick'), 
+                                top=Side(style='thick'), 
+                                bottom=Side(style='thick'))
+
+    ws_1['M14'].border = Border(left=Side(style='thin'), 
+                                right=Side(style='thick'), 
+                                top=Side(style='thick'), 
+                                bottom=Side(style='thin'))
+
+    ws_1['M15'].border = Border(left=Side(style='thin'), 
+                                right=Side(style='thick'), 
+                                top=Side(style='thin'), 
+                                bottom=Side(style='thin'))
+
+    ws_1['M16'].border = Border(left=Side(style='thin'), 
+                                right=Side(style='thick'), 
+                                top=Side(style='thin'), 
+                                bottom=Side(style='thick'))
+
+#Запрашиваем данные для отчета
+    is_abonent_level = re.compile(r'abonent')
+    is_object_level_2 = re.compile(r'level2') 
+    obj_title           = request.GET['obj_title']
+    obj_key             = request.GET['obj_key']
+    obj_parent_title    = request.GET['obj_parent_title']    
+    electric_data_end   = request.GET['electric_data_end']
+    is_electric_monthly   = request.GET['is_electric_monthly']  
+          
+    res='Электричество'
+    if (is_electric_monthly=="1"):
+        dm='monthly'
+    else:
+        dm='daily'
+
+    dt_date=common_sql.get_date_month_range_by_date(electric_data_end)
+
+    common_sql.del_double_30_by_dates(dt_date[0][0],dt_date[-1][0])
+    
+    data_table=[]
+    if (bool(is_abonent_level.search(obj_key))): #выбран абонент
+        pass
+        
+    elif (bool(is_object_level_2.search(obj_key))):#выбран объект
+        data_table = common_sql.get_data_integral_dubi(obj_parent_title, obj_title, dt_date[0][0],dt_date[-1][0], dm, res)
+
+
+    my_date_list = electric_data_end.split(".")
+    year = my_date_list[2]
+    #print(year)
+    month_name = ""
+    month_name = common_sql.get_month_rus(dt_date[0][0])
+
+    if len(data_table)>0:
+    # Заполняем отчет значениями
+        ws_1['K9'] = month_name + ' ' + year +'г.'
+
+        try:
+            ws_1['D14'] = data_table[0][1]#'0803136386'
+        except:
+            next
+
+        try:
+            ws_1['E14'] = get_val_by_round(float(data_table[0][2]), 4, ',').replace('.',',')  #data_table[0][2]#'75097,0297'
+        except:
+            next
+    
+        try:
+            ws_1['F14'] = get_val_by_round(float(data_table[0][7]), 4, ',').replace('.',',')  #data_table[0][7] #'75830,6113'
+        except:
+            next
+
+        try:
+            ws_1['G14'] = get_val_by_round(float(data_table[0][12]), 4, ',').replace('.',',')  #data_table[0][12] #'=F14-E14'
+        except:
+            next
+
+        try:
+            ws_1['H14'] = data_table[0][20]#'500'
+        except:
+            next
+
+        try:
+            ws_1['K14'] = get_val_by_round(float(data_table[0][26]), 4, ',').replace('.',',')  #data_table[0][26]#'=G14*H14*0.0251'
+        except:
+            next
+
+        try:
+            ws_1['L14'] = get_val_by_round(float(data_table[0][27]), 4, ',').replace('.',',')  #data_table[0][27]#'=G14*H14+K14'
+        except:
+            next
+        try:
+            ws_1['D15'] = data_table[1][1]#'0803136290'
+        except:
+            next
+        try:
+            ws_1['E15'] = get_val_by_round(float(data_table[1][2]), 4, ',').replace('.',',')  #data_table[1][2]#'59495,3285'
+        except:
+            next
+        try:
+            ws_1['F15'] = get_val_by_round(float(data_table[1][7]), 4, ',').replace('.',',')  #data_table[1][7]#'59988,3705'
+        except:
+            next
+        try:
+            ws_1['G15'] = get_val_by_round(float(data_table[1][12]), 4, ',').replace('.',',')  #data_table[1][12]#'=F15-E15'
+        except:
+            next
+        try:
+            ws_1['H15'] = data_table[1][20]#'500'
+        except:
+            next
+        try:
+            ws_1['K15'] = get_val_by_round(float(data_table[1][26]), 4, ',').replace('.',',')  #data_table[1][26]#'=G15*H15*0.0251'
+        except:
+            next
+        try:
+            ws_1['L15'] = get_val_by_round(float(data_table[1][27]), 4, ',').replace('.',',')  #'=G15*H15+K15'
+        except:
+            next
+        try:
+            ws_1['L16'] = get_val_by_round(float(data_table[1][27]) + float(data_table[0][27]) ,4,',').replace('.',',')
+        except:
+            next
+
+    response.seek(0)
+    response = HttpResponse(save_virtual_workbook(wb),content_type="application/vnd.ms-excel")
+    #response['Content-Disposition'] = "attachment; filename=profil.xlsx"
+    
+    output_name = 'report_integral_' + translate(obj_parent_title) + '_' + translate(obj_title) + '_' + common_sql.get_month_eng(dt_date[0][0])
+    file_ext = 'xlsx'    
+    response['Content-Disposition'] = 'attachment;filename="%s.%s"' % (output_name.replace('"', '\"'), file_ext)   
+    return response
+
+
+
+def electric_interval_month_hours(request):
+    #SHOW_LIC_NUM = getattr(settings, 'SHOW_LIC_NUM', 'False')
+    ROUND_SIZE = 0 #getattr(settings, 'ROUND_SIZE', 3)
+    response = io.StringIO()
+    wb = Workbook()
+    wb.add_named_style(ali_grey)
+    wb.add_named_style(ali_white)
+    wb.add_named_style(ali_yellow)
+    wb.add_named_style(ali_pink)
+    wb.add_named_style(ali_blue)
+
+
+#ШАпка
+
+    # Лист
+    ws_1 = wb.create_sheet('Сетевой номер прибора', 0)
+    del wb['Sheet']
+
+    # Шрифты
+    font_1 = Font(name='Arial Cyr',
+                    size=12,
+                    bold=True,
+                    italic=False,
+                    vertAlign=None,
+                    underline='none',
+                    strike=False,
+                    color='FF000000')
+
+    font_2 = Font(name='Arial Cyr',
+                    size=10,
+                    bold=True,
+                    italic=False,
+                    vertAlign=None,
+                    underline='none',
+                    strike=False,
+                    color='FF000000')
+
+    font_3 = Font(name='Arial Cyr',
+                    size=8,
+                    bold=True,
+                    italic=False,
+                    vertAlign=None,
+                    underline='none',
+                    strike=False,
+                    color='FF000000')
+
+    font_4 = Font(name='Times New Roman',
+                    size=11,
+                    bold=False,
+                    italic=False,
+                    vertAlign=None,
+                    underline='none',
+                    strike=False,
+                    color='FF000000')
+
+    # Форматирование
+    alignment_1 = Alignment(horizontal='center',
+                        vertical='bottom',
+                        text_rotation=0,
+                        wrap_text=True,
+                        shrink_to_fit=False,
+                        indent=0)
+
+    alignment_1_2 = Alignment(horizontal='center',
+                        vertical='bottom',
+                        text_rotation=0,
+                        wrap_text=False,
+                        shrink_to_fit=False,
+                        indent=0)
+
+    alignment_2 = Alignment(horizontal='left',
+                        vertical='bottom',
+                        text_rotation=0,
+                        wrap_text=False,
+                        shrink_to_fit=False,
+                        indent=0)
+
+    alignment_3 = Alignment(horizontal='center',
+                        vertical='center',
+                        text_rotation=0,
+                        wrap_text=False,
+                        shrink_to_fit=False,
+                        indent=0)
+
+    alignment_4 = Alignment(horizontal='general',
+                        vertical='bottom',
+                        text_rotation=0,
+                        wrap_text=False,
+                        shrink_to_fit=False,
+                        indent=0)
+
+    # Размерность строк и столбцов
+    ws_1.column_dimensions['A'].width = 9.29
+
+    #Границы
+    brdr_1 = Border(left=Side(style='thin'), 
+                    right=Side(style='thin'), 
+                    top=Side(style='thin'), 
+                    bottom=Side(style='thin'))
+
+    brdr_2 = Border(bottom=Side(style='thin'))
+
+    #Отчёт
+    ws_1.merge_cells('A4:Y4')
+    ws_1['A4'] = 'Интервальный акт снятия показаний приборов учета'
+    ws_1['A4'].font = font_1
+    ws_1['A4'].alignment = alignment_1
+    ws_1['A6'] = 'Наименование потребителя:'
+    ws_1['A6'].font = font_1
+    ws_1['A6'].alignment = alignment_2
+    ws_1['E6'] = 'ООО "ПромТраст"'
+    ws_1['E6'].font = font_1
+    ws_1['E6'].alignment = alignment_2
+    ws_1['A7'] = '№ Договора энергоснабжения:'
+    ws_1['A7'].font = font_1
+    ws_1['A7'].alignment = alignment_2
+    ws_1['E7'] = '№2016-Э/Дх-МЦ-5002'
+    ws_1['E7'].font = font_1
+    ws_1['E7'].alignment = alignment_2
+    ws_1['A8'] = 'Наименование  Сетевой организации:'
+    ws_1['A8'].font = font_1
+    ws_1['A8'].alignment = alignment_2
+    ws_1['F8'] = 'ОАО "МОЭСК" 1 р-н УКС ЦО МКС'
+    ws_1['F8'].font = font_1
+    ws_1['F8'].alignment = alignment_2
+    ws_1['A10'] = 'Уровень напряжения:'
+    ws_1['A10'].font = font_1
+    ws_1['A10'].alignment = alignment_2
+    ws_1['E10'] = 'СН-2'
+    ws_1['E10'].font = font_1
+    ws_1['E10'].alignment = alignment_2
+    ws_1['A11'] = 'Наименование точки поставки:'
+    ws_1['A11'].font = font_1
+    ws_1['A11'].alignment = alignment_2
+    ws_1['E11'] = 'Источник питания'
+    ws_1['E11'].font = font_1
+    ws_1['E11'].alignment = alignment_2
+    ws_1.merge_cells('H11:L11')
+    ws_1['H11'] = 'РТП-18197\РТП-16072\РУ-10кВ\КЛ-10кВ,'
+    ws_1['H11'].font = font_1
+    ws_1['H11'].alignment = alignment_2
+    ws_1['M11'] = 'Наименование присоединения'
+    ws_1['M11'].font = font_1
+    ws_1['M11'].alignment = alignment_2
+    ws_1['Q11'] = 'ТП-22969\РУ-0,4кВ'
+    ws_1['Q11'].font = font_1
+    ws_1['Q11'].alignment = alignment_2
+    ws_1['A12'] = 'Номер прибора учета:'
+    ws_1['A12'].font = font_1
+    ws_1['A12'].alignment = alignment_2
+    ws_1['E12'] = ''
+    ws_1['E12'].font = font_1
+    ws_1['E12'].alignment = alignment_2
+    ws_1['A14'] = 'расчетный период:'
+    ws_1['A14'].font = font_1
+    ws_1['A14'].alignment = alignment_2
+    ws_1.merge_cells('E14:G14')
+    ws_1['E14'] = ''
+    ws_1['E14'].font = font_1
+    ws_1['E14'].alignment = alignment_2
+    ws_1.merge_cells('W14:Y14')
+    ws_1['W14'] = 'время московское'
+    ws_1['W14'].font = font_1
+    ws_1['W14'].alignment = alignment_2
+    ws_1.merge_cells('A16:A17')
+    ws_1['A16'] = 'Дата'
+    ws_1['A16'].font = font_2
+    ws_1['A16'].alignment = alignment_3
+    ws_1.merge_cells('B16:Y16')
+    ws_1['B16'] = 'Почасовые объемы потребления электрической энергии, кВт.ч.'
+    ws_1['B16'].font = font_2
+    ws_1['B16'].alignment = alignment_3
+    ws_1['B51'] = 'Потребитель:'
+    ws_1['B51'].font = font_1
+    ws_1['B51'].alignment = alignment_4
+    ws_1['J51'] = 'Сетевая организация:'
+    ws_1['J51'].font = font_1
+    ws_1['J51'].alignment = alignment_4
+    ws_1['R51'] = 'Продавец:'
+    ws_1['R51'].font = font_1
+    ws_1['R51'].alignment = alignment_4
+    ws_1['B53'] = '__________________________/   Мальцев С.Ю.'
+    ws_1['B53'].font = font_1
+    ws_1['B53'].alignment = alignment_4
+    ws_1['J53'] = '__________________________________'
+    ws_1['J53'].font = font_1
+    ws_1['J53'].alignment = alignment_4
+    ws_1['R53'] = '__________________________________'
+    ws_1['R53'].font = font_1
+    ws_1['R53'].alignment = alignment_4
+
+    dates_range = ws_1['A18':'A48']
+    time_range = ws_1['B17':'Y17']
+    values_range = ws_1['B18':'Y48']
+    border_range_1 = ws_1['A16':'Y48']
+    border_range_2 = ws_1['E6':'G7']
+    border_range_3 = ws_1['F8':'G8']
+    border_range_4 = ws_1['E10':'G12']
+    border_range_5 = ws_1['E14':'G14']
+
+    #Заполнение таблицы
+    def daterange(start_date, end_date):
+        '''Генератор дат'''
+        for n in range(int((end_date - start_date).days)):
+            yield start_date + timedelta(n)
+
+    def datetime_range(start, end, delta):
+        '''Генератор интервалов времени'''
+        current = start
+        while current < end:
+            yield current
+            current += delta
+
+    start_date = date(2023, 3, 1)
+    end_date = date(2023, 4, 1)
+
+    dates = []
+    for single_date in daterange(start_date, end_date):
+        dates.append(single_date.strftime("%d.%m.%Y"))
+
+    intervals = [dt.strftime('%H:%M') for dt in 
+        datetime_range(datetime(2016, 9, 1, 0), datetime(2016, 9, 1, 23), 
+        timedelta(hours=1))]
+
+    intervals.extend(('23:00', '24:00'))
+
+    new_intervals = []
+    b_index = 0
+    e_index = 1
+
+    for el in intervals:
+        new_intervals.append(f'{intervals[b_index]}-{intervals[e_index]}')
+        b_index += 1
+        e_index += 1
+        if b_index == 24:
+            break
+
+    # d_i = 0
+    # for cell in dates_range:
+    #     for x in cell:
+    #         x.font = font_2
+    #         x.alignment = alignment_1_2
+    #         x.value = dates[d_i]
+    #         d_i += 1
+
+    t_i = 0
+    for cell in time_range:
+        for x in cell:
+            x.font = font_3
+            x.alignment = alignment_1
+            x.value = new_intervals[t_i]
+            t_i += 1
+
+
+
+    for cell in border_range_1:
+        for x in cell:
+            x.border = brdr_1
+
+    for cell in border_range_2:
+        for x in cell:
+            x.border = brdr_2
+
+    for cell in border_range_3:
+        for x in cell:
+            x.border = brdr_2
+
+    for cell in border_range_4:
+        for x in cell:
+            x.border = brdr_2
+
+    for cell in border_range_5:
+        for x in cell:
+            x.border = brdr_2
+
+#Запрашиваем данные для отчета
+    is_abonent_level = re.compile(r'abonent')
+    is_object_level_2 = re.compile(r'level2') 
+    obj_title           = request.GET['obj_title']
+    obj_key             = request.GET['obj_key']
+    obj_parent_title    = request.GET['obj_parent_title']    
+    electric_data_end   = request.GET['electric_data_end']
+
+    dt_date=common_sql.get_date_month_range_by_date(electric_data_end)
+
+    common_sql.del_double_30_by_dates(dt_date[0][0],dt_date[-1][0])
+
+    dt_All_el = []
+    factory_number_manual = "-"
+    year = ""
+    row_num = 0
+    for dd in dt_date:
+        data_table=[]
+        if (bool(is_abonent_level.search(obj_key))): #выбран абонент
+            data_table = common_sql.get_data_hours_various_by_date(obj_parent_title, obj_title, dd[0])
+            if len(data_table) > 0:
+                factory_number_manual = data_table[0][25]
+            if len(data_table) == 0:
+                data_table = (('','','','','','','','','','','','','','','','','','','','','','','','','','-'),)
+                
+            #заполняем данными
+            # for cell in values_range:
+
+            c_j = 1
+            for x in values_range[row_num]:
+                x.font = font_4
+                x.alignment = alignment_1
+                x.value = data_table[0][c_j]
+                c_j +=1
+            row_num +=1
+
+                
+
+        elif (bool(is_object_level_2.search(obj_key))):#выбран объект
+            pass
+    
+    my_date_list = electric_data_end.split(".")
+    year = my_date_list[2]
+    print(year)
+    month_name = ""
+    month_name = common_sql.get_month_rus(dt_date[0][0])
+
+
+# Заполняем отчет значениями
+    ws_1.title = factory_number_manual
+    ws_1['E12'] = factory_number_manual
+    ws_1['E14'] = month_name + ' ' + year +'г.'
+
+    d_i = 0
+    date_f = ""
+    for cell in dates_range:
+        if d_i == len(dt_date):
+                break
+        for x in cell:
+            x.font = font_2
+            x.alignment = alignment_1_2
+            #print(dt_date[d_i], len(dt_date), d_i)
+            date_f = ''.join(dt_date[d_i]).split('-')
+            x.value = date_f[2] + '.' + date_f[1]+ '.' + date_f[0]            
+            d_i += 1
+            if d_i == len(dt_date):
+                break
+            
+
+    response.seek(0)
+    response = HttpResponse(save_virtual_workbook(wb),content_type="application/vnd.ms-excel")
+    #response['Content-Disposition'] = "attachment; filename=profil.xlsx"
+    
+    output_name = 'report_interval_' + translate(obj_parent_title) + '_' + translate(obj_title) + '_' + common_sql.get_month_eng(dd[0])
+    file_ext = 'xlsx'    
     response['Content-Disposition'] = 'attachment;filename="%s.%s"' % (output_name.replace('"', '\"'), file_ext)   
     return response
