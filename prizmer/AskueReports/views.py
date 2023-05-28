@@ -19635,7 +19635,10 @@ def electric_interval_month_hours(request):
             for x in values_range[row_num]:
                 x.font = font_4
                 x.alignment = alignment_1
-                x.value = data_table[0][c_j]
+                try:
+                    x.value = data_table[0][c_j]
+                except:
+                    next
                 c_j +=1
             row_num +=1
 
@@ -19646,15 +19649,18 @@ def electric_interval_month_hours(request):
     
     my_date_list = electric_data_end.split(".")
     year = my_date_list[2]
-    print(year)
+    #print(year)
     month_name = ""
     month_name = common_sql.get_month_rus(dt_date[0][0])
 
 
 # Заполняем отчет значениями
-    ws_1.title = factory_number_manual
-    ws_1['E12'] = factory_number_manual
-    ws_1['E14'] = month_name + ' ' + year +'г.'
+    try:
+        ws_1.title = factory_number_manual
+        ws_1['E12'] = factory_number_manual
+        ws_1['E14'] = month_name + ' ' + year +'г.'
+    except:
+            next
 
     d_i = 0
     date_f = ""
@@ -19665,8 +19671,11 @@ def electric_interval_month_hours(request):
             x.font = font_2
             x.alignment = alignment_1_2
             #print(dt_date[d_i], len(dt_date), d_i)
-            date_f = ''.join(dt_date[d_i]).split('-')
-            x.value = date_f[2] + '.' + date_f[1]+ '.' + date_f[0]            
+            try:
+                date_f = ''.join(dt_date[d_i]).split('-')
+                x.value = date_f[2] + '.' + date_f[1]+ '.' + date_f[0]
+            except:
+                next            
             d_i += 1
             if d_i == len(dt_date):
                 break
