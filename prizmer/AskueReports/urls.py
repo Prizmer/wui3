@@ -157,5 +157,9 @@ urlpatterns = [
     url(r'^120/$', views.report_electric_by_day_for_year, name = '120'), # Показание на выбранный день за каждый месяц в течении года по электрике'. Цифровые приборы(!)
     url(r'^122/$', views.report_water_by_day_for_year, name = '122'), # Показание на выбранный день за каждый месяц в течении года по всем воде. Цифровые приборы(!)
     url(r'^124/$', views.report_heat_by_day_for_year, name = '124'), # Показание на выбранный день за каждый месяц в течении года по всем теплу. Цифровые приборы(!)
+
+    url(r'^126/$',views.electric_interval_month_hours, name = '126'), # Часовки за месяц по электрике
+    url(r'^128/$',views.electric_integral_month_hours, name = '128'), # акт по потреблению за месяц
+
     # Наличие в комментарии *, говорит о том, что он реагирует на свойства SHOW_LIC_NUM,SEPARATOR и ROUND_SIZE
 ]

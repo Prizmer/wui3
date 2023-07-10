@@ -1,9 +1,9 @@
 <html>
     <head>
 		<script>
-		var net_addr = '';
+		// var net_addr = '';
 		var load_current = function(page){
-			// console.log("Hi");
+			$('#status_info').html('>>>');
 			factory_number=$('#factory_number').text();
 			$.ajax({
 				type: "GET",
@@ -13,7 +13,7 @@
 			   })
 			   
 		   .done(function( msg ) {
-			console.log(msg);
+			$('#status_info').html('Запрос выполнен');
 			$('#current').html(msg); // Пишем в div ответ от страницы 
 			//hide_loader();
 			});			
@@ -22,7 +22,8 @@
 
 		var power_on = function(page){
 			factory_number=$('#factory_number').text();
-			$('#res_power_on_off').html('');
+			$('#status_info').html('>>>');
+			$("#power_state").val("");
 			$.ajax({
 				type: "GET",
 				url: "/polling/set_power_on",
@@ -30,15 +31,15 @@
 			   })
 			   
 		   .done(function( msg ) {
-			console.log(msg);
-			$('#res_power_on_off').html(msg); // Пишем в div ответ от страницы 
+			$('#status_info').html(msg); // Пишем в div ответ от страницы 
 			//hide_loader();
 			});			
 		};
 
 		var power_off = function(page){
 			factory_number=$('#factory_number').text();
-			$('#res_power_on_off').html('');
+			$('#status_info').html('>>>');
+			$("#power_state").val("");
 			$.ajax({
 				type: "GET",
 				url: "/polling/set_power_off",
@@ -46,10 +47,78 @@
 			   })
 			   
 		   .done(function( msg ) {
-			console.log(msg);
-			$('#res_power_on_off').html(msg); // Пишем в div ответ от страницы 
+			$('#status_info').html(msg); // Пишем в div ответ от страницы 
 			//hide_loader();
-			});			
+			});	
+		};
+
+		var set_active_power_value = function(page){
+			factory_number=$('#factory_number').text();
+			power_value=$("#power_value").val();
+			control_state=$("#inputGroupSelectLimitStatus").val();
+
+			$('#status_info').html('>>>');
+			$.ajax({
+				type: "GET",
+				url: "/polling/set_active_power_limit_value",
+				data:{factory_number: factory_number, power_value: power_value, control_state:control_state },
+			   })
+			   
+		   .done(function( msg ) {
+			$('#status_info').html(msg); // Пишем в div ответ от страницы 
+			});
+		};
+
+		var get_active_power_value = function(page){
+			factory_number=$('#factory_number').text();
+
+			$('#status_info').html('>>>');
+			$("#power_value").val('');
+			$.ajax({
+				type: "GET",
+				url: "/polling/get_active_power_limit_value",
+				data:{factory_number: factory_number},
+			   })
+			   
+		   .done(function( msg ) {
+			msg_arr = msg.split(',');
+			if (Number.isInteger(Number(msg_arr[0]))){
+				$("#power_value").val(msg_arr[0]);
+				$('#status_info').html('Запрос выполнен');
+			} else {
+				$('#status_info').html(msg_arr[0]); // Пишем в div ответ от страницы
+			}
+			if(msg_arr[1]=='0'){
+				$("#inputGroupSelectLimitStatus").val(1)
+
+			} else if (msg_arr[1]) {
+				$("#inputGroupSelectLimitStatus").val(2)
+			}
+			});		
+		};
+
+		var get_power_state = function(page){
+			factory_number=$('#factory_number').text();
+			$("#power_state").val("");
+			$('#status_info').html('>>>');
+			$.ajax({
+				type: "GET",
+				url: "/polling/get_power_state",
+				data:{factory_number: factory_number},
+			   })
+			   
+		   .done(function( msg ) {
+			
+			if (msg == '1'){ 
+			    $("#power_state").val("Выключена!");
+				$('#status_info').html('Запрос выполнен');
+			} else if (msg == '0'){
+				$("#power_state").val("Включена!");
+				$('#status_info').html('Запрос выполнен');
+			} else {
+                $('#status_info').html(msg); // Пишем в div ответ от страницы
+			}
+			});		
 		};
       </script>
     </head>
@@ -90,87 +159,95 @@
 		<div class="col-1" > 
 		{% load static %} <img src="{%static "images/place-ico64.png" %}">
 		</div>
-		<div class="col-11 align-self-center"  > <strong>{{data_table.0.0}}<img src="{%static "images/right-ico20.png" %}">  {{data_table.0.1}} </strong>
+		<div class="col-11 align-self-center"  > 
+			<strong>{{data_table.0.0}}<img src="{%static "images/right-ico20.png" %}">  {{data_table.0.1}} </strong>
+			<div id = "status_info"> Состояние счётчика</div>
 			<div class="row">			
 				<div class="col-md-3">
-					<div class="row justify-content-center radius"  style="border-radius: 20px 20px">
-						<div id="current values">
-						<strong>Запрос данных</strong>
-							<div id = current>
-								<p>Нажмите кнопку для запроса данных</p>
-							</div>
-						<span onclick="load_current('service_replace_electric')" class="button" id="polling_current_values"><b>Текущие</b></span>
-					</div>
-				</div>
-				</div>
-		<div class="col-md-5">
-			<div class="row justify-content-center radius"  style="border-radius: 20px 20px">
-				<div class = "col-12">
-					<div class="row align-items-center">
-						<div class="col align-self-center"> 
-							<strong>Статус контроля мощности</strong>
+					<div class="row justify-content-center radius"  id="current values" style="border-radius: 20px 20px">
+						
+						<div class="col-12"><strong>Запрос данных</strong> </div>
+						<div class="col-12"><strong></strong> </div>
+						<div id = "current">			
 						</div>
-					</div>									
-					<p>
-					<div class="row justify-content-center">
-						<div class = "col-7">					
-							<label class="form-check-label">Активно</label>						
+						<p>
+						<div class="col-12">
+						<button onclick="load_current('service_replace_electric')" class="btn btn-outline-primary btn-sm" type="button" id="button-addon1">Текущие</button>
 						</div>
-						<div class = "col-5">
-							<span onclick="load_current('')" class="button" id=""><b>Прочитать</b></span>						
-						</div>
-					</div>
 
-<p>
+						<!-- <span onclick="load_current('service_replace_electric')" class="button" id="polling_current_values"><b>Текущие</b></span> -->
+					
+				</div>
+				</div>
+		<div class="col-md-4">
+			<div class="row justify-content-center radius"  style="border-radius: 20px 20px">
+				<!-- <div class = "col-12"> -->
+					
 					<div class="row">
-						<div class="col-12 align-items-center"> 
-							<strong>Лимит мощности, ВТ</strong>
-						</div>														
-					<p>					
-						<div class = "col-5 offset-7">
-							<span onclick="load_current('')" class="button" id=""><b> Прочитать </b></span>						
+						<div class="col-12 align-items-center "> 
+							<strong>Лимит мощности, Вт</strong>
+						</div>
+						<p>						
+						<div class = "col-12">
+							<div class="input-group mb-3">								
+								<input type="text" class="form-control btn-sm" id="power_value" placeholder="0000" aria-label="Статус лимита мощности" aria-describedby="button-addon1">
+								<select class="form-select btn-sm" id="inputGroupSelectLimitStatus">
+									<option selected><b>Не определён</b></option>
+									<option value="1">Отключен</option>
+									<option value="2">Включен</option>								
+								  </select>
+							</div>
+						</div>
+					<p>
+					
+						<div class = "col-5 offset-2">
+							<button onclick="get_active_power_value('')" class="btn btn-outline-primary btn-sm" type="button" id="button-addon1">Прочитать</button>
 						</div> 			
 					
-						<div class = "col-7">					
-							<input type="text" class="form-control-plaintext" id="" value="0000">					
-						</div>			
-										
-						<div class = "col-5 offset-7">
-							<span onclick="load_current('')" class="button" id=""><b> Записать </b></span>						
+						<div class = "col-5">
+							<button onclick="set_active_power_value('')" class="btn btn-outline-primary btn-sm" type="button" id="button-addon1">Записать</button>							
 						</div>
 					</div>
-				
-<p>
-					<div class="row">
-						</br>
-						 <div class="col-8 mx-auto "> 							
-							<span onclick="load_current('')" class="button" id=""><b> Установить лимит мощности </b></span>
-						</div>
-						<div class="col-8 mx-auto "> 
-							<span onclick="load_current('')" class="button" id=""><b> ___Снять лимит мощности___ </b></span>
-						</div>
-						
-					</div>
-				</div>
+				<br>
+				<!-- </div> -->
 			</div>
 		</div>
 			
-			<div class="col-md-4">
+			<div class="col-md-5">
+				
 				<div class="row justify-content-center radius"  style="border-radius: 20px 20px">
-				<strong>Ручное управление нагрузкой</strong>
-			</br>
-			</br>
-				<span onclick="power_on('service_replace_electric')" class="button" id="power_on_cmd"><b>Включить  нагрузку</b></span>
-			</br>
-		    </br>
-				<span onclick="power_off('service_replace_electric')" class="button" id="power_off_cmd"><b>Выключить нагрузку</b></span>
-		</br>
-	    </br>
-			<strong id = "res_power_on_off">  </strong>
+					<!-- <div class="row align-items-center"> -->
+						<div class="col-12 align-self-center"> 
+							<strong>Состояние нагрузки</strong>
+						</div>
+					<!-- </div>									 -->
+					<p>
+					<!-- <div class="row justify-content-center">						 -->
+						<p>
+						<div class = "col-12">
+							<div class="input-group mb-3">								
+								<input type="text" class="form-control btn-sm" aria-label="Активно"  placeholder="Не определено" aria-describedby="button-addon1" id="power_state">
+								<button  onclick="get_power_state('')" class="btn btn-outline-primary btn-sm" type="button" id="button-addon1">Прочитать</button>
+							</div>
+						</div>
+					<!-- </div> -->
+
+					<div class ="col-12"> <strong>Ручное управление нагрузкой</strong> </div>
+					
+					<div class ="col-12">  </div>
+					
+					<div class ="col-6 ">
+						<button onclick="power_on('service_replace_electric')" class="btn btn-outline-primary btn-sm" type="button" id="button-addon1">&nbsp;Включить нагрузку &nbsp;</button>
+					</div>				
+			
+				<div class ="col-6 ">
+				<button onclick="power_off('service_replace_electric')" class="btn btn-outline-primary btn-sm"  type="button" id="button-addon1">Выключить нагрузку</button>
+				</div>
 				</div>
 			</div>
 		</div>
 	</div>
+
 	</div>
 	<br>
 	<div class="row justify-content-center radius" style="border-radius: 10px 60px" >

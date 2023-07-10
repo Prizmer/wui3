@@ -193,4 +193,6 @@ urlpatterns = [
     url(r'^122/$', views.all_res_by_day_for_year, name = 'all_res_by_day_for_year'), # Показание на выбранный день за каждый месяц в течении года по воде. Цифровые приборы(!)
     url(r'^124/$', views.all_res_by_day_for_year, name = 'all_res_by_day_for_year'), # Показание на выбранный день за каждый месяц в течении года по теплу. Цифровые приборы(!)
 
+    url(r'^126/$', views.electric_interval_month_hours, name = 'electric_interval_month_hours'), # Часовки за месяц по электрике. Интервальный акт = дубининская
+    url(r'^128/$', views.electric_integral_month_hours, name = 'electric_integral_month_hours'), # Часовки за месяц по электрике. Интегральный акт = дубининская
 ]

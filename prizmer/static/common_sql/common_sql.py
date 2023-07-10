@@ -7668,7 +7668,7 @@ WHERE
   date_st.value,
   coefficient, coefficient_2,coefficient_3
     """%(electric_data_end,electric_data_end,energy,obj_title,electric_data_end,energy,obj_title)
-    #print sQuery
+    print(sQuery)
     return sQuery
     
 def get_data_table_rejim( obj_title, electric_data_end, energy):
@@ -9416,14 +9416,14 @@ def MakeSqlQuery_heat_no_data( obj_title, electric_data_end, my_params):
     sQuery="""
     Select heat_abons.obj_name, heat_abons.ab_name, heat_abons.factory_number_manual, 
 round(z2.energy::numeric,7),
-
+round(z2.vol::numeric,7),
 round(z2.t_in::numeric,1),
 round(z2.t_out::numeric,1), heat_abons.name
 from heat_abons
 left join
 (SELECT z1.daily_date, z1.name_objects, z1.name_abonents, z1.number_manual, 
             sum(Case when z1.params_name = '%s' then z1.value_daily  end) as energy,
-            
+            sum(Case when z1.params_name = '%s' then z1.value_daily  end) as vol,
             sum(Case when z1.params_name = '%s' then z1.value_daily  end) as t_in,
             sum(Case when z1.params_name = '%s' then z1.value_daily  end) as t_out, res
             
@@ -9468,7 +9468,7 @@ on z2.number_manual=heat_abons.factory_number_manual
 where heat_abons.obj_name='%s'
 and (z2.energy is null)
 order by heat_abons.obj_name, heat_abons.ab_name
-    """%(my_params[0],my_params[2],my_params[3], obj_title,my_params[4],electric_data_end, obj_title)
+    """%(my_params[0],my_params[1],my_params[2],my_params[3], obj_title,my_params[4],electric_data_end, obj_title)
     #print(sQuery)
     return sQuery    
 def get_heat_no_data(obj_title,  electric_data_end):
@@ -14195,3 +14195,291 @@ def get_connection_by_serial_number(serial):
     """%serial)
     data_table = cursor.fetchall()
     return data_table
+
+
+def make_sql_query_hours_various_by_day(obj_parent_title, obj_title, electric_data_end):
+    sQuery = """
+    select 
+'%s',
+round((t0*ktt*ktn*A)::numeric),
+round((t1*ktt*ktn*A)::numeric),
+round((t2*ktt*ktn*A)::numeric),
+round((t3*ktt*ktn*A)::numeric),
+round((t4*ktt*ktn*A)::numeric),
+round((t5*ktt*ktn*A)::numeric),
+round((t6*ktt*ktn*A)::numeric),
+round((t7*ktt*ktn*A)::numeric),
+round((t8*ktt*ktn*A)::numeric),
+round((t9*ktt*ktn*A)::numeric),
+round((t10*ktt*ktn*A)::numeric),
+round((t11*ktt*ktn*A)::numeric),
+round((t12*ktt*ktn*A)::numeric),
+round((t13*ktt*ktn*A)::numeric),
+round((t14*ktt*ktn*A)::numeric),
+round((t15*ktt*ktn*A)::numeric),
+round((t16*ktt*ktn*A)::numeric),
+round((t17*ktt*ktn*A)::numeric),
+round((t18*ktt*ktn*A)::numeric),
+round((t19*ktt*ktn*A)::numeric),
+round((t20*ktt*ktn*A)::numeric),
+round((t21*ktt*ktn*A)::numeric),
+round((t22*ktt*ktn*A)::numeric),
+round((t23*ktt*ktn*A)::numeric),
+factory_number_manual
+FROM
+( 
+SELECT   
+   coefficient as ktt,
+   coefficient_2 as ktn, 
+   coefficient_3 as A,
+  objects.name, 
+  abonents.name,   
+  names_params.name, 
+  meters.factory_number_manual,
+  sum(Case when (various_values."time">='00:00:00' and various_values."time"<='00:30:00') then various_values.value end)/2  as t0,
+  sum(Case when (various_values."time">='01:00' and various_values."time"<='01:30') then various_values.value end)/2  as t1,
+  sum(Case when (various_values."time">='02:00' and various_values."time"<='02:30') then various_values.value end)/2  as t2,
+  sum(Case when (various_values."time">='03:00' and various_values."time"<='03:30') then various_values.value end)/2 as t3,
+  sum(Case when (various_values."time">='04:00' and various_values."time"<='04:30') then various_values.value end)/2  as t4,
+  sum(Case when (various_values."time">='05:00' and various_values."time"<='05:30') then various_values.value end)/2  as t5,
+  sum(Case when (various_values."time">='06:00' and various_values."time"<='06:30') then various_values.value end)/2  as t6,
+  sum(Case when (various_values."time">='07:00' and various_values."time"<='07:30') then various_values.value end)/2  as t7,
+  sum(Case when (various_values."time">='08:00' and various_values."time"<='08:30') then various_values.value end)/2  as t8,
+  sum(Case when (various_values."time">='09:00' and various_values."time"<='09:30') then various_values.value end)/2  as t9,
+  sum(Case when (various_values."time">='10:00' and various_values."time"<='10:30') then various_values.value end)/2  as t10,
+  sum(Case when (various_values."time">='11:00' and various_values."time"<='11:30') then various_values.value end)/2  as t11,
+  sum(Case when (various_values."time">='12:00' and various_values."time"<='12:30') then various_values.value end)/2  as t12,
+  sum(Case when (various_values."time">='13:00' and various_values."time"<='13:30') then various_values.value end)/2  as t13,
+  sum(Case when (various_values."time">='14:00' and various_values."time"<='14:30') then various_values.value end)/2  as t14,
+  sum(Case when (various_values."time">='15:00' and various_values."time"<='15:30') then various_values.value end)/2  as t15,
+  sum(Case when (various_values."time">='16:00' and various_values."time"<='16:30') then various_values.value end)/2  as t16,
+  sum(Case when (various_values."time">='17:00' and various_values."time"<='17:30') then various_values.value end)/2  as t17,
+  sum(Case when (various_values."time">='18:00' and various_values."time"<='18:30') then various_values.value end)/2  as t18,
+  sum(Case when (various_values."time">='19:00' and various_values."time"<='19:30') then various_values.value end)/2  as t19,
+  sum(Case when (various_values."time">='20:00' and various_values."time"<='20:30') then various_values.value end)/2 as t20,
+  sum(Case when (various_values."time">='21:00' and various_values."time"<='21:30') then various_values.value end)/2 as t21,
+  sum(Case when (various_values."time">='22:00' and various_values."time"<='22:30') then various_values.value end)/2 as t22,
+  sum(Case when (various_values."time">='23:00' and various_values."time"<='23:30') then various_values.value end)/2 as t23
+FROM 
+  public.abonents, 
+  public.objects, 
+  public.link_abonents_taken_params, 
+  public.taken_params, 
+  public.various_values, 
+  public.params, 
+  public.names_params,
+  public.meters
+WHERE 
+  abonents.guid_objects = objects.guid AND
+  link_abonents_taken_params.guid_abonents = abonents.guid AND
+  link_abonents_taken_params.guid_taken_params = taken_params.guid AND
+  taken_params.guid_params = params.guid AND
+  various_values.id_taken_params = taken_params.id AND
+  params.guid_names_params = names_params.guid AND
+  meters.guid = taken_params.guid_meters AND
+  various_values.date = '%s' AND 
+  names_params.name = 'A+ Профиль' and
+  abonents.name='%s' and
+  objects.name ='%s'
+
+  group by   objects.name, 
+  abonents.name,   
+  names_params.name,
+  coefficient, coefficient_2,coefficient_3,
+  meters.factory_number_manual
+) as z
+    """ %( electric_data_end, electric_data_end, obj_title, obj_parent_title)
+    #print(sQuery)
+    return sQuery
+
+def get_data_hours_various_by_date(obj_parent_title, obj_title,electric_data_end):
+    data_table = []
+    cursor = connection.cursor()
+    cursor.execute(make_sql_query_hours_various_by_day(obj_parent_title, obj_title, electric_data_end))
+    data_table = cursor.fetchall()    
+
+    return data_table
+
+def get_month_rus(my_date):
+    month_list = ['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь',
+           'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь']
+    my_date_list = my_date.split("-")
+    return month_list[int(my_date_list[1])-1]
+
+def get_month_eng(my_date):
+    month_list = [ 'January', 'February', 'March', 'April', 'May', 
+                  'June', 'July', 'August', 'September', 'October', 'November', 'December']
+    my_date_list = my_date.split("-")
+    #print(my_date_list)
+    return month_list[int(my_date_list[1])-1]
+
+def make_sql_query_hours_integral(obj_parent_title, obj_title, params, date_start, date_end, dm, res):
+
+    sQuery="""
+Select z3.ab_name, z3.factory_number_manual,
+round(z3.t0_start::numeric,4)::text, round(z3.t1_start::numeric,3)::text, 
+round(z3.t2_start::numeric,3)::text, 
+round(z3.t3_start::numeric,3)::text, round(z3.t4_start::numeric,3)::text, 
+round(z4.t0_end::numeric,4)::text, round(z4.t1_end::numeric,3)::text, round(z4.t2_end::numeric,3)::text, 
+round(z4.t3_end::numeric,3)::text, round(z4.t4_end::numeric,3)::text,  
+round((z4.t0_end-z3.t0_start)::numeric,4)::text as delta_t0, 
+round((z4.t1_end-z3.t1_start)::numeric,3)::text as delta_t1, 
+round((z4.t2_end-z3.t2_start)::numeric,3)::text as delta_t2, 
+round((z4.t3_end-z3.t3_start)::numeric,3)::text as delta_t3, 
+round((z4.t4_end-z3.t4_start)::numeric,3)::text as delta_t4,
+round(z3.t0R_start::numeric,3)::text, 
+round(z4.t0R_end::numeric,3)::text,  
+round((z4.t0R_end-z3.t0R_start)::numeric,3)::text as delta_t0R, 
+round(z4.ktt::numeric,1)::text,  
+round((z4.ktt*z4.ktn*(z4.t0_end-z3.t0_start))::numeric,3)::text, 
+round((z4.ktt*z4.ktn*(z4.t0R_end-z3.t0R_start))::numeric,3)::text,
+round(z4.ktn::numeric,1)::text, round(z4.a::numeric,1)::text, z4.lic_num,
+round(((z4.t0_end-z3.t0_start)*0.0251*z4.ktt*z4.ktn*z4.a)::numeric, 4)::text as delta_t0_dubi,
+round(((z4.t0_end-z3.t0_start)*0.0251*z4.ktt*z4.ktn*z4.a+(z4.t0_end-z3.t0_start)*z4.ktt*z4.ktn*z4.a)::numeric, 4)::text as delta2_t0_dubi
+from
+(Select electric_abons_2.ktt, electric_abons_2.lic_num, electric_abons_2.ktn, electric_abons_2.a, z2.date as date_end, electric_abons_2.obj_name, electric_abons_2.ab_name, electric_abons_2.factory_number_manual, z2.name_res, z2.t0 as t0_end, z2.t1 as t1_end, z2.t2 as t2_end, z2.t3 as t3_end, z2.t4 as t4_end, z2.t0r as t0r_end
+from electric_abons_2
+Left join
+(SELECT z1.ktt, z1.ktn, z1.a,z1.date, z1.name_objects, z1.name as name_abonent, z1.num_manual, z1.name_res,
+sum(Case when z1.params_name = '%s' then z1.value else null end) as t0,
+sum(Case when z1.params_name = '%s' then z1.value else null end) as t1,
+sum(Case when z1.params_name = '%s' then z1.value else null end) as t2,
+sum(Case when z1.params_name = '%s' then z1.value else null end) as t3,
+sum(Case when z1.params_name = '%s' then z1.value else null end) as t4,
+sum(Case when z1.params_name = '%s' then z1.value else null end) as t0R
+
+                        FROM
+                        (
+SELECT 
+                                  link_abonents_taken_params.coefficient_2 as ktn,
+                                  link_abonents_taken_params.coefficient as ktt,
+                                  link_abonents_taken_params.coefficient_3 as a,
+                                  daily_values.date,    
+                                  daily_values.value,                            
+                                  abonents.name, 
+                                  daily_values.id_taken_params, 
+                                  objects.name as name_objects,
+                                  names_params.name as params_name,
+                                  meters.factory_number_manual as num_manual, 
+                                  resources.name as name_res
+                                FROM 
+                                  public.daily_values, 
+                                  public.link_abonents_taken_params, 
+                                  public.taken_params, 
+                                  public.abonents, 
+                                  public.objects, 
+                                  public.names_params, 
+                                  public.params, 
+                                  public.meters, 
+                                  public.resources
+                                WHERE 
+                                  taken_params.guid = link_abonents_taken_params.guid_taken_params AND
+                                  taken_params.id = daily_values.id_taken_params AND
+                                  taken_params.guid_params = params.guid AND
+                                  taken_params.guid_meters = meters.guid AND
+                                  abonents.guid = link_abonents_taken_params.guid_abonents AND
+                                  objects.guid = abonents.guid_objects AND
+                                  names_params.guid = params.guid_names_params AND
+                                  resources.guid = names_params.guid_resources AND                                  
+                                  objects.name = '%s' AND 
+                                  daily_values.date = '%s' AND 
+                                  resources.name = '%s'
+                                   group by 
+                         daily_values.date,
+                        daily_values.id_taken_params,
+                        objects.name ,
+                        abonents.name ,
+                        meters.factory_number_manual,
+                        daily_values.value ,
+                        names_params.name ,
+                        link_abonents_taken_params.coefficient ,
+                         link_abonents_taken_params.coefficient_2 ,
+                          link_abonents_taken_params.coefficient_3,
+                          resources.name
+                                  ) z1                       
+                      group by z1.name, z1.date, z1.name_objects, z1.name, z1.num_manual, z1.name_res, z1.ktt, z1.ktn,z1.a
+                      order by z1.name) z2
+on electric_abons_2.factory_number_manual=z2.num_manual
+where electric_abons_2.obj_name='%s') z4, 
+
+
+(Select z2.date as date_start, electric_abons_2.obj_name, electric_abons_2.ab_name, electric_abons_2.factory_number_manual, z2.name_res, z2.t0 as t0_start, z2.t1 as t1_start, z2.t2 as t2_start, z2.t3 as t3_start, z2.t4 as t4_start, z2.t0r as t0r_start
+from electric_abons_2
+Left join
+(SELECT z1.date, z1.name_objects, z1.name as name_abonent, z1.num_manual, z1.name_res,
+sum(Case when z1.params_name = '%s' then z1.value else null end) as t0,
+sum(Case when z1.params_name = '%s' then z1.value else null end) as t1,
+sum(Case when z1.params_name = '%s' then z1.value else null end) as t2,
+sum(Case when z1.params_name = '%s' then z1.value else null end) as t3,
+sum(Case when z1.params_name = '%s' then z1.value else null end) as t4,
+sum(Case when z1.params_name = '%s' then z1.value else null end) as t0R
+
+                        FROM
+                        (
+SELECT 
+                                  daily_values.date,    
+                                  daily_values.value,                            
+                                  abonents.name, 
+                                  daily_values.id_taken_params, 
+                                  objects.name as name_objects,
+                                  names_params.name as params_name,
+                                  meters.factory_number_manual as num_manual, 
+                                  resources.name as name_res
+                                FROM 
+                                  public.daily_values, 
+                                  public.link_abonents_taken_params, 
+                                  public.taken_params, 
+                                  public.abonents, 
+                                  public.objects, 
+                                  public.names_params, 
+                                  public.params, 
+                                  public.meters, 
+                                  public.resources
+                                WHERE 
+                                  taken_params.guid = link_abonents_taken_params.guid_taken_params AND
+                                  taken_params.id = daily_values.id_taken_params AND
+                                  taken_params.guid_params = params.guid AND
+                                  taken_params.guid_meters = meters.guid AND
+                                  abonents.guid = link_abonents_taken_params.guid_abonents AND
+                                  objects.guid = abonents.guid_objects AND
+                                  names_params.guid = params.guid_names_params AND
+                                  resources.guid = names_params.guid_resources AND                                  
+                                  objects.name = '%s' AND 
+                                  daily_values.date = '%s' AND 
+                                  resources.name = '%s'
+                                   group by 
+                         daily_values.date,
+                        daily_values.id_taken_params,
+                        objects.name ,
+                        abonents.name ,
+                        meters.factory_number_manual,
+                        daily_values.value ,
+                        names_params.name ,
+                        link_abonents_taken_params.coefficient ,
+                         link_abonents_taken_params.coefficient_2 ,
+                          link_abonents_taken_params.coefficient_3,
+                          resources.name
+                                  ) z1                       
+                      group by z1.name, z1.date, z1.name_objects, z1.name, z1.num_manual, z1.name_res
+                      order by z1.name) z2
+on electric_abons_2.factory_number_manual=z2.num_manual
+where electric_abons_2.obj_name='%s') z3
+where z3.ab_name=z4.ab_name and z3.factory_number_manual=z4.factory_number_manual
+order by z3.ab_name ASC""" % (params[0],params[1],params[2],params[3], params[4], params[5], obj_title, date_end, res, obj_title, 
+                            params[0],params[1],params[2],params[3], params[4], params[5],obj_title,  date_start, res,obj_title)
+    if dm=='monthly' or dm=='daily' or dm=='current':
+        sQuery=sQuery.replace('daily',dm)
+    #    print(sQuery)
+    
+    return sQuery
+
+def get_data_integral_dubi(obj_parent_title, obj_title, electric_data_start, electric_data_end, dm, res):
+    data_table = []
+    params=['T0 A+','T1 A+','T2 A+','T3 A+','T4 A+', 'T0 R+']
+    cursor = connection.cursor()
+    cursor.execute(make_sql_query_hours_integral(obj_parent_title, obj_title, params, electric_data_start, electric_data_end, dm, res))
+    data_table = cursor.fetchall()
+    data_table = ChangeNull(data_table, None)    
+
+    return data_table
+    

@@ -11286,3 +11286,127 @@ def all_res_by_day_for_year(request):
     
 
     return render(request, "data_table/120.html", args)
+
+
+
+def electric_interval_month_hours(request):
+    args = {}
+    is_abonent_level = re.compile(r'abonent')
+    is_object_level_2 = re.compile(r'level2')    
+    obj_title = 'Не выбран'
+    obj_key = 'Не выбран'
+    obj_parent_title = 'Не выбран'
+    is_electric_monthly = ''
+    is_electric_daily = ''
+    is_electric_current = ''
+    is_electric_delta = ''
+    electric_data_start = ''
+    electric_data_end = ''
+    decimal.getcontext().prec = 3
+    if request.is_ajax():
+        if request.method == 'GET':
+            request.session["obj_title"]           = obj_title           = request.GET['obj_title']
+            request.session["obj_key"]             = obj_key             = request.GET['obj_key']
+            request.session["obj_parent_title"]    = obj_parent_title    = request.GET['obj_parent_title'] 
+            request.session["electric_data_end"]   = electric_data_end   = request.GET['electric_data_end']  
+          
+    dt_date=common_sql.get_date_month_range_by_date(electric_data_end)
+    # print(dt_date)
+    # print(dt_date[0][0])
+    # print( dt_date[-1][0] )
+    common_sql.del_double_30_by_dates(dt_date[0][0],dt_date[-1][0])
+    dt_All_el = []
+    factory_number_manual = ""
+    for dd in dt_date:
+        data_table=[]
+        if (bool(is_abonent_level.search(obj_key))): #выбран абонент
+            data_table = common_sql.get_data_hours_various_by_date(obj_parent_title, obj_title, dd[0])
+            if len(data_table)>0:
+                factory_number_manual = data_table[0][25]
+            if len(data_table) == 0:
+                data_table = (('','','','','','','','','','','','','','','','','','','','','','','','','','-'),)
+            dt_All_el.append(data_table)
+            
+        elif (bool(is_object_level_2.search(obj_key))):#выбран объект
+            pass
+
+
+    # my_date_list = electric_data_end.split(".")
+    # year = my_date_list[2]
+    # print(year)
+
+    month_name = ""
+    month_name = common_sql.get_month_rus(dt_date[0][0])
+    
+    #print(dt_All_el[0])
+    
+
+    args['dt_All_el'] = dt_All_el
+    args['month_name'] = month_name
+    args['factory_number_manual'] = factory_number_manual
+    args['obj_title'] = obj_title
+    args['obj_key'] = obj_key
+    args['obj_parent_title'] = obj_parent_title
+    args['is_electric_monthly'] = is_electric_monthly
+    args['is_electric_daily'] = is_electric_daily
+    args['is_electric_current'] = is_electric_current
+    args['is_electric_delta'] = is_electric_delta      
+    args['electric_data_end'] = electric_data_end
+    
+    return render(request, "data_table/electric/126.html", args)
+
+def electric_integral_month_hours(request):
+    args = {}
+    is_abonent_level = re.compile(r'abonent')
+    is_object_level_2 = re.compile(r'level2')    
+    obj_title = 'Не выбран'
+    obj_key = 'Не выбран'
+    obj_parent_title = 'Не выбран'
+    is_electric_monthly = ''
+    is_electric_daily = ''
+    is_electric_current = ''
+    is_electric_delta = ''
+    electric_data_start = ''
+    electric_data_end = ''
+    decimal.getcontext().prec = 3
+    if request.is_ajax():
+        if request.method == 'GET':
+            request.session["obj_title"]           = obj_title           = request.GET['obj_title']
+            request.session["obj_key"]             = obj_key             = request.GET['obj_key']
+            request.session["obj_parent_title"]    = obj_parent_title    = request.GET['obj_parent_title'] 
+            request.session["electric_data_end"]   = electric_data_end   = request.GET['electric_data_end']  
+            request.session["is_electric_monthly"]   = is_electric_monthly   = request.GET['is_electric_monthly']  
+          
+    res='Электричество'
+    if (is_electric_monthly=="1"):
+        dm='monthly'
+    else:
+        dm='daily'
+
+    dt_date=common_sql.get_date_month_range_by_date(electric_data_end)
+
+    common_sql.del_double_30_by_dates(dt_date[0][0],dt_date[-1][0])
+    
+    data_table=[]
+    if (bool(is_abonent_level.search(obj_key))): #выбран абонент
+        pass
+        
+    elif (bool(is_object_level_2.search(obj_key))):#выбран объект
+        data_table = common_sql.get_data_integral_dubi(obj_parent_title, obj_title, dt_date[0][0],dt_date[-1][0], dm, res)
+            
+    month_name = ""
+    month_name = common_sql.get_month_rus(dt_date[0][0])
+    
+    #print(data_table)
+    args['data_table'] = data_table
+    args['month_name'] = month_name
+    args['obj_title'] = obj_title
+    args['obj_key'] = obj_key
+    args['obj_parent_title'] = obj_parent_title
+    args['is_electric_monthly'] = is_electric_monthly
+    args['is_electric_daily'] = is_electric_daily
+    args['is_electric_current'] = is_electric_current
+    args['is_electric_delta'] = is_electric_delta      
+    args['electric_data_end'] = electric_data_end
+    
+    return render(request, "data_table/electric/128.html", args)
