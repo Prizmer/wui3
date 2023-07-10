@@ -110,7 +110,7 @@ DATABASES = {
         #'NAME': 'tro_sud',
         #'NAME': 'metro',
         #'NAME': 'dubi',
-        'NAME': 'ogni2',
+        'NAME': 'ogni3',
         'USER': 'postgres',
         'PASSWORD': '1',
         #'HOST': 'localhost',
