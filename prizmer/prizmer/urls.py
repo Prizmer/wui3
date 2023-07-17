@@ -35,6 +35,7 @@ urlpatterns =[
     url(r'^service/', include('service.urls'), name = 'service'),
     url(r'^account/', include('account_prizmer.urls'), name = 'account'),
     url(r'polling/', include('polling.urls'), name = 'polling'),
+    url(r'api/', include('prizmer_api.urls'), name = 'api'),
 
     url(r'^favicon\.ico$',RedirectView.as_view(url='/static/images/favicon.ico')),
 ]

@@ -14482,4 +14482,81 @@ def get_data_integral_dubi(obj_parent_title, obj_title, electric_data_start, ele
     data_table = ChangeNull(data_table, None)    
 
     return data_table
-    
+
+def get_all_meters_data_api(obj_parent, date):
+    data_table = []
+    cursor = connection.cursor()
+    sQuery = """
+  Select  all_res_abons.name_parent,
+          all_res_abons.obj_name,
+          all_res_abons.ab_name, 
+          all_res_abons.ktt,
+          all_res_abons.ktn,
+          all_res_abons.a,
+          z2.date::text, 
+          all_res_abons.factory_number_manual,
+          z2.name_res, 
+          z2.params_name,
+          round(z2.value::numeric,6)::double precision
+from all_res_abons
+Left join
+(SELECT z1.ktt, z1.ktn,z1.a,z1.date, z1.name_objects, z1.name as name_abonent, z1.num_manual, z1.name_res,
+z1.params_name, z1.value
+
+                        FROM
+                        (
+                                SELECT
+                                  link_abonents_taken_params.coefficient_2 as ktn,
+                                  link_abonents_taken_params.coefficient as ktt,
+                                  link_abonents_taken_params.coefficient_3 as a,
+                                  daily_values.date,
+                                  daily_values.value,
+                                  abonents.name,
+                                  daily_values.id_taken_params,
+                                  objects.name as name_objects,
+                                  names_params.name as params_name,
+                                  meters.factory_number_manual as num_manual,
+                                  resources.name as name_res
+                                FROM
+                                  public.daily_values,
+                                  public.link_abonents_taken_params,
+                                  public.taken_params,
+                                  public.abonents,
+                                  public.objects,
+                                  public.names_params,
+                                  public.params,
+                                  public.meters,
+                                  public.resources
+                                WHERE
+                                  taken_params.guid = link_abonents_taken_params.guid_taken_params AND
+                                  taken_params.id = daily_values.id_taken_params AND
+                                  taken_params.guid_params = params.guid AND
+                                  taken_params.guid_meters = meters.guid AND
+                                  abonents.guid = link_abonents_taken_params.guid_abonents AND
+                                  objects.guid = abonents.guid_objects AND
+                                  names_params.guid = params.guid_names_params AND
+                                  resources.guid = names_params.guid_resources AND
+                                  daily_values.date = '%s' 
+                                   group by
+                         daily_values.date,
+                        daily_values.id_taken_params,
+                        objects.name ,
+                        abonents.name ,
+                        meters.factory_number_manual,
+                        daily_values.value ,
+                        names_params.name ,
+                        link_abonents_taken_params.coefficient ,
+                         link_abonents_taken_params.coefficient_2 ,
+                          link_abonents_taken_params.coefficient_3,
+                          resources.name
+                          
+                                  ) z1
+                      group by z1.name, z1.date, z1.name_objects, z1.name, z1.num_manual, z1.name_res, z1.ktt, z1.ktn, z1.a,
+                     z1.params_name, z1.value
+                      order by z1.name) z2
+on all_res_abons.factory_number_manual=z2.num_manual
+order by  all_res_abons.obj_name, all_res_abons.ab_name, all_res_abons.factory_number_manual, z2.params_name
+    """%(date)
+    cursor.execute(sQuery)
+    data_table = cursor.fetchall()    
+    return data_table    
