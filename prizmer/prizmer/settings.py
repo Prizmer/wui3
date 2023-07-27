@@ -72,6 +72,7 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'debug_toolbar',
+    'rest_framework',
 #    "gunicorn",
     'general',
     'loginsys',
@@ -80,6 +81,7 @@ INSTALLED_APPS = (
     'service',
     'account_prizmer',
     'polling',
+    'prizmer_api',
 
 )
 
@@ -109,7 +111,8 @@ DATABASES = {
         #'NAME': 'ryabina',
         #'NAME': 'tro_sud',
         #'NAME': 'metro',
-        'NAME': 'dubi',
+        #'NAME': 'dubi',
+        'NAME': 'ogni2',
         'USER': 'postgres',
         'PASSWORD': '1',
         #'HOST': 'localhost',
