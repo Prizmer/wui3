@@ -14483,7 +14483,8 @@ def get_data_integral_dubi(obj_parent_title, obj_title, electric_data_start, ele
 
     return data_table
 
-def get_all_meters_data_api(obj_parent, date):
+def get_all_meters_data_api_old(obj_parent, date):
+    """Старый запрос. Очень медленный. Можно удалить при рефакторинге"""
     data_table = []
     cursor = connection.cursor()
     sQuery = """
@@ -14495,7 +14496,7 @@ def get_all_meters_data_api(obj_parent, date):
           all_res_abons.a,
           z2.date::text, 
           all_res_abons.factory_number_manual,
-          z2.name_res, 
+          all_res_abons.res_name, 
           z2.params_name,
           round(z2.value::numeric,6)::double precision
 from all_res_abons
@@ -14559,4 +14560,277 @@ order by  all_res_abons.obj_name, all_res_abons.ab_name, all_res_abons.factory_n
     """%(date)
     cursor.execute(sQuery)
     data_table = cursor.fetchall()    
-    return data_table    
+    return data_table
+
+def get_all_meters_data_api(obj_parent, date):
+    data_table = []
+    cursor = connection.cursor()
+    sQuery = """
+             SELECT 
+                parent_objects_for_progruz.obj_name1,
+                z1.name_objects,
+                z1.name as name_abonent,
+                z1.ktt,
+                z1.ktn,
+                z1.a,
+                z1.date::text,
+                z1.num_manual,
+                z1.name_res,
+                z1.params_name,
+                round(z1.value::numeric,6)::double precision,
+                z1.ab_guid
+            FROM	parent_objects_for_progruz,
+                        (
+                                SELECT
+                                  link_abonents_taken_params.coefficient_2 as ktn,
+                                  link_abonents_taken_params.coefficient as ktt,
+                                  link_abonents_taken_params.coefficient_3 as a,
+                                  daily_values.date,
+                                  daily_values.value,
+                                  abonents.name,
+							                    abonents.guid as ab_guid,
+                                  daily_values.id_taken_params,
+                                  objects.name as name_objects,
+                                  names_params.name as params_name,
+                                  meters.factory_number_manual as num_manual,
+                                  resources.name as name_res
+                                FROM
+                                  public.daily_values,
+                                  public.link_abonents_taken_params,
+                                  public.taken_params,
+                                  public.abonents,
+                                  public.objects,
+                                  public.names_params,
+                                  public.params,
+                                  public.meters,
+                                  public.resources
+                                WHERE
+                                  taken_params.guid = link_abonents_taken_params.guid_taken_params AND
+                                  taken_params.id = daily_values.id_taken_params AND
+                                  taken_params.guid_params = params.guid AND
+                                  taken_params.guid_meters = meters.guid AND
+                                  abonents.guid = link_abonents_taken_params.guid_abonents AND
+                                  objects.guid = abonents.guid_objects AND
+                                  names_params.guid = params.guid_names_params AND
+                                  resources.guid = names_params.guid_resources AND
+                                  daily_values.date = '%s' 
+                                   group by
+                         daily_values.date,
+                        daily_values.id_taken_params,
+                        objects.name ,
+                        abonents.name ,
+                        meters.factory_number_manual,
+                        daily_values.value ,
+                        names_params.name ,
+                        link_abonents_taken_params.coefficient ,
+                         link_abonents_taken_params.coefficient_2 ,
+                          link_abonents_taken_params.coefficient_3,
+                          resources.name,
+							abonents.guid
+                          
+                                  ) z1
+					where z1.ab_guid = parent_objects_for_progruz.ab_guid			  
+                      group by z1.name, z1.date, z1.name_objects, z1.name, z1.num_manual, z1.name_res, z1.ktt, z1.ktn, z1.a,
+                     z1.params_name, z1.value, z1.ab_guid, parent_objects_for_progruz.obj_name1 
+  order by z1.name_objects, z1.name,  z1.name_res, z1.params_name"""%(date)
+    # print(sQuery)
+    cursor.execute(sQuery)
+    data_table = cursor.fetchall()    
+    return data_table
+
+def get_all_taken_params_inactive_api(obj_parent, date):
+    """Возвращает таблица с GUID всех не опрошенных на сегодня параметров."""
+    data_table = []
+    cursor = connection.cursor()
+    sQuery = """
+Select  taken_params.guid
+FROM taken_params
+where taken_params.name like '%%Суточный%%'
+AND guid not in
+(
+            SELECT
+                        taken_params.guid
+                                FROM
+                                  public.daily_values,
+                                  public.link_abonents_taken_params,
+                                  public.taken_params,
+                                  public.abonents,
+                                  public.objects,
+                                  public.names_params,
+                                  public.params,
+                                  public.meters,
+                                  public.resources
+                                WHERE
+                                  taken_params.guid = link_abonents_taken_params.guid_taken_params AND
+                                  taken_params.id = daily_values.id_taken_params AND
+                                  taken_params.guid_params = params.guid AND
+                                  taken_params.guid_meters = meters.guid AND
+                                  abonents.guid = link_abonents_taken_params.guid_abonents AND
+                                  objects.guid = abonents.guid_objects AND
+                                  names_params.guid = params.guid_names_params AND
+                                  resources.guid = names_params.guid_resources AND
+                                  daily_values.date = '%s' 
+                                   group by
+						public.taken_params.guid,
+                         daily_values.date,
+                        daily_values.id_taken_params,
+                        objects.name ,
+                        abonents.name ,
+                        meters.factory_number_manual,
+                        daily_values.value ,
+                        names_params.name ,
+                        link_abonents_taken_params.coefficient ,
+                         link_abonents_taken_params.coefficient_2 ,
+                          link_abonents_taken_params.coefficient_3,
+                          resources.name,
+							abonents.guid)"""%(date)
+    # print(sQuery)
+    cursor.execute(sQuery)
+    data_table = cursor.fetchall()    
+    return data_table
+
+def get_last_taken_params_values_api(guid_taken_param):
+    """По GUID параметра возвращает последнее считанное значение и дату, когда было произведено чтение"""
+    data_table = []
+    cursor = connection.cursor()
+    sQuery = """
+        SELECT 
+          parent_objects_for_progruz.obj_name1,
+          objects.name,
+          abonents.name, 
+          link_abonents_taken_params.coefficient_2 as ktn,
+          link_abonents_taken_params.coefficient as ktt,
+          link_abonents_taken_params.coefficient_3 as a,
+          daily_values.date::text,  
+          meters.factory_number_manual,
+          resources.name as name_res, 
+        names_params.name ,
+        daily_values.value ,
+        abonents.guid
+        FROM 
+          public.abonents, 
+          public.objects, 
+          public.link_abonents_taken_params, 
+          public.taken_params, 
+          public.daily_values, 
+          public.meters, 
+          public.types_meters, 
+          public.params, 
+          public.names_params,
+          parent_objects_for_progruz,
+          resources
+        WHERE 
+          abonents.guid_objects = objects.guid AND
+          link_abonents_taken_params.guid_abonents = abonents.guid AND
+          link_abonents_taken_params.guid_taken_params = taken_params.guid AND
+          taken_params.guid_meters = meters.guid AND
+          taken_params.guid_params = params.guid AND
+          daily_values.id_taken_params = taken_params.id AND
+          meters.guid_types_meters = types_meters.guid AND
+          params.guid_names_params = names_params.guid AND
+          resources.guid = names_params.guid_resources AND
+          parent_objects_for_progruz.ab_guid = abonents.guid AND
+          taken_params.guid = '%s'
+          group by daily_values.date, 
+          objects.name, 
+          abonents.name,   
+          meters.factory_number_manual, 
+          types_meters.name,
+          names_params.name,
+          daily_values.value,
+          parent_objects_for_progruz.obj_name1,
+          link_abonents_taken_params.coefficient_2,
+          link_abonents_taken_params.coefficient,
+          link_abonents_taken_params.coefficient_3,
+          resources.name,
+          abonents.guid
+        order by daily_values.date DESC
+        LIMIT 1"""%(guid_taken_param)
+    # print(sQuery)
+    cursor.execute(sQuery)
+    data_table = cursor.fetchall()    
+    return data_table
+
+def get_all_meters_data_with_status_api(obj_parent, date):
+    data_table = []
+    cursor = connection.cursor()
+    sQuery = """
+            Select  all_res_abons.name_parent,
+          all_res_abons.obj_name,
+          all_res_abons.ab_name, 
+          all_res_abons.ktt,
+          all_res_abons.ktn,
+          all_res_abons.a,
+          z2.date::text, 
+          all_res_abons.factory_number_manual,
+          all_res_abons.res_name, 
+          all_res_abons.name_param,
+
+		  round(z2.value::numeric,6)::double precision,
+		  all_res_abons.dt_install::date::text,
+		  case when z2.value is null
+		  then 'irrelevant' 
+		  else 'relevant'
+		  end as status
+from all_res_abons
+Left join
+(SELECT z1.ktt, z1.ktn,z1.a,z1.date, z1.name_objects, z1.name as name_abonent, z1.num_manual, z1.name_res,
+z1.params_name, z1.value
+
+                        FROM
+                        (
+                                SELECT
+                                  link_abonents_taken_params.coefficient_2 as ktn,
+                                  link_abonents_taken_params.coefficient as ktt,
+                                  link_abonents_taken_params.coefficient_3 as a,
+                                  daily_values.date,
+                                  daily_values.value,
+                                  abonents.name,
+                                  daily_values.id_taken_params,
+                                  objects.name as name_objects,
+                                  names_params.name as params_name,
+                                  meters.factory_number_manual as num_manual,
+                                  resources.name as name_res
+                                FROM
+                                  public.daily_values,
+                                  public.link_abonents_taken_params,
+                                  public.taken_params,
+                                  public.abonents,
+                                  public.objects,
+                                  public.names_params,
+                                  public.params,
+                                  public.meters,
+                                  public.resources
+                                WHERE
+                                  taken_params.guid = link_abonents_taken_params.guid_taken_params AND
+                                  taken_params.id = daily_values.id_taken_params AND
+                                  taken_params.guid_params = params.guid AND
+                                  taken_params.guid_meters = meters.guid AND
+                                  abonents.guid = link_abonents_taken_params.guid_abonents AND
+                                  objects.guid = abonents.guid_objects AND
+                                  names_params.guid = params.guid_names_params AND
+                                  resources.guid = names_params.guid_resources AND
+                                  daily_values.date = '%s' 
+                                   group by
+                         daily_values.date,
+                        daily_values.id_taken_params,
+                        objects.name ,
+                        abonents.name ,
+                        meters.factory_number_manual,
+                        daily_values.value ,
+                        names_params.name ,
+                        link_abonents_taken_params.coefficient ,
+                         link_abonents_taken_params.coefficient_2 ,
+                          link_abonents_taken_params.coefficient_3,
+                          resources.name
+                          
+                                  ) z1
+                      group by z1.name, z1.date, z1.name_objects, z1.name, z1.num_manual, z1.name_res, z1.ktt, z1.ktn, z1.a,
+                     z1.params_name, z1.value
+                      order by z1.name) z2
+on all_res_abons.factory_number_manual=z2.num_manual and all_res_abons.name_param = z2.params_name
+order by  all_res_abons.obj_name, all_res_abons.ab_name, all_res_abons.factory_number_manual, z2.params_name"""%(date)
+    # print(sQuery)
+    cursor.execute(sQuery)
+    data_table = cursor.fetchall()    
+    return data_table
