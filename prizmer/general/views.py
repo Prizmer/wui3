@@ -11410,3 +11410,81 @@ def electric_integral_month_hours(request):
     args['electric_data_end'] = electric_data_end
     
     return render(request, "data_table/electric/128.html", args)
+
+def pulsar_heat_error_code(request):
+    error_tuple = ('Произошел сброс даты, времени, всех значений счетчиков.',
+        'Ошибка чтения/записи FLASH.',
+        'Ошибка чтения/записи EEPROM.',
+        'Разрядилась батарея питания.',
+        'Неисправность часового кварца',
+        'Неисправность модуля RF.',
+        'Замкнут антисаботажный геркон',
+        'Поток воды через расходомер протекает в обратном направлении',
+        'Отсутствует вода в трубопроводе',
+        'Зафиксирован расход ниже настраиваемого порога п.0x0103',
+        'Зафиксирован расход выше настраиваемого порога п.0x0104',
+        'Аппаратная ошибка микросхемы измерительного фронтенда',
+        'Аппаратная ошибка микросхемы измерительного контроллера',
+        'Расшифровка на листе "Ошибки"',
+        'Расшифровка на листе "Ошибки"',
+        'Расшифровка на листе "Ошибки"',
+        'Неисправность термометра в подающем трубопроводе',
+        'Неисправность термометра в обратном трубопроводе',
+        'Перепад температур по модулю выше порога п.0x0138 и знак не корректный',
+        'Перепад температур ниже настраиваемого порога п.0x0139',
+        'Датчик давления 1. Короткое замыкание в цепи питания датчиков давления',
+        'Датчик давления 2. Короткое замыкание в цепи питания датчиков давления',
+        'Резерв',
+        'Резерв',
+        'Резерв',
+        'Резерв',
+        'Резерв',
+        'Резерв',
+        'Резерв',
+        'Резерв',
+        'Резерв',
+        'Резерв',
+                 )
+
+    args = {}
+    is_abonent_level = re.compile(r'abonent')
+    is_object_level = re.compile(r'level')
+    is_object_level_1 = re.compile(r'level1')
+    is_object_level_2 = re.compile(r'level2')
+    
+    meters_name         = request.GET['obj_title']
+    electric_data_end   = request.GET['electric_data_end']            
+    obj_key             = request.GET['obj_key']
+    obj_title = 'Не выбран'
+    obj_parent_title = 'Не выбран'
+
+    if request.is_ajax():
+        if request.method == 'GET':
+            request.session["obj_parent_title"]    = obj_parent_title         = request.GET['obj_parent_title']
+            request.session["obj_title"]           = obj_title         = request.GET['obj_title']
+            request.session["electric_data_end"]   = electric_data_end   = request.GET['electric_data_end']           
+            request.session["obj_key"]             = obj_key             = request.GET['obj_key']
+    data_table = []
+    if (bool(is_abonent_level.search(obj_key))):
+        data_table = common_sql.get_data_table_by_date_daily_pulsar_error_code(obj_parent_title, obj_title, electric_data_end, True)
+    elif (bool(is_object_level_2.search(obj_key))):
+        data_table = common_sql.get_data_table_by_date_daily_pulsar_error_code(obj_parent_title, obj_title, electric_data_end, False)
+        # расшифровка значения ошибок
+        result_data_table = []
+        for line in data_table:
+            meter_errors = []
+            line = list(line)
+            if line[2] != None:
+                line[2] = bin(int(line[2]))[2:].zfill(32)
+                print(len(line[2]), len(error_tuple))
+                for i, j in enumerate(line[2]):
+                    if j == '1':
+                        meter_errors.append(error_tuple[i])
+            line.append(meter_errors)
+            result_data_table.append(line)
+
+    
+    args['data_table'] = result_data_table
+    args['electric_data_end'] = electric_data_end
+    args['obj_title'] = meters_name 
+    return render(request, "data_table/heat/130.html", args)

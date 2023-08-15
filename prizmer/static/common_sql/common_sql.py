@@ -6051,6 +6051,18 @@ def get_data_table_by_date_daily_pulsar_frost(obj_parent_title, obj_title, elect
     if len(data_table)>0: data_table=ChangeNull_and_LeaveEmptyCol(data_table, electric_data, 7) 
     return data_table
 
+def get_data_table_by_date_daily_pulsar_error_code(obj_parent_title, obj_title, electric_data, isAbon):
+    data_table = []
+    params=['Error_code','Теплосчётчик']
+    cursor = connection.cursor()
+    if isAbon:
+        print('для абонента')
+        cursor.execute(MakeSqlQuery_heat_error_code_for_all(obj_title, obj_title, electric_data, params))
+    else:
+        cursor.execute(MakeSqlQuery_heat_error_code_for_all(obj_parent_title,obj_title, electric_data, params))
+    data_table = cursor.fetchall()   
+    
+    return data_table
 
 def makeSqlQuery_heat_pulsar_teplo_abon_period(obj_parent_title,obj_title, electric_data_end, electric_data_start, params):
     sQuery="""
@@ -7299,6 +7311,50 @@ WHERE
   where heat_abons.obj_name='%s'
   order by heat_abons.ab_name
     """%(my_params[0],my_params[1],obj_title,my_params[2],electric_data_end,obj_title)
+    return sQuery
+
+def MakeSqlQuery_heat_error_code_for_all(obj_parent_title, obj_title, electric_data_end, my_params):
+    sQuery="""
+    Select heat_abons.ab_name, heat_abons.factory_number_manual, error_code
+
+from heat_abons
+left join
+(SELECT 
+daily_values.date,                           
+                          objects.name, 
+                          abonents.name as ab_name, 
+                          meters.factory_number_manual,                           
+                          sum(Case when names_params.name = '%s' then daily_values.value else null end) as error_code
+
+FROM 
+  public.link_abonents_taken_params, 
+  public.meters, 
+  public.abonents, 
+  public.taken_params, 
+  public.objects, 
+  public.daily_values, 
+  public.params, 
+  public.names_params, 
+  public.types_meters
+WHERE 
+  link_abonents_taken_params.guid_taken_params = taken_params.guid AND
+  meters.guid = taken_params.guid_meters AND
+  meters.guid_types_meters = types_meters.guid AND
+  abonents.guid = link_abonents_taken_params.guid_abonents AND
+  abonents.guid_objects = objects.guid AND
+  taken_params.guid_params = params.guid AND
+  daily_values.id_taken_params = taken_params.id AND
+  params.guid_names_params = names_params.guid AND
+  params.guid_types_meters = types_meters.guid AND
+  objects.name = '%s' AND 
+  types_meters.name like '%%Тепло%%' and
+  daily_values.date='%s'
+  group by daily_values.date, objects.name, abonents.name, meters.factory_number_manual) as z1
+  on heat_abons.factory_number_manual=z1.factory_number_manual
+  where heat_abons.obj_name='%s'
+  order by heat_abons.ab_name
+    """%(my_params[0],obj_title,electric_data_end,obj_title)
+    print(sQuery)
     return sQuery
     
 def get_data_table_elf_heat_daily(obj_parent_title, obj_title, electric_data_end, isAbon):

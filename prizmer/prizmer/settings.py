@@ -111,13 +111,16 @@ DATABASES = {
         #'NAME': 'ryabina',
         #'NAME': 'tro_sud',
         #'NAME': 'metro',
-        #'NAME': 'dubi',
-        'NAME': 'ogni2',
+        'NAME': 'pav',
+        # 'NAME': 'ogni2',
+        #'NAME': 'obninsk1',
         'USER': 'postgres',
         'PASSWORD': '1',
         #'HOST': 'localhost',
         'HOST': '192.168.50.49',
+        #'HOST': '94.199.105.211',
         'PORT': '5432',
+        #'PORT': '14012',
         'OPTIONS': {
             'client_encoding': 'UTF8',            
             }
