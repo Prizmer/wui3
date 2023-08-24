@@ -11479,12 +11479,13 @@ def pulsar_heat_error_code(request):
                 print(len(line[2]), len(error_tuple))
                 for i, j in enumerate(line[2]):
                     if j == '1':
-                        meter_errors.append(error_tuple[i])
+                        if error_tuple[i] != 'Резерв':
+                            meter_errors.append(error_tuple[i])
             line.append(meter_errors)
             result_data_table.append(line)
 
     
     args['data_table'] = result_data_table
     args['electric_data_end'] = electric_data_end
-    args['obj_title'] = meters_name 
+    args['obj_title'] = meters_name
     return render(request, "data_table/heat/130.html", args)
