@@ -664,6 +664,10 @@ def LoadElectricMeters(sPath, sSheet):
                 add_meter = Meters(name = str(type_meter) + ' ' + str(meter), address = str(adr), factory_number_manual = str(meter), guid_types_meters = TypesMeters.objects.get(guid = "17d88dbc-23b9-490a-9895-58ad24fe459d") )
                 add_meter.save()
                 writeToLog('Device added' + ' --->   ' + 'СЕ301')
+            elif str(type_meter) == 'Sanext':
+                add_meter = Meters(name = str(type_meter) + ' ' + str(meter), address = str(adr), factory_number_manual = str(meter), guid_types_meters = TypesMeters.objects.get(guid = "e8fa5e00-e1b9-4ef3-bc39-b8439a44b540") )
+                add_meter.save()
+                writeToLog('Device added' + ' --->   ' + 'Sanext')
             else:
                 writeToLog('Не найдено совпадение с существующим типом прибора')
                 met-=1
@@ -2552,6 +2556,9 @@ def add_taken_param_no_signals(instance, isR, isHalfs): # Добавляем с�
         # "Показание Температура выхода" To, C0
         add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "d3433b80-cb8c-4038-a682-947e6d05955e"))
         add_param.save()
+        # "Код ошибки" 
+        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "dce68a94-2fb1-4856-acd6-2a1b13d5ec99"))
+        add_param.save()
 
     elif instance.guid_types_meters.name == 'Пульсар Холодосчётчик':
         #Добавляем параметры для Холодосчётчика Пульсар.
@@ -2725,6 +2732,22 @@ def add_taken_param_no_signals(instance, isR, isHalfs): # Добавляем с�
         add_param.save()        
 #        #R+ Профиль
         add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = u"610a6bf6-d00a-4fd4-a41e-0a0d9ffcba2f")) # R+ 30-мин. срез мощности
+        add_param.save()
+
+    elif instance.guid_types_meters.name == 'Sanext':
+        #Добавляем параметры для Теплосчётчика Sanext.
+        #------------Суточные
+        # "Показание Энергии" Q, Гкал
+        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "dd95cc37-023c-4d15-861d-8a7363f36d9c"))
+        add_param.save()
+        # "Показание Расход теплоносителя" Объем, м3
+        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "f83d191d-1252-4257-ab85-5d0bba9a04c2"))
+        add_param.save()
+        # "Показание Температура подачи" Ti, C0
+        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "ae423b31-9b3d-4ab3-a6cf-8b745faf48f0"))
+        add_param.save()
+        # "Показание Температура выхода" To, C0
+        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "e2baef4b-3cfe-4f19-aec7-0d77f5c8a822"))
         add_param.save()
     else:
         pass
