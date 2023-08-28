@@ -11512,8 +11512,8 @@ def get_water_elf_daily_by_user(id_user, date_end):
 def MakeHeatDanfosQueryDaily_for_abon(obj_parent_title, obj_title, electric_data_end, params):
     sQuery = """
     Select obj_name, ab_name, heat_abons.factory_number_manual, 
-    round(energy::numeric,3), 
-    round(volume::numeric,3), 
+    round(energy::numeric,5), 
+    round(volume::numeric,2), 
     round(t_in::numeric,1), round(t_out::numeric,1)
 from heat_abons
 Left Join
@@ -11564,7 +11564,7 @@ WHERE
 def MakeHeatDanfosQueryDaily_for_obj(obj_parent_title, obj_title, electric_data_end, params):
     sQuery = """
     Select obj_name, ab_name, heat_abons.factory_number_manual, 
-    round(energy::numeric,2), 
+    round(energy::numeric,5), 
     round(volume::numeric,2), 
     round(t_in::numeric,1), 
     round(t_out::numeric,1)
