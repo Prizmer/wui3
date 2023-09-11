@@ -2666,6 +2666,18 @@ def get_data_table_by_date_monthly_3_zones(obj_title, obj_parent_title, electric
         data_table.append(data_table_temp)
     return data_table
 
+def change_none_to_zero(data_table):
+    #обойти в цикле все строки и добавить "0" в ячейки, где none
+    if data_table == None: return []
+    for i in range(len(data_table)):
+        data_table[i]=list(data_table[i])
+        for j in range(1,len(data_table[i])):
+            if (data_table[i][j] == None) or (data_table[i][j] is None) or (data_table[i][j] == "None"):
+                data_table[i][j]='0'
+        data_table[i]=tuple(data_table[i])
+    return data_table
+
+
 def ChangeNull(data_table, electric_data):
     #обойти в цикле все строки и добавить "Н/Д" в ячейки, где null
     if data_table == None: return []
@@ -9818,6 +9830,21 @@ def get_date_month_range_by_date(electric_date_end):
     data_table = cursor.fetchall()      
     return data_table
 
+def get_date_month_range_by_date_plus_day(electric_date_end):
+    cursor = connection.cursor()
+    data_table=[] 
+    sQuery="""
+    SELECT date_trunc('day', dd)::date::text
+    FROM generate_series
+        ( (date_trunc('month', '%s'::timestamp))::timestamp 
+        , (date_trunc('day', date_trunc('month', '%s'::TIMESTAMP) +'1 month'::INTERVAL))::timestamp
+        , '1 day'::interval) dd
+    """%(electric_date_end, electric_date_end) 
+    #print sQuery    
+    cursor.execute(sQuery)  
+    data_table = cursor.fetchall()      
+    return data_table
+
 def MakeQuery_electric_period_c300(obj_parent_title, obj_title ,electric_data_start, electric_data_end, my_params):
     sQuery="""
     Select row_number() over(ORDER BY z_start.account_1, z_start.type_energo) num, 
@@ -14351,8 +14378,9 @@ WHERE
 def get_data_hours_various_by_date(obj_parent_title, obj_title,electric_data_end):
     data_table = []
     cursor = connection.cursor()
-    cursor.execute(make_sql_query_hours_various_by_day(obj_parent_title, obj_title, electric_data_end))
-    data_table = cursor.fetchall()    
+    cursor.execute(make_sql_query_hours_various_by_day(obj_parent_title, obj_title, electric_data_end))    
+    data_table = cursor.fetchall()
+    data_table = change_none_to_zero(data_table)
 
     return data_table
 

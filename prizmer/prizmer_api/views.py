@@ -15,6 +15,12 @@ import datetime
 class ObjectsAPIView(generics.ListAPIView):
     queryset = Objects.objects.all()
     serializer_class = ObjectsSerializer
+    print('Запрос файла')
+    with open('api_request.txt', 'a') as f:
+        f.write('HHello')
+        
+
+
 
 class AllMetersDataAPIView(APIView):
     def get(self, request):

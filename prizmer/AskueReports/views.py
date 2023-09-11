@@ -19627,13 +19627,13 @@ def electric_interval_month_hours(request):
             if len(data_table) > 0:
                 factory_number_manual = data_table[0][25]
             if len(data_table) == 0:
-                data_table = (('','','','','','','','','','','','','','','','','','','','','','','','','','-'),)
+                data_table = (('0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','-'),)
                 
             #заполняем данными
             # for cell in values_range:
-
             c_j = 1
             for x in values_range[row_num]:
+                print(row_num, '-',  values_range[row_num])
                 x.font = font_4
                 x.alignment = alignment_1
                 try:
