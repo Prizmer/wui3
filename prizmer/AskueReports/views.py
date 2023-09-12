@@ -19229,7 +19229,7 @@ def electric_integral_month_hours(request):
     else:
         dm='daily'
 
-    dt_date=common_sql.get_date_month_range_by_date(electric_data_end)
+    dt_date=common_sql.get_date_month_range_by_date_plus_day(electric_data_end)
 
     common_sql.del_double_30_by_dates(dt_date[0][0],dt_date[-1][0])
     
