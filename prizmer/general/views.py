@@ -11392,6 +11392,7 @@ def electric_integral_month_hours(request):
         pass
         
     elif (bool(is_object_level_2.search(obj_key))):#выбран объект
+        #print(dt_date[0][0],dt_date[-1][0])
         data_table = common_sql.get_data_integral_dubi(obj_parent_title, obj_title, dt_date[0][0],dt_date[-1][0], dm, res)
             
     month_name = ""

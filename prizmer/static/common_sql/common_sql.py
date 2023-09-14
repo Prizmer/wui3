@@ -14400,13 +14400,19 @@ def get_month_eng(my_date):
 def make_sql_query_hours_integral(obj_parent_title, obj_title, params, date_start, date_end, dm, res):
 
     sQuery="""
-Select z3.ab_name, z3.factory_number_manual,
-round(z3.t0_start::numeric,4)::text, round(z3.t1_start::numeric,3)::text, 
+Select z3.ab_name, 
+z3.factory_number_manual,
+  round(z3.t0_start::numeric,4)::text,
+round(z3.t1_start::numeric,3)::text, 
 round(z3.t2_start::numeric,3)::text, 
-round(z3.t3_start::numeric,3)::text, round(z3.t4_start::numeric,3)::text, 
-round(z4.t0_end::numeric,4)::text, round(z4.t1_end::numeric,3)::text, round(z4.t2_end::numeric,3)::text, 
-round(z4.t3_end::numeric,3)::text, round(z4.t4_end::numeric,3)::text,  
-round((z4.t0_end-z3.t0_start)::numeric,4)::text as delta_t0, 
+round(z3.t3_start::numeric,3)::text, 
+round(z3.t4_start::numeric,3)::text, 
+  round(z4.t0_end::numeric,4)::text, 
+round(z4.t1_end::numeric,3)::text, 
+round(z4.t2_end::numeric,3)::text, 
+round(z4.t3_end::numeric,3)::text, 
+round(z4.t4_end::numeric,3)::text,  
+  round((z4.t0_end-z3.t0_start)::numeric,4)::text as delta_t0, 
 round((z4.t1_end-z3.t1_start)::numeric,3)::text as delta_t1, 
 round((z4.t2_end-z3.t2_start)::numeric,3)::text as delta_t2, 
 round((z4.t3_end-z3.t3_start)::numeric,3)::text as delta_t3, 
@@ -14414,12 +14420,14 @@ round((z4.t4_end-z3.t4_start)::numeric,3)::text as delta_t4,
 round(z3.t0R_start::numeric,3)::text, 
 round(z4.t0R_end::numeric,3)::text,  
 round((z4.t0R_end-z3.t0R_start)::numeric,3)::text as delta_t0R, 
-round(z4.ktt::numeric,1)::text,  
+  round(z4.ktt::numeric,1)::text,  
 round((z4.ktt*z4.ktn*(z4.t0_end-z3.t0_start))::numeric,3)::text, 
 round((z4.ktt*z4.ktn*(z4.t0R_end-z3.t0R_start))::numeric,3)::text,
-round(z4.ktn::numeric,1)::text, round(z4.a::numeric,1)::text, z4.lic_num,
-round(((z4.t0_end-z3.t0_start)*0.0251*z4.ktt*z4.ktn*z4.a)::numeric, 4)::text as delta_t0_dubi,
-round(((z4.t0_end-z3.t0_start)*0.0251*z4.ktt*z4.ktn*z4.a+(z4.t0_end-z3.t0_start)*z4.ktt*z4.ktn*z4.a)::numeric, 4)::text as delta2_t0_dubi
+round(z4.ktn::numeric,1)::text, 
+round(z4.a::numeric,1)::text, 
+z4.lic_num,
+  round(((z4.t0_end-z3.t0_start)*0.0251*z4.ktt*z4.a)::numeric, 4)::text as delta_t0_dubi,
+  round(((z4.t0_end-z3.t0_start)*0.0251*z4.ktt*z4.a+(z4.t0_end-z3.t0_start)*z4.ktt*z4.a)::numeric, 4)::text as delta2_t0_dubi
 from
 (Select electric_abons_2.ktt, electric_abons_2.lic_num, electric_abons_2.ktn, electric_abons_2.a, z2.date as date_end, electric_abons_2.obj_name, electric_abons_2.ab_name, electric_abons_2.factory_number_manual, z2.name_res, z2.t0 as t0_end, z2.t1 as t1_end, z2.t2 as t2_end, z2.t3 as t3_end, z2.t4 as t4_end, z2.t0r as t0r_end
 from electric_abons_2
