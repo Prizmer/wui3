@@ -668,6 +668,7 @@ def LoadElectricMeters(sPath, sSheet):
                 add_meter = Meters(name = str(type_meter) + ' ' + str(meter), address = str(adr), factory_number_manual = str(meter), guid_types_meters = TypesMeters.objects.get(guid = "e8fa5e00-e1b9-4ef3-bc39-b8439a44b540") )
                 add_meter.save()
                 writeToLog('Device added' + ' --->   ' + 'Sanext')
+
             else:
                 writeToLog('Не найдено совпадение с существующим типом прибора')
                 met-=1
@@ -2749,6 +2750,108 @@ def add_taken_param_no_signals(instance, isR, isHalfs): # Добавляем с�
         # "Показание Температура выхода" To, C0
         add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "e2baef4b-3cfe-4f19-aec7-0d77f5c8a822"))
         add_param.save()
+
+    elif instance.guid_types_meters.name == 'Valtec 16M':
+        print('add_taken_params_valtec_16m')
+    # Суточные
+      # Канал 1
+        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "a11b0730-3975-40c1-bd2f-ed0c1a3132dc"))
+        add_param.save()
+      # Канал 2
+        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "9d2832c8-f116-434d-ab48-0f28cbfc03ad"))
+        add_param.save()
+      # Канал 3
+        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "4fe447ea-de07-4d97-ad4f-20ded5503ddb"))
+        add_param.save()
+      # Канал 4
+        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "f859f4ed-166e-4b44-9df3-f3a60d778c35"))
+        add_param.save()
+      # Канал 5
+        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "c1b97126-d5f8-4d8c-acc4-08eaa017d5fa"))
+        add_param.save()
+      # Канал 6
+        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "ca29cbf2-ab61-4cb0-b9fd-99121cb45b1f"))
+        add_param.save()
+      # Канал 7
+        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "28c0bd41-1281-4272-b33e-234669294644"))
+        add_param.save()
+      # Канал 8
+        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "616608c0-2343-4d22-b065-d8d5f9769731"))
+        add_param.save()
+      # Канал 9
+        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "22ff1bd3-506b-40db-9137-2f01a923698d"))
+        add_param.save()
+      # Канал 10
+        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "48a5e8d8-d065-423c-a7ac-f126048687f7"))
+        add_param.save()
+      # Канал 11
+        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "9b2cb997-1bb0-4230-92f7-3cd01032e5b9"))
+        add_param.save()
+      # Канал 12
+        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "fe4e2925-d986-4727-b3d5-bd3f809009e5"))
+        add_param.save()
+      # Канал 13
+        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "a49323aa-135d-4a3f-93b8-1e32762e64e7"))
+        add_param.save()
+      # Канал 14
+        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "aae6e088-7dcb-49a6-aafc-df4834ceca11"))
+        add_param.save()
+      # Канал 15
+        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "1e1d2cef-11fc-4b81-9201-ce19a85cacab"))
+        add_param.save()
+      # Канал 16
+        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "310b935b-e7f9-47d3-8c87-a8ae13a3c81d"))
+        add_param.save() 
+  
+    # Текущие
+      # Канал 1
+       # add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = u""))
+       # add_param.save()
+      # Канал 2
+        #add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = u""))
+        #add_param.save()
+      # Канал 3
+        #add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = u""))
+        #add_param.save()
+      # Канал 4
+        #add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = u""))
+        #add_param.save()
+      # Канал 5
+        #add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = u""))
+        #add_param.save()
+      # Канал 6
+        #add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = u""))
+        #add_param.save()
+      # Канал 7
+        #add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = u""))
+        #add_param.save()
+      # Канал 8
+        #add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = u""))
+        #add_param.save()
+      # Канал 9
+        #add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = u""))
+        #add_param.save()
+      # Канал 10
+        #add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = u""))
+        #add_param.save()
+      # Канал 11
+        #add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = u""))
+        #add_param.save()
+      # Канал 12
+        #add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = u""))
+        #add_param.save()
+      # Канал 13
+        #add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = u""))
+        #add_param.save()
+      # Канал 14
+        #add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = u""))
+        #add_param.save()
+      # Канал 15
+        #add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = u""))
+        #add_param.save()
+      # Канал 16
+        #add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = u""))
+        #add_param.save()
     else:
         pass
         #print('!!!!!!!!!!!!!!', instance.guid_types_meters.name)
@@ -2855,6 +2958,7 @@ def add_link_abonents_taken_params(sender, instance, created, **kwargs):
     
 
 def add_link_abonents_taken_params2(sender, instance, created, **kwargs):
+    print(f'Зашли в функцию add_link_abonents_taken_params2')
     writeToLog(instance.name)
     isExistTakenParam=SimpleCheckIfExist('taken_params','name',instance.name,"","","")
     if not isExistTakenParam:
@@ -2867,7 +2971,7 @@ def add_link_abonents_taken_params2(sender, instance, created, **kwargs):
         channel=str(dtAll[i][4])
         num_pulsar=str(dtAll[i][5])
         taken_param = type_pulsar+' '+num_pulsar+' '+type_pulsar+' Канал '+channel+' Суточный -- adress: '+channel+'  channel: 0'
-        #print taken_param
+        print(f'Пытаемся привязать: {taken_param}')
         if (taken_param==instance.name):
             isExistAbonent=SimpleCheckIfExist('abonents','name',abon,'','','')
             if isExistAbonent:
@@ -3190,6 +3294,16 @@ def LoadWaterPulsar(sPath, sSheet):
                    print ('OK Device 2M added in DB')
                    #Если экземпляр был создан, то добавляем считываемые параметры
                    add_taken_param_no_signals(instance = add_meter, isR = False, isHalfs = False)
+                   met+=1
+
+            elif str(typePulsar) == 'Valtec 16M':
+                   signals.post_save.disconnect(add_link_taken_params, sender=TakenParams)  
+                   add_meter = Meters(name = str(str(typePulsar) + ' ' + str(numPulsar)), address = str(numPulsar),  factory_number_manual = str(numPulsar), guid_types_meters = TypesMeters.objects.get(guid = "d8613ccc-a5b4-406b-8a04-b70e08f7f7a8") )
+                   add_meter.save()
+                   print ('OK Device Valtec 16M added in DB')
+                   #Если экземпляр был создан, то добавляем считываемые параметры
+                   add_taken_param_no_signals(instance = add_meter, isR = False, isHalfs = False)
+            
                    met+=1
             else:
                 print('Pulsar already exists or you incorrectly indicated the type of device in the loading list')        

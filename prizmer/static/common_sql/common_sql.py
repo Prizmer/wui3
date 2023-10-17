@@ -5037,7 +5037,7 @@ WHERE
     """%(my_param[0],electric_data_end, meters_name,meters_name)
     # if dc == u'current':
     #   sQuery=sQuery.replace('daily', dc)
-    #print sQuery
+    # print(sQuery)
     return sQuery
     
 def MakeSqlQuery_water_by_date_for_abon(meters_name, parent_name, electric_data_end, my_param, dc):
@@ -6912,11 +6912,11 @@ def get_data_table_pulsar_water_for_period_Skladochnaya(obj_parent_title, obj_ti
     
 def MakeSqlQuery_water_pulsar_daily_for_abonent_row(obj_parent_title, obj_title, electric_data_end, my_params):
     sQuery="""
-Select z2.date_end,z2.name, z2.hvs_1_num, z2.hvs_1,z2.gvs_1_num, z2.gvs_1, 
-z2.hvs_2_num, z2.hvs_2,  z2.gvs_2_num,z2.gvs_2, 
-z2.hvs_3_num,z2.hvs_3, z2.gvs_3_num, z2.gvs_3, 
-(z2.hvs_1+z2.hvs_2+z2.hvs_3) as sum_hvs,
-(z2.gvs_1+z2.gvs_2+z2.gvs_3) as sum_gvs
+Select z2.date_end,z2.name, z2.hvs_1_num, round(z2.hvs_1::numeric,3), z2.gvs_1_num, round(z2.gvs_1::numeric,3), 
+z2.hvs_2_num, round(z2.hvs_2::numeric,3),  z2.gvs_2_num, round(z2.gvs_2::numeric,3), 
+z2.hvs_3_num, round(z2.hvs_3::numeric,3), z2.gvs_3_num, round(z2.gvs_3::numeric,3), 
+round((z2.hvs_1+z2.hvs_2+z2.hvs_3)::numeric,3) as sum_hvs,
+round((z2.gvs_1+z2.gvs_2+z2.gvs_3)::numeric,3) as sum_gvs
 from 
 (
 Select z1.date_end, z1.name,
@@ -6980,11 +6980,11 @@ group by z1.date_end,z1.name
     
 def MakeSqlQuery_water_pulsar_daily_for_all_row(obj_parent_title, obj_title, electric_data_end, my_params):
     sQuery="""
-Select z2.date_end,z2.name, z2.hvs_1_num, z2.hvs_1,z2.gvs_1_num, z2.gvs_1, 
-z2.hvs_2_num, z2.hvs_2,  z2.gvs_2_num,z2.gvs_2, 
-z2.hvs_3_num,z2.hvs_3, z2.gvs_3_num, z2.gvs_3, 
-(z2.hvs_1+z2.hvs_2+z2.hvs_3) as sum_hvs,
-(z2.gvs_1+z2.gvs_2+z2.gvs_3) as sum_gvs
+Select z2.date_end,z2.name, z2.hvs_1_num, round(z2.hvs_1::numeric,3), z2.gvs_1_num, round(z2.gvs_1::numeric,3), 
+z2.hvs_2_num, round(z2.hvs_2::numeric,3),  z2.gvs_2_num, round(z2.gvs_2::numeric,3), 
+z2.hvs_3_num, round(z2.hvs_3::numeric,3), z2.gvs_3_num, round(z2.gvs_3::numeric,3), 
+round((z2.hvs_1+z2.hvs_2+z2.hvs_3)::numeric,3) as sum_hvs,
+round((z2.gvs_1+z2.gvs_2+z2.gvs_3)::numeric,3) as sum_gvs
 from 
 (
 Select z1.date_end, z1.name,

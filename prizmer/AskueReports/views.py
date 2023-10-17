@@ -31,6 +31,7 @@ separator = getattr(settings, 'SEPARATOR', ',') #'.' #separator = '.' or ','
 
 def get_val_by_round(val, ROUND_SIZE, separator):
     new_val = f"{val:.{ROUND_SIZE}f}" #<--- для питона старше 3.6
+    new_val = str(new_val).replace('.',separator)
     return new_val
 
 def zagotovka(request):
@@ -8161,6 +8162,7 @@ def report_pulsar_water_daily(request):
     return response
     
 def report_pulsar_water_daily_row(request):
+    ROUND_SIZE = getattr(settings, 'ROUND_SIZE', 3)
     response = io.StringIO()
     wb = Workbook()
     wb.add_named_style(ali_grey)
@@ -8273,7 +8275,8 @@ def report_pulsar_water_daily_row(request):
             next
             
         try:
-            ws.cell('C%s'%(row)).value = '%s' % (data_table[row-3][3])  # value hvs
+            #ws.cell('C%s'%(row)).value = '%s' % (data_table[row-3][3])  # value hvs
+            ws.cell('C%s'%(row)).value = '%s' % get_val_by_round(float(data_table[row-3][3]), ROUND_SIZE, separator)
             ws.cell('C%s'%(row)).style = "ali_blue"
         except:
             ws.cell('C%s'%(row)).style = "ali_blue"
@@ -8287,7 +8290,8 @@ def report_pulsar_water_daily_row(request):
             next
             
         try:
-            ws.cell('E%s'%(row)).value = '%s' % (data_table[row-3][5])  # value gvs
+            #ws.cell('E%s'%(row)).value = '%s' % (data_table[row-3][5])  # value gvs
+            ws.cell('E%s'%(row)).value = '%s' % get_val_by_round(float(data_table[row-3][5]), ROUND_SIZE, separator)
             ws.cell('E%s'%(row)).style = "ali_pink"
         except:
             ws.cell('E%s'%(row)).style = "ali_pink"
@@ -8301,7 +8305,8 @@ def report_pulsar_water_daily_row(request):
             next
             
         try:
-            ws.cell('G%s'%(row)).value = '%s' % (data_table[row-3][7]) # val hvs
+            #ws.cell('G%s'%(row)).value = '%s' % (data_table[row-3][7]) # val hvs
+            ws.cell('G%s'%(row)).value = '%s' % get_val_by_round(float(data_table[row-3][7]), ROUND_SIZE, separator)
             ws.cell('G%s'%(row)).style = "ali_blue"
         except:
             ws.cell('G%s'%(row)).style = "ali_blue"
@@ -8315,7 +8320,8 @@ def report_pulsar_water_daily_row(request):
             next
             
         try:
-            ws.cell('I%s'%(row)).value = '%s' % (data_table[row-3][9])  # gvs val
+            #ws.cell('I%s'%(row)).value = '%s' % (data_table[row-3][9])  # gvs val
+            ws.cell('I%s'%(row)).value = '%s' % get_val_by_round(float(data_table[row-3][9]), ROUND_SIZE, separator)
             ws.cell('I%s'%(row)).style = "ali_pink"
         except:
             ws.cell('I%s'%(row)).style = "ali_pink"
@@ -8329,7 +8335,8 @@ def report_pulsar_water_daily_row(request):
             next
             
         try:
-            ws.cell('K%s'%(row)).value = '%s' % (data_table[row-3][11])  # hvs val
+            #ws.cell('K%s'%(row)).value = '%s' % (data_table[row-3][11])  # hvs val
+            ws.cell('K%s'%(row)).value = '%s' % get_val_by_round(float(data_table[row-3][11]), ROUND_SIZE, separator)
             ws.cell('K%s'%(row)).style = "ali_blue"
         except:
             ws.cell('K%s'%(row)).style = "ali_blue"
@@ -8343,7 +8350,8 @@ def report_pulsar_water_daily_row(request):
             next
             
         try:
-            ws.cell('M%s'%(row)).value = '%s' % (data_table[row-3][13])  # hvs val
+            #ws.cell('M%s'%(row)).value = '%s' % (data_table[row-3][13])  # hvs val
+            ws.cell('M%s'%(row)).value = '%s' % get_val_by_round(float(data_table[row-3][13]), ROUND_SIZE, separator)
             ws.cell('M%s'%(row)).style = "ali_pink"
         except:
             ws.cell('M%s'%(row)).style = "ali_pink"
@@ -8357,7 +8365,8 @@ def report_pulsar_water_daily_row(request):
             next
             
         try:
-            ws.cell('O%s'%(row)).value = '%s' % (data_table[row-3][15])  # hvs val
+            #ws.cell('O%s'%(row)).value = '%s' % (data_table[row-3][15])  # hvs val
+            ws.cell('O%s'%(row)).value = '%s' % get_val_by_round(float(data_table[row-3][15]), ROUND_SIZE, separator)
             ws.cell('O%s'%(row)).style = "ali_pink"
         except:
             ws.cell('O%s'%(row)).style = "ali_pink"
@@ -19277,12 +19286,12 @@ def electric_integral_month_hours(request):
             next
 
         try:
-            ws_1['K14'] = get_val_by_round(float(data_table[0][26]), 4, ',').replace('.',',')  #data_table[0][26]#'=G14*H14*0.0251'
+            ws_1['K14'] = get_val_by_round(float(data_table[0][26]), 0, ',').replace('.',',')  #data_table[0][26]#'=G14*H14*0.0251'
         except:
             next
 
         try:
-            ws_1['L14'] = get_val_by_round(float(data_table[0][27]), 4, ',').replace('.',',')  #data_table[0][27]#'=G14*H14+K14'
+            ws_1['L14'] = get_val_by_round(float(data_table[0][27]), 0, ',').replace('.',',')  #data_table[0][27]#'=G14*H14+K14'
         except:
             next
         try:
@@ -19306,11 +19315,11 @@ def electric_integral_month_hours(request):
         except:
             next
         try:
-            ws_1['K15'] = get_val_by_round(float(data_table[1][26]), 4, ',').replace('.',',')  #data_table[1][26]#'=G15*H15*0.0251'
+            ws_1['K15'] = get_val_by_round(float(data_table[1][26]), 0, ',').replace('.',',')  #data_table[1][26]#'=G15*H15*0.0251'
         except:
             next
         try:
-            ws_1['L15'] = get_val_by_round(float(data_table[1][27]), 4, ',').replace('.',',')  #'=G15*H15+K15'
+            ws_1['L15'] = get_val_by_round(float(data_table[1][27]), 0, ',').replace('.',',')  #'=G15*H15+K15'
         except:
             next
         try:
