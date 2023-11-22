@@ -2,8 +2,8 @@
 
 -- DROP VIEW public.water_abons_report;
 
---CREATE OR REPLACE VIEW public.water_abons_report
--- AS
+CREATE OR REPLACE VIEW public.water_abons_report
+ AS
  WITH korp AS (
          SELECT objects_1.name,
             objects_1.guid_parent,
@@ -43,6 +43,6 @@
   GROUP BY korp.name, abonents.account_2, abonents.name, objects.name, meters.name, names_params.name, meters.factory_number_manual, meters.attr1
   ORDER BY korp.name, objects.name, abonents.name;
 
---ALTER TABLE public.water_abons_report
- --   OWNER TO postgres;
+ALTER TABLE public.water_abons_report
+  OWNER TO postgres;
 
