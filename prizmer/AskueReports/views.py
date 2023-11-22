@@ -19913,7 +19913,7 @@ def report_pulsar_water_impulse_daily_row(request):
 
 #    ws.row_dimensions[5].height = 41
     ws.column_dimensions['A'].width = 17 
-    ws.row_dimensions[2].height = 32 
+    ws.row_dimensions[2].height = 41 
         
     #wb.save(response)
     response.seek(0)
