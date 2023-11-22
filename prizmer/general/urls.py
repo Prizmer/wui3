@@ -197,4 +197,6 @@ urlpatterns = [
     url(r'^128/$', views.electric_integral_month_hours, name = 'electric_integral_month_hours'), # Часовки за месяц по электрике. Интегральный акт = дубининская
 
     url(r'^130/$', views.pulsar_heat_error_code, name = 'pulsar_heat_error_code'), # Коды ошибок с теплосчётчиков Пульсар
+
+    url(r'^132/$', views.pulsar_water_impulse_daily_row, name = 'water_impulse_pulsar_row'), # Показания по стоякам в одну строку на дату с регистраторов Пульсар (аналог отчёта60, но импульс)
 ]

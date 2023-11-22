@@ -81,7 +81,7 @@ INSTALLED_APPS = (
     'service',
     'account_prizmer',
     'polling',
-    'prizmer_api',
+    #'prizmer_api',
 
 )
 
@@ -113,8 +113,8 @@ DATABASES = {
         #'NAME': 'metro',
         # 'NAME': 'pav',
         #'NAME': 'dubi',
-        'NAME': 'ogni2',
-        # 'NAME': 'ogni1',
+        #'NAME': 'ogni2',
+        'NAME': 'ogni1',
         #'NAME': 'obninsk1',
         'USER': 'postgres',
         'PASSWORD': '1',
