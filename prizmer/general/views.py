@@ -11520,7 +11520,7 @@ def pulsar_water_impulse_daily_row(request):
         data_table = common_sql.get_data_table_pulsar_impulse_water_daily_row(obj_parent_title, obj_title, electric_data_end, False)
               
     if len(data_table)>0: 
-        data_table=common_sql.ChangeNull_for_pulsar(data_table)
+        data_table=common_sql.ChangeNull_for_impulse_pulsar(data_table)
         
     args['data_table'] = data_table
     args['obj_title'] = obj_title

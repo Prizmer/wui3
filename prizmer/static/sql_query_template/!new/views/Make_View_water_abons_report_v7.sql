@@ -3,7 +3,7 @@
 -- DROP VIEW public.water_abons_report;
 
 CREATE OR REPLACE VIEW public.water_abons_report
- AS
+AS
  WITH korp AS (
          SELECT objects_1.name,
             objects_1.guid_parent,
@@ -22,7 +22,8 @@ CREATE OR REPLACE VIEW public.water_abons_report
     objects.name AS obj_name,
     meters.name AS meter_name,
     names_params.name AS channel,
-    meters.factory_number_manual,
+	substring(abonents.name from position('№' in abonents.name)+1 for 100) as factory_number_manual,
+	
     meters.attr1,
 	 CASE
             WHEN ((abonents.name)::text ~~ '%ГВС%'::text) THEN 'ГВС'::text
@@ -44,5 +45,5 @@ CREATE OR REPLACE VIEW public.water_abons_report
   ORDER BY korp.name, objects.name, abonents.name;
 
 ALTER TABLE public.water_abons_report
-  OWNER TO postgres;
+ --   OWNER TO postgres;
 

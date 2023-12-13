@@ -2714,22 +2714,22 @@ def ChangeNull_and_LeaveEmptyCol(data_table, electric_data, numColEmpty):
 def ChangeNull_for_pulsar(data_table):
     for i in range(len(data_table)):
         data_table[i]=list(data_table[i])
-        if (data_table[i][3] == 0):
-            data_table[i][3]='Н/Д'
-        if (data_table[i][5] == 0):
-            data_table[i][5]='Н/Д'
-        if (data_table[i][7] == 0):
-            data_table[i][7]='Н/Д'
-        if (data_table[i][9] == 0):
-            data_table[i][9]='Н/Д'
-        if (data_table[i][11] == 0):
-            data_table[i][11]='Н/Д'
-        if (data_table[i][13] == 0):
-            data_table[i][13]='Н/Д'
-        if (data_table[i][14] == 0):
-            data_table[i][14]='Н/Д'
-        if (data_table[i][15] == 0):
-            data_table[i][15]='Н/Д'
+        # if (data_table[i][3] == 0):
+        #     data_table[i][3]='Н/Д'
+        # if (data_table[i][5] == 0):
+        #     data_table[i][5]='Н/Д'
+        # if (data_table[i][7] == 0):
+        #     data_table[i][7]='Н/Д'
+        # if (data_table[i][9] == 0):
+        #     data_table[i][9]='Н/Д'
+        # if (data_table[i][11] == 0):
+        #     data_table[i][11]='Н/Д'
+        # if (data_table[i][13] == 0):
+        #     data_table[i][13]='Н/Д'
+        # if (data_table[i][14] == 0):
+        #     data_table[i][14]='Н/Д'
+        # if (data_table[i][15] == 0):
+        #     data_table[i][15]='Н/Д'
             
         if (data_table[i][2] == None) or (data_table[i][2] is None):
             data_table[i][3]='-'            
@@ -2751,6 +2751,7 @@ def ChangeNull_for_pulsar(data_table):
             data_table[i][12]='нет'
         data_table[i]=tuple(data_table[i])
     return data_table
+
 
 def get_data_table_by_date_for_group_3_zones_v3(obj_title, electric_data, dm):
     data_table = []
