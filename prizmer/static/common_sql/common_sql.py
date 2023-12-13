@@ -4984,7 +4984,11 @@ def get_data_table_tekon_heat_daily(obj_title,obj_parent_title, electric_data_en
 
 def MakeSqlQuery_water_by_date_for_korp(meters_name, parent_name, electric_data_end, my_param, dc):
     sQuery="""
-Select z2.date, obj_name as ab_name, water_abons_report.ab_name as meter_name,  z2.meter_name, z2.name_params, z2.value 
+Select z2.date, obj_name as ab_name, 
+water_abons_report.ab_name as meter_name,  
+z2.meter_name, 
+z2.name_params, 
+round(z2.value::numeric,2)
 from water_abons_report
 
 LEFT JOIN (
@@ -5047,7 +5051,7 @@ def MakeSqlQuery_water_by_date_for_abon(meters_name, parent_name, electric_data_
   abonents.name as meters,
   meters.name as meter_name,  
   names_params.name as name_params,
-  daily_values.value,    
+  round(daily_values.value::numeric,2),    
   abonents.guid,
   water_abons_report.name,
   resources.name
