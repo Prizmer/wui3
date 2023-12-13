@@ -5041,7 +5041,7 @@ WHERE
     """%(my_param[0],electric_data_end, meters_name,meters_name)
     # if dc == u'current':
     #   sQuery=sQuery.replace('daily', dc)
-    # print(sQuery)
+    #print(sQuery)
     return sQuery
     
 def MakeSqlQuery_water_by_date_for_abon(meters_name, parent_name, electric_data_end, my_param, dc):
@@ -14929,4 +14929,200 @@ order by  all_res_abons.obj_name, all_res_abons.ab_name, all_res_abons.factory_n
     # print(sQuery)
     cursor.execute(sQuery)
     data_table = cursor.fetchall()    
+    return data_table
+
+def MakeSqlQuery_water_pulsar_impulse_daily_for_obj_row(obj_parent_title, obj_title, electric_data_end, my_params):
+    sQuery="""
+Select z2.date_end,z2.ab_name, 
+z2.hvs_1_num, round(z2.hvs_1::numeric,3), 
+z2.gvs_1_num, round(z2.gvs_1::numeric,3),
+z2.hvs_2_num, round(z2.hvs_2::numeric,3),  
+z2.gvs_2_num, round(z2.gvs_2::numeric,3),
+z2.hvs_3_num, round(z2.hvs_3::numeric,3), 
+z2.gvs_3_num, round(z2.gvs_3::numeric,3),
+round((z2.hvs_1+z2.hvs_2+z2.hvs_3)::numeric,3) as sum_hvs,
+round((z2.gvs_1+z2.gvs_2+z2.gvs_3)::numeric,3) as sum_gvs
+FROM
+(Select z1.date_end, 
+z1.ab_name,
+sum(Case when z1.attr1 = 'Стояк 1' and z1.type_meter='ХВС'  then z1.factory_number_manual::bigint  end) as hvs_1_num,
+sum(Case when z1.attr1 = 'Стояк 1' and z1.type_meter='ХВС'  then z1.value else 0 end) as hvs_1,
+sum(Case when z1.attr1 = 'Стояк 1' and z1.type_meter='ГВС'  then z1.factory_number_manual::bigint  end) as gvs_1_num,
+sum(Case when z1.attr1 = 'Стояк 1' and z1.type_meter='ГВС'  then z1.value else 0 end) as gvs_1,
+sum(Case when z1.attr1 = 'Стояк 2' and z1.type_meter='ХВС'  then z1.factory_number_manual::bigint end) as hvs_2_num,
+sum(Case when z1.attr1 = 'Стояк 2' and z1.type_meter='ХВС'  then z1.value else 0  end) as hvs_2,
+sum(Case when z1.attr1 = 'Стояк 2' and z1.type_meter='ГВС'  then z1.factory_number_manual::bigint end) as gvs_2_num,
+sum(Case when z1.attr1 = 'Стояк 2' and z1.type_meter='ГВС'  then z1.value else 0  end) as gvs_2,
+sum(Case when z1.attr1 = 'Стояк 3' and z1.type_meter='ХВС'  then z1.factory_number_manual::bigint  end) as hvs_3_num,
+sum(Case when z1.attr1 = 'Стояк 3' and z1.type_meter='ХВС'  then z1.value else 0  end) as hvs_3,
+sum(Case when z1.attr1 = 'Стояк 3' and z1.type_meter='ГВС'  then z1.factory_number_manual::bigint  end) as gvs_3_num,
+sum(Case when z1.attr1 = 'Стояк 3' and z1.type_meter='ГВС'  then z1.value else 0  end) as gvs_3
+from
+(
+Select '%s' as date_end, 
+	obj_name as ab_name, 
+	water_abons_report.ab_name as meter_name,  
+	water_abons_report.meter_name as name_puls, 
+	water_abons_report.channel, 
+	z2.value, 
+	water_abons_report.attr1,
+	water_abons_report.type_meter,
+	water_abons_report.factory_number_manual
+from water_abons_report
+
+LEFT JOIN (
+SELECT
+  daily_values.date,
+  obj_name as ab_name,
+  abonents.name as meters,
+  meters.name as meter_name,
+  names_params.name as name_params,
+  daily_values.value,
+  abonents.guid,
+  water_abons_report.name,
+  resources.name as res
+FROM
+  public.meters,
+  public.taken_params,
+  public.daily_values,
+  public.abonents,
+  public.link_abonents_taken_params,
+  water_abons_report,
+  params,
+  names_params,
+  resources
+WHERE
+  taken_params.guid_meters = meters.guid AND
+  daily_values.id_taken_params = taken_params.id AND
+  link_abonents_taken_params.guid_taken_params = taken_params.guid AND
+  link_abonents_taken_params.guid_abonents = abonents.guid AND
+  water_abons_report.ab_name=abonents.name and
+  params.guid=taken_params.guid_params  and
+  names_params.guid=params.guid_names_params and
+  resources.guid=names_params.guid_resources and
+  resources.name='Импульс'
+  and date='%s' and
+  water_abons_report.name='%s'
+  group by
+        daily_values.date,
+  obj_name,
+  abonents.name,
+  meters.name,
+  names_params.name,
+  daily_values.value,
+  abonents.guid,
+  water_abons_report.name,
+  resources.name
+  order by obj_name, names_params.name ) z2
+  on z2.meters=water_abons_report.ab_name
+  where water_abons_report.name='%s') as z1
+  GROUP by  z1.date_end, z1.ab_name) as z2
+order by z2.ab_name
+    """%(electric_data_end,electric_data_end, obj_title, obj_title)
+    #print(sQuery)
+    return sQuery
+
+def MakeSqlQuery_water_impulse_pulsar_daily_for_abonent_row(obj_parent_title, obj_title, electric_data_end, my_params):
+    sQuery = """
+    Select z2.date_end,z2.ab_name, 
+z2.hvs_1_num, round(z2.hvs_1::numeric,3), 
+z2.gvs_1_num, round(z2.gvs_1::numeric,3),
+z2.hvs_2_num, round(z2.hvs_2::numeric,3),  
+z2.gvs_2_num, round(z2.gvs_2::numeric,3),
+z2.hvs_3_num, round(z2.hvs_3::numeric,3), 
+z2.gvs_3_num, round(z2.gvs_3::numeric,3),
+round((z2.hvs_1+z2.hvs_2+z2.hvs_3)::numeric,3) as sum_hvs,
+round((z2.gvs_1+z2.gvs_2+z2.gvs_3)::numeric,3) as sum_gvs
+FROM
+(Select z1.date_end, 
+z1.ab_name,
+sum(Case when z1.attr1 = 'Стояк 1' and z1.type_meter='ХВС'  then z1.factory_number_manual::bigint  end) as hvs_1_num,
+sum(Case when z1.attr1 = 'Стояк 1' and z1.type_meter='ХВС'  then z1.value else 0 end) as hvs_1,
+sum(Case when z1.attr1 = 'Стояк 1' and z1.type_meter='ГВС'  then z1.factory_number_manual::bigint  end) as gvs_1_num,
+sum(Case when z1.attr1 = 'Стояк 1' and z1.type_meter='ГВС'  then z1.value else 0 end) as gvs_1,
+sum(Case when z1.attr1 = 'Стояк 2' and z1.type_meter='ХВС'  then z1.factory_number_manual::bigint end) as hvs_2_num,
+sum(Case when z1.attr1 = 'Стояк 2' and z1.type_meter='ХВС'  then z1.value else 0  end) as hvs_2,
+sum(Case when z1.attr1 = 'Стояк 2' and z1.type_meter='ГВС'  then z1.factory_number_manual::bigint end) as gvs_2_num,
+sum(Case when z1.attr1 = 'Стояк 2' and z1.type_meter='ГВС'  then z1.value else 0  end) as gvs_2,
+sum(Case when z1.attr1 = 'Стояк 3' and z1.type_meter='ХВС'  then z1.factory_number_manual::bigint  end) as hvs_3_num,
+sum(Case when z1.attr1 = 'Стояк 3' and z1.type_meter='ХВС'  then z1.value else 0  end) as hvs_3,
+sum(Case when z1.attr1 = 'Стояк 3' and z1.type_meter='ГВС'  then z1.factory_number_manual::bigint  end) as gvs_3_num,
+sum(Case when z1.attr1 = 'Стояк 3' and z1.type_meter='ГВС'  then z1.value else 0  end) as gvs_3
+from
+(
+Select '%s' as date_end, 
+	obj_name as ab_name, 
+	water_abons_report.ab_name as meter_name,  
+	water_abons_report.meter_name as name_puls, 
+	water_abons_report.channel, 
+	z2.value, 
+	water_abons_report.attr1,
+	water_abons_report.type_meter,
+	water_abons_report.factory_number_manual
+from water_abons_report
+
+LEFT JOIN (
+SELECT
+  daily_values.date,
+  obj_name as ab_name,
+  abonents.name as meters,
+  meters.name as meter_name,
+  names_params.name as name_params,
+  daily_values.value,
+  abonents.guid,
+  water_abons_report.name,
+  resources.name as res
+FROM
+  public.meters,
+  public.taken_params,
+  public.daily_values,
+  public.abonents,
+  public.link_abonents_taken_params,
+  water_abons_report,
+  params,
+  names_params,
+  resources
+WHERE
+  taken_params.guid_meters = meters.guid AND
+  daily_values.id_taken_params = taken_params.id AND
+  link_abonents_taken_params.guid_taken_params = taken_params.guid AND
+  link_abonents_taken_params.guid_abonents = abonents.guid AND
+  water_abons_report.ab_name=abonents.name and
+  params.guid=taken_params.guid_params  and
+  names_params.guid=params.guid_names_params and
+  resources.guid=names_params.guid_resources and
+  resources.name='Импульс'
+  and date='%s' and
+  water_abons_report.name='%s' and 
+  water_abons_report.obj_name='%s'
+  group by
+        daily_values.date,
+  obj_name,
+  abonents.name,
+  meters.name,
+  names_params.name,
+  daily_values.value,
+  abonents.guid,
+  water_abons_report.name,
+  resources.name
+  order by obj_name, names_params.name ) z2
+  on z2.meters=water_abons_report.ab_name
+  where water_abons_report.name='%s'and 
+  water_abons_report.obj_name='%s') as z1
+  GROUP by  z1.date_end, z1.ab_name) as z2
+order by z2.ab_name
+    """%( electric_data_end,  electric_data_end, obj_parent_title, obj_title, obj_parent_title, obj_title)
+    #print(sQuery)
+    return sQuery
+
+def get_data_table_pulsar_impulse_water_daily_row(obj_parent_title, obj_title, electric_data_end, isAbon):
+    my_params=['Пульсар ГВС', 'Пульсар ХВС','ХВС','ГВС', 'Стояк 1', 'Стояк 2', 'Стояк 3']
+    cursor = connection.cursor()
+    data_table=[]
+    if (isAbon):
+        cursor.execute(MakeSqlQuery_water_impulse_pulsar_daily_for_abonent_row(obj_parent_title, obj_title, electric_data_end, my_params))
+    else:
+        cursor.execute(MakeSqlQuery_water_pulsar_impulse_daily_for_obj_row(obj_parent_title, obj_title, electric_data_end, my_params))
+    data_table = cursor.fetchall()
+    
     return data_table
