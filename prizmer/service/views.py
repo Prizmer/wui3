@@ -2685,34 +2685,40 @@ def add_taken_param_no_signals(instance, isR, isHalfs): # Добавляем с�
         #Т выход    
         add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "db1ed365-e85e-4547-aef6-89fed020898f"))
         add_param.save()
-
-        #Месячные
-        #Объём     
-        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "3c763ebc-6ad4-4193-967f-f352bfae92c5"))
+        #Канал 1. Импульсный
+        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "0166c378-5696-489e-92fb-a1d360fc2921"))
         add_param.save()
-        #Энергия  
-        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "7a5d6dd3-3a34-40e4-90af-0c00252b978d"))
-        add_param.save()
-        #Т вход
-        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "caf11a15-27ff-4c0d-9b18-d55028e4840b"))
-        add_param.save()
-        #Т выход    
-        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "f76371c9-5ecd-44b2-835e-5fc4cdce7141"))
+        #Канал 2. Импульсный    
+        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "b18bc638-eb07-429e-9c59-d859604be48f"))
         add_param.save()
 
-        #Текущие 
-        #Объём     
-        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "097122a4-b7d0-4700-add2-bc99a58347d0"))
-        add_param.save()
-        #Энергия  
-        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "af254ed7-d4ab-4293-8aaf-8bb13c81efb7"))
-        add_param.save()
-        #Т вход
-        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "caf11a15-27ff-4c0d-9b18-d55028e4840b"))
-        add_param.save()
-        #Т выход    
-        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "1d246b01-7fd8-441e-af1b-9851acf5f104"))
-        add_param.save()
+        # #Месячные
+        # #Объём     
+        # add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "3c763ebc-6ad4-4193-967f-f352bfae92c5"))
+        # add_param.save()
+        # #Энергия  
+        # add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "7a5d6dd3-3a34-40e4-90af-0c00252b978d"))
+        # add_param.save()
+        # #Т вход
+        # add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "caf11a15-27ff-4c0d-9b18-d55028e4840b"))
+        # add_param.save()
+        # #Т выход    
+        # add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "f76371c9-5ecd-44b2-835e-5fc4cdce7141"))
+        # add_param.save()
+
+        # #Текущие 
+        # #Объём     
+        # add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "097122a4-b7d0-4700-add2-bc99a58347d0"))
+        # add_param.save()
+        # #Энергия  
+        # add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "af254ed7-d4ab-4293-8aaf-8bb13c81efb7"))
+        # add_param.save()
+        # #Т вход
+        # add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "caf11a15-27ff-4c0d-9b18-d55028e4840b"))
+        # add_param.save()
+        # #Т выход    
+        # add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "1d246b01-7fd8-441e-af1b-9851acf5f104"))
+        # add_param.save()
 
     elif instance.guid_types_meters.name == 'Энергомера СЕ301':
         #Добавляем параметры для счётчика Энергомера СЕ301.    
