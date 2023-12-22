@@ -1,3 +1,4 @@
-*.pyc
+.pyc
 *.xlsx
 prizmer/prizmer/settings.py
+.txt
