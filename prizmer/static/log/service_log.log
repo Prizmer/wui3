@@ -987,3 +987,53 @@
 [13-12-2023 17:20]: Абонент найден Нартис СПОДЭС 023232004705 Нартис СПОДЭС T3 A+ Суточный -- adress: 0  channel: 3
 [13-12-2023 17:20]: Абонент найден Нартис СПОДЭС 023232004705 Нартис СПОДЭС A+ Профиль Получасовой -- adress: 0  channel: 5
 [13-12-2023 17:20]: Абонент найден Нартис СПОДЭС 023232004705 Нартис СПОДЭС R+ Профиль Получасовой -- adress: 0  channel: 6
+[27-12-2023 19:15]: Новый tcp/ip порт добавлен
+[27-12-2023 19:15]: Новый tcp/ip порт добавленПорт 172.22.5.203: 10000 уже существует 
+[27-12-2023 19:15]: Новый tcp/ip порт добавленПорт 172.22.5.203: 10000 уже существует 
+[27-12-2023 19:15]: D:\code\wui3\prizmer\static/cfg/danfoss_test.xlsx
+[27-12-2023 19:15]: г.Москва
+[27-12-2023 19:15]: ул. Погодинская
+[27-12-2023 19:15]: Дом 2
+[27-12-2023 19:15]: Квартира 0008
+[27-12-2023 19:15]: None
+[27-12-2023 19:15]: None
+[27-12-2023 19:15]: create object ул. Погодинская
+[27-12-2023 19:15]: create abonent Квартира 0008
+[27-12-2023 19:15]: г.Москва
+[27-12-2023 19:15]: ул. Погодинская
+[27-12-2023 19:15]: Дом 2
+[27-12-2023 19:15]: Квартира 0009
+[27-12-2023 19:15]: None
+[27-12-2023 19:15]: None
+[27-12-2023 19:15]: create abonent Квартира 0009
+[27-12-2023 19:15]: г.Москва
+[27-12-2023 19:15]: ул. Погодинская
+[27-12-2023 19:15]: Дом 2
+[27-12-2023 19:15]: Квартира 0010
+[27-12-2023 19:15]: None
+[27-12-2023 19:15]: None
+[27-12-2023 19:15]: create abonent Квартира 0010
+[27-12-2023 19:15]: ул. Погодинская
+[27-12-2023 19:15]: Device added --->   Danfoss SonoSelect
+[27-12-2023 19:15]: Абонент найден Danfoss SonoSelect 0290418BE1921 Danfoss SonoSelect Объем Суточный -- adress: 1  channel: 64
+[27-12-2023 19:15]: Абонент найден Danfoss SonoSelect 0290418BE1921 SonoSelect Danfoss Энергия Суточный -- adress: 9  channel: 64
+[27-12-2023 19:15]: Абонент найден Danfoss SonoSelect 0290418BE1921 Danfoss SonoSelect Ti Суточный -- adress: 21  channel: 32
+[27-12-2023 19:15]: Абонент найден Danfoss SonoSelect 0290418BE1921 Danfoss SonoSelect To Суточный -- adress: 23  channel: 32
+[27-12-2023 19:15]: Абонент найден Danfoss SonoSelect 0290418BE1921 Danfoss SonoSelect Канал 1 Суточный -- adress: 31  channel: 0
+[27-12-2023 19:15]: Абонент найден Danfoss SonoSelect 0290418BE1921 Danfoss SonoSelect Канал 2 Суточный -- adress: 32  channel: 0
+[27-12-2023 19:15]: ул. Погодинская
+[27-12-2023 19:15]: Device added --->   Danfoss SonoSelect
+[27-12-2023 19:15]: Абонент найден Danfoss SonoSelect 0290318BE1921 Danfoss SonoSelect Объем Суточный -- adress: 1  channel: 64
+[27-12-2023 19:15]: Абонент найден Danfoss SonoSelect 0290318BE1921 SonoSelect Danfoss Энергия Суточный -- adress: 9  channel: 64
+[27-12-2023 19:15]: Абонент найден Danfoss SonoSelect 0290318BE1921 Danfoss SonoSelect Ti Суточный -- adress: 21  channel: 32
+[27-12-2023 19:15]: Абонент найден Danfoss SonoSelect 0290318BE1921 Danfoss SonoSelect To Суточный -- adress: 23  channel: 32
+[27-12-2023 19:15]: Абонент найден Danfoss SonoSelect 0290318BE1921 Danfoss SonoSelect Канал 1 Суточный -- adress: 31  channel: 0
+[27-12-2023 19:15]: Абонент найден Danfoss SonoSelect 0290318BE1921 Danfoss SonoSelect Канал 2 Суточный -- adress: 32  channel: 0
+[27-12-2023 19:15]: ул. Погодинская
+[27-12-2023 19:15]: Device added --->   Danfoss SonoSelect
+[27-12-2023 19:15]: Абонент найден Danfoss SonoSelect 0280918BE1921 Danfoss SonoSelect Объем Суточный -- adress: 1  channel: 64
+[27-12-2023 19:15]: Абонент найден Danfoss SonoSelect 0280918BE1921 SonoSelect Danfoss Энергия Суточный -- adress: 9  channel: 64
+[27-12-2023 19:15]: Абонент найден Danfoss SonoSelect 0280918BE1921 Danfoss SonoSelect Ti Суточный -- adress: 21  channel: 32
+[27-12-2023 19:15]: Абонент найден Danfoss SonoSelect 0280918BE1921 Danfoss SonoSelect To Суточный -- adress: 23  channel: 32
+[27-12-2023 19:15]: Абонент найден Danfoss SonoSelect 0280918BE1921 Danfoss SonoSelect Канал 1 Суточный -- adress: 31  channel: 0
+[27-12-2023 19:15]: Абонент найден Danfoss SonoSelect 0280918BE1921 Danfoss SonoSelect Канал 2 Суточный -- adress: 32  channel: 0
