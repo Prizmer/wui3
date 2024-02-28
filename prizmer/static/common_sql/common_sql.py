@@ -2752,6 +2752,46 @@ def ChangeNull_for_pulsar(data_table):
         data_table[i]=tuple(data_table[i])
     return data_table
 
+def ChangeNull_for_impulse_pulsar(data_table):
+    for i in range(len(data_table)):
+        data_table[i]=list(data_table[i])
+        # if (data_table[i][3] == 0):
+        #     data_table[i][3]='Н/Д'
+        # if (data_table[i][5] == 0):
+        #     data_table[i][5]='Н/Д'
+        # if (data_table[i][7] == 0):
+        #     data_table[i][7]='Н/Д'
+        # if (data_table[i][9] == 0):
+        #     data_table[i][9]='Н/Д'
+        # if (data_table[i][11] == 0):
+        #     data_table[i][11]='Н/Д'
+        # if (data_table[i][13] == 0):
+        #     data_table[i][13]='Н/Д'
+        # if (data_table[i][14] == 0):
+        #     data_table[i][14]='Н/Д'
+        # if (data_table[i][15] == 0):
+        #     data_table[i][15]='Н/Д'
+            
+        if (data_table[i][2] == None) or (data_table[i][2] is None):
+            data_table[i][3]='-'            
+            data_table[i][2]='нет'
+        if (data_table[i][4] == None) or (data_table[i][4] is None):
+            data_table[i][5]='-'  
+            data_table[i][4]='нет'
+        if (data_table[i][6] == None) or (data_table[i][6] is None):
+            data_table[i][7]='-'  
+            data_table[i][6]='нет'
+        if (data_table[i][8] == None) or (data_table[i][8] is None):
+            data_table[i][9]='-'  
+            data_table[i][8]='нет'
+        if (data_table[i][10] == None) or (data_table[i][10] is None):
+            data_table[i][11]='-'  
+            data_table[i][10]='нет'
+        if (data_table[i][12] == None) or (data_table[i][12] is None):
+            data_table[i][13]='-'  
+            data_table[i][12]='нет'
+        data_table[i]=tuple(data_table[i])
+    return data_table
 
 def get_data_table_by_date_for_group_3_zones_v3(obj_title, electric_data, dm):
     data_table = []
@@ -9390,7 +9430,7 @@ where  electric_abons.obj_name= '%s'
 and z2.t0 is null
    
 ORDER BY electric_abons.obj_name, electric_abons.ab_name ASC """%(my_params[0],my_params[1],my_params[2],my_params[3],my_params[4],obj_title,electric_data_end,obj_title)
-    print(sQuery)
+    #print(sQuery)
     return sQuery
     
 def get_electric_no_data(obj_title, electric_data_end):
@@ -9462,7 +9502,7 @@ where  electric_abons.obj_name= '%s'
    
 ORDER BY electric_abons.ab_name ASC) as z 
 group by obj_name"""%(electric_data_end,my_params[0],my_params[1],my_params[2],my_params[3],my_params[4],obj_title,electric_data_end,obj_title)
-    #print sQuery
+    #print(sQuery)
     return sQuery 
     
 def get_electric_count(obj_title, electric_data_end):
@@ -9737,6 +9777,7 @@ WHERE
   order by obj_name, z2.name_params) z
   group by obj_name
     """%(electric_data_end,my_params[0],electric_data_end,obj_title,obj_title)
+    #print(sQuery)
     return sQuery    
     
 def get_water_impulse_count(obj_title,  electric_data_end):
@@ -10433,7 +10474,7 @@ where water_pulsar_abons.obj_name='%s'
 order by water_pulsar_abons.ab_name) as z
 group by obj_name
   """%(obj, my_params[0],my_params[1], electric_data_end, obj)
-  #print sQuery
+  #print(sQuery)
   return sQuery
 def get_water_digital_pulsar_count(obj,  electric_data_end):
     my_params=['%%Пульс%%ГВС%%', '%%Пульс%%ХВС%%']
@@ -15124,6 +15165,290 @@ def get_data_table_pulsar_impulse_water_daily_row(obj_parent_title, obj_title, e
         cursor.execute(MakeSqlQuery_water_impulse_pulsar_daily_for_abonent_row(obj_parent_title, obj_title, electric_data_end, my_params))
     else:
         cursor.execute(MakeSqlQuery_water_pulsar_impulse_daily_for_obj_row(obj_parent_title, obj_title, electric_data_end, my_params))
+    data_table = cursor.fetchall()
+    
+    return data_table
+
+def MakeSqlQuery_water_impulse_danfoss_daily(obj_parent_title, obj_title, electric_data_end, isAbon):
+    if isAbon:
+        where_str = """ obj_name = '%s' and ab_name='%s' """%(obj_parent_title, obj_title)
+    else: 
+        where_str = """ obj_name = '%s'"""%(obj_title)
+
+    sQuery ="""
+    Select  danfoss_water_from_heat.name_parent,
+          danfoss_water_from_heat.obj_name,
+          danfoss_water_from_heat.ab_name, 
+          danfoss_water_from_heat.factory_number_manual,           
+          danfoss_water_from_heat.num_meter,
+          '%s', 
+          danfoss_water_from_heat.res_name, 
+          danfoss_water_from_heat.name_param,
+          round(z2.value::numeric,3)::double precision
+
+from danfoss_water_from_heat
+Left join
+(SELECT z1.ktt, z1.ktn,z1.a,z1.date, z1.name_objects, z1.name as name_abonent, z1.num_manual, z1.name_res,
+z1.params_name, z1.value, z1.factory_number_manual
+
+                        FROM
+                        (
+                              SELECT
+                                  link_abonents_taken_params.coefficient_2 as ktn,
+                                  link_abonents_taken_params.coefficient as ktt,
+                                  link_abonents_taken_params.coefficient_3 as a,
+                                  daily_values.date,
+                                  daily_values.value,
+                                  abonents.name,
+                                  daily_values.id_taken_params,
+                                  objects.name as name_objects,
+                                  names_params.name as params_name,
+							      meters.factory_number_manual,
+								  case when names_params.name = 'Канал 1' then 
+                                  		meters.attr1 else
+								  		meters.attr2 end as num_manual,                                  
+								   case when names_params.name = 'Канал 1' then 
+                                  		'ХВС' else
+								  		'ГВС' end as name_res
+								FROM
+                                  public.daily_values,
+                                  public.link_abonents_taken_params,
+                                  public.taken_params,
+                                  public.abonents,
+                                  public.objects,
+                                  public.names_params,
+                                  public.params,
+                                  public.meters,
+                                  public.resources
+                                WHERE
+                                  taken_params.guid = link_abonents_taken_params.guid_taken_params AND
+                                  taken_params.id = daily_values.id_taken_params AND
+                                  taken_params.guid_params = params.guid AND
+                                  taken_params.guid_meters = meters.guid AND
+                                  abonents.guid = link_abonents_taken_params.guid_abonents AND
+                                  objects.guid = abonents.guid_objects AND
+                                  names_params.guid = params.guid_names_params AND
+                                  resources.guid = names_params.guid_resources AND
+                                  daily_values.date = '%s'  and
+								  resources.name = 'Импульс'								  
+                                   group by
+                         daily_values.date,
+                        daily_values.id_taken_params,
+                        objects.name ,
+                        abonents.name ,
+                        meters.factory_number_manual,
+                        daily_values.value ,
+                        names_params.name ,
+                        link_abonents_taken_params.coefficient ,
+                         link_abonents_taken_params.coefficient_2 ,
+                          link_abonents_taken_params.coefficient_3,
+                          resources.name,
+						  meters.attr1,
+						  meters.attr2,
+							meters.factory_number_manual
+                                  ) z1
+                      group by z1.name, z1.date, z1.name_objects, z1.name, z1.num_manual, z1.name_res, z1.ktt, z1.ktn, z1.a,
+                     z1.params_name, z1.value, z1.factory_number_manual
+                      order by z1.name) z2
+on danfoss_water_from_heat.num_meter=z2.num_manual and z2.params_name = danfoss_water_from_heat.params_name
+and danfoss_water_from_heat.factory_number_manual=z2.factory_number_manual 
+where %s
+order by  danfoss_water_from_heat.obj_name, danfoss_water_from_heat.ab_name, danfoss_water_from_heat.factory_number_manual, z2.params_name
+    """%(electric_data_end, electric_data_end, where_str)
+    #print(sQuery)
+    return sQuery
+
+def get_data_table_danfoss_impulse_water_daily(obj_parent_title, obj_title, electric_data_end, isAbon):
+    cursor = connection.cursor()
+    data_table=[]
+    cursor.execute(MakeSqlQuery_water_impulse_danfoss_daily(obj_parent_title, obj_title, electric_data_end, isAbon))   
+    data_table = cursor.fetchall()
+    
+    return data_table
+
+def MakeSqlQuery_water_impulse_danfoss_consumption(obj_parent_title, obj_title,electric_data_start, electric_data_end, isAbon):
+    if isAbon:
+        where_str = """ obj_name = '%s' and ab_name='%s' """%(obj_parent_title, obj_title)
+    else: 
+        where_str = """ obj_name = '%s'"""%(obj_title)
+
+    sQuery = """
+    Select z_start.name_parent, 
+z_start.obj_name, 
+z_start.ab_name, 
+z_start.factory_number_manual, 
+z_start.num_meter,
+z_start.res_name,
+z_start.name_param,
+z_start.value,
+z_end.value,
+round((z_end.value - z_start.value)::numeric, 3)::double precision
+FROM
+(Select danfoss_water_from_heat.ab_guid,  
+		  danfoss_water_from_heat.name_parent,
+          danfoss_water_from_heat.obj_name,
+          danfoss_water_from_heat.ab_name,
+          danfoss_water_from_heat.factory_number_manual,
+          danfoss_water_from_heat.num_meter,
+          danfoss_water_from_heat.res_name,
+          danfoss_water_from_heat.name_param,
+          round(z2.value::numeric,3)::double precision as value
+
+from danfoss_water_from_heat
+Left join
+(SELECT z1.ktt, z1.ktn,z1.a,z1.date, z1.name_objects, z1.name as name_abonent, z1.num_manual, z1.name_res,
+z1.params_name, z1.value, z1.factory_number_manual
+
+                        FROM
+                        (
+                              SELECT
+                                  link_abonents_taken_params.coefficient_2 as ktn,
+                                  link_abonents_taken_params.coefficient as ktt,
+                                  link_abonents_taken_params.coefficient_3 as a,
+                                  daily_values.date,
+                                  daily_values.value,
+                                  abonents.name,
+                                  daily_values.id_taken_params,
+                                  objects.name as name_objects,
+                                  names_params.name as params_name,
+                                                              meters.factory_number_manual,
+                                                                  case when names_params.name = 'Канал 1' then
+                                                meters.attr1 else
+                                                                                meters.attr2 end as num_manual,
+                                                                   case when names_params.name = 'Канал 1' then
+                                                'ХВС' else
+                                                                                'ГВС' end as name_res
+                                                                FROM
+                                  public.daily_values,
+                                  public.link_abonents_taken_params,
+                                  public.taken_params,
+                                  public.abonents,
+                                  public.objects,
+                                  public.names_params,
+                                  public.params,
+                                  public.meters,
+                                  public.resources
+                                WHERE
+                                  taken_params.guid = link_abonents_taken_params.guid_taken_params AND
+                                  taken_params.id = daily_values.id_taken_params AND
+                                  taken_params.guid_params = params.guid AND
+                                  taken_params.guid_meters = meters.guid AND
+                                  abonents.guid = link_abonents_taken_params.guid_abonents AND
+                                  objects.guid = abonents.guid_objects AND
+                                  names_params.guid = params.guid_names_params AND
+                                  resources.guid = names_params.guid_resources AND
+                                  daily_values.date = '%s'  and
+                                                                  resources.name = 'Импульс'
+                                   group by
+                         daily_values.date,
+                        daily_values.id_taken_params,
+                        objects.name ,
+                        abonents.name ,
+                        meters.factory_number_manual,
+                        daily_values.value ,
+                        names_params.name ,
+                        link_abonents_taken_params.coefficient ,
+                         link_abonents_taken_params.coefficient_2 ,
+                          link_abonents_taken_params.coefficient_3,
+                          resources.name,
+                                                  meters.attr1,
+                                                  meters.attr2,
+                                                        meters.factory_number_manual
+                                  ) z1
+                      group by z1.name, z1.date, z1.name_objects, z1.name, z1.num_manual, z1.name_res, z1.ktt, z1.ktn, z1.a,
+                     z1.params_name, z1.value, z1.factory_number_manual
+                      order by z1.name) z2
+on danfoss_water_from_heat.num_meter=z2.num_manual and z2.params_name = danfoss_water_from_heat.params_name
+and danfoss_water_from_heat.factory_number_manual=z2.factory_number_manual
+where  %s
+order by  danfoss_water_from_heat.obj_name, danfoss_water_from_heat.ab_name, danfoss_water_from_heat.factory_number_manual, z2.params_name)as z_start,
+
+(Select danfoss_water_from_heat.ab_guid,  
+		  danfoss_water_from_heat.name_parent,
+          danfoss_water_from_heat.obj_name,
+          danfoss_water_from_heat.ab_name,
+          danfoss_water_from_heat.factory_number_manual,
+          danfoss_water_from_heat.num_meter,
+          danfoss_water_from_heat.res_name,
+          danfoss_water_from_heat.name_param,
+          round(z2.value::numeric,3)::double precision as value
+
+from danfoss_water_from_heat
+Left join
+(SELECT z1.ktt, z1.ktn,z1.a,z1.date, z1.name_objects, z1.name as name_abonent, z1.num_manual, z1.name_res,
+z1.params_name, z1.value, z1.factory_number_manual
+
+                        FROM
+                        (
+                              SELECT
+                                  link_abonents_taken_params.coefficient_2 as ktn,
+                                  link_abonents_taken_params.coefficient as ktt,
+                                  link_abonents_taken_params.coefficient_3 as a,
+                                  daily_values.date,
+                                  daily_values.value,
+                                  abonents.name,
+                                  daily_values.id_taken_params,
+                                  objects.name as name_objects,
+                                  names_params.name as params_name,
+                                                              meters.factory_number_manual,
+                                                                  case when names_params.name = 'Канал 1' then
+                                                meters.attr1 else
+                                                                                meters.attr2 end as num_manual,
+                                                                   case when names_params.name = 'Канал 1' then
+                                                'ХВС' else
+                                                                                'ГВС' end as name_res
+                                                                FROM
+                                  public.daily_values,
+                                  public.link_abonents_taken_params,
+                                  public.taken_params,
+                                  public.abonents,
+                                  public.objects,
+                                  public.names_params,
+                                  public.params,
+                                  public.meters,
+                                  public.resources
+                                WHERE
+                                  taken_params.guid = link_abonents_taken_params.guid_taken_params AND
+                                  taken_params.id = daily_values.id_taken_params AND
+                                  taken_params.guid_params = params.guid AND
+                                  taken_params.guid_meters = meters.guid AND
+                                  abonents.guid = link_abonents_taken_params.guid_abonents AND
+                                  objects.guid = abonents.guid_objects AND
+                                  names_params.guid = params.guid_names_params AND
+                                  resources.guid = names_params.guid_resources AND
+                                  daily_values.date = '%s'  and
+                                                                  resources.name = 'Импульс'
+                                   group by
+                         daily_values.date,
+                        daily_values.id_taken_params,
+                        objects.name ,
+                        abonents.name ,
+                        meters.factory_number_manual,
+                        daily_values.value ,
+                        names_params.name ,
+                        link_abonents_taken_params.coefficient ,
+                         link_abonents_taken_params.coefficient_2 ,
+                          link_abonents_taken_params.coefficient_3,
+                          resources.name,
+                                                  meters.attr1,
+                                                  meters.attr2,
+                                                        meters.factory_number_manual
+                                  ) z1
+                      group by z1.name, z1.date, z1.name_objects, z1.name, z1.num_manual, z1.name_res, z1.ktt, z1.ktn, z1.a,
+                     z1.params_name, z1.value, z1.factory_number_manual
+                      order by z1.name) z2
+on danfoss_water_from_heat.num_meter=z2.num_manual and z2.params_name = danfoss_water_from_heat.params_name
+and danfoss_water_from_heat.factory_number_manual=z2.factory_number_manual
+where  %s
+order by  danfoss_water_from_heat.obj_name, danfoss_water_from_heat.ab_name, danfoss_water_from_heat.factory_number_manual, z2.params_name) as z_end
+where z_end.ab_guid = z_start.ab_guid and z_end.num_meter = z_start.num_meter and z_end.name_param = z_start.name_param
+    """%(electric_data_start, where_str, electric_data_end, where_str)
+    #print(sQuery)
+    return sQuery
+def get_data_table_danfoss_water_impulse_for_period(obj_parent_title, obj_title, electric_data_start,electric_data_end, isAbon):
+    cursor = connection.cursor()
+    data_table=[]
+    cursor.execute(MakeSqlQuery_water_impulse_danfoss_consumption(obj_parent_title, obj_title, electric_data_start, electric_data_end, isAbon))   
     data_table = cursor.fetchall()
     
     return data_table

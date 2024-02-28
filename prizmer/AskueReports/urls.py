@@ -163,5 +163,9 @@ urlpatterns = [
 
     url(r'^132/$', views.report_pulsar_water_impulse_daily_row, name = '132'),# Показания по стоякам в одну строку на дату с регистратора импульсов   
 
+    url(r'^133/$', views.report_danfoss_water_impulse_consumption, name = '133'),# Потребеление по водосчётчикам импульсным с каналов теплосчётчика Danfoss 
+    url(r'^134/$', views.report_danfoss_water_impulse_daily, name = '134'),# Показания по водосчётчикам импульсным с каналов теплосчётчика Danfoss  
+
+
     # Наличие в комментарии *, говорит о том, что он реагирует на свойства SHOW_LIC_NUM,SEPARATOR и ROUND_SIZE
 ]
