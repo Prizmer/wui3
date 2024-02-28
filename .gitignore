@@ -2,3 +2,4 @@
 *.xlsx
 prizmer/prizmer/settings.py
 .txt
+*.pyc
