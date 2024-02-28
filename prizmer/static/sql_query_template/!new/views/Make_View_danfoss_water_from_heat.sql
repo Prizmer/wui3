@@ -1,9 +1,10 @@
 -- View: public.danfoss_water_from_heat
-
 DROP VIEW public.danfoss_water_from_heat;
 
 CREATE OR REPLACE VIEW public.danfoss_water_from_heat
 AS
+SELECT *
+FROM(
  WITH last_comment AS (
          SELECT DISTINCT ON (comments.name) comments.date,
             comments.name,
@@ -66,7 +67,9 @@ AS
 		 names_params.guid_resources::text = resources.guid::text AND 
 		 resources.name::text = 'Импульс'::text AND 
 		 meters.guid_types_meters = types_meters.guid AND		 
-		 types_meters.name = 'Danfoss SonoSelect'
+		 (types_meters.name = 'Danfoss SonoSelect' or  types_meters.name = 'Пульсар Теплосчётчик')
+		 --AND meters.attr1 <> '' 
+	     --and meters.attr2 <> '' 
           GROUP BY  objects1.name , abonents.guid, abonents.name, objects.name, meters.factory_number_manual, resources.name, types_meters.name,
 		meters.attr1,
             meters.attr2,
@@ -74,11 +77,12 @@ AS
 		link_abonents_taken_params.coefficient,
             link_abonents_taken_params.coefficient_2 ,
             link_abonents_taken_params.coefficient_3, 
-		 meters.dt_install ) z1
-	 
-     LEFT JOIN last_comment ON last_comment.guid_abonents::text = z1.ab_guid::text
-	 order by ab_name
+		 meters.dt_install ) z1	 
+     LEFT JOIN last_comment ON last_comment.guid_abonents::text = z1.ab_guid::text	 	 
+) z
 
+where num_meter <> ''
+order by obj_name, ab_name
 --ALTER TABLE public.heat_abons
 --    OWNER TO postgres;
 

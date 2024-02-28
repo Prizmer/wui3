@@ -199,4 +199,7 @@ urlpatterns = [
     url(r'^130/$', views.pulsar_heat_error_code, name = 'pulsar_heat_error_code'), # Коды ошибок с теплосчётчиков Пульсар
 
     url(r'^132/$', views.pulsar_water_impulse_daily_row, name = 'water_impulse_pulsar_row'), # Показания по стоякам в одну строку на дату с регистраторов Пульсар (аналог отчёта60, но импульс)
+
+    url(r'^133/$', views.danfoss_water_impulse_consumption, name = 'danfoss_water_impulse_consumption'), # Потребеление по водосчётчикам импульсным с каналов теплосчётчика Danfoss
+    url(r'^134/$', views.danfoss_water_impulse_daily, name = 'danfoss_water_impulse_daily'), # показания по водосчётчикам импульсным с каналов теплосчётчика Danfoss
 ]

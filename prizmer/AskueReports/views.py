@@ -19924,3 +19924,269 @@ def report_pulsar_water_impulse_daily_row(request):
     file_ext = 'xlsx'    
     response['Content-Disposition'] = 'attachment;filename="%s.%s"' % (output_name.replace('"', '\"'), file_ext)   
     return response
+
+def report_danfoss_water_impulse_consumption(request):
+    #SHOW_LIC_NUM = getattr(settings, 'SHOW_LIC_NUM', 'False')
+    ROUND_SIZE = getattr(settings, 'ROUND_SIZE', 'False')
+    response = io.StringIO()
+    wb = Workbook()
+    wb.add_named_style(ali_grey)
+    wb.add_named_style(ali_white)
+    wb.add_named_style(ali_yellow)
+    wb.add_named_style(ali_pink)
+    wb.add_named_style(ali_blue)
+    ws = wb.active
+    
+    obj_parent_title        = request.GET.get('obj_parent_title')
+    obj_title               = request.GET.get('obj_title')
+    electric_data_end       = request.GET.get('electric_data_end')
+    electric_data_start     = request.GET.get('electric_data_start')
+    
+#Шапка
+    ws.merge_cells('A2:G2')
+    ws['A2'] = obj_parent_title + ' > ' + obj_title + '. Потребление по водосчётчикам в период с ' + electric_data_start + ' по ' +electric_data_end
+    
+    ws['A5'] = 'Абонент'
+    ws['A5'].style = "ali_grey"
+    
+    ws['B5'] = 'Регистратор импульсов'
+    ws['B5'].style = "ali_grey"
+    
+    ws['C5'] = 'Счётчик'
+    ws['C5'].style = "ali_grey"
+
+    ws['d5'] = 'Тип'
+    ws['d5'].style = "ali_grey"
+    
+    ws['e5'] = 'Показания на '  + electric_data_start+', м3'
+    ws['e5'].style = "ali_grey"
+    
+    ws['f5'] = 'Показания на '  + electric_data_end+', м3'
+    ws['f5'].style = "ali_grey"
+    
+    ws['g5'] = 'Потребление, м3'
+    ws['g5'].style = "ali_grey"
+
+    # if SHOW_LIC_NUM:
+    #     ws['e5'] = 'Лицевой номер '
+    #     ws['e5'].style = "ali_grey"    
+  
+    
+#Запрашиваем данные для отчета
+    is_abonent_level = re.compile(r'abonent')
+    is_object_level_2 = re.compile(r'level2')
+    is_group_level = re.compile(r'group')
+    obj_title           = request.GET['obj_title']
+    obj_key             = request.GET['obj_key']
+    obj_parent_title    = request.GET['obj_parent_title']    
+    is_electric_daily   = request.GET['is_electric_daily']
+    electric_data_start = request.GET['electric_data_start']
+    electric_data_end   = request.GET['electric_data_end']
+    is_electric_period  = request.GET['is_electric_period']
+
+    if (bool(is_abonent_level.search(obj_key))):
+        data_table = common_sql.get_data_table_danfoss_water_impulse_for_period(obj_parent_title, obj_title, electric_data_start, electric_data_end, True)       
+    elif (bool(is_object_level_2.search(obj_key))):
+        data_table = common_sql.get_data_table_danfoss_water_impulse_for_period(obj_parent_title, obj_title, electric_data_start,electric_data_end, False)
+        
+# Заполняем отчет значениями
+    for row in range(6, len(data_table)+6):
+        try:
+            ws.cell('A%s'%(row)).value = '%s' % (data_table[row-6][2])  # Абонент
+            ws.cell('A%s'%(row)).style = "ali_white"
+        except:
+            ws.cell('A%s'%(row)).style = "ali_white"
+            next
+        
+        try:
+            ws.cell('B%s'%(row)).value = '%s' % (data_table[row-6][3])  # danfoss
+            ws.cell('B%s'%(row)).style = "ali_white"
+        except:
+            ws.cell('B%s'%(row)).style = "ali_white"
+            next
+            
+        try:
+            ws.cell('C%s'%(row)).value = '%s' % (data_table[row-6][4])  # meter number
+            ws.cell('C%s'%(row)).style = "ali_white"
+        except:
+            ws.cell('C%s'%(row)).style = "ali_white"
+            next
+        
+        try:
+            ws.cell('d%s'%(row)).value = '%s' % (data_table[row-6][5])  # type res
+            ws.cell('d%s'%(row)).style = "ali_white"
+        except:
+            ws.cell('d%s'%(row)).style = "ali_white"
+            next
+
+        try:
+            ws.cell('e%s'%(row)).value = '%s' % get_val_by_round(float(data_table[row-6][7]),ROUND_SIZE, separator)
+            ws.cell('e%s'%(row)).style = "ali_white"
+        except:
+            ws.cell('e%s'%(row)).style = "ali_white"
+            next
+            
+        try:
+            ws.cell('f%s'%(row)).value = '%s' % get_val_by_round(float(data_table[row-6][8]),ROUND_SIZE, separator)  # 
+            ws.cell('f%s'%(row)).style = "ali_white"
+        except:
+            ws.cell('f%s'%(row)).style = "ali_white"
+            next
+            
+        try:
+            ws.cell('g%s'%(row)).value = '%s' % get_val_by_round(float(data_table[row-6][9]),ROUND_SIZE, separator)  # 
+            ws.cell('g%s'%(row)).style = "ali_white"
+        except:
+            ws.cell('g%s'%(row)).style = "ali_white"
+            next
+                
+        # try:
+        #     ws.cell('g%s'%(row)).value = '%s' % get_val(data_table[row-6][2])  # лицевой,е сли понадобиться
+        #     ws.cell('g%s'%(row)).style = "ali_white"
+        # except:
+        #     ws.cell('g%s'%(row)).style = "ali_white"
+        #     next
+
+    ws.row_dimensions[5].height = 41
+    ws.column_dimensions['A'].width = 35 
+    ws.column_dimensions['B'].width = 17 
+    ws.column_dimensions['C'].width = 20
+    ws.column_dimensions['D'].width = 10
+    ws.column_dimensions['E'].width = 20
+    ws.column_dimensions['F'].width = 20
+    ws.column_dimensions['g'].width = 20
+    
+    #wb.save(response)
+    response.seek(0)
+    response = HttpResponse(save_virtual_workbook(wb),content_type="application/vnd.ms-excel")
+    
+    output_name = 'consumption_water_impulse_danfoss_'+translate(obj_title)+'_'+electric_data_start+'-'+electric_data_end
+    file_ext = 'xlsx'
+    
+    response['Content-Disposition'] = 'attachment;filename="%s.%s"' % (output_name.replace('"', '\"'), file_ext)    
+    return response
+
+def report_danfoss_water_impulse_daily(request):
+    #SHOW_LIC_NUM = getattr(settings, 'SHOW_LIC_NUM', 'False')
+    ROUND_SIZE = getattr(settings, 'ROUND_SIZE', 'False')
+    response = io.StringIO()
+    wb = Workbook()
+    wb.add_named_style(ali_grey)
+    wb.add_named_style(ali_white)
+    wb.add_named_style(ali_yellow)
+    wb.add_named_style(ali_pink)
+    wb.add_named_style(ali_blue)
+    ws = wb.active
+    
+    obj_parent_title         = request.GET.get('obj_parent_title')
+    obj_title         = request.GET.get('obj_title')
+    electric_data_end   = request.GET.get('electric_data_end')
+    electric_data_start   = request.GET.get('electric_data_start')
+    
+#Шапка
+    ws.merge_cells('A2:G2')
+    ws['A2'] =  obj_parent_title + ' > ' + obj_title + '. Показания по водосчётчикам на ' + electric_data_end
+    
+
+    ws['A5'] = 'Абонент'
+    ws['A5'].style = "ali_grey"
+    
+    ws['B5'] = 'Регистратор импульсов'
+    ws['B5'].style = "ali_grey"
+    
+    ws['C5'] = 'Счётчик'
+    ws['C5'].style = "ali_grey"
+            
+    ws['d5'] = 'Тип'
+    ws['d5'].style = "ali_grey"
+
+    ws['e5'] = 'Показания Объёма, м3'
+    ws['e5'].style = "ali_grey"
+
+    # if SHOW_LIC_NUM:
+    #     ws['j5'] = 'Лицевой номер '
+    #     ws['j5'].style = "ali_grey"    
+  
+    
+#Запрашиваем данные для отчета
+    is_abonent_level = re.compile(r'abonent')
+    is_object_level_2 = re.compile(r'level2')
+    is_group_level = re.compile(r'group')
+    obj_title           = request.GET['obj_title']
+    obj_key             = request.GET['obj_key']
+    obj_parent_title    = request.GET['obj_parent_title']    
+    is_electric_daily   = request.GET['is_electric_daily']
+    electric_data_start = request.GET['electric_data_start']
+    electric_data_end   = request.GET['electric_data_end']
+    is_electric_period  = request.GET['is_electric_period']
+
+    if (bool(is_abonent_level.search(obj_key))):
+        data_table = common_sql.get_data_table_danfoss_impulse_water_daily(obj_parent_title, obj_title, electric_data_end, True)
+    elif (bool(is_object_level_2.search(obj_key))):
+        data_table = common_sql.get_data_table_danfoss_impulse_water_daily(obj_parent_title, obj_title, electric_data_end, False)
+        
+    #zamenyem None na N/D vezde
+    if len(data_table)>0: 
+        data_table=common_sql.ChangeNull(data_table, None)
+        
+# Заполняем отчет значениями
+    for row in range(6, len(data_table)+6):
+        try:
+            ws.cell('A%s'%(row)).value = '%s' % (data_table[row-6][2])  # Абонент
+            ws.cell('A%s'%(row)).style = "ali_white"
+        except:
+            ws.cell('A%s'%(row)).style = "ali_white"
+            next
+        
+        try:
+            ws.cell('B%s'%(row)).value = '%s' % (data_table[row-6][3])  # danfoss заводской номер
+            ws.cell('B%s'%(row)).style = "ali_white"
+        except:
+            ws.cell('B%s'%(row)).style = "ali_white"
+            next
+            
+        try:
+            ws.cell('C%s'%(row)).value = '%s' % (data_table[row-6][4])  # meter_num
+            ws.cell('C%s'%(row)).style = "ali_white"
+        except:
+            ws.cell('C%s'%(row)).style = "ali_white"
+            next
+
+        try:
+            ws.cell('d%s'%(row)).value = '%s' % (data_table[row-6][6])  # type res
+            ws.cell('d%s'%(row)).style = "ali_white"
+        except:
+            ws.cell('d%s'%(row)).style = "ali_white"
+            next
+            
+        try:
+            ws.cell('e%s'%(row)).value = '%s' % get_val_by_round(float(data_table[row-6][8]),ROUND_SIZE, separator)
+            ws.cell('e%s'%(row)).style = "ali_white"
+        except:
+            ws.cell('e%s'%(row)).style = "ali_white"
+            next
+            
+        
+        # try:
+        #     ws.cell('j%s'%(row)).value = '%s' % get_val(data_table[row-6][2])  # лицевой,е сли понадобиться
+        #     ws.cell('j%s'%(row)).style = "ali_white"
+        # except:
+        #     ws.cell('g%s'%(row)).style = "ali_white"
+        #     next
+
+    ws.row_dimensions[5].height = 41
+    ws.column_dimensions['A'].width = 35 
+    ws.column_dimensions['B'].width = 17 
+    ws.column_dimensions['C'].width = 20
+    ws.column_dimensions['D'].width = 10
+    ws.column_dimensions['e'].width = 20
+
+    #wb.save(response)
+    response.seek(0)
+    response = HttpResponse(save_virtual_workbook(wb),content_type="application/vnd.ms-excel")
+    
+    output_name = 'daily_water_impulse_danfoss_'+translate(obj_title)+'_'+electric_data_start+'-'+electric_data_end
+    file_ext = 'xlsx'
+    
+    response['Content-Disposition'] = 'attachment;filename="%s.%s"' % (output_name.replace('"', '\"'), file_ext)   
+    return response
