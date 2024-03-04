@@ -23,8 +23,10 @@ from django.conf import settings
 #from io import StringIO
 import time as pt
 import zipfile
-from datetime import date, datetime, timedelta
 import random 
+
+#TODO: поправить в отчётам, там где datetime используется таким способом
+#from datetime import date, datetime, timedelta
 
 separator = getattr(settings, 'SEPARATOR', ',') #'.' #separator = '.' or ','
 
