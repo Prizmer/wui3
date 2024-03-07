@@ -20192,3 +20192,229 @@ def report_danfoss_water_impulse_daily(request):
     
     response['Content-Disposition'] = 'attachment;filename="%s.%s"' % (output_name.replace('"', '\"'), file_ext)   
     return response
+
+
+def report_water_from_heat_daily_row(request):
+    ROUND_SIZE = getattr(settings, 'ROUND_SIZE', 3)
+    response = io.StringIO()
+    wb = Workbook()
+    wb.add_named_style(ali_grey)
+    wb.add_named_style(ali_white)
+    wb.add_named_style(ali_yellow)
+    wb.add_named_style(ali_pink)
+    wb.add_named_style(ali_blue)
+    ws = wb.active
+    electric_data_end   = request.session["electric_data_end"]
+
+#Шапка
+    ws['A1'] = 'Абонент'
+    ws['A1'].style = "ali_grey"
+    ws.merge_cells('A1:A2')
+    
+    ws['B1'] = 'Стояк 1'
+    ws['B1'].style = "ali_grey"
+    ws.merge_cells('B1:E1')
+    
+    ws['B2'] = 'Счётчик ХВС'
+    ws['B2'].style = "ali_grey"
+    
+    ws['C2'] = 'Значение ХВС, м3'
+    ws['C2'].style = "ali_grey"   
+    
+    
+    ws['D2'] = 'Счётчик ГВС'
+    ws['D2'].style = "ali_grey"
+    
+    ws['E2'] = 'Значение ГВС, м3'
+    ws['E2'].style = "ali_grey"
+    
+    
+    ws['F1'] = 'Стояк 2'
+    ws['F1'].style = "ali_grey"
+    ws.merge_cells('F1:I1')
+    
+    ws['F2'] = 'Счётчик ХВС'
+    ws['F2'].style = "ali_grey"
+    
+    ws['G2'] = 'Значение ХВС, м3'
+    ws['G2'].style = "ali_grey"   
+    
+    
+    ws['H2'] = 'Счётчик ГВС'
+    ws['H2'].style = "ali_grey"
+    
+    ws['I2'] = 'Значение ГВС, м3'
+    ws['I2'].style = "ali_grey"
+    
+    
+    ws['J1'] = 'Стояк 3'
+    ws['J1'].style = "ali_grey"
+    ws.merge_cells('J1:M1')
+    
+    ws['J2'] = 'Счётчик ХВС'
+    ws['J2'].style = "ali_grey"
+    
+    ws['K2'] = 'Значение ХВС, м3'
+    ws['K2'].style = "ali_grey"   
+    
+    
+    ws['L2'] = 'Счётчик ГВС'
+    ws['L2'].style = "ali_grey"
+    
+    ws['M2'] = 'Значение ГВС, м3'
+    ws['M2'].style = "ali_grey"
+    
+    ws['N1'] = 'Сумма ХВС, м3'
+    ws['N1'].style = "ali_grey"
+    ws.merge_cells('N1:N2')
+    
+    ws['O1'] = 'Сумма ГВС, м3'
+    ws['O1'].style = "ali_grey"
+    ws.merge_cells('O1:O2')
+#Запрашиваем данные для отчета
+
+    
+    is_abonent_level = re.compile(r'abonent')
+    is_object_level_2 = re.compile(r'level2')
+    
+    obj_parent_title         = request.session['obj_parent_title']
+    obj_title         = request.session['obj_title']
+    electric_data_end   = request.session['electric_data_end']            
+    obj_key             = request.session['obj_key']
+             
+    if (bool(is_abonent_level.search(obj_key))):
+        data_table = common_sql.get_data_table_water_from_heat_daily_row(obj_parent_title, obj_title, electric_data_end, True)
+    elif (bool(is_object_level_2.search(obj_key))):
+        data_table = common_sql.get_data_table_water_from_heat_daily_row(obj_parent_title, obj_title, electric_data_end, False)
+              
+    if len(data_table)>0: 
+        data_table=common_sql.ChangeNull_for_impulse_pulsar(data_table)
+
+    
+# Заполняем отчет значениями
+    for row in range(3, len(data_table)+3):
+        try:
+            ws.cell('A%s'%(row)).value = '%s' % (data_table[row-3][1])  # абонент
+            ws.cell('A%s'%(row)).style = "ali_white"
+        except:
+            ws.cell('A%s'%(row)).style = "ali_white"
+            next
+        
+        try:
+            ws.cell('B%s'%(row)).value = '%s' % (data_table[row-3][2])  # nomer hvs
+            ws.cell('B%s'%(row)).style = "ali_blue"
+        except:
+            ws.cell('B%s'%(row)).style = "ali_blue"
+            next
+            
+        try:
+            #ws.cell('C%s'%(row)).value = '%s' % (data_table[row-3][3])  # value hvs
+            ws.cell('C%s'%(row)).value = '%s' % get_val_by_round(float(data_table[row-3][3]), ROUND_SIZE, separator)
+            ws.cell('C%s'%(row)).style = "ali_blue"
+        except:
+            ws.cell('C%s'%(row)).style = "ali_blue"
+            next
+            
+        try:
+            ws.cell('D%s'%(row)).value = '%s' % (data_table[row-3][4])  # gvs num
+            ws.cell('D%s'%(row)).style = "ali_pink"
+        except:
+            ws.cell('D%s'%(row)).style = "ali_pink"
+            next
+            
+        try:
+            #ws.cell('E%s'%(row)).value = '%s' % (data_table[row-3][5])  # value gvs
+            ws.cell('E%s'%(row)).value = '%s' % get_val_by_round(float(data_table[row-3][5]), ROUND_SIZE, separator)
+            ws.cell('E%s'%(row)).style = "ali_pink"
+        except:
+            ws.cell('E%s'%(row)).style = "ali_pink"
+            next
+        
+        try:
+            ws.cell('F%s'%(row)).value = '%s' % (data_table[row-3][6])  # num hvs
+            ws.cell('F%s'%(row)).style = "ali_blue"
+        except:
+            ws.cell('F%s'%(row)).style = "ali_blue"
+            next
+            
+        try:
+            #ws.cell('G%s'%(row)).value = '%s' % (data_table[row-3][7]) # val hvs
+            ws.cell('G%s'%(row)).value = '%s' % get_val_by_round(float(data_table[row-3][7]), ROUND_SIZE, separator)
+            ws.cell('G%s'%(row)).style = "ali_blue"
+        except:
+            ws.cell('G%s'%(row)).style = "ali_blue"
+            next
+                        
+        try:
+            ws.cell('H%s'%(row)).value = '%s' % (data_table[row-3][8])  # gvs num
+            ws.cell('H%s'%(row)).style = "ali_pink"
+        except:
+            ws.cell('H%s'%(row)).style = "ali_pink"
+            next
+            
+        try:
+            #ws.cell('I%s'%(row)).value = '%s' % (data_table[row-3][9])  # gvs val
+            ws.cell('I%s'%(row)).value = '%s' % get_val_by_round(float(data_table[row-3][9]), ROUND_SIZE, separator)
+            ws.cell('I%s'%(row)).style = "ali_pink"
+        except:
+            ws.cell('I%s'%(row)).style = "ali_pink"
+            next
+            
+        try:
+            ws.cell('J%s'%(row)).value = '%s' % (data_table[row-3][10])  # hvs num
+            ws.cell('J%s'%(row)).style = "ali_blue"
+        except:
+            ws.cell('J%s'%(row)).style = "ali_blue"
+            next
+            
+        try:
+            #ws.cell('K%s'%(row)).value = '%s' % (data_table[row-3][11])  # hvs val
+            ws.cell('K%s'%(row)).value = '%s' % get_val_by_round(float(data_table[row-3][11]), ROUND_SIZE, separator)
+            ws.cell('K%s'%(row)).style = "ali_blue"
+        except:
+            ws.cell('K%s'%(row)).style = "ali_blue"
+            next
+            
+        try:
+            ws.cell('L%s'%(row)).value = '%s' % (data_table[row-3][12])  # hvs num
+            ws.cell('L%s'%(row)).style = "ali_pink"
+        except:
+            ws.cell('L%s'%(row)).style = "ali_pink"
+            next
+            
+        try:
+            #ws.cell('M%s'%(row)).value = '%s' % (data_table[row-3][13])  # hvs val
+            ws.cell('M%s'%(row)).value = '%s' % get_val_by_round(float(data_table[row-3][13]), ROUND_SIZE, separator)
+            ws.cell('M%s'%(row)).style = "ali_pink"
+        except:
+            ws.cell('M%s'%(row)).style = "ali_pink"
+            next
+            
+        try:
+            ws.cell('N%s'%(row)).value = '%s' % get_val_by_round(float(data_table[row-3][14]), ROUND_SIZE, separator)#(data_table[row-3][14])  # hvs num
+            ws.cell('N%s'%(row)).style = "ali_blue"
+        except:
+            ws.cell('N%s'%(row)).style = "ali_blue"
+            next
+            
+        try:
+            #ws.cell('O%s'%(row)).value = '%s' % (data_table[row-3][15])  # hvs val
+            ws.cell('O%s'%(row)).value = '%s' % get_val_by_round(float(data_table[row-3][15]), ROUND_SIZE, separator)
+            ws.cell('O%s'%(row)).style = "ali_pink"
+        except:
+            ws.cell('O%s'%(row)).style = "ali_pink"
+            next
+
+#    ws.row_dimensions[5].height = 41
+    ws.column_dimensions['A'].width = 17 
+    ws.row_dimensions[2].height = 41 
+        
+    #wb.save(response)
+    response.seek(0)
+    response = HttpResponse(save_virtual_workbook(wb),content_type="application/vnd.ms-excel")
+    #response['Content-Disposition'] = "attachment; filename=profil.xlsx"
+    
+    output_name = 'report_water_from_heat_row_'+translate(obj_parent_title)+'_'+translate(obj_title)+'_'+str(electric_data_end)
+    file_ext = 'xlsx'    
+    response['Content-Disposition'] = 'attachment;filename="%s.%s"' % (output_name.replace('"', '\"'), file_ext)   
+    return response

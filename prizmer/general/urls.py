@@ -202,4 +202,6 @@ urlpatterns = [
 
     url(r'^133/$', views.danfoss_water_impulse_consumption, name = 'danfoss_water_impulse_consumption'), # Потребеление по водосчётчикам импульсным с каналов теплосчётчика Danfoss
     url(r'^134/$', views.danfoss_water_impulse_daily, name = 'danfoss_water_impulse_daily'), # показания по водосчётчикам импульсным с каналов теплосчётчика Danfoss
+
+    url(r'^136/$', views.pulsar_water_from_heat_daily_row, name = 'water_from_heat_row'), # Показания по стоякам в одну строку на дату с Теплосчётчиков Пульсар (аналог отчётов 60,132)
 ]
