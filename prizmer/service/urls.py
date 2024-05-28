@@ -53,5 +53,7 @@ urlpatterns = [
     url(r'^get_80020_template/$', views.get_80020_template, name = 'get_80020_template'), #возвращает excel форму образец для прогрузочной ведомости
 
     url(r'^del_meters/$', views.del_meters, name = 'del_meters'), #Удаление приборов из БД по прогрузочной ведомости
+
+    url(r'^del_various30/$', views.del_various30, name = 'del_various30'), #Удаление получасовок по конкретному прибору на выбранную дату
     
 ]

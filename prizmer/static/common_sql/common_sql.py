@@ -6408,7 +6408,7 @@ def get_data_table_pulsar_frost_for_period(obj_parent_title, obj_title, electric
     if len(data_table)>0: data_table=ChangeNull(data_table, None)
     return data_table
 
-def MakeSqlQuery_water_pulsar_period_for_abonent(obj_parent_title, obj_title,electric_data_start, electric_data_end, my_params):
+def MakeSqlQuery_water_pulsar_period_for_abonent(obj_parent_title, obj_title,electric_data_start, electric_data_end, my_params, sortDir):
     #print obj_parent_title, obj_title,electric_data_start, my_params[0], my_params[1]
     #print obj_parent_title, obj_title,  electric_data_end, my_params[0], my_params[1]    
     sQuery="""
@@ -6497,11 +6497,15 @@ z1.attr1,
 z1.factory_number_manual,
 z1.value_start,
 z2.value_end
-    """%(obj_parent_title, obj_title,electric_data_start, my_params[0], my_params[1],obj_parent_title, obj_title, obj_parent_title, obj_title,  electric_data_end, my_params[0], my_params[1],obj_parent_title, obj_title)
-    #print (sQuery)  
+order by z1.ab_name ASC, 
+z1.type_meter %s
+    """%(obj_parent_title, obj_title,electric_data_start, my_params[0], my_params[1],
+         obj_parent_title, obj_title, obj_parent_title, obj_title,  electric_data_end, 
+         my_params[0], my_params[1],obj_parent_title, obj_title, sortDir)
+    #print(sQuery)  
     return sQuery
     
-def MakeSqlQuery_water_pulsar_period_for_all(obj_parent_title, obj_title,electric_data_start, electric_data_end, my_params):
+def MakeSqlQuery_water_pulsar_period_for_all(obj_parent_title, obj_title,electric_data_start, electric_data_end, my_params, sortDir):
     sQuery="""
 Select z_start.ab_name, z_start.type_meter, z_start.attr1, z_start.factory_number_manual,round(z_start.value::numeric,3),round(z_end.value::numeric,3), round((z_end.value-z_start.value)::numeric,3) as delta
 from
@@ -6591,25 +6595,25 @@ z_start.type_meter,
 z_start.attr1, 
 z_start.factory_number_manual,z_start.value,
 z_end.value
-order by z_start.ab_name, z_start.attr1, z_start.type_meter 
-    """%(electric_data_end , my_params[2], my_params[3], obj_title, electric_data_start, my_params[2], my_params[3],obj_title)
+order by z_start.ab_name ASC, z_start.attr1 ASC, z_start.type_meter %s 
+    """%(electric_data_end , my_params[2], my_params[3], obj_title, electric_data_start, my_params[2], my_params[3],obj_title, sortDir)
     #print (sQuery) 
     return sQuery
     
-def get_data_table_pulsar_water_daily(obj_parent_title, obj_title, electric_data_end, isAbon):
+def get_data_table_pulsar_water_daily(obj_parent_title, obj_title, electric_data_end, isAbon, sortDir):
     my_params=['Пульс%%ГВС', 'Пульс%%ХВС']
     cursor = connection.cursor()
     data_table=[]
     
     if (isAbon):
-        cursor.execute(MakeSqlQuery_water_pulsar_daily_for_abonent(obj_parent_title, obj_title, electric_data_end, my_params))
+        cursor.execute(MakeSqlQuery_water_pulsar_daily_for_abonent(obj_parent_title, obj_title, electric_data_end, my_params, sortDir))
     else:
-        cursor.execute(MakeSqlQuery_water_pulsar_daily_for_all(obj_parent_title, obj_title, electric_data_end, my_params))
+        cursor.execute(MakeSqlQuery_water_pulsar_daily_for_all(obj_parent_title, obj_title, electric_data_end, my_params, sortDir))
     data_table = cursor.fetchall()
     
     return data_table
     
-def MakeSqlQuery_water_pulsar_daily_for_abonent(obj_parent_title, obj_title, electric_data_end, my_params):
+def MakeSqlQuery_water_pulsar_daily_for_abonent(obj_parent_title, obj_title, electric_data_end, my_params, sortDir):
     sQuery="""
     Select z1.date,water_pulsar_abons.ab_name, water_pulsar_abons.type_meter, water_pulsar_abons.attr1, water_pulsar_abons.factory_number_manual, round(z1.value::numeric,3),
      water_pulsar_abons.ab_guid, 
@@ -6659,12 +6663,14 @@ water_pulsar_abons.factory_number_manual,
 z1.value,
  water_pulsar_abons.ab_guid, 
  water_pulsar_abons.comment
-    """%(obj_parent_title, obj_title, electric_data_end, my_params[0],my_params[1],obj_parent_title, obj_title)
+ order by water_pulsar_abons.ab_name ASC, 
+water_pulsar_abons.type_meter %s
+    """%(obj_parent_title, obj_title, electric_data_end, my_params[0],my_params[1],obj_parent_title, obj_title, sortDir)
     #print(sQuery)
     #print('22222222222222222222222')
     return sQuery
     
-def MakeSqlQuery_water_pulsar_daily_for_all(obj_parent_title, obj_title, electric_data_end, my_params):
+def MakeSqlQuery_water_pulsar_daily_for_all(obj_parent_title, obj_title, electric_data_end, my_params, sortDir):
     sQuery="""
     Select z1.date, water_pulsar_abons.ab_name, z1.type_meter, z1.attr1, water_pulsar_abons.factory_number_manual, round(z1.value::numeric,3),water_pulsar_abons.ab_guid,
  water_pulsar_abons.comment
@@ -6710,19 +6716,20 @@ water_pulsar_abons.factory_number_manual, z1.value,
 water_pulsar_abons.ab_guid,
 water_pulsar_abons.ab_guid, 
  water_pulsar_abons.comment
-  order by water_pulsar_abons.ab_name, z1.type_meter, z1.attr1
-    """%(obj_title, electric_data_end, my_params[0],my_params[1],obj_title)
+  order by water_pulsar_abons.ab_name ASC, z1.attr1 ASC, z1.type_meter %s
+  
+    """%(obj_title, electric_data_end, my_params[0],my_params[1],obj_title, sortDir)
     #print(sQuery)
     return sQuery
     
-def get_data_table_pulsar_water_for_period(obj_parent_title, obj_title, electric_data_start, electric_data_end, isAbon):
+def get_data_table_pulsar_water_for_period(obj_parent_title, obj_title, electric_data_start, electric_data_end, isAbon, sortDir):
     my_params=['Пульс%%ГВС', 'Пульс%%ХВС', 'ГВС', 'ХВС']
     cursor = connection.cursor()
     data_table=[]
     if (isAbon):
-        cursor.execute(MakeSqlQuery_water_pulsar_period_for_abonent(obj_parent_title, obj_title,electric_data_start, electric_data_end, my_params))
+        cursor.execute(MakeSqlQuery_water_pulsar_period_for_abonent(obj_parent_title, obj_title,electric_data_start, electric_data_end, my_params, sortDir))
     else:
-        cursor.execute(MakeSqlQuery_water_pulsar_period_for_all(obj_parent_title, obj_title,electric_data_start, electric_data_end, my_params))
+        cursor.execute(MakeSqlQuery_water_pulsar_period_for_all(obj_parent_title, obj_title,electric_data_start, electric_data_end, my_params, sortDir))
     data_table = cursor.fetchall()
     
     return data_table
@@ -7897,6 +7904,7 @@ WHERE
     """%(electric_data_start, electric_data_end,electric_data_start, electric_data_end, obj_title)
     #print sQuery
     return sQuery
+
 def get_data_table_water_pulsar1_between_dates(obj_title, obj_parent_title,electric_data_start, electric_data_end, isAbon):
     cursor = connection.cursor()
     data_table=[]
@@ -8376,9 +8384,32 @@ def GetSimpleTable(table,fieldName,value):
         where %s.%s='%s'"""%(table, table, fieldName, value)
     else: sQuery="""
         Select *
-        from %s"""%(table)
-        
+        from %s"""%(table)        
     #print sQuery
+    cursor.execute(sQuery)
+    dt = cursor.fetchall()
+    return dt
+
+def GetCrossTwoTable(table1, table2, crossField1, crossField2, whereTable, fieldName, fieldValue):
+    #возвращает результат пересечения 2 таблиц с условием WHERE или без, елси поля пустые: whereTable, fieldName, fieldValue
+    dt=[]
+    cursor = connection.cursor()
+    if len(whereTable)>0:
+        sQuery="""
+        SELECT *
+        FROM 
+          %s, 
+          %s
+        WHERE 
+          %s.%s = %s.%s AND
+          %s.%s = '%s';"""%(table1, table2, table1, crossField1, table2, crossField2, whereTable, fieldName, fieldValue)
+    else: sQuery="""
+        SELECT *  
+        FROM 
+          %s, 
+          %s
+        WHERE 
+          %s.%s = %s.%s"""%(table1, table2, table1, crossField1, table2, crossField2)  
     cursor.execute(sQuery)
     dt = cursor.fetchall()
     return dt
@@ -9425,7 +9456,7 @@ sum(Case when z1.params_name = '%s' then z1.value_daily  end) as t3
                         ) z1                      
 group by z1.name_objects, z1.daily_date, z1.name_objects, z1.name_abonents, z1.number_manual, z1.ktn, z1.ktt, z1.a 
 ) z2
-on electric_abons.ab_name=z2.name_abonents
+on electric_abons.ab_name=z2.name_abonents  and electric_abons.factory_number_manual = z2.number_manual
 where  electric_abons.obj_name= '%s' 
 and z2.t0 is null
    
@@ -9497,7 +9528,7 @@ z1.ktn, z1.ktt, z1.a
                         ) z1                      
 group by z1.name_objects, z1.daily_date, z1.name_objects, z1.name_abonents, z1.number_manual, z1.ktn, z1.ktt, z1.a 
 ) z2
-on electric_abons.ab_name=z2.name_abonents
+on electric_abons.ab_name=z2.name_abonents and electric_abons.factory_number_manual = z2.number_manual
 where  electric_abons.obj_name= '%s' 
    
 ORDER BY electric_abons.ab_name ASC) as z 
@@ -15554,5 +15585,50 @@ def get_data_table_water_from_heat_daily_row(obj_parent_title, obj_title, electr
     data_table=[]
     cursor.execute(MakeSqlQuery_water_from_heat_daily_row(obj_parent_title, obj_title, electric_data_end, isAbon))   
     data_table = cursor.fetchall()
+    
+    return data_table
+
+def del_various_values_by_factory_number_by_date(meter, date):
+    cursor = connection.cursor()
+    data_table=[]
+    sQuery = """
+    Delete
+    FROM 
+     public.various_values
+     where id in
+     (
+      SELECT        
+        various_values.id
+      FROM 
+        public.taken_params, 
+        public.various_values, 
+        public.meters
+      WHERE 
+        taken_params.guid_meters = meters.guid AND
+        various_values.id_taken_params = taken_params.id AND
+        meters.factory_number_manual = '%s' AND 
+        various_values.date = '%s'
+      )"""%(meter, date)
+    cursor = connection.cursor()
+    cursor.execute(sQuery)
+    connection.commit()
+    cursor.close()
+    
+    return data_table
+
+def del_various_values_by_date( date):
+    cursor = connection.cursor()
+    data_table=[]
+    sQuery = """
+    Delete
+    FROM 
+     public.various_values
+     where  various_values.date = '%s'
+      """%(date)
+    #print(sQuery)
+    cursor = connection.cursor()
+    cursor.execute(sQuery)
+    connection.commit()
+    cursor.close()
     
     return data_table

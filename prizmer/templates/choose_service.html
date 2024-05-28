@@ -1,10 +1,20 @@
 <html>
     <head>
 	<meta charset="utf-8">
+
+{% load static %}	<script src="{%static "libs/calendar/moment.min.js" %}"> </script>
+{% load static %}	<script src="{%static "libs/calendar/jquery.min.js" %}"> </script>
+{% load static %} <link href="{%static "libs/calendar/fullcalendar.print.css"%}" rel="stylesheet" type="text/css">
+{% load static %}	<script src="{%static "libs/calendar/fullcalendar.min.js" %}"> </script>
+{% load static %} <link href="{%static "libs/calendar/fullcalendar.css"%}" rel="stylesheet" type="text/css">
+
 {% load static %} <link href="{%static "main.css"%}" rel="stylesheet"/>
-{% load static %} <script src="{%static "libs/jquery.js" %}" type=text/javascript> </script>
+
+{% load static %} <script src="{%static "libs/jquery.js" %}" type=text/javascript></script>
 {% load static %} <script src="{%static "libs/jquery-ui/ui/jquery-ui.js" %}" type=text/javascript></script>
 {% load static %} <script src="{%static "libs/jquery-ui/ui/i18n/jquery.ui.datepicker-ru.js" %}" type=text/javascript></script>
+<!-- Alternate skin for datepicker-->
+{% load static %} <link href="{%static "libs/jquery-ui/themes/base/jquery-ui.css"%}" rel="stylesheet" type="text/css">
 {% load static %} <link href="{%static "libs/bootstrap-4.3.1-dist/css/bootstrap.css"%}" rel="stylesheet" type="text/css">
 
     <title> ПАК ПРИЗМЕР| Сервисные настройки |</title>
@@ -16,7 +26,10 @@
  $("#download-ico").click(function(){
         load_service("service_file");
 		});
-
+//$.datepicker.setDefaults( $.datepicker.regional[ "ru" ]);
+//$( "#datepickerDel" ).datepicker({dateFormat: 'dd.mm.yy', defaultDate:+0});
+	
+var date_del = $('#datepickerDel').datepicker().val(); 
 var isLoaded=0;
 var isFirst=1;
 var sPath="";
@@ -30,6 +43,7 @@ var old_meter="";
 var new_meter="";
 var meter1="";
 var meter2="";
+
 			
 var load_service = function(page){
 		//загружаем экселевские файлы из cfg
@@ -49,6 +63,7 @@ var load_service = function(page){
 		   
 	   .done(function( msg ) {
 		//console.log('load excel-block');
+		//$( "#datepickerDel" ).datepicker({dateFormat: 'dd.mm.yy', defaultDate:+0});
 		$('#excel-block').html(msg); // Пишем в div ответ от страницы 
 		//hide_loader();
 		change_wb();
@@ -62,7 +77,9 @@ var load_service = function(page){
 		new_meter=$("#new_meter").val();
 		meter1=$("#meter1").val();
 		meter2=$("#meter2").val();	
-        file30=$("#direct30").val();	
+        file30=$("#direct30").val();
+		date_del30 = $('#datepickerDel').datepicker().val();
+		num_del30 = $("#num_del30").val();
 		
 		$("span").css("pointer-events", "none");
 				
@@ -70,20 +87,28 @@ var load_service = function(page){
         type: "GET",
         url: "/service/"+page,
         beforeSend: function(){show_loader();},
-        data:{ choice_file:choice_file, choice_sheet:choice_sheet, tcp_ip_status:tcp_ip_status, object_status:object_status, counter_status:counter_status, old_meter:old_meter, new_meter:new_meter, meter1:meter1,meter2:meter2, balance_status:balance_status, file30:file30},        
+        data:{ choice_file:choice_file, choice_sheet:choice_sheet, tcp_ip_status:tcp_ip_status, object_status:object_status, counter_status:counter_status, old_meter:old_meter, new_meter:new_meter, meter1:meter1,meter2:meter2, balance_status:balance_status, file30:file30, num_del30:num_del30, date_del30:date_del30 },        
        })
 	   
-	   .done(function( msg ) {
-        $('#data-table').html(msg); // Пишем в div ответ от страницы
+	   .done(function( msg ) {	    
+        $('#data-table').html(msg);// Пишем в div ответ от страницы
+		if (document.getElementById("datepickerDel") != null)
+			{$( "#datepickerDel" ).datepicker({dateFormat: 'dd.mm.yy', defaultDate:+0});
+			//alert('datepickerDel as done');
+			}
+		//
+											
 		if (document.getElementById("file_name") != null) {
 		//console.log(document.getElementById("file_name").value);
+		//$("#file_name").show();
 		$("#choice_file").val(document.getElementById("file_name").value)
 		change_wb();
 		if (document.getElementById("sheet_name") != null){
 		$("#choice_sheet").val(document.getElementById("sheet_name").value)
 		};
 		};
-        hide_loader();
+		
+        hide_loader();		
 		$("span").css("pointer-events", "auto");
         });
     };
@@ -120,6 +145,11 @@ var hide_loader = function(){
     $("#fadingBarsG_2").hide();
     $("#fadingBarsG_3").hide();
     };
+	
+//var make_date_picker = function(){
+//	$( "#datepickerDel" ).datepicker({DateFormat: 'dd.mm.yy', 
+//											defaultDate:+0});
+//};
 
 function upload(event) {
 event.preventDefault();

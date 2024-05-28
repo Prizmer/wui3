@@ -375,6 +375,34 @@ def GetSimpleCrossTable(table1,fieldName1,value1,table2,fieldName2, value2):
     dt = cursor.fetchall()
     return dt
 
+def GetCrossTwoTable(table1, table2, crossField1, crossField2, whereTable1, fieldName1, fieldValue1, whereTable2, fieldName2, fieldValue2):
+    #возвращает результат пересечения 2 таблиц с условием WHERE или без, елси поля пустые: whereTable, fieldName, fieldValue
+    dt=[]
+    cursor = connection.cursor()
+    if len(whereTable1)>0:
+        sQuery="""
+        SELECT *
+        FROM 
+          %s, 
+          %s
+        WHERE 
+          %s.%s = %s.%s AND
+          %s.%s = '%s'"""%(table1, table2, table1, crossField1, table2, crossField2, whereTable1, fieldName1, fieldValue1)
+        if len(whereTable2)>0:
+            sQuery += """
+             AND %s.%s = '%s'
+            """%(whereTable2, fieldName2, fieldValue2)
+    else: sQuery="""
+        SELECT *  
+        FROM 
+          %s, 
+          %s
+        WHERE 
+          %s.%s = %s.%s"""%(table1, table2, table1, crossField1, table2, crossField2)  
+    cursor.execute(sQuery)
+    dt = cursor.fetchall()
+    return dt
+
 def GetTableFromExcel(sPath,sSheet):
     wb = load_workbook(filename = sPath)
     ws = wb[sSheet]
@@ -5443,7 +5471,7 @@ def delete_meters_by_excel(sPath, sheet):
             i+=1
             continue
         meter = row[m_col]
-        print(meter, type(meter))
+        #print(meter, type(meter))
         try:
             del_meter = Meters.objects.get(factory_number_manual = str(meter))
             del_meter.delete()
@@ -5452,11 +5480,40 @@ def delete_meters_by_excel(sPath, sheet):
         except ObjectDoesNotExist:
             result.append('НЕ найден: {}'.format(meter))
         i+=1
-    
-
-    #в цикле 
-    #если существует счётчик, то удаляем каскадно
-    #если прибора нет, то доабвляем запись об этом у result
-
-
+        #в цикле 
+        #если существует счётчик, то удаляем каскадно
+        #если прибора нет, то доабвляем запись об этом у result
     return result
+
+def del_various30(request):
+    args={}
+    result = []
+    date_del30 = ""
+    meter = ""
+   
+    try:    
+        meter       = request.GET.get('num_del30')          
+        date_del30  = request.GET.get('date_del30')        
+        
+        # проверяем дату!
+        print(date_del30)
+        if len(date_del30)>0:
+            #удаление
+            if len(meter)>0:
+                print(len(meter))
+                common_sql.del_various_values_by_factory_number_by_date(meter, date_del30)
+                result.append('Получасовые показания удалены для прибора: %s за %s'%(meter, date_del30))
+            else:
+                common_sql.del_various_values_by_date(date_del30)
+                result.append('Получасовые показания удалены для всех приборов за %s'%(date_del30))
+                #удаляем все получасовки на дату
+        else:
+            result.append('Удаление НЕ выполнено. Выберите дату.')
+
+    except: # catch *all* exceptions
+        e = sys.exc_info()[0]
+        result.append( "Ошибка: %s" % e )
+
+    #print(result)    
+    args["del30_status"] = result[0]
+    return render(request,"service/service_30.html", args)

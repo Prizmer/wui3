@@ -7502,10 +7502,55 @@ def pulsar_water_daily(request):
             request.session["obj_parent_title"]    = obj_parent_title    = request.GET['obj_parent_title']
             #request.session["obj_parent_title"]    = obj_title         = request.GET['obj_title']
             request.session["electric_data_end"]   = electric_data_end   = request.GET['electric_data_end']            
+    sortDir = 'ASC'
     if (bool(is_abonent_level.search(obj_key))):
-        data_table = common_sql.get_data_table_pulsar_water_daily(obj_parent_title, obj_title, electric_data_end, True)
+        data_table = common_sql.get_data_table_pulsar_water_daily(obj_parent_title, obj_title, electric_data_end, True, sortDir)
     elif (bool(is_object_level_2.search(obj_key))):
-        data_table = common_sql.get_data_table_pulsar_water_daily(obj_parent_title, obj_title, electric_data_end, False)
+        data_table = common_sql.get_data_table_pulsar_water_daily(obj_parent_title, obj_title, electric_data_end, False, sortDir)
+              
+    if len(data_table)>0: 
+        data_table=common_sql.ChangeNull_and_LeaveEmptyCol(data_table, None, 7)
+        
+    args['data_table'] = data_table
+    args['obj_title'] = obj_title
+    args['obj_key'] = obj_key
+    args['obj_parent_title'] = obj_parent_title
+    args['is_electric_monthly'] = is_electric_monthly
+    args['is_electric_daily'] = is_electric_daily
+    args['is_electric_current'] = is_electric_current
+    args['is_electric_delta'] = is_electric_delta
+    args['electric_data_start'] = electric_data_start
+    args['electric_data_end'] = electric_data_end
+   
+    return render(request, "data_table/water/58.html", args)
+    
+def pulsar_water_daily_desc(request):
+    args = {}
+    is_abonent_level = re.compile(r'abonent')
+    is_object_level_2 = re.compile(r'level2')
+    data_table = []
+    obj_title = 'Не выбран'
+    obj_key = 'Не выбран'
+    obj_parent_title = 'Не выбран'
+    is_electric_monthly = ''
+    is_electric_daily = ''
+    is_electric_current = ''
+    is_electric_delta = ''
+    electric_data_start = ''
+    electric_data_end = ''
+
+    if request.is_ajax():
+        if request.method == 'GET':
+            request.session["obj_title"]           = obj_title           = request.GET['obj_title']
+            request.session["obj_key"]             = obj_key             = request.GET['obj_key']
+            request.session["obj_parent_title"]    = obj_parent_title    = request.GET['obj_parent_title']
+            #request.session["obj_parent_title"]    = obj_title         = request.GET['obj_title']
+            request.session["electric_data_end"]   = electric_data_end   = request.GET['electric_data_end']            
+    sortDir = 'DESC'
+    if (bool(is_abonent_level.search(obj_key))):
+        data_table = common_sql.get_data_table_pulsar_water_daily(obj_parent_title, obj_title, electric_data_end, True, sortDir)
+    elif (bool(is_object_level_2.search(obj_key))):
+        data_table = common_sql.get_data_table_pulsar_water_daily(obj_parent_title, obj_title, electric_data_end, False, sortDir)
               
     if len(data_table)>0: 
         data_table=common_sql.ChangeNull_and_LeaveEmptyCol(data_table, None, 7)
@@ -7523,7 +7568,6 @@ def pulsar_water_daily(request):
    
 
     return render(request, "data_table/water/58.html", args)
-    
 def pulsar_water_period(request):
     args = {}
     is_abonent_level = re.compile(r'abonent')
@@ -7566,7 +7610,6 @@ def pulsar_water_period(request):
     args['electric_data_start'] = electric_data_start
     args['electric_data_end'] = electric_data_end
    
-
     return render(request, "data_table/water/57.html", args)
     
 def pulsar_water_daily_row(request):
@@ -7610,7 +7653,6 @@ def pulsar_water_daily_row(request):
     args['electric_data_start'] = electric_data_start
     args['electric_data_end'] = electric_data_end
    
-
     return render(request, "data_table/water/60.html", args)
     
 def heat_elf_daily(request):
@@ -8064,13 +8106,14 @@ def pulsar_water_period_2(request):
             request.session["obj_key"]             = obj_key             = request.GET['obj_key']
             request.session["obj_parent_title"]    = obj_parent_title    = request.GET['obj_parent_title']            
             request.session["electric_data_end"]   = electric_data_end   = request.GET['electric_data_end']
-            request.session["electric_data_start"]   = electric_data_start   = request.GET['electric_data_start']              
+            request.session["electric_data_start"]   = electric_data_start   = request.GET['electric_data_start']
+    sortDir = "ASC"              
     if (bool(is_abonent_level.search(obj_key))):
-        data_table = common_sql.get_data_table_pulsar_water_for_period(obj_parent_title, obj_title, electric_data_start, electric_data_end, True)
+        data_table = common_sql.get_data_table_pulsar_water_for_period(obj_parent_title, obj_title, electric_data_start, electric_data_end, True, sortDir)
         data_table_graphic = common_sql.get_data_table_water_pulsar1_between_dates(obj_title, obj_parent_title,electric_data_start, electric_data_end, True)
                       
     elif (bool(is_object_level_2.search(obj_key))):
-        data_table = common_sql.get_data_table_pulsar_water_for_period(obj_parent_title, obj_title, electric_data_start,electric_data_end, False)
+        data_table = common_sql.get_data_table_pulsar_water_for_period(obj_parent_title, obj_title, electric_data_start,electric_data_end, False, sortDir)
         data_table_graphic = common_sql.get_data_table_water_pulsar1_between_dates(obj_title, obj_parent_title,electric_data_start, electric_data_end, False)
               
     if len(data_table)>0: 
@@ -8101,7 +8144,64 @@ def pulsar_water_period_2(request):
 
     return render(request, "data_table/water/73.html", args)
     
+def pulsar_water_period_2_desc(request):
+    args = {}
+    is_abonent_level = re.compile(r'abonent')
+    is_object_level_2 = re.compile(r'level2')
+    data_table = []
+    obj_title = 'Не выбран'
+    obj_key = 'Не выбран'
+    obj_parent_title = 'Не выбран'
+    is_electric_monthly = ''
+    is_electric_daily = ''
+    is_electric_current = ''
+    is_electric_delta = ''
+    electric_data_start = ''
+    electric_data_end = ''
+    data_table_graphic =[]
+    if request.is_ajax():
+        if request.method == 'GET':
+            request.session["obj_title"]           = obj_title           = request.GET['obj_title']
+            request.session["obj_key"]             = obj_key             = request.GET['obj_key']
+            request.session["obj_parent_title"]    = obj_parent_title    = request.GET['obj_parent_title']            
+            request.session["electric_data_end"]   = electric_data_end   = request.GET['electric_data_end']
+            request.session["electric_data_start"]   = electric_data_start   = request.GET['electric_data_start']
+    sortDir = "DESC"              
+    if (bool(is_abonent_level.search(obj_key))):
+        data_table = common_sql.get_data_table_pulsar_water_for_period(obj_parent_title, obj_title, electric_data_start, electric_data_end, True, sortDir)
+        data_table_graphic = common_sql.get_data_table_water_pulsar1_between_dates(obj_title, obj_parent_title,electric_data_start, electric_data_end, True)
+                      
+    elif (bool(is_object_level_2.search(obj_key))):
+        data_table = common_sql.get_data_table_pulsar_water_for_period(obj_parent_title, obj_title, electric_data_start,electric_data_end, False, sortDir)
+        data_table_graphic = common_sql.get_data_table_water_pulsar1_between_dates(obj_title, obj_parent_title,electric_data_start, electric_data_end, False)
+              
+    if len(data_table)>0: 
+        data_table=common_sql.ChangeNull(data_table, None)
+    
+    AllData=[]
+    Xcoord=[]
+    #print data_table_graphic
+    if (len( data_table_graphic) >0):
+        Xcoord=makeOneCoords(data_table_graphic,0) #label 
+        
+        AllData=[{str("data"):makeOneCoords(data_table_graphic,5), str("label"):str("GVS"), str("backgroundColor"): get_rgba_color(1)},
+             {str("data"):makeOneCoords(data_table_graphic,6), str("label"):str("HVS"),  str("backgroundColor"): get_rgba_color(5)}]
+                 
+    
+    args['data_table'] = data_table
+    args['obj_title'] = obj_title
+    args['obj_key'] = obj_key
+    args['obj_parent_title'] = obj_parent_title
+    args['is_electric_monthly'] = is_electric_monthly
+    args['is_electric_daily'] = is_electric_daily
+    args['is_electric_current'] = is_electric_current
+    args['is_electric_delta'] = is_electric_delta
+    args['electric_data_start'] = electric_data_start
+    args['electric_data_end'] = electric_data_end
+    args['label'] = Xcoord
+    args['AllData']=AllData
 
+    return render(request, "data_table/water/73.html", args)
     
 def heat_karat_daily(request):
     args = {}

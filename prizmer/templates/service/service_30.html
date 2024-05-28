@@ -5,6 +5,9 @@
 {% load static %} <script src="{%static "libs/jquery-ui/ui/i18n/jquery.ui.datepicker-ru.js" %}" type=text/javascript></script>
 
 <script src="/static/libs/liHighLight.js" type=text/javascript></script>
+<script> 	
+//alert('datepickerDel as load mini page');
+//$( "#datepickerDel" ).datepicker({dateFormat: 'dd.mm.yy', defaultDate:+0}); </script>
 <br><br>
 <div class = "container radius"  style="border-radius: 10px 40px">
 <div class = "row"  >
@@ -16,10 +19,39 @@
 	<div class = "col-9"> <input type="text" id="direct30" name="direct30" minlength="3" maxlength="300" size="100"> </div>
 	<div class = "col-2"> <span onclick="load_service('service_load30')" class="button" id="load30">Загрузить</span> </div>
 </div>
+      
 <br>
 <div class = "row">
 	<div class = "col-11">		{{status}}		</div>
 </div>
+<br><br>
+</div>
+
+
+<div class = "container radius"  style="border-radius: 10px 40px">
+<div class = "row"  >
+	<div class = "col" id = "blue-style"><h5><strong>Удаление 30-ок из БД на дату по номеру прибора</strong> </h5></div>
+</div>
+
+<div class = "row">
+	<div class = "col"><img src="{%static "images/question2-ico20.png" %}" title ="Если поле останется пустым, то будут удалены все Получасовые показания на выбранную дату по всем приборам" ></div>
+</div>
+
+<div class = "row justify-content-start align-items-center" >
+	<div class = "col-2"> <strong>Заводской №:</strong> </div>
+	<div class = "col-3"> <input type="text" id="num_del30" name="num_del30" minlength="3" maxlength="20" size="20"></div>
+	<div class = "col-4"> 
+		<!-- <input type="text" placeholder="Выберите дату" class="form-control datepicker" id="datepickerDel" name= "datepickerDel">	 -->
+		<div id="datepickerDel"></div>
+	</div>
+	<div class = "col-1"> <span onclick="load_service('del_various30')" class="button" id="del30"> _Удалить_ </span> </div> 
+
+</div>
+<br> <br>
+<div class = "row">
+	<div class = "col-11">		{{del30_status}}		</div>
+</div>
+
 <br><br>
 </div>
 </form>

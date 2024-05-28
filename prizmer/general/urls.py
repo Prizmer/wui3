@@ -204,4 +204,8 @@ urlpatterns = [
     url(r'^134/$', views.danfoss_water_impulse_daily, name = 'danfoss_water_impulse_daily'), # показания по водосчётчикам импульсным с каналов теплосчётчика Danfoss
 
     url(r'^136/$', views.pulsar_water_from_heat_daily_row, name = 'water_from_heat_row'), # Показания по стоякам в одну строку на дату с Теплосчётчиков Пульсар (аналог отчётов 60,132)
+
+    url(r'^137/$', views.pulsar_water_period_2_desc, name = 'period_water_pulsar_graphic_desc'), # Показание за период с водосчётчиков Пульсар, копия 73, но изменена сортировка ХВ-ГВ
+    url(r'^138/$', views.pulsar_water_daily_desc, name = 'water_pulsar'), # Показание на дату с водосчётчиков Пульсар, копия 58, но изменена сортировка ХВ-ГВ
+    
 ]
