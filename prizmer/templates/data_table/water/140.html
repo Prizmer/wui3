@@ -1,0 +1,103 @@
+<html>
+<head>
+	<script>
+
+$(document).ready(function(){
+$(".comment").click(LoadComments);   
+$(".add_comment").click(AddComments);   
+});
+
+function set_color(){
+var tbl = document.getElementsByName("dt_1");
+if (tbl !== null)
+{
+    var el = tbl[0].getElementsByTagName("td");
+    if (el !== null)
+    {
+        for (var i = 0; i < el.length; i++) {
+          if (el[i].innerHTML === '1,000'){
+              el[i].innerHTML = '< 20%';
+              el[i].className += " " + "td_red_battery";  
+            }
+          if (el[i].innerHTML === '0,000'){
+              el[i].innerHTML = 'норма';
+            }
+          if (parseFloat((el[i].innerHTML).replace(',','.')) < 3.2) {            
+            el[i].className += " " + "td_red_battery";
+            }  
+        }
+    }
+
+}}
+	</script>
+</head>
+<body>
+<script src="/static/libs/liHighLight.js" type=text/javascript></script>
+
+<!--Комментарии -->
+<div id='comment-block' style="overflow-y:scroll;">
+ <span id="modal_close">X</span> <!-- Кнoпкa зaкрыть -->
+	
+</div>
+<div id="overlay"></div><!-- Пoдлoжкa -->
+
+<!--Добавление нового Комментария -->
+<div id='comment-add-block'>
+ <!--Форма для Добавления нового Комментария -->
+</div>
+
+<span>Показания по воде на <strong>{{electric_data_end}}</strong></span>
+<br>
+<span>Абонент: <strong>{{obj_title}}</strong></span>
+<br>
+{{progress}}
+{% if data_table %} 
+<table class="content" id="data-table"  name="dt_1" >
+<tr>
+
+<th>Абонент</th>
+<th>Тип</th>
+<th>Стояк</th>
+<th>Счётчик</th>
+<th>Напряжение батарейки, В</th>
+<th class="th_hvs">Комментарий</th>
+<th class="th_hvs"></th>
+
+<!--<th>Дата</th>-->
+
+</tr>
+{% for value in data_table %}
+<tr>
+
+<td>{{value.1}}</td>
+<td>{{value.2}}</td>
+<td>{{value.3}}</td>
+<td>{{value.4}}</td>
+<td>{{value.5}}</td>
+<td class="th_hvs"> 
+{% if value.7 %} 
+<div class="comment" id={{value.6}} data-resource='water'> 
+ {{value.7}}
+ {% load static %} <img src="{%static "images/comment-ico24.png" %}" >
+</div>
+{% endif %}
+</td>
+<td class="th_hvs"> 
+<div class="add_comment" id={{value.6}}  data-resource='water'> 
+ {% load static %} <img src="{%static "images/add_comment-ico16.png" %}" >
+</div>
+</td>
+
+<!--<td>{{value.3}}</td>-->
+</tr>
+{% endfor %}
+</table>
+<script> set_color(); </script>
+{% else %}
+<br>
+<br>
+<span><strong>Нет данных.</strong></span>
+<br>
+{% endif %}
+</body>
+</html>

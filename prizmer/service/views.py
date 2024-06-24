@@ -708,6 +708,18 @@ def LoadElectricMeters(sPath, sSheet):
                 add_meter = Meters(name = str(type_meter) + ' ' + str(meter), address = str(adr), factory_number_manual = str(meter), attr1 = str(attr1), guid_types_meters = TypesMeters.objects.get(guid = "c922dec6-f830-4ee1-bb6a-cd0a96c53c81") )
                 add_meter.save()
                 writeToLog('Device added' + ' --->   ' + 'Пульс Эл. ХВС')
+            elif str(type_meter) == 'ЭкоНом ГВС':
+                add_meter = Meters(name = str(type_meter) + ' ' + str(meter), address = str(adr), factory_number_manual = str(meter), attr1 = str(attr1), guid_types_meters = TypesMeters.objects.get(guid = "e2e6c4c5-636a-432a-bdbf-6a5ab4b1fdee") )
+                add_meter.save()
+                writeToLog('Device added' + ' --->   ' + 'ЭкоНом ГВС')
+            elif str(type_meter) == 'ЭкоНом ХВС':
+                add_meter = Meters(name = str(type_meter) + ' ' + str(meter), address = str(adr), factory_number_manual = str(meter), attr1 = str(attr1), guid_types_meters = TypesMeters.objects.get(guid = "50098019-7418-4661-baa9-b913de3596da") )
+                add_meter.save()
+                writeToLog('Device added' + ' --->   ' + 'ЭкоНом ХВС')
+            elif str(type_meter) == 'ЭкоНом Теплосчётчик':
+                add_meter = Meters(name = str(type_meter) + ' ' + str(meter), address = str(adr), factory_number_manual = str(meter), attr1 = str(attr1), guid_types_meters = TypesMeters.objects.get(guid = "aefa5648-2240-42b4-88cf-04b093a60187") )
+                add_meter.save()
+                writeToLog('Device added' + ' --->   ' + 'ЭкоНом Теплосчётчик')
 
             else:
                 writeToLog('Не найдено совпадение с существующим типом прибора')
@@ -2946,7 +2958,36 @@ def add_taken_param_no_signals(instance, isR, isHalfs): # Добавляем с�
         add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "f4facbc6-6b26-426b-939f-b67dbdd5631a"))
         add_param.save()
 
+    elif instance.guid_types_meters.name == 'ЭкоНом ХВС':
+        #Добавляем параметры для водосчётчика ЭкоНом ХВС.
+        #------------Суточные
+        # "Показание Расход воды" Объем, м3
+        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "4ff80736-bcc7-47e6-9314-e505b837191d"))
+        add_param.save()
 
+
+    elif instance.guid_types_meters.name == 'ЭкоНом ГВС':
+        #Добавляем параметры для водосчётчика ЭкоНом ГВС.
+        #------------Суточные
+        # "Показание Расход воды" Объем, м3
+        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "9f280064-b8c7-4037-8a3c-617301221427"))
+        add_param.save()
+
+    elif instance.guid_types_meters.name == 'ЭкоНом Теплосчётчик':
+        #Добавляем параметры для Теплосчётчика ЭкоНом.
+        #------------Суточные
+        # "Показание Энергии" Q, Гкал
+        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "b22a28d0-9cb1-45eb-baba-5bb696ceb50d"))
+        add_param.save()
+        # "Показание Расход теплоносителя" Объем, м3
+        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "4400f32c-9074-4838-93cf-7c7066f088f5"))
+        add_param.save()
+        # "Показание Температура подачи" Ti, C0
+        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "5d9407e9-8ff7-4d8b-937e-d47edfe27e31"))
+        add_param.save()
+        # "Показание Температура выхода" To, C0
+        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "3c4bf80c-1a62-41ef-8bdd-9e9593ee0c56"))
+        add_param.save()
     else:
         pass
         #print('!!!!!!!!!!!!!!', instance.guid_types_meters.name)

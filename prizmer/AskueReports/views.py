@@ -7972,7 +7972,7 @@ def report_pulsar_water_period_2_desc(request):
     
     data_table = []
                      
-    sortDir = "ASC"              
+    sortDir = "DESC"              
     if (bool(is_abonent_level.search(obj_key))):
         data_table = common_sql.get_data_table_pulsar_water_for_period(obj_parent_title, obj_title, electric_data_start, electric_data_end, True, sortDir)
     elif (bool(is_object_level_2.search(obj_key))):

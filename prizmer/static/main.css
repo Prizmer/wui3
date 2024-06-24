@@ -299,6 +299,15 @@ padding: 3px;
     padding-top:0;
     padding-bottom:0;
 }
+.td_red_battery
+{
+    background: #ff4f4b; /* #d9534f; */
+    padding:1px;
+    padding-top:0;
+    padding-bottom:0;
+    font-weight: bold;
+    
+}
 .td_yellow
 {
     background: #ffcc00;

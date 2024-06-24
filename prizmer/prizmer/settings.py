@@ -106,8 +106,9 @@ WSGI_APPLICATION = 'prizmer.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE':'django.db.backends.postgresql_psycopg2',
-        'NAME': 'citybay',
-        #'NAME': 'komunarka_k10',
+        # 'NAME': 'citybay',
+        # 'NAME': 'komunarka_k10',
+        #'NAME': 'jd9',
         #'NAME': 'sovet',
         #'NAME': 'ryabina',
         #'NAME': 'tro_sud',
@@ -120,6 +121,7 @@ DATABASES = {
         #'NAME': 'pogodinka2',
         #'NAME': 'obninsk1',
         # 'NAME': 'template',
+        'NAME': 'nartis_test',
         #'NAME': 'pogodinka2',
         # #'NAME': 'template_1501',
         #'NAME': 'sobytie',

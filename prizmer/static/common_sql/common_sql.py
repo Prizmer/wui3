@@ -6612,6 +6612,130 @@ def get_data_table_pulsar_water_daily(obj_parent_title, obj_title, electric_data
     data_table = cursor.fetchall()
     
     return data_table
+
+def MakeSqlQuery_water_pulsar_battery_for_abonent(obj_parent_title, obj_title, electric_data_end, my_params, sortDir):
+    sQuery = """
+Select z1.date,water_pulsar_abons.ab_name, water_pulsar_abons.type_meter, water_pulsar_abons.attr1, water_pulsar_abons.factory_number_manual, round(z1.value::numeric,3),
+     water_pulsar_abons.ab_guid,
+    water_pulsar_abons.comment,
+	z1.params_name
+from water_pulsar_abons
+left join
+(SELECT
+  daily_values.date,
+  abonents.name,
+  substring(types_meters.name from 9 for 11),
+  meters.attr1,
+  meters.factory_number_manual,
+  daily_values.value,
+  abonents.guid,
+ taken_params.name as params_name
+FROM
+  public.abonents,
+  public.objects,
+  public.link_abonents_taken_params,
+  public.taken_params,
+  public.daily_values,
+  public.meters,
+  public.types_meters
+WHERE
+  abonents.guid_objects = objects.guid AND
+  link_abonents_taken_params.guid_abonents = abonents.guid AND
+  link_abonents_taken_params.guid_taken_params = taken_params.guid AND
+  taken_params.guid_meters = meters.guid AND
+  daily_values.id_taken_params = taken_params.id AND
+  meters.guid_types_meters = types_meters.guid AND
+  objects.name = '%s' AND
+  abonents.name = '%s' and
+  daily_values.date = '%s' and
+  (types_meters.name like '%s' or types_meters.name like '%s')
+) as z1
+on z1.factory_number_manual=water_pulsar_abons.factory_number_manual
+where
+water_pulsar_abons.obj_name='%s'and
+water_pulsar_abons.ab_name='%s' and
+z1.params_name like '%%battery_voltage%%'
+group by
+z1.date,
+water_pulsar_abons.ab_name,
+water_pulsar_abons.type_meter,
+water_pulsar_abons.attr1,
+water_pulsar_abons.factory_number_manual,
+z1.value,
+ water_pulsar_abons.ab_guid,
+ water_pulsar_abons.comment,
+ z1.params_name
+ order by water_pulsar_abons.ab_name ASC,
+water_pulsar_abons.type_meter %s
+"""%(obj_parent_title, obj_title, electric_data_end, my_params[0],my_params[1],obj_parent_title, obj_title, sortDir)
+    return sQuery
+
+def MakeSqlQuery_water_pulsar_battery_for_all(obj_parent_title, obj_title, electric_data_end, my_params, sortDir):
+    sQuery="""
+   Select z1.date, water_pulsar_abons.ab_name, z1.type_meter, z1.attr1, water_pulsar_abons.factory_number_manual, round(z1.value::numeric,3),water_pulsar_abons.ab_guid,
+ water_pulsar_abons.comment, z1.params_name
+from water_pulsar_abons
+left join
+(SELECT
+  daily_values.date,
+  abonents.name,
+  (Case when (types_meters.name = 'Пульс СТК ХВС' or types_meters.name = 'Пульс СТК ГВС') then "substring"((types_meters.name)::text, 11, 13) else "substring"((types_meters.name)::text, 9, 11) end)
+             AS type_meter,
+  meters.attr1,
+  meters.factory_number_manual,
+   daily_values.value,
+  abonents.guid,
+ taken_params.name as params_name
+FROM 
+  public.abonents, 
+  public.objects, 
+  public.link_abonents_taken_params, 
+  public.taken_params, 
+  public.daily_values, 
+  public.meters, 
+  public.types_meters
+WHERE 
+  abonents.guid_objects = objects.guid AND
+  link_abonents_taken_params.guid_abonents = abonents.guid AND
+  link_abonents_taken_params.guid_taken_params = taken_params.guid AND
+  taken_params.guid_meters = meters.guid AND
+  daily_values.id_taken_params = taken_params.id AND
+  meters.guid_types_meters = types_meters.guid AND
+  objects.name = '%s' AND 
+  daily_values.date = '%s' and
+  (types_meters.name like '%s' or types_meters.name like '%s')
+ORDER BY
+  abonents.name ASC) as z1
+on water_pulsar_abons.factory_number_manual=z1.factory_number_manual
+  where water_pulsar_abons.obj_name='%s' 
+   and
+z1.params_name like '%%battery_voltage%%'
+  group by z1.date,
+water_pulsar_abons.ab_name,
+z1.type_meter,
+z1.attr1,
+water_pulsar_abons.factory_number_manual, z1.value,
+water_pulsar_abons.ab_guid,
+water_pulsar_abons.ab_guid,
+ water_pulsar_abons.comment,
+ z1.params_name
+  order by water_pulsar_abons.ab_name ASC, z1.attr1 ASC, z1.type_meter %s  
+    """%(obj_title, electric_data_end, my_params[0],my_params[1],obj_title, sortDir)
+    #print(sQuery)
+    return sQuery
+
+def get_data_table_pulsar_water_battery(obj_parent_title, obj_title, electric_data_end, isAbon, sortDir):
+    my_params=['Пульс%%ГВС', 'Пульс%%ХВС']
+    cursor = connection.cursor()
+    data_table=[]
+    
+    if (isAbon):
+        cursor.execute(MakeSqlQuery_water_pulsar_battery_for_abonent(obj_parent_title, obj_title, electric_data_end, my_params, sortDir))
+    else:
+        cursor.execute(MakeSqlQuery_water_pulsar_battery_for_all(obj_parent_title, obj_title, electric_data_end, my_params, sortDir))
+    data_table = cursor.fetchall()
+    
+    return data_table
     
 def MakeSqlQuery_water_pulsar_daily_for_abonent(obj_parent_title, obj_title, electric_data_end, my_params, sortDir):
     sQuery="""
