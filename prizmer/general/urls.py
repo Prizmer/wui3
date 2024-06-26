@@ -210,5 +210,7 @@ urlpatterns = [
     
     url(r'^140/$', views.pulsar_water_battery, name = 'water_pulsar_battery'), # Показание на дату с водосчётчиков Пульсар, копия 58, но изменена сортировка ХВ-ГВ
 
-    
+    url(r'^141/$', views.econom_water_period, name = 'period_water_econom'), # Показание за период с водосчётчиков Эконом
+    url(r'^142/$', views.econom_water_daily, name = 'water_econom'), # Показание на дату с водосчётчиков ЭкоНом
+   
 ]

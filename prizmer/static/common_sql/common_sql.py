@@ -6613,6 +6613,31 @@ def get_data_table_pulsar_water_daily(obj_parent_title, obj_title, electric_data
     
     return data_table
 
+def get_data_table_econom_water_daily(obj_parent_title, obj_title, electric_data_end, isAbon, sortDir):
+    my_params=['%ЭкоНом%ГВС%', '%ЭкоНом%ХВС%']
+    cursor = connection.cursor()
+    data_table=[]
+    
+    if (isAbon):
+        cursor.execute(MakeSqlQuery_water_pulsar_daily_for_abonent(obj_parent_title, obj_title, electric_data_end, my_params, sortDir))
+    else:
+        cursor.execute(MakeSqlQuery_water_pulsar_daily_for_all(obj_parent_title, obj_title, electric_data_end, my_params, sortDir))
+    data_table = cursor.fetchall()
+    
+    return data_table
+
+def get_data_table_econom_water_for_period(obj_parent_title, obj_title, electric_data_start, electric_data_end, isAbon, sortDir):
+    my_params=['%ЭкоНом%ГВС%', '%ЭкоНом%ХВС%', 'ГВС', 'ХВС']
+    cursor = connection.cursor()
+    data_table=[]
+    if (isAbon):
+        cursor.execute(MakeSqlQuery_water_pulsar_period_for_abonent(obj_parent_title, obj_title,electric_data_start, electric_data_end, my_params, sortDir))
+    else:
+        cursor.execute(MakeSqlQuery_water_pulsar_period_for_all(obj_parent_title, obj_title,electric_data_start, electric_data_end, my_params, sortDir))
+    data_table = cursor.fetchall()
+    
+    return data_table
+
 def MakeSqlQuery_water_pulsar_battery_for_abonent(obj_parent_title, obj_title, electric_data_end, my_params, sortDir):
     sQuery = """
 Select z1.date,water_pulsar_abons.ab_name, water_pulsar_abons.type_meter, water_pulsar_abons.attr1, water_pulsar_abons.factory_number_manual, round(z1.value::numeric,3),
@@ -6747,7 +6772,10 @@ left join
 (SELECT 
   daily_values.date,  
   abonents.name, 
-  substring(types_meters.name from 9 for 11),   
+  (Case when (types_meters.name = 'Пульс СТК ХВС' or types_meters.name = 'Пульс СТК ГВС') then "substring"((types_meters.name)::text, 11, 13) 
+   		when (types_meters.name like '%%ЭкоНом%%ВС%%') then "substring"((types_meters.name)::text, 8, 11) 
+   else "substring"((types_meters.name)::text, 9, 11) end)
+             AS type_meter,   
   meters.attr1,
   meters.factory_number_manual,
   (Case when (types_meters.name = 'Пульс СТК ХВС' or types_meters.name = 'Пульс СТК ГВС') then daily_values.value/1000 else daily_values.value end)
@@ -6803,8 +6831,10 @@ left join
 (SELECT 
   daily_values.date,  
   abonents.name, 
-  (Case when (types_meters.name = 'Пульс СТК ХВС' or types_meters.name = 'Пульс СТК ГВС') then "substring"((types_meters.name)::text, 11, 13) else "substring"((types_meters.name)::text, 9, 11) end)
-             AS type_meter,   
+ (Case when (types_meters.name = 'Пульс СТК ХВС' or types_meters.name = 'Пульс СТК ГВС') then "substring"((types_meters.name)::text, 11, 13) 
+   		when (types_meters.name like '%%ЭкоНом%%ВС%%') then "substring"((types_meters.name)::text, 8, 11) 
+   else "substring"((types_meters.name)::text, 9, 11) end)
+             AS type_meter,
   meters.attr1,
   meters.factory_number_manual,   
   (Case when (types_meters.name = 'Пульс СТК ХВС' or types_meters.name = 'Пульс СТК ГВС') then daily_values.value/1000 else daily_values.value end)

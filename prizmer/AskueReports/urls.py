@@ -171,4 +171,8 @@ urlpatterns = [
     url(r'^137/$', views.report_pulsar_water_period_2_desc, name = '137'), # Показание за период с водосчётчиков Пульсар, копия 73, но изменена сортировка ХВ-ГВ
     url(r'^138/$', views.report_pulsar_water_daily_desc, name = '138'), # Показание на дату с водосчётчиков Пульсар, копия 58, но изменена сортировка ХВ-ГВ
     # Наличие в комментарии *, говорит о том, что он реагирует на свойства SHOW_LIC_NUM,SEPARATOR и ROUND_SIZE
+
+    # url(r'^141/$', views.econom_water_period, name = 'period_water_econom'), # Показание за период с водосчётчиков Эконом
+    url(r'^142/$', views.report_econom_water_daily, name = '142'), # Показание на дату с водосчётчиков ЭкоНом
+
 ]
