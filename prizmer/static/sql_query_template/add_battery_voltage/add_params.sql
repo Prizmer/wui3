@@ -22,3 +22,4 @@ INSERT INTO public.params(
 	guid, name, param_address, channel, guid_names_params, guid_types_meters, guid_types_params)
 	VALUES ('c1efbc03-04b8-4f6f-abaf-645c25d601b6', 'Пульсар Теплосчётчик battery_voltage Суточный -- adress: 2  channel: 0', 2, 0, '06f68849-3e99-4f36-9650-a2687a82f468', '82b96b1c-31cf-4753-9d64-d22e2f4d036e', 'bb986590-63cb-4b9f-8f4b-1b96335c5441');
 
+-- c0534604-4cf3-4286-8428-8b846270e16f guid resource Служебные

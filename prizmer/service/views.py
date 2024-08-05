@@ -721,6 +721,11 @@ def LoadElectricMeters(sPath, sSheet):
                 add_meter.save()
                 writeToLog('Device added' + ' --->   ' + 'ЭкоНом Теплосчётчик')
 
+            elif str(type_meter) == 'Декаст Теплосчётчик':
+                add_meter = Meters(name = str(type_meter) + ' ' + str(meter), address = str(adr), factory_number_manual = str(meter), attr1 = str(attr1), guid_types_meters = TypesMeters.objects.get(guid = "b95134db-af0c-4eea-bc8e-32b2bcfc7e1d") )
+                add_meter.save()
+                writeToLog('Device added' + ' --->   ' + 'Декаст Теплосчётчик')
+
             else:
                 writeToLog('Не найдено совпадение с существующим типом прибора')
                 met-=1
@@ -2987,6 +2992,22 @@ def add_taken_param_no_signals(instance, isR, isHalfs): # Добавляем с�
         add_param.save()
         # "Показание Температура выхода" To, C0
         add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "3c4bf80c-1a62-41ef-8bdd-9e9593ee0c56"))
+        add_param.save()
+
+    elif instance.guid_types_meters.name == 'Декаст Теплосчётчик':
+        #Добавляем параметры для Декаст Теплосчётчик.
+        #------------Суточные
+        # "Показание Энергии" Q, Гкал
+        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "7b109795-7076-444c-ba75-0f6494e523c5"))
+        add_param.save()
+        # "Показание Расход теплоносителя" Объем, м3
+        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "99fd51ba-2b1a-4cd3-adde-e0e744250d96"))
+        add_param.save()
+        # "Показание Температура подачи" Ti, C0
+        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "47c98a3e-0db8-4c51-8f2e-a4eed31039f9"))
+        add_param.save()
+        # "Показание Температура выхода" To, C0
+        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "9a0c606e-6986-4a36-93a4-0769a2f851e9"))
         add_param.save()
     else:
         pass
