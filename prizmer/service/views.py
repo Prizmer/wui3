@@ -3009,6 +3009,68 @@ def add_taken_param_no_signals(instance, isR, isHalfs): # Добавляем с�
         # "Показание Температура выхода" To, C0
         add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "9a0c606e-6986-4a36-93a4-0769a2f851e9"))
         add_param.save()
+
+    elif instance.guid_types_meters.name == 'МЗТА':
+        print('add_taken_params_mzta')
+    # Суточные
+      # Канал 2
+        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "82ce9adf-0a2e-4ceb-8d95-89fc4d9df289"))
+        add_param.save()
+      # Канал 3
+        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "4fd62d3d-880f-4f00-81bd-41b380c012da"))
+        add_param.save()
+      # Канал 4
+        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "ec10fc08-9e1b-416b-ab8e-b6f2233c8196"))
+        add_param.save()
+      # Канал 5
+        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "12ea6b3b-4dcf-40e3-bdf1-9edb80b9585a"))
+        add_param.save()
+      # Канал 6
+        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "6352996a-dc82-4939-8e0d-8679af9a3cb4"))
+        add_param.save()
+      # Канал 7
+        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "99c31bc4-0764-472a-91f9-774c7eacfaed"))
+        add_param.save()
+      # Канал 8
+        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "f394d963-c94f-42ac-9a15-d83dd0a97e78"))
+        add_param.save()
+      # Канал 9
+        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "8f16a338-23db-4fe0-99e1-3aad34897fda"))
+        add_param.save()
+      # Канал 10
+        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "11136ad3-a88e-40e5-8d19-cbf43032d17c"))
+        add_param.save()
+      # Канал 11
+        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "41f7302d-4fe7-4b55-8cc4-5d12269671e1"))
+        add_param.save()
+      # Канал 12
+        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "6472c355-66cd-4f99-8c17-a01ad155449e"))
+        add_param.save()
+      # Канал 13
+        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "5a4f437f-8b6d-4a59-9ec3-ad5f47cefccf"))
+        add_param.save()
+      # Канал 14
+        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "447cf2bb-bc43-4a50-8cd0-b1cc0407d973"))
+        add_param.save()
+      # Канал 15
+        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "98bcdfdd-8965-42f3-84fe-978d367be9eb"))
+        add_param.save()
+      # Канал 16
+        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "8663465e-64d1-49d9-915b-b0cd7d71a503"))
+        add_param.save()
+      # Канал 17
+        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "f7af4d4f-e542-406d-9ad2-44a5b8e9d506"))
+        add_param.save() 
+      # Канал 18
+        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "ccd0c7f4-babd-4953-99c8-b6adf0cf1b12"))
+        add_param.save()
+      # Канал 19
+        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "7633d6a2-9cba-49d4-b456-a51e137b45f1"))
+        add_param.save()
+      # Канал 20
+        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "a556773c-888a-4bb7-8ac4-e083630f0f28"))
+        add_param.save()
+
     else:
         pass
         #print('!!!!!!!!!!!!!!', instance.guid_types_meters.name)
@@ -3132,7 +3194,7 @@ def add_link_abonents_taken_params2(sender, instance, created, **kwargs):
         if (taken_param==instance.name):
             isExistAbonent=SimpleCheckIfExist('abonents','name',abon,'','','')
             if isExistAbonent:
-                writeToLog('Совпадение')
+                #writeToLog('Совпадение')
                 #"ХВС, №47622 Канал 4 Суточный"
                 #guidAbon=GetSimpleTable('abonents','name',abon)[0][0]
                 t = Abonents.objects.filter(name = abon)
@@ -3462,6 +3524,16 @@ def LoadWaterPulsar(sPath, sSheet):
                    add_taken_param_no_signals(instance = add_meter, isR = False, isHalfs = False)
             
                    met+=1
+
+            elif str(typePulsar) == 'МЗТА':
+                   signals.post_save.disconnect(add_link_taken_params, sender=TakenParams)  
+                   add_meter = Meters(name = str(str(typePulsar) + ' ' + str(numPulsar)), address = str(numPulsar),  factory_number_manual = str(numPulsar), guid_types_meters = TypesMeters.objects.get(guid = "295f91bd-3e05-435e-9eb8-bda7eddaf6a4") )
+                   add_meter.save()
+                   print ('OK Device МЗТА added in DB')
+                   #Если экземпляр был создан, то добавляем считываемые параметры
+                   add_taken_param_no_signals(instance = add_meter, isR = False, isHalfs = False)
+            
+                   met+=1
             else:
                 print('Pulsar already exists or you incorrectly indicated the type of device in the loading list')        
         # надо проверить каналы и подсоединить их 
@@ -3471,13 +3543,13 @@ def LoadWaterPulsar(sPath, sSheet):
         abonent_name=str(dtAll[i][2])
         taken_param = pulsarName + ' ' + str(dtAll[i][5]) + ' '+ pulsarName + ' ' + 'Канал ' + chanel+ ' Суточный -- adress: ' +chanel+'  channel: 0'
         #print "chanel ", chanel
-        #print(taken_param)
+        print(taken_param)
         #Sravnenie(taken_param)
         dtTakenParam=GetSimpleTable('taken_params','name',taken_param)
         #writeToLog(bool(dtTakenParam))
-        #print(dtTakenParam)
+        print(dtTakenParam)
         if dtTakenParam:                
-            #print(u'taken param найден')
+            print(u'taken param найден')
             guid_taken_param=dtTakenParam[0][2]
             dtLink=GetSimpleTable('link_abonents_taken_params','guid_taken_params',guid_taken_param)
             #print dtLink
@@ -3489,7 +3561,7 @@ def LoadWaterPulsar(sPath, sSheet):
                 #dtAbon= GetSimpleTable('abonents','name', abonent_name)
                 t = Abonents.objects.filter(name = abonent_name)
                 guidAbon = t[0].guid     #dtAbon[0][0]
-                #print guidAbon
+                print(abonent_name, 'guidAbon', guidAbon)
                 #"миномес ГВС, №68208 Канал 5 Суточный"
                 #print abonent_name, guidAbon, guid_taken_param
                 common_sql.InsertInLinkAbonentsTakenParams(name = abonent_name+' Канал '+chanel+' Суточный',coefficient=1, coefficient_2 = 1,coefficient_3 = 1, guid_abonents = guidAbon, guid_taken_params = guid_taken_param)
