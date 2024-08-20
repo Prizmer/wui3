@@ -121,6 +121,7 @@ DATABASES = {
         #'NAME': 'pogodinka2',
         #'NAME': 'obninsk1',
         'NAME': 'template',
+        # 'NAME': 'mzta',
         # 'NAME': 'nartis_test',
         # 'NAME': 'econom',
         # 'NAME': 'jd8',
