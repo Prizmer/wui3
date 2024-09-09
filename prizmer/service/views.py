@@ -716,6 +716,14 @@ def LoadElectricMeters(sPath, sSheet):
                 add_meter = Meters(name = str(type_meter) + ' ' + str(meter), address = str(adr), factory_number_manual = str(meter), attr1 = str(attr1), guid_types_meters = TypesMeters.objects.get(guid = "50098019-7418-4661-baa9-b913de3596da") )
                 add_meter.save()
                 writeToLog('Device added' + ' --->   ' + 'ЭкоНом ХВС')
+            elif str(type_meter) == 'Декаст ГВС':
+                add_meter = Meters(name = str(type_meter) + ' ' + str(meter), address = str(adr), factory_number_manual = str(meter), attr1 = str(attr1), guid_types_meters = TypesMeters.objects.get(guid = "36b6ea95-beb1-490d-a39f-06163bfcaae5") )
+                add_meter.save()
+                writeToLog('Device added' + ' --->   ' + 'Декаст ГВС')
+            elif str(type_meter) == 'Декаст ХВС':
+                add_meter = Meters(name = str(type_meter) + ' ' + str(meter), address = str(adr), factory_number_manual = str(meter), attr1 = str(attr1), guid_types_meters = TypesMeters.objects.get(guid = "657d8ad0-bdba-4459-a07e-4d4eb72950d6") )
+                add_meter.save()
+                writeToLog('Device added' + ' --->   ' + 'Декаст ХВС')
             elif str(type_meter) == 'ЭкоНом Теплосчётчик':
                 add_meter = Meters(name = str(type_meter) + ' ' + str(meter), address = str(adr), factory_number_manual = str(meter), attr1 = str(attr1), guid_types_meters = TypesMeters.objects.get(guid = "aefa5648-2240-42b4-88cf-04b093a60187") )
                 add_meter.save()
@@ -3069,6 +3077,21 @@ def add_taken_param_no_signals(instance, isR, isHalfs): # Добавляем с�
         add_param.save()
       # Канал 20
         add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "a556773c-888a-4bb7-8ac4-e083630f0f28"))
+        add_param.save()
+
+    elif instance.guid_types_meters.name == 'Декаст ХВС':
+        #Добавляем параметры для водосчётчика Декаст ХВС.
+        #------------Суточные
+        # "Показание Расход воды" Объем, м3
+        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "2c129d66-9551-43af-b841-3beeb31974e1"))
+        add_param.save()
+
+
+    elif instance.guid_types_meters.name == 'Декаст ГВС':
+        #Добавляем параметры для водосчётчика Декаст ГВС.
+        #------------Суточные
+        # "Показание Расход воды" Объем, м3
+        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "a2df1925-fa6a-4e41-9ded-01f17f8db55d"))
         add_param.save()
 
     else:
