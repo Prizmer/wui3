@@ -4655,7 +4655,7 @@ def LoadBalance(sPath, sheet):
                balance_group_guid=GetSimpleTable('balance_groups','name',balance_group)[0][0]
            
             #проверяем нет ли такой связи уже
-            dt_link=GetSimpleTable('link_balance_groups_meters',"guid_meters",guid_meters[0][0])
+            dt_link=GetSimpleTable('link_balance_groups_meters',"guid_meters",guid_meters)
             isNewLink=True
             for j in range(1,len(dt_link)):
                 #print dt_link[j][3]
