@@ -426,8 +426,10 @@ def GetTableFromExcel(sPath,sSheet):
         M=ws['m%s'%(row)].value
         N=ws['n%s'%(row)].value
         O=ws['o%s'%(row)].value
+        P=ws['p%s'%(row)].value
+        Q=ws['q%s'%(row)].value
         
-        vals =[A,B,C,D,E,F,G,H,I,J,K,L,M,N,O]
+        vals =[A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q]
         dt.append(vals)
         row+=1
     return dt
@@ -571,7 +573,9 @@ def LoadElectricMeters(sPath, sSheet):
         NumLic=str(dtAll[i][5]).strip()  #номер лицевого счёта, тут используется как пароль для м-230-ум
         Group=str(dtAll[i][12]).strip() 
         attr1=str(dtAll[i][13]).strip() 
-        attr2=str(dtAll[i][14]).strip() 
+        attr2=str(dtAll[i][14]).strip()
+        attr3=str(dtAll[i][15]).strip() 
+        attr4=str(dtAll[i][16]).strip()  
         isNewMeter=SimpleCheckIfExist('meters','factory_number_manual',meter,"","","")
         isNewAbon=SimpleCheckIfExist('objects','name', obj_l2,'abonents', 'name', abon)
         isR = False
@@ -657,7 +661,8 @@ def LoadElectricMeters(sPath, sSheet):
                 writeToLog('Device added' + ' --->   ' + 'Пульс СТК ХВС')
 
             elif str(type_meter) == 'Пульсар Теплосчётчик':
-                add_meter = Meters(name = str(type_meter) + ' ' + str(meter), address = str(adr), factory_number_manual = str(meter), guid_types_meters = TypesMeters.objects.get(guid = "82b96b1c-31cf-4753-9d64-d22e2f4d036e") )
+
+                add_meter = Meters(name = str(type_meter) + ' ' + str(meter), address = str(adr), factory_number_manual = str(meter), attr1 = str(attr1), attr2 = str(attr2), attr3 = str(attr3), attr4 = str(attr4), guid_types_meters = TypesMeters.objects.get(guid = "82b96b1c-31cf-4753-9d64-d22e2f4d036e") )
                 add_meter.save()
                 writeToLog('Device added' + ' --->   ' + 'Пульсар Теплосчётчик')
 
