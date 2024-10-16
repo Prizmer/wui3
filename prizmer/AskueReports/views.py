@@ -65,6 +65,7 @@ ali_grey   = NamedStyle(name = "ali_grey", fill=PatternFill(fill_type='solid', s
 ali_white  = NamedStyle(name = "ali_white", border=Border(left=Side(border_style='thin',color='FF000000'), bottom=Side(border_style='thin',color='FF000000'), right=Side(border_style='thin',color='FF000000'), top=Side(border_style='thin',color='FF000000')), alignment = Alignment(horizontal='center', vertical='center', wrap_text=True, shrink_to_fit=True))
 ali_blue   = NamedStyle(name = "ali_blue", fill=PatternFill(fill_type='solid', start_color='E6E6FA'), border=Border(left=Side(border_style='thin',color='FF000000'), bottom=Side(border_style='thin',color='FF000000'), right=Side(border_style='thin',color='FF000000'), top=Side(border_style='thin',color='FF000000')), alignment = Alignment(horizontal='center', vertical='center', wrap_text=True, shrink_to_fit=True))
 ali_pink   = NamedStyle(name = "ali_pink", fill=PatternFill(fill_type='solid', start_color='FFF0F5'), border=Border(left=Side(border_style='thin',color='FF000000'), bottom=Side(border_style='thin',color='FF000000'), right=Side(border_style='thin',color='FF000000'), top=Side(border_style='thin',color='FF000000')), alignment = Alignment(horizontal='center', vertical='center', wrap_text=True, shrink_to_fit=True))
+ali_red    = NamedStyle(name = "ali_red", fill=PatternFill(fill_type='solid', start_color='FF3333'), border=Border(left=Side(border_style='thin',color='FF000000'), bottom=Side(border_style='thin',color='FF000000'), right=Side(border_style='thin',color='FF000000'), top=Side(border_style='thin',color='FF000000')), alignment = Alignment(horizontal='center', vertical='center', wrap_text=True, shrink_to_fit=True))
 
 ali_yellow = NamedStyle(name = "ali_yellow", fill=PatternFill(fill_type='solid', start_color='EEEE00'), border=Border(left=Side(border_style='thin',color='FF000000'), bottom=Side(border_style='thin',color='FF000000'), right=Side(border_style='thin',color='FF000000'), top=Side(border_style='thin',color='FF000000')), alignment = Alignment(horizontal='center', vertical='center', wrap_text=True, shrink_to_fit=True))
 ali_white_size_18  = NamedStyle(name = "ali_white_size_18", font=Font(size=18))
@@ -20765,3 +20766,129 @@ def report_econom_water_daily(request):
     
     response['Content-Disposition'] = 'attachment;filename="%s.%s"' % (output_name.replace('"', '\"'), file_ext)   
     return response
+
+def report_pulsar_water_battery(request):
+    ROUND_SIZE = getattr(settings, 'ROUND_SIZE', 3)
+    response = io.StringIO()
+    wb = Workbook()
+    wb.add_named_style(ali_grey)
+    wb.add_named_style(ali_white)
+    wb.add_named_style(ali_yellow)
+    wb.add_named_style(ali_pink)
+    wb.add_named_style(ali_red)
+    ws = wb.active
+    electric_data_end   = request.session["electric_data_end"]
+
+#Шапка
+    ws['A2'] = 'Абонент'
+    ws['A2'].style = "ali_grey"
+    
+    ws['B2'] = 'Тип'
+    ws['B2'].style = "ali_grey"
+    
+    ws['c2'] = 'Стояк'
+    ws['c2'].style = "ali_grey"
+    
+    ws['d2'] = 'Счётчик'
+    ws['d2'].style = "ali_grey"   
+        
+    ws['e2'] = 'Напряжение батарейки, В'
+    ws['e2'].style = "ali_grey"
+    
+    ws['f2'] = 'Комментарий'
+    ws['f2'].style = "ali_grey"
+    
+#Запрашиваем данные для отчета
+    
+    is_abonent_level = re.compile(r'abonent')
+    is_object_level_2 = re.compile(r'level2')
+    
+    obj_parent_title         = request.session['obj_parent_title']
+    obj_title         = request.session['obj_title']
+    electric_data_end   = request.session['electric_data_end']            
+    obj_key             = request.session['obj_key']
+             
+    sortDir = 'DESC'
+    if (bool(is_abonent_level.search(obj_key))):
+        data_table = common_sql.get_data_table_pulsar_water_battery(obj_parent_title, obj_title, electric_data_end, True, sortDir)
+    elif (bool(is_object_level_2.search(obj_key))):
+        data_table = common_sql.get_data_table_pulsar_water_battery(obj_parent_title, obj_title, electric_data_end, False, sortDir)
+              
+    if len(data_table)>0: 
+        data_table=common_sql.ChangeNull_and_LeaveEmptyCol(data_table, None, 7)
+
+    
+# Заполняем отчет значениями
+    for row in range(3, len(data_table)+3):
+        try:
+            ws.cell('A%s'%(row)).value = '%s' % (data_table[row-3][1])  # абонент
+            ws.cell('A%s'%(row)).style = "ali_white"
+        except:
+            ws.cell('A%s'%(row)).style = "ali_white"
+            next
+        
+        try:
+            ws.cell('B%s'%(row)).value = '%s' % (data_table[row-3][2])  # 
+            ws.cell('B%s'%(row)).style = "ali_white"
+        except:
+            ws.cell('B%s'%(row)).style = "ali_white"
+            next
+            
+        try:
+            ws.cell('C%s'%(row)).value = '%s' % (data_table[row-3][3])  #         
+            ws.cell('C%s'%(row)).style = "ali_white"
+        except:
+            ws.cell('C%s'%(row)).style = "ali_white"
+            next
+        
+        try:
+            ws.cell('d%s'%(row)).value = '%s' % (data_table[row-3][4])  #         
+            ws.cell('d%s'%(row)).style = "ali_white"
+        except:
+            ws.cell('d%s'%(row)).style = "ali_white"
+            next
+            
+        try:
+            val = data_table[row-3][5]
+            #print(val, bool(val == 1), bool(val < 3.2))            
+            if (val == 1):
+                ws.cell('e%s'%(row)).value = '%s' % ("<20%")  
+                ws.cell('e%s'%(row)).style = "ali_red"
+            elif(val == 0):
+                ws.cell('e%s'%(row)).value = '%s' % ("норма")  # 
+                ws.cell('e%s'%(row)).style = "ali_white"
+            elif(val < 3.2):
+                ws.cell('e%s'%(row)).value = '%s' % ("<20%")  
+                ws.cell('e%s'%(row)).style = "ali_red"
+            else:
+                ws.cell('e%s'%(row)).value = '%s' % (val)  
+                ws.cell('e%s'%(row)).style = "ali_white"
+            
+        except:
+            ws.cell('e%s'%(row)).style = "ali_white"
+            next
+            
+        try:
+            ws.cell('f%s'%(row)).value = '%s' % (data_table[row-3][7])
+            ws.cell('f%s'%(row)).style = "ali_white"
+        except:
+            ws.cell('f%s'%(row)).style = "ali_white"
+            next
+               
+
+    ws.row_dimensions[2].height = 30
+    ws.column_dimensions['A'].width = 17 
+    ws.column_dimensions['d'].width = 12 
+    ws.column_dimensions['e'].width = 17 
+    ws.column_dimensions['f'].width = 17 
+        
+    #wb.save(response)
+    response.seek(0)
+    response = HttpResponse(save_virtual_workbook(wb),content_type="application/vnd.ms-excel")
+    #response['Content-Disposition'] = "attachment; filename=profil.xlsx"
+    
+    output_name = 'report_water_battery_'+translate(obj_parent_title)+'_'+translate(obj_title)+'_'+str(electric_data_end)
+    file_ext = 'xlsx'    
+    response['Content-Disposition'] = 'attachment;filename="%s.%s"' % (output_name.replace('"', '\"'), file_ext)   
+    return response
+
