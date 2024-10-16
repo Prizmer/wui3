@@ -6446,7 +6446,7 @@ WHERE
   objects.name = '%s' AND 
   abonents.name='%s' and
   daily_values.date = '%s' and
-  (types_meters.name like '%s' or types_meters.name like '%s')
+  (types_meters.name like '%s' or types_meters.name like '%s' or types_meters.name like 'Декаст%%ВС')
 ) as z0
 on z0.factory_number_manual=water_pulsar_abons.factory_number_manual
 where water_pulsar_abons.obj_name='%s' 
@@ -6484,7 +6484,7 @@ WHERE
   objects.name = '%s' AND 
   abonents.name='%s' and
   daily_values.date = '%s' and
-  (types_meters.name like '%s' or types_meters.name like '%s')
+  (types_meters.name like '%s' or types_meters.name like '%s' or types_meters.name like 'Декаст%%ВС')
 ) as z1
 on z1.factory_number_manual=water_pulsar_abons.factory_number_manual
 where water_pulsar_abons.obj_name='%s' 
@@ -6774,6 +6774,7 @@ left join
   abonents.name, 
   (Case when (types_meters.name = 'Пульс СТК ХВС' or types_meters.name = 'Пульс СТК ГВС') then "substring"((types_meters.name)::text, 11, 13) 
    		when (types_meters.name like '%%ЭкоНом%%ВС%%') then "substring"((types_meters.name)::text, 8, 11) 
+      when (types_meters.name like 'Декаст%%ВС') then "substring"((types_meters.name)::text, 7, 10) 
    else "substring"((types_meters.name)::text, 9, 11) end)
              AS type_meter,   
   meters.attr1,
@@ -6800,7 +6801,7 @@ WHERE
   objects.name = '%s' AND 
   abonents.name='%s' and
   daily_values.date = '%s' and
-  (types_meters.name like '%s' or types_meters.name like '%s')
+  (types_meters.name like '%s' or types_meters.name like '%s' or types_meters.name like 'Декаст%%ВС')
 ) as z1
 on z1.factory_number_manual=water_pulsar_abons.factory_number_manual
 where 
@@ -6833,6 +6834,7 @@ left join
   abonents.name, 
  (Case when (types_meters.name = 'Пульс СТК ХВС' or types_meters.name = 'Пульс СТК ГВС') then "substring"((types_meters.name)::text, 11, 13) 
    		when (types_meters.name like '%%ЭкоНом%%ВС%%') then "substring"((types_meters.name)::text, 8, 11) 
+     when (types_meters.name like 'Декаст%%ВС') then "substring"((types_meters.name)::text, 7, 10) 
    else "substring"((types_meters.name)::text, 9, 11) end)
              AS type_meter,
   meters.attr1,
@@ -6857,7 +6859,7 @@ WHERE
   meters.guid_types_meters = types_meters.guid AND
   objects.name = '%s' AND 
   daily_values.date = '%s' and
-  (types_meters.name like '%s' or types_meters.name like '%s')
+  (types_meters.name like '%s' or types_meters.name like '%s' or types_meters.name like 'Декаст%%ВС')
 ORDER BY
   abonents.name ASC) as z1
 on water_pulsar_abons.factory_number_manual=z1.factory_number_manual
