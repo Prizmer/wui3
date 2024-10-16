@@ -107,7 +107,7 @@ DATABASES = {
     'default': {
         'ENGINE':'django.db.backends.postgresql_psycopg2',
         # 'NAME': 'citybay',
-        # 'NAME': 'komunarka_k10',
+        'NAME': 'komunarka_k10',
         #'NAME': 'jd9',
         #'NAME': 'sovet',
         #'NAME': 'ryabina',
@@ -120,7 +120,7 @@ DATABASES = {
         #'NAME': 'sobytie',
         #'NAME': 'pogodinka2',
         #'NAME': 'obninsk1',
-        'NAME': 'template',
+        # 'NAME': 'template',
         # 'NAME': 'mzta',
         # 'NAME': 'nartis_test',
         # 'NAME': 'econom',
