@@ -6113,7 +6113,7 @@ def get_data_table_by_date_daily_pulsar_error_code(obj_parent_title, obj_title, 
     params=['Error_code','Теплосчётчик']
     cursor = connection.cursor()
     if isAbon:
-        print('для абонента')
+        #print('для абонента')
         cursor.execute(MakeSqlQuery_heat_error_code_for_all(obj_title, obj_title, electric_data, params))
     else:
         cursor.execute(MakeSqlQuery_heat_error_code_for_all(obj_parent_title,obj_title, electric_data, params))
@@ -7574,7 +7574,7 @@ WHERE
   where heat_abons.obj_name='%s'
   order by heat_abons.ab_name
     """%(my_params[0],obj_title,electric_data_end,obj_title)
-    print(sQuery)
+    #print(sQuery)
     return sQuery
     
 def get_data_table_elf_heat_daily(obj_parent_title, obj_title, electric_data_end, isAbon):

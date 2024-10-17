@@ -11,7 +11,7 @@
 <th>Абонент</th>
 <th>Счётчик</th>
 <th>Расшифровка</th>
-<!-- <th>Шифр ошибки</th> -->
+<th>Шифр ошибки</th> 
 
 
 </tr>
@@ -19,7 +19,12 @@
 <tr>
 <td>{{value.0}}</td>
 <td>{{value.1}}</td>
-<td><strong>{{value.3}}</strong></td>
+<!-- <td><strong>{{value.3}}</strong></td> -->
+<td STYLE = " text-align: left;"> 
+	{% for v in value.3 %}
+	<strong>{{v}}<br> </strong>
+	{% endfor %}
+</td>
 <td>{{value.2}}</td>
 
 

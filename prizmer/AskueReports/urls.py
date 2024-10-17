@@ -161,6 +161,8 @@ urlpatterns = [
     url(r'^126/$',views.electric_interval_month_hours, name = '126'), # Часовки за месяц по электрике
     url(r'^128/$',views.electric_integral_month_hours, name = '128'), # акт по потреблению за месяц
 
+    url(r'^130/$', views.report_pulsar_heat_error_code, name = '130'), # Коды ошибок с теплосчётчиков Пульсар
+
     url(r'^132/$', views.report_pulsar_water_impulse_daily_row, name = '132'),# Показания по стоякам в одну строку на дату с регистратора импульсов   
 
     url(r'^133/$', views.report_danfoss_water_impulse_consumption, name = '133'),# Потребеление по водосчётчикам импульсным с каналов теплосчётчика Danfoss 

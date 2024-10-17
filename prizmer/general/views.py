@@ -11612,18 +11612,18 @@ def pulsar_heat_error_code(request):
             request.session["electric_data_end"]   = electric_data_end   = request.GET['electric_data_end']           
             request.session["obj_key"]             = obj_key             = request.GET['obj_key']
     data_table = []
+    result_data_table = []
     if (bool(is_abonent_level.search(obj_key))):
         data_table = common_sql.get_data_table_by_date_daily_pulsar_error_code(obj_parent_title, obj_title, electric_data_end, True)
     elif (bool(is_object_level_2.search(obj_key))):
         data_table = common_sql.get_data_table_by_date_daily_pulsar_error_code(obj_parent_title, obj_title, electric_data_end, False)
-        # расшифровка значения ошибок
-        result_data_table = []
+        # расшифровка значения ошибок        
         for line in data_table:
             meter_errors = []
             line = list(line)
             if line[2] != None:
                 line[2] = bin(int(line[2]))[2:].zfill(32)
-                print(len(line[2]), len(error_tuple))
+                #print(len(line[2]), len(error_tuple))
                 for i, j in enumerate(line[2]):
                     if j == '1':
                         if error_tuple[i] != 'Резерв':

@@ -20892,3 +20892,179 @@ def report_pulsar_water_battery(request):
     response['Content-Disposition'] = 'attachment;filename="%s.%s"' % (output_name.replace('"', '\"'), file_ext)   
     return response
 
+def report_pulsar_heat_error_code(request):
+    ROUND_SIZE = getattr(settings, 'ROUND_SIZE', 3)
+    response = io.StringIO()
+    wb = Workbook()
+    wb.add_named_style(ali_grey)
+    wb.add_named_style(ali_white)
+    wb.add_named_style(ali_yellow)
+    wb.add_named_style(ali_pink)
+    wb.add_named_style(ali_red)
+    ws = wb.active
+    electric_data_end   = request.session["electric_data_end"]
+
+#Шапка
+    ws['A2'] = 'Абонент'
+    ws['A2'].style = "ali_grey"
+    
+    ws['B2'] = 'Счётчик'
+    ws['B2'].style = "ali_grey"
+    
+    ws['c2'] = 'Расшифровка'
+    ws['c2'].style = "ali_grey"
+    
+    ws['d2'] = 'Шифр ошибки'
+    ws['d2'].style = "ali_grey"   
+        
+    
+#Запрашиваем данные для отчета
+    
+    is_abonent_level = re.compile(r'abonent')
+    is_object_level_2 = re.compile(r'level2')
+    
+    obj_parent_title         = request.session['obj_parent_title']
+    obj_title         = request.session['obj_title']
+    electric_data_end   = request.session['electric_data_end']            
+    obj_key             = request.session['obj_key']
+             
+    sortDir = 'DESC'
+    if (bool(is_abonent_level.search(obj_key))):
+        data_table = common_sql.get_data_table_pulsar_water_battery(obj_parent_title, obj_title, electric_data_end, True, sortDir)
+    elif (bool(is_object_level_2.search(obj_key))):
+        data_table = common_sql.get_data_table_pulsar_water_battery(obj_parent_title, obj_title, electric_data_end, False, sortDir)
+              
+    if len(data_table)>0: 
+        data_table=common_sql.ChangeNull_and_LeaveEmptyCol(data_table, None, 7)
+
+    error_tuple = ('Произошел сброс даты, времени, всех значений счетчиков.',
+        'Ошибка чтения/записи FLASH.',
+        'Ошибка чтения/записи EEPROM.',
+        'Разрядилась батарея питания.',
+        'Неисправность часового кварца',
+        'Неисправность модуля RF.',
+        'Замкнут антисаботажный геркон',
+        'Поток воды через расходомер протекает в обратном направлении',
+        'Отсутствует вода в трубопроводе',
+        'Зафиксирован расход ниже настраиваемого порога п.0x0103',
+        'Зафиксирован расход выше настраиваемого порога п.0x0104',
+        'Аппаратная ошибка микросхемы измерительного фронтенда',
+        'Аппаратная ошибка микросхемы измерительного контроллера',
+        'Расшифровка на листе "Ошибки"',
+        'Расшифровка на листе "Ошибки"',
+        'Расшифровка на листе "Ошибки"',
+        'Неисправность термометра в подающем трубопроводе',
+        'Неисправность термометра в обратном трубопроводе',
+        'Перепад температур по модулю выше порога п.0x0138 и знак не корректный',
+        'Перепад температур ниже настраиваемого порога п.0x0139',
+        'Датчик давления 1. Короткое замыкание в цепи питания датчиков давления',
+        'Датчик давления 2. Короткое замыкание в цепи питания датчиков давления',
+        'Резерв',
+        'Резерв',
+        'Резерв',
+        'Резерв',
+        'Резерв',
+        'Резерв',
+        'Резерв',
+        'Резерв',
+        'Резерв',
+        'Резерв',
+                 )
+
+    args = {}
+    is_abonent_level = re.compile(r'abonent')
+    is_object_level = re.compile(r'level')
+    is_object_level_1 = re.compile(r'level1')
+    is_object_level_2 = re.compile(r'level2')
+    
+    meters_name         = request.GET['obj_title']
+    electric_data_end   = request.GET['electric_data_end']            
+    obj_key             = request.GET['obj_key']
+    obj_parent_title         = request.GET['obj_parent_title']
+    obj_title         = request.GET['obj_title']
+
+    data_table = []
+    result_data_table = []
+    if (bool(is_abonent_level.search(obj_key))):
+        data_table = common_sql.get_data_table_by_date_daily_pulsar_error_code(obj_parent_title, obj_title, electric_data_end, True)
+    elif (bool(is_object_level_2.search(obj_key))):
+        data_table = common_sql.get_data_table_by_date_daily_pulsar_error_code(obj_parent_title, obj_title, electric_data_end, False)
+        # расшифровка значения ошибок        
+        for line in data_table:
+            meter_errors = []
+            line = list(line)
+            if line[2] != None:
+                line[2] = bin(int(line[2]))[2:].zfill(32)
+                #print(len(line[2]), len(error_tuple))
+                for i, j in enumerate(line[2]):
+                    if j == '1':
+                        if error_tuple[i] != 'Резерв':
+                            meter_errors.append(error_tuple[i])
+            line.append(meter_errors)
+            result_data_table.append(line)
+    
+    data_table = result_data_table
+# Заполняем отчет значениями
+    for row in range(3, len(data_table)+3):
+        try:
+            ws.cell('A%s'%(row)).value = '%s' % (data_table[row-3][0])  # абонент
+            ws.cell('A%s'%(row)).style = "ali_white"
+        except:
+            ws.cell('A%s'%(row)).style = "ali_white"
+            next
+        
+        try:
+            ws.cell('B%s'%(row)).value = '%s' % (data_table[row-3][1])  # 
+            ws.cell('B%s'%(row)).style = "ali_white"
+        except:
+            ws.cell('B%s'%(row)).style = "ali_white"
+            next
+            
+        try:
+            value = data_table[row-3][3]
+            #print(value)
+            if len(value) > 0:
+                sum_val="="
+                r = 1
+                for v in value:
+                    v = v.replace("\"","")
+                    if r > 1:
+                        sum_val+="&"
+                    sum_val += '\"%s;\"&%s'%(v,"CHAR(10)")
+                    r+=1
+                sum_val = sum_val[:len(sum_val)-9]
+                ws.row_dimensions[row].height = r*10
+                ws.cell('C%s'%(row)).value = sum_val      
+                ws.cell('C%s'%(row)).style = "ali_white"
+            else:
+                ws.cell('C%s'%(row)).style = "ali_white"
+        except:
+            ws.cell('C%s'%(row)).style = "ali_white"
+            next
+        
+        try:
+            ws.cell('d%s'%(row)).value = '%s' % (data_table[row-3][2])  #         
+            ws.cell('d%s'%(row)).style = "ali_white"
+        except:
+            ws.cell('d%s'%(row)).style = "ali_white"
+            next
+            
+       
+
+    ws.row_dimensions[2].height = 30
+    ws.column_dimensions['A'].width = 17 
+    ws.column_dimensions['d'].width = 12 
+    ws.column_dimensions['C'].width = 80
+    ws.column_dimensions['d'].width = 50
+
+
+        
+    #wb.save(response)
+    response.seek(0)
+    response = HttpResponse(save_virtual_workbook(wb),content_type="application/vnd.ms-excel")
+    #response['Content-Disposition'] = "attachment; filename=profil.xlsx"
+    
+    output_name = 'report_pulsar_heat_error_'+translate(obj_parent_title)+'_'+translate(obj_title)+'_'+str(electric_data_end)
+    file_ext = 'xlsx'    
+    response['Content-Disposition'] = 'attachment;filename="%s.%s"' % (output_name.replace('"', '\"'), file_ext)   
+    return response
