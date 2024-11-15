@@ -6447,6 +6447,7 @@ WHERE
   abonents.name='%s' and
   daily_values.date = '%s' and
   (types_meters.name like '%s' or types_meters.name like '%s' or types_meters.name like 'Декаст%%ВС')
+   AND   taken_params.name not like '%%battery%%'
 ) as z0
 on z0.factory_number_manual=water_pulsar_abons.factory_number_manual
 where water_pulsar_abons.obj_name='%s' 
@@ -6485,6 +6486,7 @@ WHERE
   abonents.name='%s' and
   daily_values.date = '%s' and
   (types_meters.name like '%s' or types_meters.name like '%s' or types_meters.name like 'Декаст%%ВС')
+   AND   taken_params.name not like '%%battery%%'
 ) as z1
 on z1.factory_number_manual=water_pulsar_abons.factory_number_manual
 where water_pulsar_abons.obj_name='%s' 
@@ -6544,8 +6546,8 @@ WHERE
   params.guid_names_params = names_params.guid AND
   names_params.guid_resources = resources.guid AND
   daily_values.date = '%s' AND 
-  (resources.name like '%s' OR 
-  resources.name like '%s'))as z1
+  (resources.name like '%s' OR   resources.name like '%s')
+   AND   taken_params.name not like '%%battery%%')as z1
   on z1.factory_number_manual=water_pulsar_abons.factory_number_manual
   where water_pulsar_abons.obj_name='%s'
   order by ab_name) as z_end,
@@ -6584,8 +6586,8 @@ WHERE
   params.guid_names_params = names_params.guid AND
   names_params.guid_resources = resources.guid AND
   daily_values.date = '%s' AND 
-  (resources.name like '%s' OR 
-  resources.name like '%s'))as z1
+  (resources.name like '%s' OR   resources.name like '%s')
+   AND   taken_params.name not like '%%battery%%')as z1
   on z1.factory_number_manual=water_pulsar_abons.factory_number_manual
   where water_pulsar_abons.obj_name='%s'
   order by ab_name) as z_start
@@ -6802,6 +6804,7 @@ WHERE
   abonents.name='%s' and
   daily_values.date = '%s' and
   (types_meters.name like '%s' or types_meters.name like '%s' or types_meters.name like 'Декаст%%ВС')
+   AND   taken_params.name not like '%%battery%%'
 ) as z1
 on z1.factory_number_manual=water_pulsar_abons.factory_number_manual
 where 
@@ -6860,6 +6863,7 @@ WHERE
   objects.name = '%s' AND 
   daily_values.date = '%s' and
   (types_meters.name like '%s' or types_meters.name like '%s' or types_meters.name like 'Декаст%%ВС')
+   AND   taken_params.name not like '%%battery%%'
 ORDER BY
   abonents.name ASC) as z1
 on water_pulsar_abons.factory_number_manual=z1.factory_number_manual
@@ -7172,6 +7176,7 @@ WHERE
   abonents.name='%s' and
   daily_values.date = '%s' and
   (types_meters.name='%s' or types_meters.name='%s')
+   AND   taken_params.name not like '%%battery%%'
 ) as z0
 on z0.factory_number_manual=water_pulsar_abons.factory_number_manual
 where water_pulsar_abons.ab_name='%s' and
@@ -7240,6 +7245,7 @@ WHERE
 
   daily_values.date = '%s' and
   (types_meters.name='%s' or types_meters.name='%s')
+   AND   taken_params.name not like '%%battery%%'
 ) as z0
 on z0.factory_number_manual=water_pulsar_abons.factory_number_manual
 where 
