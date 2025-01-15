@@ -3257,6 +3257,7 @@ def report_electric_potreblenie_2_zones(request):
 def report_electric_potreblenie_3_zones_v2(request):
     SHOW_LIC_NUM = getattr(settings, 'SHOW_LIC_NUM', 'False')
     ROUND_SIZE = getattr(settings, 'ROUND_SIZE', 3)
+
     response = io.StringIO()
     wb = Workbook()
     wb.add_named_style(ali_grey)
@@ -8181,6 +8182,8 @@ def report_pulsar_water_period(request):
     return response
 
 def report_pulsar_water_daily(request):
+    COMMENT_TO_EXCEL = getattr(settings, 'COMMENT_TO_EXCEL', 'False')
+
     response = io.StringIO()
     wb = Workbook()
     wb.add_named_style(ali_grey)
@@ -8210,6 +8213,12 @@ def report_pulsar_water_daily(request):
     ws['E5'] = 'Показания на '  + str(request.session["electric_data_end"])+', м3'
     ws['E5'].style = "ali_grey"
     
+    if COMMENT_TO_EXCEL:
+        ws.merge_cells('f4:f5')
+        ws['f4'] = 'Комментарий к абоненту'
+        ws['f4'].style = "ali_grey"
+        ws['f5'].style = "ali_grey"
+        ws.column_dimensions['f'].width = 30
 
     
 #Запрашиваем данные для отчета
@@ -8268,6 +8277,18 @@ def report_pulsar_water_daily(request):
         except:
             ws.cell('E%s'%(row)).style = "ali_white"
             next
+        
+        if COMMENT_TO_EXCEL:
+            try:
+                val = '%s' % (data_table[row-6][7])
+                if val == 'Н/Д':
+                    ws.cell('f%s'%(row)).value = ""   # коммент
+                else:
+                    ws.cell('f%s'%(row)).value = val   # коммент
+                ws.cell('f%s'%(row)).style = "ali_white"
+            except:
+                ws.cell('f%s'%(row)).style = "ali_white"
+                next
 
 
     ws.row_dimensions[5].height = 63
@@ -8625,6 +8646,7 @@ def report_pulsar_water_daily_row(request):
     return response
     
 def report_pulsar_heat_daily(request):
+    COMMENT_TO_EXCEL = getattr(settings, 'COMMENT_TO_EXCEL', 'False')
     response = io.StringIO()
     wb = Workbook()
     wb.add_named_style(ali_grey)
@@ -8638,7 +8660,6 @@ def report_pulsar_heat_daily(request):
     ws.merge_cells('A2:E2')
     ws['A2'] = 'Пульсар. Показания по теплу на ' + str(request.session["electric_data_end"])
     
-
     ws['A5'] = 'Абонент'
     ws['A5'].style = "ali_grey"
     
@@ -8656,6 +8677,12 @@ def report_pulsar_heat_daily(request):
     
     ws['F5'] = 'Температура выхода, С'
     ws['F5'].style = "ali_grey"
+
+    if COMMENT_TO_EXCEL:
+        ws['g5'] = 'Комментарий к абоненту'
+        ws['g5'].style = "ali_grey"
+        ws['g5'].style = "ali_grey"
+        ws.column_dimensions['g'].width = 30
     
 #Запрашиваем данные для отчета
     is_abonent_level = re.compile(r'abonent')
@@ -8716,6 +8743,17 @@ def report_pulsar_heat_daily(request):
         except:
             ws.cell('F%s'%(row)).style = "ali_white"
             next
+        if COMMENT_TO_EXCEL:
+            try:
+                val = '%s' % (data_table[row-6][7])
+                if val == 'Н/Д':
+                    ws.cell('g%s'%(row)).value = ""   # коммент
+                else:
+                    ws.cell('g%s'%(row)).value = val   # коммент
+                ws.cell('g%s'%(row)).style = "ali_white"
+            except:
+                ws.cell('g%s'%(row)).style = "ali_white"
+                next
 
     ws.row_dimensions[5].height = 63
     ws.column_dimensions['A'].width = 20 
@@ -16004,6 +16042,7 @@ def report_heat_tem104_daily(request):
 def report_electric_3_zones_v2(request):
     SHOW_LIC_NUM = getattr(settings, 'SHOW_LIC_NUM', 'False')
     ROUND_SIZE = getattr(settings, 'ROUND_SIZE', 3)
+    COMMENT_TO_EXCEL = getattr(settings, 'COMMENT_TO_EXCEL', 'False')
     response = io.StringIO()
     wb = Workbook()
     wb.add_named_style(ali_grey)
@@ -16106,8 +16145,18 @@ def report_electric_3_zones_v2(request):
         ws['O4'] = 'Лицевой номер абонента'
         ws['O4'].style = "ali_grey"
         ws['O5'].style = "ali_grey"
+        ws.column_dimensions['O'].width = 17
     
-    ws.column_dimensions['O'].width = 17
+    if COMMENT_TO_EXCEL:
+        ws.merge_cells('P4:P5')
+        ws['P4'] = 'Комментарий к абоненту'
+        ws['P4'].style = "ali_grey"
+        ws['P5'].style = "ali_grey"
+        if SHOW_LIC_NUM == False:
+            ws.column_dimensions['O'].width = 1
+        ws.column_dimensions['P'].width = 30
+    
+
     ws.row_dimensions[5].height = 43
     ws.column_dimensions['A'].width = 20
     ws.column_dimensions['B'].width = 30 
@@ -16276,6 +16325,14 @@ def report_electric_3_zones_v2(request):
                 ws.cell('O%s'%(row)).style = "ali_white"
             except:
                 ws.cell('O%s'%(row)).style = "ali_white"
+                next
+            
+        if COMMENT_TO_EXCEL:
+            try:                
+                ws.cell('P%s'%(row)).value = '%s' % (data_table[row-6][11])   # коммент
+                ws.cell('P%s'%(row)).style = "ali_white"
+            except:
+                ws.cell('P%s'%(row)).style = "ali_white"
                 next
 
 # Сохраняем в ecxel  
