@@ -208,6 +208,8 @@ urlpatterns = [
     url(r'^137/$', views.pulsar_water_period_2_desc, name = 'period_water_pulsar_graphic_desc'), # Показание за период с водосчётчиков Пульсар, копия 73, но изменена сортировка ХВ-ГВ
     url(r'^138/$', views.pulsar_water_daily_desc, name = 'water_pulsar'), # Показание на дату с водосчётчиков Пульсар, копия 58, но изменена сортировка ХВ-ГВ
     
+    url(r'^139/$', views.pulsar_water_consumption_mosvodokanal, name = 'pulsar_water_consumption_mosvodokanal'), # Отчёт поп отреблению для мосводокаанала на Пресня-Сити
+
     url(r'^140/$', views.pulsar_water_battery, name = 'water_pulsar_battery'), # Вода, батарейка
 
     url(r'^141/$', views.econom_water_period, name = 'period_water_econom'), # Показание за период с водосчётчиков Эконом

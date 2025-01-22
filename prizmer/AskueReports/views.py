@@ -21125,3 +21125,246 @@ def report_pulsar_heat_error_code(request):
     file_ext = 'xlsx'    
     response['Content-Disposition'] = 'attachment;filename="%s.%s"' % (output_name.replace('"', '\"'), file_ext)   
     return response
+
+def pulsar_water_consumption_mosvodokanal(request):
+    #SHOW_LIC_NUM = getattr(settings, 'SHOW_LIC_NUM', 'False')
+    ROUND_SIZE = getattr(settings, 'ROUND_SIZE', 3)
+    response = io.StringIO()
+    wb = Workbook()
+    wb.add_named_style(ali_grey)
+    wb.add_named_style(ali_white)
+    ws = wb.active    
+    ws.title = "Показания ПУ"
+        
+#Шапка
+
+    ws['A1'] = 'Договор'
+    ws['A1'].style = "ali_grey"
+    
+    ws['B1'] = 'Абонент'
+    ws['B1'].style = "ali_grey"
+    
+    ws['C1'] = 'Тип воды'
+    ws['C1'].style = "ali_grey"
+    
+    ws['D1'] = 'Узел учёта'
+    ws['D1'].style = "ali_grey"
+    
+    ws['E1'] = '№ счётчика'
+    ws['E1'].style = "ali_grey"
+    
+    ws['F1'] = 'Адрес'
+    ws['F1'].style = "ali_grey"
+    
+    ws['G1'] = 'Дата поверки'
+    ws['G1'].style = "ali_grey"
+    
+    ws['H1'] = 'Дата следующей поверки'
+    ws['H1'].style = "ali_grey"
+
+    ws['I1'] = 'Предыдущее показание'
+    ws['I1'].style = "ali_grey"
+
+    ws['J1'] = 'Текущее показание'
+    ws['J1'].style = "ali_grey"
+
+    ws['K1'] = 'Примечания'
+    ws['K1'].style = "ali_grey"
+#Запрашиваем данные для отчета
+
+             
+    obj_parent_title   = request.session["obj_parent_title"]
+    obj_title   = request.session["obj_title"]
+    electric_data_end   = request.session["electric_data_end"]
+    electric_data_start   = request.session["electric_data_start"]
+
+    sortDir = 'ASC'
+    data_table = common_sql.get_data_table_water_consumption_mosvodokanal(obj_parent_title, obj_title, electric_data_start, electric_data_end, sortDir)
+              
+    if len(data_table)>0: 
+        data_table=common_sql.ChangeNull(data_table, None)
+
+    
+# Заполняем отчет значениями
+    for row in range(2, len(data_table)+2):
+        try:
+            ws.cell('A%s'%(row)).value = '%s' % (data_table[row-2][0])  
+            ws.cell('A%s'%(row)).style = "ali_white"
+        except:
+            ws.cell('A%s'%(row)).style = "ali_white"
+            next
+        
+        try:
+            ws.cell('B%s'%(row)).value = '%s' % (data_table[row-2][1])  
+            ws.cell('B%s'%(row)).style = "ali_white"
+        except:
+            ws.cell('B%s'%(row)).style = "ali_white"
+            next
+            
+        try:
+            ws.cell('C%s'%(row)).value = '%s' % (data_table[row-2][2])  
+            ws.cell('C%s'%(row)).style = "ali_white"
+        except:
+            ws.cell('C%s'%(row)).style = "ali_white"
+            next
+
+        try:
+            ws.cell('D%s'%(row)).value = '%s' % (data_table[row-2][3]) 
+            ws.cell('D%s'%(row)).style = "ali_white"
+        except:
+            ws.cell('D%s'%(row)).style = "ali_white"
+            next
+
+        try:
+            ws.cell('E%s'%(row)).value = '%s' % (data_table[row-2][4]) 
+            ws.cell('E%s'%(row)).style = "ali_white"
+        except:
+            ws.cell('E%s'%(row)).style = "ali_white"
+            next
+        
+        try:
+            ws.cell('F%s'%(row)).value = '%s' % (data_table[row-2][5])
+            ws.cell('F%s'%(row)).style = "ali_white"
+        except:
+            ws.cell('F%s'%(row)).style = "ali_white"
+            next
+
+        try:
+            ws.cell('G%s'%(row)).value = '%s' % (data_table[row-2][6])  
+            ws.cell('G%s'%(row)).style = "ali_white"
+        except:
+            ws.cell('G%s'%(row)).style = "ali_white"
+            next
+
+        try:
+            ws.cell('H%s'%(row)).value = '%s' % (data_table[row-2][7]) 
+            ws.cell('H%s'%(row)).style = "ali_white"
+        except:
+            ws.cell('H%s'%(row)).style = "ali_white"
+            next
+
+        try:
+            ws.cell('I%s'%(row)).value = '%s' % (data_table[row-2][8]) 
+            ws.cell('I%s'%(row)).style = "ali_white"
+        except:
+            ws.cell('I%s'%(row)).style = "ali_white"
+            next
+
+        try:
+            ws.cell('J%s'%(row)).value = '%s' % (data_table[row-2][9]) 
+            ws.cell('J%s'%(row)).style = "ali_white"
+        except:
+            ws.cell('J%s'%(row)).style = "ali_white"
+            next
+            
+     
+    ws.row_dimensions[1].height = 50
+    ws.column_dimensions['A'].width = 15 
+    ws.column_dimensions['D'].width = 15 
+    ws.column_dimensions['e'].width = 15 
+    ws.column_dimensions['F'].width = 35 
+    ws.column_dimensions['G'].width = 15
+    ws.column_dimensions['H'].width = 15
+
+    ws2 = wb.create_sheet(title="Справочник примечаний")
+
+    ws2['A1'] = 'Код'
+    ws2['A1'].style = "ali_grey"
+    
+    ws2['B1'] = 'Описание'
+    ws2['B1'].style = "ali_grey"
+
+    ws2['A2'] = '4'
+    ws2['A2'].style = "ali_white"    
+    ws2['B2'] = 'Авария'
+    ws2['B2'].style = "ali_white"
+
+    ws2['A3'] = '2'
+    ws2['A3'].style = "ali_white"    
+    ws2['B3'] = 'Ввод ликвидирован'
+    ws2['B3'].style = "ali_white"
+
+    ws2['A4'] = '1'
+    ws2['A4'].style = "ali_white"    
+    ws2['B4'] = 'Ввод передан'
+    ws2['B4'].style = "ali_white"
+
+    ws2['A5'] = '5'
+    ws2['A5'].style = "ali_white"    
+    ws2['B5'] = 'Выехали арендаторы'
+    ws2['B5'].style = "ali_white"
+
+    ws2['A6'] = '6'
+    ws2['A6'].style = "ali_white"    
+    ws2['B6'] = 'Дом снесен'
+    ws2['B6'].style = "ali_white"
+
+    ws2['A7'] = '7'
+    ws2['A7'].style = "ali_white"    
+    ws2['B7'] = 'Каникулы'
+    ws2['B7'].style = "ali_white"
+
+    ws2['A8'] = '16'
+    ws2['A8'].style = "ali_white"    
+    ws2['B8'] = 'Летнее водопользование, не проживаем'
+    ws2['B8'].style = "ali_white"
+
+    ws2['A9'] = '0'
+    ws2['A9'].style = "ali_white"    
+    ws2['B9'] = 'Не указано'
+    ws2['B9'].style = "ali_white"
+
+    ws2['A10'] = '8'
+    ws2['A10'].style = "ali_white"    
+    ws2['B10'] = 'Отключена горячая вода'
+    ws2['B10'].style = "ali_white"
+
+    ws2['A11'] = '3'
+    ws2['A11'].style = "ali_white"    
+    ws2['B11'] = 'Патрубок'
+    ws2['B11'].style = "ali_white"
+
+    ws2['A12'] = '9'
+    ws2['A12'].style = "ali_white"    
+    ws2['B12'] = 'Переключен на другой в/в'
+    ws2['B12'].style = "ali_white"
+
+    ws2['A13'] = '10'
+    ws2['A13'].style = "ali_white"    
+    ws2['B13'] = 'Подключен новый абонент'
+    ws2['B13'].style = "ali_white"
+
+    ws2['A14'] = '14'
+    ws2['A14'].style = "ali_white"    
+    ws2['B14'] = 'Прокрутка счетчика'
+    ws2['B14'].style = "ali_white"
+
+    ws2['A15'] = '11'
+    ws2['A15'].style = "ali_white"    
+    ws2['B15'] = 'Профилактический ремонт'
+    ws2['B15'].style = "ali_white"
+
+    ws2['A16'] = '15'
+    ws2['A16'].style = "ali_white"    
+    ws2['B16'] = 'Смена водосчетчика'
+    ws2['B16'].style = "ali_white"
+
+    ws2['A17'] = '12'
+    ws2['A17'].style = "ali_white"    
+    ws2['B17'] = 'Сокращение производства'
+    ws2['B17'].style = "ali_white"
+
+    ws2['A18'] = '13'
+    ws2['A18'].style = "ali_white"    
+    ws2['B18'] = 'Увеличение производства'
+    ws2['B18'].style = "ali_white"
+
+    ws2.column_dimensions['b'].width = 70 
+
+    response.seek(0)
+    response = HttpResponse(save_virtual_workbook(wb),content_type="application/vnd.ms-excel")
+    
+    output_name = 'report_mosvodokanal_'+str(electric_data_start)+'-'+str(electric_data_end)
+    file_ext = 'xlsx'    
+    response['Content-Disposition'] = 'attachment;filename="%s.%s"' % (output_name.replace('"', '\"'), file_ext)   
+    return response
