@@ -5082,7 +5082,7 @@ WHERE
     """%(my_param[0],electric_data_end, meters_name,meters_name)
     # if dc == u'current':
     #   sQuery=sQuery.replace('daily', dc)
-    print(sQuery)
+    #print(sQuery)
     return sQuery
     
 def MakeSqlQuery_water_by_date_for_abon(meters_name, parent_name, electric_data_end, my_param, dc):
