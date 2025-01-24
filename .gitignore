@@ -1,4 +1,5 @@
 /.pyc
+*.py[cod]
 *.xlsx
 prizmer/prizmer/settings.py
 /**/*.txt
