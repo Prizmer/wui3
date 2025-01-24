@@ -111,6 +111,10 @@ DATABASES = {
         #'NAME': 'jd1-2-3',
         #'NAME': '4solnca',
         #'NAME': 'woods',
+<<<<<<< HEAD
+=======
+        'NAME': 'freedom',
+>>>>>>> mzta_loading
         #'NAME': 'ostrov3',
         #'NAME': 'jd9',
         #'NAME': 'sovet',

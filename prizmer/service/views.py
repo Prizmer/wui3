@@ -3495,21 +3495,30 @@ def LoadWaterPulsar(sPath, sSheet):
     met=0
     con=0
     #print 'str(len(dtAll))', str(len(dtAll))
+    obj_l2=str(dtAll[2][1]).strip() #квартира
     for i in range(2,len(dtAll)):
         obj_l0='Вода' # всегда будет Вода как объект-родитель
         obj_l1=str(dtAll[i][0]).strip() #корпус
-        obj_l2=str(dtAll[i][1]).strip() #квартира
-        if not dtAll[i][1] or dtAll[i][1]==None:
-            j=i
-            while not obj_l2 or obj_l2==None:
-                j-=1
-                obj_l2=dtAll[j][1]
+        #obj_l2=str(dtAll[i][1]).strip() #квартира
+        #print(str(dtAll[i][1]), dtAll[i][1] != None)
+        if (dtAll[i][1] != None):
+            #print('change ', obj_l2, ' to ', str(dtAll[i][1]).strip())
+            obj_l2=str(dtAll[i][1]).strip()
+        # if not dtAll[i][1] or dtAll[i][1]==None:
+        #     j=i
+        #     while not obj_l2 or obj_l2==None:
+        #         j-=1
+        #         obj_l2=dtAll[j][1]
         abon=str(dtAll[i][2]).strip() #абонент он же счётчик по воде
         numPulsar=str(dtAll[i][5]).strip() #номер пульсара
         typePulsar=str(dtAll[i][6]).strip() #тип пульсара
-        
+        #print(obj_l1, obj_l2)
+        num_meter_mzta = str(dtAll[i][3]).strip() #при загрузке пульсара поле не импользуется, при загруке мзта - это уникальный заводской номер, а поле str(dtAll[i][3]).strip() - сетевой
+        #print(num_meter_mzta)
         isNewAbon=SimpleCheckIfExist('objects','name', obj_l2,'abonents', 'name', abon)
         isNewPulsar=SimpleCheckIfExist('meters','address', numPulsar,'','','')
+        if str(typePulsar) == 'МЗТА':
+            isNewPulsar=SimpleCheckIfExist('meters','factory_number_manual', num_meter_mzta,'','','')
         #print(u'пульсар существует ',str(isNewPulsar),typePulsar,numPulsar)
         if not (isNewAbon):
             return "Нет структуры объектов и счётчиков для "+ obj_l2 + " " +abon
@@ -3555,7 +3564,7 @@ def LoadWaterPulsar(sPath, sSheet):
 
             elif str(typePulsar) == 'МЗТА':
                    signals.post_save.disconnect(add_link_taken_params, sender=TakenParams)  
-                   add_meter = Meters(name = str(str(typePulsar) + ' ' + str(numPulsar)), address = str(numPulsar),  factory_number_manual = str(numPulsar), guid_types_meters = TypesMeters.objects.get(guid = "295f91bd-3e05-435e-9eb8-bda7eddaf6a4") )
+                   add_meter = Meters(name = str(str(typePulsar) + ' ' + str(num_meter_mzta)), address = str(numPulsar),  factory_number_manual = str(num_meter_mzta), guid_types_meters = TypesMeters.objects.get(guid = "295f91bd-3e05-435e-9eb8-bda7eddaf6a4") )
                    add_meter.save()
                    print ('OK Device МЗТА added in DB')
                    #Если экземпляр был создан, то добавляем считываемые параметры
@@ -3568,16 +3577,20 @@ def LoadWaterPulsar(sPath, sSheet):
         #Пульсар 16M 029571 Пульсар 16M Канал 16 Суточный -- adress: 16  channel: 0
         chanel=str(dtAll[i][4])
         pulsarName=str(dtAll[i][6])
-        abonent_name=str(dtAll[i][2])
+        abonent_name=str(dtAll[i][2])        
         taken_param = pulsarName + ' ' + str(dtAll[i][5]) + ' '+ pulsarName + ' ' + 'Канал ' + chanel+ ' Суточный -- adress: ' +chanel+'  channel: 0'
+        if str(typePulsar) == 'МЗТА':
+            #МЗТА 15-4001 МЗТА Канал 20 Суточный -- adress: 20 channel: 0
+            taken_param = str(str(typePulsar) + ' ' + str(num_meter_mzta)) + ' ' + str(typePulsar)  + ' ' + 'Канал ' + chanel+ ' Суточный -- adress: ' +chanel+'  channel: 0'
+            #taken_param = pulsarName + ' ' + str(dtAll[i][5]) + ' '+ str(str(typePulsar) + ' ' + str(num_meter_mzta)) + ' ' + 'Канал ' + chanel+ ' Суточный -- adress: ' +chanel+'  channel: 0'
         #print "chanel ", chanel
-        print(taken_param)
+        #print(taken_param)
         #Sravnenie(taken_param)
         dtTakenParam=GetSimpleTable('taken_params','name',taken_param)
         #writeToLog(bool(dtTakenParam))
-        print(dtTakenParam)
+        #print(dtTakenParam)
         if dtTakenParam:                
-            print(u'taken param найден')
+            #print(u'taken param найден')
             guid_taken_param=dtTakenParam[0][2]
             dtLink=GetSimpleTable('link_abonents_taken_params','guid_taken_params',guid_taken_param)
             #print dtLink
@@ -3589,7 +3602,7 @@ def LoadWaterPulsar(sPath, sSheet):
                 #dtAbon= GetSimpleTable('abonents','name', abonent_name)
                 t = Abonents.objects.filter(name = abonent_name)
                 guidAbon = t[0].guid     #dtAbon[0][0]
-                print(abonent_name, 'guidAbon', guidAbon)
+                #print(abonent_name, 'guidAbon', guidAbon)
                 #"миномес ГВС, №68208 Канал 5 Суточный"
                 #print abonent_name, guidAbon, guid_taken_param
                 common_sql.InsertInLinkAbonentsTakenParams(name = abonent_name+' Канал '+chanel+' Суточный',coefficient=1, coefficient_2 = 1,coefficient_3 = 1, guid_abonents = guidAbon, guid_taken_params = guid_taken_param)
