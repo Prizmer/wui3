@@ -9,7 +9,7 @@ var is_electric_period = 0;
 // Variables End     
      
 $(document).ready(function(){
-
+heat_dm_block.style.display = 'none';  
     
 // Loader 
 hide_loader();
@@ -42,6 +42,14 @@ $("#choice_report").selectmenu({
                      obj_key = "Не выбран";
                      obj_parent_title = "Не выбран";}	
 	
+	if ($(this).val()==56 || $(this).val()==59)
+    {
+		heat_dm_block.style.display = 'block';  
+	}
+	else
+	{
+		heat_dm_block.style.display = 'none';  
+	}
     if ($(this).val()%2==0)
     { //для чётного отображаем 1 календаря
         $("#datepickerEnd").show();

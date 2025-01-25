@@ -5945,7 +5945,7 @@ def get_30_min_value_by_meters_number_param_names_and_datetime(meters_number, pa
     simpleq = simpleq.fetchall()
     return simpleq
 
-def makeSqlQuery_heat_daily_pulsar_teplo_abon(obj_parent_title,obj_title, electric_data, params):
+def makeSqlQuery_heat_daily_pulsar_teplo_abon(obj_parent_title,obj_title, electric_data, params, dm):
     sQuery="""
            Select z2.daily_date, heat_abons.ab_name, heat_abons.factory_number_manual, 
 round(z2.energy::numeric,7),
@@ -6010,10 +6010,11 @@ left join
 on z2.number_manual=heat_abons.factory_number_manual
 where heat_abons.obj_name='%s' and heat_abons.ab_name  = '%s' and heat_abons.type_meter  like '%%%s%%'
 order by heat_abons.ab_name""" % (params[0],params[1],params[2],params[3], obj_parent_title, obj_title,params[4], electric_data,obj_parent_title, obj_title, params[4] )
+    sQuery.replace('daily', dm)
     #print(sQuery)
     return sQuery
 
-def makeSqlQuery_heat_daily_pulsar_teplo_all(obj_title, electric_data, params):
+def makeSqlQuery_heat_daily_pulsar_teplo_all(obj_title, electric_data, params, dm):
     sQuery="""
            Select z2.daily_date, heat_abons.ab_name, heat_abons.factory_number_manual, 
 round(z2.energy::numeric,7),
@@ -6077,19 +6078,20 @@ left join
 on z2.number_manual=heat_abons.factory_number_manual
 where heat_abons.obj_name='%s' and heat_abons.type_meter  like '%%%s%%'
 order by heat_abons.ab_name""" % (params[0],params[1],params[2],params[3], obj_title,params[4], electric_data, obj_title, params[4])
+    sQuery.replace('daily', dm)
     #print(sQuery)    
     return sQuery
 
 
 
-def get_data_table_by_date_daily_pulsar_teplo(obj_parent_title, obj_title, electric_data, isAbon):
+def get_data_table_by_date_daily_pulsar_teplo(obj_parent_title, obj_title, electric_data, isAbon, dm):
     data_table = []
     params=['Энергия','Объем','Ti','To', 'Теплосчётчик']
     cursor = connection.cursor()
     if isAbon:
-        cursor.execute(makeSqlQuery_heat_daily_pulsar_teplo_abon(obj_parent_title,obj_title, electric_data, params))
+        cursor.execute(makeSqlQuery_heat_daily_pulsar_teplo_abon(obj_parent_title,obj_title, electric_data, params, dm))
     else:
-        cursor.execute(makeSqlQuery_heat_daily_pulsar_teplo_all(obj_title, electric_data, params))
+        cursor.execute(makeSqlQuery_heat_daily_pulsar_teplo_all(obj_title, electric_data, params, dm))
     data_table = cursor.fetchall()   
     
     if len(data_table)>0: data_table=ChangeNull_and_LeaveEmptyCol(data_table, electric_data, 7) 
@@ -6098,11 +6100,12 @@ def get_data_table_by_date_daily_pulsar_teplo(obj_parent_title, obj_title, elect
 def get_data_table_by_date_daily_pulsar_frost(obj_parent_title, obj_title, electric_data, isAbon):
     data_table = []
     params=['Энергия','Объем','Ti','To', 'Холодосчётчик']
+    dm = 'daily'
     cursor = connection.cursor()
     if isAbon:
-        cursor.execute(makeSqlQuery_heat_daily_pulsar_teplo_abon(obj_parent_title,obj_title, electric_data, params))
+        cursor.execute(makeSqlQuery_heat_daily_pulsar_teplo_abon(obj_parent_title,obj_title, electric_data, params,dm))
     else:
-        cursor.execute(makeSqlQuery_heat_daily_pulsar_teplo_all(obj_title, electric_data, params))
+        cursor.execute(makeSqlQuery_heat_daily_pulsar_teplo_all(obj_title, electric_data, params, dm))
     data_table = cursor.fetchall()   
     
     if len(data_table)>0: data_table=ChangeNull_and_LeaveEmptyCol(data_table, electric_data, 7) 

@@ -7359,12 +7359,14 @@ def pulsar_heat_daily(request):
             request.session["electric_data_end"]   = electric_data_end   = request.GET['electric_data_end']
             request.session["is_electric_period"]  = is_electric_period  = request.GET['is_electric_period']
 
-
+            dm = 'daily'
+            if is_electric_monthly:
+                dm = 'monthly'
 #*********************************************************************************************************************************************************************
             if (bool(is_abonent_level.search(obj_key))):
-                data_table = common_sql.get_data_table_by_date_daily_pulsar_teplo(obj_parent_title, obj_title, electric_data_end, True)
+                data_table = common_sql.get_data_table_by_date_daily_pulsar_teplo(obj_parent_title, obj_title, electric_data_end, True, dm)
             elif (bool(is_object_level_2.search(obj_key))):
-                data_table = common_sql.get_data_table_by_date_daily_pulsar_teplo(obj_parent_title, obj_title, electric_data_end, False)
+                data_table = common_sql.get_data_table_by_date_daily_pulsar_teplo(obj_parent_title, obj_title, electric_data_end, False, dm)
                 
     args['data_table'] = data_table
     args['obj_title'] = obj_title

@@ -109,12 +109,9 @@ DATABASES = {
         # 'NAME': 'citybay',
         #'NAME': 'komunarka_k10',
         #'NAME': 'jd1-2-3',
-        #'NAME': '4solnca',
+        'NAME': '4solnca',
         #'NAME': 'woods',
-<<<<<<< HEAD
-=======
-        'NAME': 'freedom',
->>>>>>> mzta_loading
+        #'NAME': 'freedom',
         #'NAME': 'ostrov3',
         #'NAME': 'jd9',
         #'NAME': 'sovet',
@@ -127,7 +124,7 @@ DATABASES = {
         #'NAME': 'ogni1',
         #'NAME': 'sobytie',
         #'NAME': 'pogodinka2',
-        'NAME': 'presniya',
+        #'NAME': 'presniya',
         #'NAME': 'obninsk1',
         # 'NAME': 'template',
         # 'NAME': 'mzta',
