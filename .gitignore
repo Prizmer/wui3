@@ -1,7 +1,8 @@
 /.pyc
 *.pyc
 *.py[cod]
-*.xlsx
-prizmer/prizmer/settings.py
-/**/*.txt
+cfg/*.xlsx
+#prizmer/prizmer/settings.py
+/service_log.log
+/api_request.txt
 /**/*.pyc

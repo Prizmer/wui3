@@ -8694,12 +8694,15 @@ def report_pulsar_heat_daily(request):
     obj_key             =  request.session['obj_key']
     
     data_table = []
-                     
+    is_electric_monthly             =  request.session['is_electric_monthly']
+    dm = 'daily'
+    if is_electric_monthly == "1":
+        dm = 'monthly'
+#*********************************************************************************************************************************************************************
     if (bool(is_abonent_level.search(obj_key))):
-        data_table = common_sql.get_data_table_by_date_daily_pulsar_teplo(obj_parent_title, obj_title, electric_data_end, True)
+        data_table = common_sql.get_data_table_by_date_daily_pulsar_teplo(obj_parent_title, obj_title, electric_data_end, True, dm)
     elif (bool(is_object_level_2.search(obj_key))):
-        data_table = common_sql.get_data_table_by_date_daily_pulsar_teplo(obj_parent_title, obj_title, electric_data_end, False)
-
+        data_table = common_sql.get_data_table_by_date_daily_pulsar_teplo(obj_parent_title, obj_title, electric_data_end, False, dm)
         
 # Заполняем отчет значениями
     for row in range(6, len(data_table)+6):
@@ -8827,11 +8830,14 @@ def report_pulsar_heat_period(request):
     obj_title         = request.session['obj_title']
           
     obj_key             = request.session['obj_key']
-             
+    is_electric_monthly             =  request.session['is_electric_monthly']
+    dm = 'daily'
+    if is_electric_monthly == "1":
+        dm = 'monthly'
     if (bool(is_abonent_level.search(obj_key))):
-        data_table = common_sql.get_data_table_pulsar_teplo_for_period(obj_parent_title, obj_title,electric_data_end, electric_data_start, True)
+        data_table = common_sql.get_data_table_pulsar_teplo_for_period(obj_parent_title, obj_title,electric_data_end, electric_data_start, True,dm)
     elif (bool(is_object_level_2.search(obj_key))):
-        data_table = common_sql.get_data_table_pulsar_teplo_for_period(obj_parent_title, obj_title, electric_data_end,electric_data_start, False)
+        data_table = common_sql.get_data_table_pulsar_teplo_for_period(obj_parent_title, obj_title, electric_data_end,electric_data_start, False,dm)
                
               
     if len(data_table)>0: 
@@ -8954,10 +8960,15 @@ def report_pulsar_heat_period_2(request):
           
     obj_key             = request.session['obj_key']
     data_table=[]      
+    is_electric_monthly             =  request.session['is_electric_monthly']
+    dm = 'daily'
+    if is_electric_monthly == "1":
+        dm = 'monthly'
+
     if (bool(is_abonent_level.search(obj_key))):
-        data_table = common_sql.get_data_table_pulsar_teplo_for_period(obj_parent_title, obj_title,electric_data_end, electric_data_start, True)
+        data_table = common_sql.get_data_table_pulsar_teplo_for_period(obj_parent_title, obj_title,electric_data_end, electric_data_start, True,dm)
     elif (bool(is_object_level_2.search(obj_key))):
-        data_table = common_sql.get_data_table_pulsar_teplo_for_period(obj_parent_title, obj_title, electric_data_end,electric_data_start, False)
+        data_table = common_sql.get_data_table_pulsar_teplo_for_period(obj_parent_title, obj_title, electric_data_end,electric_data_start, False,dm)
                
               
     if len(data_table)>0: 
@@ -9054,11 +9065,14 @@ def report_pulsar_heat_daily_2(request):
     obj_key             =  request.session['obj_key']
     
     data_table = []
-                     
+    is_electric_monthly             =  request.session['is_electric_monthly']
+    dm = 'daily'
+    if is_electric_monthly == "1":
+        dm = 'monthly'
     if (bool(is_abonent_level.search(obj_key))):
-        data_table = common_sql.get_data_table_by_date_daily_pulsar_teplo(obj_parent_title, obj_title, electric_data_end, True)
+        data_table = common_sql.get_data_table_by_date_daily_pulsar_teplo(obj_parent_title, obj_title, electric_data_end, True,dm)
     elif (bool(is_object_level_2.search(obj_key))):
-        data_table = common_sql.get_data_table_by_date_daily_pulsar_teplo(obj_parent_title, obj_title, electric_data_end, False)
+        data_table = common_sql.get_data_table_by_date_daily_pulsar_teplo(obj_parent_title, obj_title, electric_data_end, False,dm)
 
         
 # Заполняем отчет значениями
@@ -16392,11 +16406,12 @@ def report_stk_heat_daily(request):
     obj_key             =  request.session['obj_key']
     
     data_table = []
-                     
+    dm = 'daily'
+
     if (bool(is_abonent_level.search(obj_key))):
-        data_table = common_sql.get_data_table_by_date_daily_pulsar_teplo(obj_parent_title, obj_title, electric_data_end, True)
+        data_table = common_sql.get_data_table_by_date_daily_pulsar_teplo(obj_parent_title, obj_title, electric_data_end, True, dm)
     elif (bool(is_object_level_2.search(obj_key))):
-        data_table = common_sql.get_data_table_by_date_daily_pulsar_teplo(obj_parent_title, obj_title, electric_data_end, False)
+        data_table = common_sql.get_data_table_by_date_daily_pulsar_teplo(obj_parent_title, obj_title, electric_data_end, False, dm)
 
         
 # Заполняем отчет значениями
@@ -16517,11 +16532,15 @@ def report_stk_heat_period(request):
     obj_title         = request.session['obj_title']
           
     obj_key             = request.session['obj_key']
-             
+    is_electric_monthly             =  request.session['is_electric_monthly']
+    dm = 'daily'
+    if is_electric_monthly == "1":
+        dm = 'monthly'
+        
     if (bool(is_abonent_level.search(obj_key))):
-        data_table = common_sql.get_data_table_pulsar_teplo_for_period(obj_parent_title, obj_title,electric_data_end, electric_data_start, True)
+        data_table = common_sql.get_data_table_pulsar_teplo_for_period(obj_parent_title, obj_title,electric_data_end, electric_data_start, True,dm)
     elif (bool(is_object_level_2.search(obj_key))):
-        data_table = common_sql.get_data_table_pulsar_teplo_for_period(obj_parent_title, obj_title, electric_data_end,electric_data_start, False)
+        data_table = common_sql.get_data_table_pulsar_teplo_for_period(obj_parent_title, obj_title, electric_data_end,electric_data_start, False,dm)
                
               
     if len(data_table)>0: 

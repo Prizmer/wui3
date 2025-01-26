@@ -6010,7 +6010,7 @@ left join
 on z2.number_manual=heat_abons.factory_number_manual
 where heat_abons.obj_name='%s' and heat_abons.ab_name  = '%s' and heat_abons.type_meter  like '%%%s%%'
 order by heat_abons.ab_name""" % (params[0],params[1],params[2],params[3], obj_parent_title, obj_title,params[4], electric_data,obj_parent_title, obj_title, params[4] )
-    sQuery.replace('daily', dm)
+    sQuery = sQuery.replace('daily', dm)
     #print(sQuery)
     return sQuery
 
@@ -6078,7 +6078,7 @@ left join
 on z2.number_manual=heat_abons.factory_number_manual
 where heat_abons.obj_name='%s' and heat_abons.type_meter  like '%%%s%%'
 order by heat_abons.ab_name""" % (params[0],params[1],params[2],params[3], obj_title,params[4], electric_data, obj_title, params[4])
-    sQuery.replace('daily', dm)
+    sQuery = sQuery.replace('daily', dm)
     #print(sQuery)    
     return sQuery
 
@@ -6124,7 +6124,7 @@ def get_data_table_by_date_daily_pulsar_error_code(obj_parent_title, obj_title, 
     
     return data_table
 
-def makeSqlQuery_heat_pulsar_teplo_abon_period(obj_parent_title,obj_title, electric_data_end, electric_data_start, params):
+def makeSqlQuery_heat_pulsar_teplo_abon_period(obj_parent_title,obj_title, electric_data_end, electric_data_start, params, dm):
     sQuery="""
    Select  ab_name,factory_number_manual,
 round((z5.energy_start)::numeric,7) as energy_st,
@@ -6253,9 +6253,12 @@ where z3.factory_number_manual=z4.factory_number_manual
 order by ab_name
     """%(params[0],params[1],params[2],params[3],obj_parent_title, obj_title,params[4], electric_data_start, obj_parent_title, obj_title, params[4],
          params[0],params[1],params[2],params[3], obj_parent_title, obj_title,params[4], electric_data_end, obj_parent_title, obj_title, params[4])
+    sQuery=sQuery.replace('daily',dm)
+
+    #print(sQuery)
     return sQuery
 
-def makeSqlQuery_heat_pulsar_teplo_all_period(obj_title, electric_data_end,electric_data_start, params):
+def makeSqlQuery_heat_pulsar_teplo_all_period(obj_title, electric_data_end,electric_data_start, params, dm):
     sQuery="""
    Select  ab_name,factory_number_manual,
 round((z5.energy_start)::numeric,7) as energy_st,
@@ -6382,17 +6385,20 @@ where z3.factory_number_manual=z4.factory_number_manual
 order by ab_name
     """%(params[0],params[1],params[2],params[3], obj_title,params[4], electric_data_start,obj_title, params[4],
          params[0],params[1],params[2],params[3], obj_title,params[4], electric_data_end, obj_title, params[4])
-    #print sQuery   
+    sQuery=sQuery.replace('daily',dm)
+    #print(sQuery)   
+    #print(dm)
+    
     return sQuery
 
-def get_data_table_pulsar_teplo_for_period(obj_parent_title, obj_title, electric_data_end,electric_data_start, isAbon):
+def get_data_table_pulsar_teplo_for_period(obj_parent_title, obj_title, electric_data_end,electric_data_start, isAbon, dm):
     data_table = []
     params=['Энергия','Объем','Ti','To', 'Теплосчётчик']
     cursor = connection.cursor()
     if isAbon:
-        cursor.execute(makeSqlQuery_heat_pulsar_teplo_abon_period(obj_parent_title,obj_title, electric_data_end,electric_data_start, params))
+        cursor.execute(makeSqlQuery_heat_pulsar_teplo_abon_period(obj_parent_title,obj_title, electric_data_end,electric_data_start, params, dm))
     else:
-        cursor.execute(makeSqlQuery_heat_pulsar_teplo_all_period(obj_title, electric_data_end,electric_data_start, params))
+        cursor.execute(makeSqlQuery_heat_pulsar_teplo_all_period(obj_title, electric_data_end,electric_data_start, params, dm))
     data_table = cursor.fetchall()   
     
     if len(data_table)>0: data_table=ChangeNull(data_table, None)
@@ -6402,10 +6408,11 @@ def get_data_table_pulsar_frost_for_period(obj_parent_title, obj_title, electric
     data_table = []
     params=['Энергия','Объем','Ti','To', 'Холодосчётчик']
     cursor = connection.cursor()
+    dm = 'daily'
     if isAbon:
-        cursor.execute(makeSqlQuery_heat_pulsar_teplo_abon_period(obj_parent_title,obj_title, electric_data_end,electric_data_start, params))
+        cursor.execute(makeSqlQuery_heat_pulsar_teplo_abon_period(obj_parent_title,obj_title, electric_data_end,electric_data_start, params, dm))
     else:
-        cursor.execute(makeSqlQuery_heat_pulsar_teplo_all_period(obj_title, electric_data_end,electric_data_start, params))
+        cursor.execute(makeSqlQuery_heat_pulsar_teplo_all_period(obj_title, electric_data_end,electric_data_start, params, dm))
     data_table = cursor.fetchall()   
     
     if len(data_table)>0: data_table=ChangeNull(data_table, None)
