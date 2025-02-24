@@ -10,6 +10,7 @@ from django.db import connection
 import re
 #from excel_response import ExcelResponse
 import datetime
+#from datetime import datetime, timedelta
 import decimal
 
 from django.db.models.signals import post_save
@@ -7948,20 +7949,20 @@ def makeOneCoords(graphic_data,numField1):
     for i in range(len(graphic_data)):
         graphic_data[i]=list(graphic_data[i]) 
         date=graphic_data[i][numField1]   
-        #print numField1, date         
-        #print date 
+        #print(numField1, date)         
+        #print(date)
         if (date=='Н/Д' or date is None or date==None): 
             labels.append(str(0))
         else:
-            #print type(date)
+            #print(type(date))
             if type(date)==datetime.date:
                 labels.append(date.strftime("%d-%m-%Y"))
             elif type(date)==float or type(date)==decimal.Decimal:
-                labels.append(str(date))            
-            elif type(date)==datetime.datetime:
-                labels.append(date.strftime("%d-%m-%Y %H:%M"))
+                labels.append(str(date))
             elif type(date)==str:
-                labels.append(str(translate(date)))
+                labels.append(str(translate(date)))            
+            elif type(date)==datetime.datetime:
+                labels.append(date.strftime("%d-%m-%Y %H:%M"))            
             else:
                 labels.append(str(translate(date)))
             
@@ -11967,3 +11968,106 @@ def pulsar_water_consumption_mosvodokanal(request):
     args['electric_data_end'] = electric_data_end
 
     return render(request, "data_table/139.html", args)
+
+def electric_analize_extended(request):
+    args = {}
+    is_abonent_level = re.compile(r'abonent')
+    is_object_level_2 = re.compile(r'level2')
+    data_table = []
+    obj_title = 'Не выбран'
+    obj_key = 'Не выбран'
+    obj_parent_title = 'Не выбран'
+    electric_data_start = ''
+    electric_data_end = ''
+
+    if request.is_ajax():        
+        if request.method == 'GET':
+            request.session["obj_title"]           = obj_title           = request.GET['obj_title']
+            request.session["obj_key"]             = obj_key             = request.GET['obj_key']
+            request.session["obj_parent_title"]    = obj_parent_title    = request.GET['obj_parent_title']           
+            request.session["is_electric_daily"]   = is_electric_daily   = request.GET['is_electric_daily']
+            request.session["electric_data_start"] = electric_data_start = request.GET['electric_data_start']
+            request.session["electric_data_end"]   = electric_data_end   = request.GET['electric_data_end']
+              
+            #анализируем даты
+            #делим диапазон дат на 3 части
+            end_date = datetime.strptime(electric_data_end, '%d.%m.%Y').date()
+            start_date = datetime.strptime(electric_data_start, '%d.%m.%Y').date()
+            # Вычисляем общее количество дней в диапазоне
+            total_days = (end_date - start_date).days
+            # Разбиваем диапазон на 3 равные части
+            part_size = total_days // 3
+            # Вычисляем промежуточные даты
+            date1 = start_date + timedelta(days=part_size)
+            date2 = date1 + timedelta(days=part_size)
+            # Формируем список с диапазонами
+            date_ranges = [
+                (start_date, date1),
+                (date1 + timedelta(days=1), date2),
+                (date2 + timedelta(days=1), end_date)
+            ]
+
+            #получаем список объектов
+            dt_common = []
+            dt_common = common_sql.get_data_table_electric_objects_with_30()
+
+            #считаем потребление суммарное и среднее для объекта по каждому диапазону
+            dt_all = []
+            dt1=[]
+            dt2=[]
+            dt3=[]    
+            dt1 = common_sql.get_data_table_consumption_30_sum_and_average(date_ranges[0][0].strftime('%d.%m.%Y'),date_ranges[0][1].strftime('%d.%m.%Y'), obj_title, '--')
+            dt_all.append(dt1[0])
+            dt2 = common_sql.get_data_table_consumption_30_sum_and_average(date_ranges[1][0].strftime('%d.%m.%Y'),date_ranges[1][1].strftime('%d.%m.%Y'), obj_title, '--')
+            dt_all.append(dt2[0])
+            dt3 = common_sql.get_data_table_consumption_30_sum_and_average(date_ranges[2][0].strftime('%d.%m.%Y'),date_ranges[2][1].strftime('%d.%m.%Y'), obj_title, '--')
+            dt_all.append(dt3[0])
+
+            data_table =  common_sql.get_data_table_consumption_30_sum_and_average(electric_data_start, electric_data_end, obj_title, '')
+
+            
+    AllData=[]
+    Xcoord=[]
+    AllData2=[]
+    Xcoord2=[]
+    
+    data1 = []
+    labels1 = []
+    backgr_colors1 = []    
+    if (len(data_table) > 0):        
+        for i, row in enumerate(data_table, start =0):
+            labels1.append(data_table[i][1])
+            data1.append(str(data_table[i][2]))
+            backgr_colors1.append(get_rgba_color(2*i))
+        AllData = """[{label: %s,  backgroundColor: %s,  data: %s}]"""%(labels1, backgr_colors1, data1)
+        #AllData.append({str("data"):makeOneCoords(data_table,2), str("label"):str(data_table[0][1]), str("backgroundColor"): get_rgba_color(5)})
+        Xcoord=makeOneCoords(data_table, 1) #label - корпуса
+        # print(AllData)
+
+    data = []
+    labels = []
+    backgr_colors = []
+    if (len(dt_all) > 0):        
+        for i, row in enumerate(dt_all, start =0):
+            labels.append(str(dt_all[i][0]))
+            data.append(str(dt_all[i][1]))
+            backgr_colors.append(get_rgba_color(3))
+        
+        AllData2 = """[{label: "Потребление, кВт",  backgroundColor: %s,  data: %s}]"""%(backgr_colors, data)
+        #AllData2.append({str("data"):[str(dt_all[i][1])], str("label"):str(dt_all[i][0]), str("backgroundColor"): get_rgba_color(2*i)})
+        Xcoord2=labels #label - корпуса      
+        # print(AllData2)
+    
+    args['data_table'] = dt_all #сумма потребления по дипазонам
+    args['obj_title'] = obj_title
+    args['obj_key'] = obj_key
+    args['obj_parent_title'] = obj_parent_title
+    args['is_electric_daily'] = is_electric_daily
+    args['electric_data_start'] = electric_data_start
+    args['electric_data_end'] = electric_data_end
+    args['label'] = Xcoord
+    args['AllData']=AllData
+    args['label2'] = Xcoord2
+    args['AllData2']=AllData2 
+
+    return render(request, "data_table/143.html", args)

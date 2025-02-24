@@ -817,41 +817,49 @@ def add_link_meter(sender, instance, created, **kwargs):
 def add_link_meter_port_from_excel_cfg_water_v2(sender, instance, created, **kwargs):
     """Делаем привязку счётчика к порту по excel файлу ведомости"""
     dtAll=GetTableFromExcel(cfg_excel_name,cfg_sheet_name) #получили из excel все строки до первой пустой строки (проверка по колонке А)
-    #print u'test'
-    for i in range(1,len(dtAll)):
+    for i in range(2,len(dtAll)):
         #print u'Обрабатываем строку ' + unicode(dtAll[i][6])+' - '+unicode(dtAll[i][7])
         #print dtAll[i]
         meter=dtAll[i][5] #счётчик
-        #print meter
-        #print instance.factory_number_manual
-        #print dtAll[0][5], dtAll[0][4]       
+        # print(meter)
+        #print(instance.factory_number_manual)
+        #print(dtAll[0][5], dtAll[0][4])
+        #print('строка', i)
         ip_adr=str(dtAll[i][7]).strip()
         ip_port=str(dtAll[i][8]).strip()
+        #print(f'{ip_adr}: {ip_port}')
+        if (instance.guid_types_meters.name == 'МЗТА'):
+            meter = dtAll[i][3]
         # Привязка к tpc порту
         if meter is not None:
-            if str(meter) == instance.factory_number_manual :
-                 guid_ip_port_from_excel = connection.cursor()
-                 sQuery="""SELECT 
-                                      tcpip_settings.guid
-                                    FROM 
-                                      public.tcpip_settings
-                                    WHERE 
-                                      tcpip_settings.ip_address = '%s' AND 
-                                      tcpip_settings.ip_port = '%s';"""%(str(ip_adr), str(ip_port))
+            if (str(meter) == instance.factory_number_manual):
+                guid_ip_port_from_excel = connection.cursor()
+                sQuery="""SELECT 
+                        tcpip_settings.guid
+                        FROM 
+                        public.tcpip_settings
+                        WHERE 
+                        tcpip_settings.ip_address = '%s' AND 
+                        tcpip_settings.ip_port = '%s';"""%(str(ip_adr), str(ip_port))
     #print sQuery
-                 guid_ip_port_from_excel.execute(sQuery)
-                 guid_ip_port_from_excel = guid_ip_port_from_excel.fetchall()
-                 print(guid_ip_port_from_excel)
+                guid_ip_port_from_excel.execute(sQuery)
+                guid_ip_port_from_excel = guid_ip_port_from_excel.fetchall()
+                #print(sQuery)
+                #print(guid_ip_port_from_excel)
                  
-                 IsExistLink=SimpleCheckIfExist("Link_Meters_Tcpip_Settings","guid_meters",instance.guid,"","guid_tcpip_settings", guid_ip_port_from_excel)
-                 #print IsExistLink
-                 if IsExistLink: break
-                 if guid_ip_port_from_excel:
-                     guid_ip_port = TcpipSettings.objects.get(guid=guid_ip_port_from_excel[0][0])
-                     add_ip_port_link = LinkMetersTcpipSettings(guid_meters = instance, guid_tcpip_settings = guid_ip_port)            
-                     add_ip_port_link.save()
-                     #print u'Связь добавлена ', meter, ip_adr, ip_port
-                 else: pass #print(u'Не прогружен порт')
+                IsExistLink=SimpleCheckIfExist("Link_Meters_Tcpip_Settings","guid_meters",instance.guid,"","guid_tcpip_settings", guid_ip_port_from_excel)
+                #print IsExistLink
+                if IsExistLink:
+                    print('Связь уже есть')
+                    pass
+                elif guid_ip_port_from_excel:
+                    guid_ip_port = TcpipSettings.objects.get(guid=guid_ip_port_from_excel[0][0])
+                    print(guid_ip_port)
+                    add_ip_port_link = LinkMetersTcpipSettings(guid_meters = instance, guid_tcpip_settings = guid_ip_port)            
+                    add_ip_port_link.save()
+                    print(u'Связь добавлена ', meter, ip_adr, ip_port)
+                else:
+                    pass #print(u'Не прогружен порт')
                  
 
 def add_link_meter_port_from_excel_cfg_electric(sender, instance, created, **kwargs):

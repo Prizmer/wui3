@@ -5,12 +5,16 @@
 from django.shortcuts import render, HttpResponse
 from django.db import connection
 import io
-from openpyxl import Workbook
+from openpyxl import Workbook, load_workbook
 #from openpyxl.compat import range
 import datetime
 from openpyxl.styles import NamedStyle, PatternFill, Border, Side, Alignment, Font
 from openpyxl.utils import get_column_letter
 from openpyxl.writer.excel import save_virtual_workbook
+from openpyxl.chart import BarChart, Reference, LineChart, PieChart
+from openpyxl.chart.axis import DateAxis
+from openpyxl.styles import numbers
+from openpyxl.drawing.image import Image
 import common_sql
 import re
 #from excel_response import ExcelResponse
@@ -24,6 +28,7 @@ from django.conf import settings
 import time as pt
 import zipfile
 import random 
+from datetime import datetime, timedelta
 
 #TODO: поправить в отчётам, там где datetime используется таким способом
 #from datetime import date, datetime, timedelta
@@ -66,6 +71,7 @@ ali_white  = NamedStyle(name = "ali_white", border=Border(left=Side(border_style
 ali_blue   = NamedStyle(name = "ali_blue", fill=PatternFill(fill_type='solid', start_color='E6E6FA'), border=Border(left=Side(border_style='thin',color='FF000000'), bottom=Side(border_style='thin',color='FF000000'), right=Side(border_style='thin',color='FF000000'), top=Side(border_style='thin',color='FF000000')), alignment = Alignment(horizontal='center', vertical='center', wrap_text=True, shrink_to_fit=True))
 ali_pink   = NamedStyle(name = "ali_pink", fill=PatternFill(fill_type='solid', start_color='FFF0F5'), border=Border(left=Side(border_style='thin',color='FF000000'), bottom=Side(border_style='thin',color='FF000000'), right=Side(border_style='thin',color='FF000000'), top=Side(border_style='thin',color='FF000000')), alignment = Alignment(horizontal='center', vertical='center', wrap_text=True, shrink_to_fit=True))
 ali_red    = NamedStyle(name = "ali_red", fill=PatternFill(fill_type='solid', start_color='FF3333'), border=Border(left=Side(border_style='thin',color='FF000000'), bottom=Side(border_style='thin',color='FF000000'), right=Side(border_style='thin',color='FF000000'), top=Side(border_style='thin',color='FF000000')), alignment = Alignment(horizontal='center', vertical='center', wrap_text=True, shrink_to_fit=True))
+
 
 ali_yellow = NamedStyle(name = "ali_yellow", fill=PatternFill(fill_type='solid', start_color='EEEE00'), border=Border(left=Side(border_style='thin',color='FF000000'), bottom=Side(border_style='thin',color='FF000000'), right=Side(border_style='thin',color='FF000000'), top=Side(border_style='thin',color='FF000000')), alignment = Alignment(horizontal='center', vertical='center', wrap_text=True, shrink_to_fit=True))
 ali_white_size_18  = NamedStyle(name = "ali_white_size_18", font=Font(size=18))
@@ -21384,6 +21390,688 @@ def pulsar_water_consumption_mosvodokanal(request):
     response = HttpResponse(save_virtual_workbook(wb),content_type="application/vnd.ms-excel")
     
     output_name = 'report_mosvodokanal_'+str(electric_data_start)+'-'+str(electric_data_end)
+    file_ext = 'xlsx'    
+    response['Content-Disposition'] = 'attachment;filename="%s.%s"' % (output_name.replace('"', '\"'), file_ext)   
+    return response
+
+
+def electric_analize_extended(request):
+    ROUND_SIZE = getattr(settings, 'ROUND_SIZE', 2)
+    response = io.StringIO()
+    obj_parent_title   = ""
+    obj_title   = ""
+    electric_data_end   = ""
+    electric_data_start   = ""
+
+    obj_parent_title   = request.session["obj_parent_title"]
+    obj_title   = request.session["obj_title"]
+    electric_data_end   = request.session["electric_data_end"]
+    electric_data_start   = request.session["electric_data_start"]
+
+    from django.contrib.staticfiles import finders
+    template_path =  finders.find('%s'%('template_electric_extended.xlsx'))
+    wb = load_workbook(template_path)
+        
+    #получаем общую информацию по количеству ЖК и кол-ву корпусов с приборами
+    dt_common = []
+    dt_common = common_sql.get_data_table_electric_objects_with_30()   
+
+    ws = wb['Сводная'] 
+    #анализируем даты
+    #делим диапазон дат на 3 части
+    end_date = datetime.strptime(electric_data_end, '%d.%m.%Y').date()
+    start_date = datetime.strptime(electric_data_start, '%d.%m.%Y').date()
+    # Вычисляем общее количество дней в диапазоне
+    total_days = (end_date - start_date).days
+    # Разбиваем диапазон на 3 равные части
+    part_size = total_days // 3
+    # Вычисляем промежуточные даты
+    date1 = start_date + timedelta(days=part_size)
+    date2 = date1 + timedelta(days=part_size)
+    # Формируем список с диапазонами
+    date_ranges = [
+        (start_date, date1),
+        (date1 + timedelta(days=1), date2),
+        (date2 + timedelta(days=1), end_date)
+    ]
+    #print(total_days, part_size)
+    # Выводим результат
+    #for i, (range_start, range_end) in enumerate(date_ranges, start=1):
+    #    print(f"Часть {i}: {range_start.strftime('%Y-%m-%d')} - {range_end.strftime('%Y-%m-%d')}")
+
+    ################################################################################################
+    #заполняем главную-сводную страницу
+    #вписываем везде даты
+    date_range = electric_data_start + ' - ' +  electric_data_end
+    #print(f"{date_ranges[0][0].strftime('%d.%m.%Y')}")
+    try:
+        ws.cell('L2').value = '%s' % (electric_data_start) 
+        ws.cell('N2').value = '%s' % (electric_data_end) 
+    except:
+        next
+    try:
+        ws.cell('B8').value = '%s' % (f"{date_ranges[0][0].strftime('%d.%m.%Y')} - {date_ranges[0][1].strftime('%d.%m.%Y')}")
+        ws.cell('B9').value = '%s' % (f"{date_ranges[1][0].strftime('%d.%m.%Y')} - {date_ranges[1][1].strftime('%d.%m.%Y')}")
+        ws.cell('B10').value = '%s' % (f"{date_ranges[2][0].strftime('%d.%m.%Y')} - {date_ranges[2][1].strftime('%d.%m.%Y')}")         
+    except:
+        next
+
+    ws_teh = wb.create_sheet("Техническая", -1)
+
+    if len(dt_common)>0: 
+        try:
+            ws.cell('B2').value = '%s' % (str(dt_common[0][0] + ' ' + dt_common[0][1])) 
+        except:
+            next            
+        
+        common_sum1 = ''
+        common_average1 = ''
+        common_sum2 = ''
+        common_average2 = ''
+        common_sum3 = ''
+        common_average3 = ''
+        for col_i, korp in enumerate(dt_common, start=0):
+            ####################################################################################
+            #часть формул, которые будут использвоаны в свободной таблицы (их надо вставлять в конце, иначе они могут не пересчитатся)
+            common_sum1 += f"'{korp[3]}'!I6," #"'%s'.I6," % (korp[3]) 
+            common_average1 += f"'{korp[3]}'!J6,"
+            common_sum2 += f"'{korp[3]}'!I7,"
+            common_average2 += f"'{korp[3]}'!J7,"
+            common_sum3 += f"'{korp[3]}'!I8,"
+            common_average3 += f"'{korp[3]}'!J8,"
+            #создаём страницы с именем корпуса
+            
+            ws_korp = wb.copy_worksheet(wb['korp_temp'])#снимаем копию с шаблонной странице, в конце её надо удалить
+            ws_korp.title = korp[3] #имя страницы
+            try:
+                ws_korp.cell('B1').value = '%s' % (korp[3]) 
+            except:
+                next
+
+            #пишем даты:
+            try:
+                ws_korp.cell('H6').value = '%s' % (f"{date_ranges[0][0].strftime('%d.%m.%Y')} - {date_ranges[0][1].strftime('%d.%m.%Y')}")
+                ws_korp.cell('H7').value = '%s' % (f"{date_ranges[1][0].strftime('%d.%m.%Y')} - {date_ranges[1][1].strftime('%d.%m.%Y')}")
+                ws_korp.cell('H8').value = '%s' % (f"{date_ranges[2][0].strftime('%d.%m.%Y')} - {date_ranges[2][1].strftime('%d.%m.%Y')}")         
+            except:
+                next
+            
+            #на главной пишем названия корпусов
+            try:
+                #ws.cell(row=номер_строки, column=номер_столбца, value=значение)
+                ws.cell(row=4, column=(3+col_i), value=str(korp[3]))
+                #ws.cell('C%s'%(4+col_i)).value = '%s' % (korp[3]) 
+                ws.cell(row=4, column=(3+col_i)).style = "ali_white"
+            except:
+                next
+            #на техническую пишем:
+            try:
+                ws_teh.cell('A%s'%(col_i+1)).value = '%s' % (korp[3]) 
+                ws_teh.cell('A%s'%(col_i+1)).style = "ali_white"
+            except:
+                next
+            
+            #считываем суммарные получасовки за каждые полчаса по корпусу            
+            params=['A+ Профиль','R+ Профиль']
+            dt_sum_30_obj =  common_sql.get_electric_30_by_obj_for_period(str(korp[3]), electric_data_start, electric_data_end, params,'')
+            for n, sum_row in enumerate(dt_sum_30_obj, start = 0):
+                try:
+                    ws_korp.cell('X%s'%(4+n)).value = '%s' % (sum_row[0]) 
+                    ws_korp.cell('X%s'%(4+n)).style = "ali_white"
+                except:
+                    ws_korp.cell('X%s'%(4+n)).style = "ali_white"
+                try:
+                    ws_korp.cell('Y%s'%(4+n)).value = '%s' % (sum_row[3]) 
+                    ws_korp.cell('Y%s'%(4+n)).style = "ali_white"
+                except:
+                    ws_korp.cell('Y%s'%(4+n)).style = "ali_white"
+                try:
+                    ws_korp.cell('Z%s'%(4+n)).value = float(sum_row[4])  # '%s' % (sum_row[4]) 
+                    ws_korp.cell('Z%s'%(4+n)).style = "ali_white"
+                except:
+                    ws_korp.cell('Z%s'%(4+n)).style = "ali_white"
+            
+                
+            ################################################################################################
+            #Создаём страницы по количеству приборов с получасовками на основе шаблонной страницы
+            dt_common_abons = []
+            dt_common_abons = common_sql.get_data_table_electric_abons_with_30(korp[3])
+            if len(dt_common_abons):
+                for l, abon in enumerate(dt_common_abons, start = 0): 
+                    try:
+                        ws_korp.cell('B%s'%(4+l)).value = '%s' % (abon[5])
+                        ws_korp.cell('B%s'%(4+l)).style = "ali_white"                 
+                    except:               
+                        ws_korp.cell('B%s'%(4+l)).style = "ali_white"
+                    try:
+                        ws_korp.cell('C%s'%(4+l)).value = '%s' % (abon[6])
+                        ws_korp.cell('C%s'%(4+l)).style = "ali_white"                 
+                    except:               
+                        ws_korp.cell('C%s'%(4+l)).style = "ali_white"
+                    try:
+                        ws_korp.cell('D%s'%(4+l)).value = '%s' % (abon[7])
+                        ws_korp.cell('D%s'%(4+l)).style = "ali_white"                 
+                    except:               
+                        ws_korp.cell('D%s'%(4+l)).style = "ali_white"
+                    
+                    
+                    ws_pu = wb.copy_worksheet(wb['ПУ_temp'])#снимаем копию с шаблонной странице,
+                    ws_pu.title = abon[6] #имя страницы
+                    try:
+                        ws_pu.cell('E2').value = f"{abon[3]} {abon[5]}. Значения профиля показаний за период с {electric_data_start} по {electric_data_end}"
+                    except:
+                        next
+                    try:
+                        ws_pu.cell('F3').value = '%s' % (f"{abon[6]}") #factory_number
+                    except:
+                        next
+                    try:
+                        ws_pu.cell('F4').value = '%s' % (f"{abon[7]}")#ktt
+                    except:
+                        next
+                    try:
+                        ws_pu.cell('F5').value = '%s' % (f"{abon[8]}")#ktt
+                    except:
+                        next
+                    try:
+                        ws_pu.cell('E9').value = '%s' % (f"{date_ranges[0][0].strftime('%d.%m.%Y')} - {date_ranges[0][1].strftime('%d.%m.%Y')}")
+                        ws_pu.cell('E10').value = '%s' % (f"{date_ranges[1][0].strftime('%d.%m.%Y')} - {date_ranges[1][1].strftime('%d.%m.%Y')}")
+                        ws_pu.cell('E11').value = '%s' % (f"{date_ranges[2][0].strftime('%d.%m.%Y')} - {date_ranges[2][1].strftime('%d.%m.%Y')}")
+                    except:
+                        next
+
+                    
+                    #заполняем получасовки для прибора
+                    params=['A+ Профиль','R+ Профиль']
+                    dt_meter_30 = common_sql.get_electric_30_by_abonent_for_period(abon[5], abon[3], electric_data_start, electric_data_end, params)
+                    for j, x in enumerate(dt_meter_30, start=0):
+                        try:
+                            ws_pu.cell('O%s'%(j+6)).value = '%s' % (x[10]) 
+                            ws_pu.cell('O%s'%(j+6)).style = "ali_white"
+                        except:
+                            ws_pu.cell('O%s'%(j+6)).style = "ali_white"
+                        try:
+                            ws_pu.cell('P%s'%(j+6)).value = '%s' % (x[5]) 
+                            ws_pu.cell('P%s'%(j+6)).style = "ali_white"
+                        except:
+                            ws_pu.cell('P%s'%(j+6)).style = "ali_white"
+                        try:                
+                            ws_pu.cell('Q%s'%(j+6)).value = float(x[6]) #get_val_by_round(float(x[6]), ROUND_SIZE, separator)#'%s' % (x[6]) 
+                            ws_pu.cell('Q%s'%(j+6)).style = "ali_white"
+                        except:
+                            next
+                        try:
+                            ws_pu.cell('R%s'%(j+6)).value = float(x[11])# '%s' % (x[11]) 
+                            ws_pu.cell('R%s'%(j+6)).style = "ali_white"
+                        except:
+                            next
+                                        
+                    #заполняем потребление мощности по дням на базе сумм получасовок
+                    dt_daily_consumption =  common_sql.get_daily_consumption_by_30(abon[5], abon[3], electric_data_start, electric_data_end, params)
+                    #print(dt_daily_consumption)
+                    for k, cons_row in enumerate(dt_daily_consumption, start = 0):
+                        try:
+                            ws_pu.cell('B%s'%(k+6)).value = '%s' % (cons_row[3]) 
+                            ws_pu.cell('B%s'%(k+6)).style = "ali_white"
+                        except:
+                            next
+                        try:
+                            ws_pu.cell('C%s'%(k+6)).value = float(cons_row[4]) 
+                            ws_pu.cell('C%s'%(k+6)).style = "ali_white"
+                        except:
+                            ws_pu.cell('C%s'%(k+6)).style = "ali_white"
+                            next
+                        #вставка в эксель формул для вычисления
+                        try:
+                            ws_pu.cell('F9').value = "=MAX(C6:C%s)"%(6+part_size)
+                            ws_pu.cell('F9').style = "ali_white"
+                        except:
+                            next
+                        try:
+                            ws_pu.cell('F10').value = "=MAX(C%s:C%s)"%(6+part_size+1, 6+2*part_size)
+                            ws_pu.cell('F10').style = "ali_white"
+                        except:
+                            next
+                        try:
+                            ws_pu.cell('F11').value = "=MAX(C%s:C%s)"%(6+2*part_size+1, 6+len(dt_daily_consumption)-1)
+                            ws_pu.cell('F11').style = "ali_white"
+                        except:
+                            next
+                        try:
+                            ws_pu.cell('G9').value = "=ROUND(AVERAGE(C6:C%s),2)"%(6+part_size)
+                            ws_pu.cell('G9').style = "ali_white"
+                        except:
+                            next
+                        try:
+                            ws_pu.cell('G10').value = "=ROUND(AVERAGE(C%s:C%s),2)"%(6+part_size+1, 6+2*part_size)
+                            ws_pu.cell('G10').style = "ali_white"
+                        except:
+                            next
+                        try:
+                            ws_pu.cell('G11').value = "=ROUND(AVERAGE(C%s:C%s),2)"%(6+2*part_size+1, 6+len(dt_daily_consumption)-1)
+                            ws_pu.cell('G11').style = "ali_white"
+                        except:
+                            next
+                        try:
+                            ws_pu.cell('H9').value = "=MIN(C6:C%s)"%(6+part_size)
+                            ws_pu.cell('H9').style = "ali_white"
+                        except:
+                            next
+                        try:
+                            ws_pu.cell('H10').value = "=MIN(C%s:C%s)"%(6+part_size+1, 6+2*part_size)
+                            ws_pu.cell('H10').style = "ali_white"
+                        except:
+                            next
+                        try:
+                            ws_pu.cell('H11').value = "=MIN(C%s:C%s)"%(6+2*part_size+1, 6+len(dt_daily_consumption)-1)
+                            ws_pu.cell('H11').style = "ali_white"
+                        except:
+                            next
+                        try:
+                            ws_pu.cell('I9').value = "=SUM(C6:C%s)"%(6+part_size)
+                            ws_pu.cell('I9').style = "ali_white"
+                        except:
+                            next
+                        try:
+                            ws_pu.cell('I10').value = "=SUM(C%s:C%s)"%(6+part_size+1, 6+2*part_size)
+                            ws_pu.cell('I10').style = "ali_white"
+                        except:
+                            next
+                        try:
+                            ws_pu.cell('I11').value = "=SUM(C%s:C%s)"%(6+2*part_size+1, 6+len(dt_daily_consumption)-1)
+                            ws_pu.cell('I11').style = "ali_white"
+                        except:
+                            next
+
+                        try:
+                            ws_korp.cell('E%s'%(4+l)).value = "=MAX('%s'!F9:F11)"%(abon[6])
+                            ws_korp.cell('E%s'%(4+l)).style = "ali_white"
+                        except:
+                            next
+                        try:
+                            ws_korp.cell('F%s'%(4+l)).value = "=MIN('%s'!H9:H11)"%(abon[6])
+                            ws_korp.cell('F%s'%(4+l)).style = "ali_white"
+                        except:
+                            next
+
+                        image_path = finders.find('images/device-ico64.png')
+                        if image_path:
+                            img = Image(image_path)
+                            ws_pu.add_image(img, "D2") 
+                  
+                    #добавляем линейную диаграмму по получасовкам на korp
+                    chart_m = LineChart()
+                    chart_m.title = "Профиль мощности"
+                    chart_m.y_axis.title = "Значение"
+                    chart_m.x_axis.title = "Дата"
+                    # уберем легенду
+                    chart_m.legend = None
+                
+                    # Указываем диапазон данных для графика
+                    num = 5+len(dt_sum_30_obj)-1
+                    data_ref = Reference(ws_pu, min_col=18, min_row=5, max_row=num) # Значения (столбец B)
+                    categories_ref = Reference(ws_pu, min_col=16, min_row=5, max_row=num)  # Даты (столбец A)
+                    
+                    # Добавляем данные и категории в график
+                    chart_m.add_data(data_ref, titles_from_data=True)
+                    chart_m.set_categories(categories_ref)
+                    chart_m.height = 20   # Высота диаграммы (точек)
+                    chart_m.width = 28  # Ширина диаграммы (точек)
+                    # Добавляем график на лист
+                    ws_pu.add_chart(chart_m, "E22")
+
+                    #добавляем диаграмму на ws_pu: суммарное потребление
+                    chart_bar_meter = BarChart()
+                    # установим тип - `вертикальные столбцы`
+                    chart_bar_meter.type = "col"
+                    # установим стиль диаграммы (цветовая схема)
+                    chart_bar_meter.style = 10
+                    # заголовок диаграммы
+                    chart_bar_meter.title = "Суммарное потребление за выбранные периоды"
+                    
+                    categor = Reference(ws_pu, min_col=5, min_row=9, max_row=11)
+                    # теперь выберем категорию для оси `x`
+                    data = Reference(ws_pu, min_col=9, min_row=9, max_row=11, max_col=9)
+                    # добавляем данные в объект диаграммы
+                    chart_bar_meter.add_data(data, titles_from_data=False)
+                    # установим метки на объект диаграммы
+                    chart_bar_meter.set_categories(categor)
+                    # Задаем размер диаграммы (ширина и высота в точках)
+                    chart_bar_meter.width = 10  # Ширина диаграммы (15 точек)
+                    chart_bar_meter.height = 6   # Высота диаграммы (7 точек)
+                    # уберем легенду
+                    chart_bar_meter.legend = None
+                    ws_pu.add_chart(chart_bar_meter, "K3")
+
+                    #добавляем диаграмму на ws_pu: среднее потребление
+                    chart_bar_meter2 = LineChart()
+                    # установим тип - `вертикальные столбцы`
+                    #chart_bar_meter2.type = "col"
+                    # установим стиль диаграммы (цветовая схема)
+                    chart_bar_meter2.style = 10
+                    # заголовок диаграммы
+                    chart_bar_meter2.title = "Средне-суточное потребление за выбранные периоды"
+                    
+                    categor = Reference(ws_pu, min_col=5, min_row=9, max_row=11)
+                    # теперь выберем категорию для оси `x`
+                    data = Reference(ws_pu, min_col=7, min_row=9, max_row=11)
+                    # добавляем данные в объект диаграммы
+                    chart_bar_meter2.add_data(data, titles_from_data=False)
+                    # установим метки на объект диаграммы
+                    chart_bar_meter2.set_categories(categor)
+                    # Задаем размер диаграммы (ширина и высота в точках)
+                    chart_bar_meter2.width = 10  # Ширина диаграммы (15 точек)
+                    chart_bar_meter2.height = 6   # Высота диаграммы (7 точек)
+                    # уберем легенду
+                    chart_bar_meter2.legend = None
+                    ws_pu.add_chart(chart_bar_meter2, "K10")
+
+                    #добавляем рисунки на страницы с ПУ
+                                        
+                #вставляем формулы на станице корпуса на основе ранее заполненных данных                   
+                            
+                try:
+                    ws_korp.cell('I6').value = "=SUM(Z4:Z%s)"%(4+part_size*48)
+                    ws_korp.cell('I6').style = "ali_white"
+                except:
+                    next
+                try:
+                    ws_korp.cell('I7').value = "=SUM(Z%s:Z%s)"%(4+part_size*48+1, 4+2*part_size*48)
+                    ws_korp.cell('I7').style  = "ali_white"
+                except:
+                    next
+                try:
+                    ws_korp.cell('I8').value = "=SUM(Z%s:Z%s)"%(4+2*part_size*48+1, 4+len(dt_sum_30_obj)-1)
+                    ws_korp.cell('I8').style  = "ali_white"
+                except:
+                    next
+                try:
+                    ws_korp.cell('J6').value = "=ROUND(AVERAGE(Z4:Z%s),2)"%(4+part_size*48)
+                    ws_korp.cell('j6').style = "ali_white"
+                except:
+                    next
+                try:
+                    ws_korp.cell('J7').value = "=ROUND(AVERAGE(Z%s:Z%s),2)"%(4+part_size*48+1, 4+2*part_size*48)
+                    ws_korp.cell('J7').style  = "ali_white"
+                except:
+                    next
+                try:
+                    ws_korp.cell('J8').value = "=ROUND(AVERAGE(Z%s:Z%s),2)"%(4+2*part_size*48+1, 4+len(dt_sum_30_obj)-1)
+                    ws_korp.cell('J8').style  = "ali_white"
+                except:
+                    next
+                try:
+                    ws_korp.cell('Q4').value = "=MAX(Z4:Z%s)"%(4+len(dt_sum_30_obj)-1)
+                    ws_korp.cell('Q4').style  = "ali_white"
+                except:
+                    next
+                try:
+                    ws_korp.cell('R4').value = '=INDEX(Y4:Y%s,MATCH(Q4,Z4:Z%s,0))'%((4+len(dt_sum_30_obj)-1),(4+len(dt_sum_30_obj)-1)) #f"=INDEX(Y4:Y{(4+len(dt_daily_consumption)-1)}{r}MATCH(R4{r}Z4:Z{(4+len(dt_daily_consumption)-1)}{r}0))" #"=INDEX(Y4:Y%s;MATCH(R4;Z4:Z%s;0))"%(4+len(dt_daily_consumption)-1,4+len(dt_daily_consumption)-1)
+                    ws_korp.cell('R4').style  = "ali_white"
+                except:
+                    next
+                try:
+                    ws_korp.cell('Q5').value = "=MIN(Z4:Z%s)"%(4+len(dt_sum_30_obj)-1)
+                    ws_korp.cell('Q5').style  = "ali_white"
+                except:
+                    next
+                try:
+                    ws_korp.cell('R5').value = '=INDEX(Y4:Y%s,MATCH(Q5,Z4:Z%s,0))'%((4+len(dt_sum_30_obj)-1),(4+len(dt_sum_30_obj)-1))
+                    ws_korp.cell('R5').style  = "ali_white"
+                except:
+                    next
+                
+                #добавляем диаграмму на ws_korp: суммарное потребление
+                chart_bar_korp = BarChart()
+                # установим тип - `вертикальные столбцы`
+                chart_bar_korp.type = "col"
+                # установим стиль диаграммы (цветовая схема)
+                chart_bar_korp.style = 10
+                # заголовок диаграммы
+                chart_bar_korp.title = "Суммарное потребление за выбранные периоды"
+                
+                categor = Reference(ws_korp, min_col=8, min_row=6, max_row=8)
+                # теперь выберем категорию для оси `x`
+                data = Reference(ws_korp, min_col=9, min_row=6, max_row=8)
+                # добавляем данные в объект диаграммы
+                chart_bar_korp.add_data(data, titles_from_data=False)
+                # установим метки на объект диаграммы
+                chart_bar_korp.set_categories(categor)
+                # Задаем размер диаграммы (ширина и высота в точках)
+                chart_bar_korp.width = 10  # Ширина диаграммы (15 точек)
+                chart_bar_korp.height = 6   # Высота диаграммы (7 точек)
+                # уберем легенду
+                chart_bar_korp.legend = None
+                ws_korp.add_chart(chart_bar_korp, "L3")
+
+                #добавляем диаграмму на ws_pu: среднее потребление
+                chart_bar_korp2 = LineChart()
+                chart_bar_korp2.style = 10
+                # заголовок диаграммы
+                chart_bar_korp2.title = "Средне-суточное потребление за выбранные периоды"
+                
+                categor = Reference(ws_korp, min_col=8, min_row=6, max_row=8)
+                # теперь выберем категорию для оси `x`
+                data = Reference(ws_korp, min_col=10, min_row=6, max_row=8)
+                # добавляем данные в объект диаграммы
+                chart_bar_korp2.add_data(data, titles_from_data=False)
+                # установим метки на объект диаграммы
+                chart_bar_korp2.set_categories(categor)
+                # Задаем размер диаграммы (ширина и высота в точках)
+                chart_bar_korp2.width = 10  # Ширина диаграммы (15 точек)
+                chart_bar_korp2.height = 6   # Высота диаграммы (7 точек)
+                # уберем легенду
+                chart_bar_korp2.legend = None
+                ws_korp.add_chart(chart_bar_korp2, "L10")
+
+                ################
+                #добавляем линейную диаграмму по получасовкам на korp
+                chart_k = LineChart()
+                chart_k.title = "Профиль мощности"
+                chart_k.y_axis.title = "Значение"
+                chart_k.x_axis.title = "Дата"
+                # уберем легенду
+                chart_k.legend = None
+            
+                # Указываем диапазон данных для графика
+                num = 8+len(dt_sum_30_obj)-1
+                data_ref = Reference(ws_korp, min_col=26, min_row=7, max_row=num) # Значения (столбец B)
+                categories_ref = Reference(ws_korp, min_col=25, min_row=7, max_row=num)  # Даты (столбец A)
+                
+                # Добавляем данные и категории в график
+                chart_k.add_data(data_ref, titles_from_data=True)
+                chart_k.set_categories(categories_ref)
+                chart_k.height = 20   # Высота диаграммы (точек)
+                chart_k.width = 45  # Ширина диаграммы (точек)
+                # Добавляем график на лист
+                place = "A%s"%(len(dt_common_abons)+6)
+                ws_korp.add_chart(chart_k, place)
+
+                image_path = finders.find('images/place-ico64.png')
+                if image_path:
+                    img = Image(image_path)
+                    ws_korp.add_image(img, "A1") 
+
+             
+            ##Пишем данные в сводную главную таблицу
+            try:
+                val = "=SUM('%s'!I6:I9)"%(korp[3])
+                ws.cell(row=5, column=(3+col_i), value=val)
+                ws.cell(row=5, column=(3+col_i)).style = "ali_white"
+                #ws.cell('C%s'%(5+col_i)).value = "=SUM('%s'!I6:I9)"%(korp[3]) 
+                #ws.cell('C%s'%(5+col_i)).style = "ali_white"
+            except:
+                next
+            #на техническую пишем:
+            try:
+                val = "=SUM('%s'!I6:I9)"%(korp[3])
+                ws_teh.cell('B%s'%(col_i+1)).value = val 
+                ws_teh.cell('B%s'%(col_i+1)).style = "ali_white"
+            except:
+                next                
+            try:
+                ws.cell('C8').value = f"=SUM({common_sum1[0:-1]})" 
+                ws.cell('C8').style = "ali_white"
+            except:
+                next
+            try:
+                ws.cell('C9').value = f"=SUM({common_sum2[0:-1]})" 
+                ws.cell('C9').style = "ali_white"
+            except:
+                next
+            try:
+                ws.cell('C10').value = f"=SUM({common_sum3[0:-1]})" 
+                ws.cell('C10').style = "ali_white"
+            except:
+                next
+            try:
+                ws.cell('D8').value = f"=AVERAGE({common_average1[0:-1]})" 
+                ws.cell('D8').style = "ali_white"
+            except:
+                next
+            try:
+                ws.cell('D9').value = f"=AVERAGE({common_average2[0:-1]})" 
+                ws.cell('D9').style = "ali_white"
+            except:
+                next
+            try:
+                ws.cell('D10').value = f"=AVERAGE({common_average3[0:-1]})" 
+                ws.cell('D10').style = "ali_white"
+            except:
+                next
+        
+        dt_sum_30_all_korp =  common_sql.get_electric_30_by_obj_for_period(str(korp[3]), electric_data_start, electric_data_end, params,'--')
+        for n, sum_row in enumerate(dt_sum_30_all_korp, start = 0):
+            try:
+                ws.cell('X%s'%(8+n)).value = '%s' % (sum_row[0]) 
+                ws.cell('X%s'%(8+n)).style = "ali_white"
+            except:
+                ws.cell('X%s'%(8+n)).style = "ali_white"
+            try:
+                ws.cell('Y%s'%(8+n)).value = '%s' % (sum_row[3]) 
+                ws.cell('Y%s'%(8+n)).style = "ali_white"
+            except:
+                ws.cell('Y%s'%(8+n)).style = "ali_white"
+            try:
+                ws.cell('Z%s'%(8+n)).value = float(sum_row[4])  # '%s' % (sum_row[4]) 
+                ws.cell('Z%s'%(8+n)).style = "ali_white"
+            except:
+                ws.cell('Z%s'%(8+n)).style = "ali_white"  
+        try:
+            ws.cell('L8').value = "=MAX(Z8:Z%s)"%(8+len(dt_sum_30_all_korp)-1)
+            ws.cell('L8').style  = "ali_white"
+        except:
+            next
+        try:
+            ws.cell('M8').value = '=INDEX(Y4:Y%s,MATCH(L8,Z8:Z%s,0))'%((8+len(dt_sum_30_all_korp)-1),(8+len(dt_sum_30_all_korp)-1)) #f"=INDEX(Y4:Y{(4+len(dt_daily_consumption)-1)}{r}MATCH(R4{r}Z4:Z{(4+len(dt_daily_consumption)-1)}{r}0))" #"=INDEX(Y4:Y%s;MATCH(R4;Z4:Z%s;0))"%(4+len(dt_daily_consumption)-1,4+len(dt_daily_consumption)-1)
+            ws.cell('M8').style  = "ali_white"
+        except:
+            next
+        try:
+            ws.cell('L9').value = "=MIN(Z4:Z%s)"%(8+len(dt_sum_30_all_korp)-1)
+            ws.cell('L9').style  = "ali_white"
+        except:
+            next
+        try:
+            ws.cell('M9').value = '=INDEX(Y4:Y%s,MATCH(L9,Z8:Z%s,0))'%((8+len(dt_sum_30_all_korp)-1),(8+len(dt_sum_30_all_korp)-1))
+            ws.cell('M9').style  = "ali_white"
+        except:
+            next
+
+    #добавляем диаграмму на главную:
+    # создаем объект диаграммы
+    chart1 = BarChart()
+    # установим тип - `вертикальные столбцы`
+    chart1.type = "col"
+    # установим стиль диаграммы (цветовая схема)
+    chart1.style = 10
+    # заголовок диаграммы
+    chart1.title = "Суммарное потребление за выбранные периоды"
+    
+    categor = Reference(ws, min_col=2, min_row=8, max_row=10)
+    # теперь выберем категорию для оси `x`
+    data = Reference(ws, min_col=3, min_row=8, max_row=10)
+    # добавляем данные в объект диаграммы
+    chart1.add_data(data, titles_from_data=False)
+    # установим метки на объект диаграммы
+    chart1.set_categories(categor)
+    # Задаем размер диаграммы (ширина и высота в точках)
+    chart1.width = 10  # Ширина диаграммы (15 точек)
+    chart1.height = 6   # Высота диаграммы (7 точек)
+    # уберем легенду
+    chart1.legend = None
+    ws.add_chart(chart1, "F7")
+
+    #4+len(dt_common)
+    #добавляем круговую диаграмму с "вкладом" от каждого корпуса
+    chart_pie = PieChart()
+    chart_pie.title = 'Распределение потребления'
+    #chart_pie.type = "pie"
+    #chart_pie.splitType = "val" # split by value
+    num = len(dt_common)
+    labels = Reference(ws_teh, min_col=1, min_row=1, max_row=num)
+    data = Reference(ws_teh, min_col=2, min_row=1, max_row=num)
+    # labels = Reference(ws, min_col=3, min_row=4, max_row=4, max_col = 2+num)
+    # data = Reference(ws, min_col=3, min_row=5, max_row=5, max_col = 2+num)
+    chart_pie.add_data(data, titles_from_data=False)
+    chart_pie.set_categories(labels)
+    chart_pie.width = 10  # Ширина 
+    chart_pie.height = 6   # Высота 
+     # уберем легенду
+    #chart_pie.legend = None
+
+    ws.add_chart(chart_pie, "O7")
+
+    ################
+    #добавляем линейную диаграмму по получасовкам на главную
+    chart = LineChart()
+    chart.title = "Профиль мощности"
+    chart.y_axis.title = "Значение"
+    chart.x_axis.title = "Дата"
+    # уберем легенду
+    chart.legend = None
+ 
+    # Указываем диапазон данных для графика
+    num = 8+len(dt_sum_30_obj)-1
+    data_ref = Reference(ws, min_col=26, min_row=7, max_row=num)#(8+len(dt_sum_30_obj)-1), max_col=25)  # Значения (столбец B)
+    categories_ref = Reference(ws, min_col=25, min_row=7, max_row=num)  # Даты (столбец A)
+    
+    # Добавляем данные и категории в график
+    chart.add_data(data_ref, titles_from_data=True)
+    chart.set_categories(categories_ref)
+    chart.height = 20   # Высота диаграммы (точек)
+    chart.width = 45  # Ширина диаграммы (точек)
+    # Добавляем график на лист
+    ws.add_chart(chart, "A16")  # График будет размещен начиная с ячейки D2
+
+    #загрузка картинок на сводную страницу
+    # Ищем путь к изображению в папке static
+    image_path = finders.find('images/new_ico/lamp2-ico48.png')
+    if image_path:
+        img = Image(image_path)
+        ws.add_image(img, "G1") 
+    image_path = finders.find('images/new_ico/logo2-ico48.png')
+    if image_path:
+        img = Image(image_path)
+        ws.add_image(img, "A1") 
+
+    
+    image_path = finders.find('images/new_ico/house_ico48.png')
+    if image_path:
+        img = Image(image_path)
+        ws.add_image(img, "A4") 
+
+    wb.remove(wb['ПУ_temp'])#
+    wb.remove(wb['korp_temp'])
+    
+    ws_temp =  wb.copy_worksheet(ws_teh)    
+    wb.remove(ws_teh)
+    ws_temp.title = "Техническая"
+
+    response.seek(0)
+    response = HttpResponse(save_virtual_workbook(wb),content_type="application/vnd.ms-excel")
+    
+    output_name = 'electric_extended_'#+str(electric_data_start)+'-'+str(electric_data_end)
     file_ext = 'xlsx'    
     response['Content-Disposition'] = 'attachment;filename="%s.%s"' % (output_name.replace('"', '\"'), file_ext)   
     return response

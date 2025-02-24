@@ -1,0 +1,107 @@
+<html>
+<head>
+</head>
+<body>
+<script src="/static/libs/liHighLight.js" type=text/javascript></script>
+
+<script>
+{% if AllData %}
+	var ctx = document.getElementById("myChart").getContext('2d');
+	var myChart = new Chart(ctx, {
+		type: 'pie',
+		data: {
+			labels: {{label|safe}}, 
+			datasets: {{AllData|safe}},
+		},
+		options: {
+			scales: {
+				yAxes: [{
+					display: false
+				}]
+			},
+			title: {
+			display: true,
+			text: 'Части от общего потребления по корпусам'
+		  }
+		}
+	});
+{% endif %}	
+
+{% if AllData2 %}
+var ctx2 = document.getElementById("myChart2").getContext('2d');
+var myChart2 = new Chart(ctx2, {
+    type: 'bar',
+    data: {
+        labels: {{label2|safe}}, 
+        datasets: {{AllData2|safe}},
+    },
+    options: {
+        scales: {
+            yAxes: [{
+                display: false
+            }]
+        },
+		title: {
+        display: true,
+        text: 'Потребление за выбранные диапазоны'
+      }
+    }
+});
+{% endif %}	
+</script>
+
+
+<p>
+
+<div> Для просмотра детального отчёта нажмите кнопку <strong>"Экспорт"</strong> <!-- &nbsp;&nbsp;&nbsp;&nbsp; -->
+{% load static %} <img  src="{%static "images/top-ico64.png" %}" alt="Экспорт"></div>
+
+<span>Квартальный анализ по электрике за период с <strong>{{electric_data_start}}</strong> по <strong>{{electric_data_end}}</strong></span>
+<br>
+Рекомендуемый диапазон дат - <strong>3 месяцa</strong> (Диапазон будет разбит на 3 части)
+
+<div class = "row align-items-center">
+<div class = "col-6" > 
+	{% if data_table %}
+	<table class="content" id="data-table" >
+	<tr>
+	<th>Потребление, кВт</th>
+	<th>Сумма</th>
+	<th>Среднее в день</th>
+	<th>MAX</th>
+	<th>MIN</th>
+	</tr>
+	{% for value in data_table %}
+	<tr>
+	<td><strong>{{value.0}}</strong></td>
+	<td>{{value.1}}</td>
+	<td>{{value.2}}</td>
+	<td>{{value.3}}</td>
+	<td>{{value.4}}</td>
+	{% endfor %}
+	</table>
+	{% else %}
+	<span><strong>Нет данных.</strong></span>
+	{% endif %}
+</div>
+
+<div class = "col-6" > 
+	<br>{% if AllData %}
+				<canvas id="myChart" width="300" height="100"></canvas>						
+		{% endif %}
+	<br>
+</div>
+</div>
+<div class = "row align-items-center">
+<div class = "col-6" > </div>
+<div class = "col-6" > 
+	<br>{% if AllData2 %}
+				<canvas id="myChart2" width="300" height="100"></canvas>						
+		{% endif %}
+	<br>
+</div>
+</div>
+
+
+</body>
+</html>

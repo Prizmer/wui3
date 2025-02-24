@@ -109,7 +109,7 @@ DATABASES = {
         # 'NAME': 'citybay',
         #'NAME': 'komunarka_k10',
         #'NAME': 'jd1-2-3',
-        'NAME': '4solnca',
+        #'NAME': '4solnca',
         #'NAME': 'woods',
         #'NAME': 'freedom',
         #'NAME': 'ostrov3',
@@ -120,10 +120,11 @@ DATABASES = {
         #'NAME': 'fresh',
         # 'NAME': 'pav',
         #'NAME': 'dubi',
-        #'NAME': 'ogni2',
+        'NAME': 'ogni2',
         #'NAME': 'ogni1',
         #'NAME': 'sobytie',
         #'NAME': 'pogodinka2',
+        #'NAME': 'pervomay42',
         #'NAME': 'presniya',
         #'NAME': 'obninsk1',
         # 'NAME': 'template',
@@ -193,7 +194,7 @@ LOGGING = {
         }
 }
 
-CLEAN_DOUBLE_30 = False #Удаление получасовок перед формированием отчёта, актулаьно для СЭТов
+CLEAN_DOUBLE_30 = False #Удаление получасовок перед формированием отчёта, актуально для СЭТов
 SHOW_LIC_NUM = False #Показывать лицевой номер в отчёте, актуально для 91, 102, 104, 106 и старше отчётов
 SEPARATOR = ',' # Какой разделитель использовать при экспорте в excel '.' or ','
 ROUND_SIZE = 3 #Сколько знаков после запятой будет выводится в отчёт excel

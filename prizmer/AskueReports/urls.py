@@ -180,4 +180,5 @@ urlpatterns = [
     # url(r'^141/$', views.econom_water_period, name = 'period_water_econom'), # Показание за период с водосчётчиков Эконом
     url(r'^142/$', views.report_econom_water_daily, name = '142'), # Показание на дату с водосчётчиков ЭкоНом
 
+    url(r'^143/$', views.electric_analize_extended, name = '143'), # Анализ потребления по получасовкам за период
 ]

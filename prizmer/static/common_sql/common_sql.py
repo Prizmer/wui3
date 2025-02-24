@@ -11153,11 +11153,12 @@ def get_electric_30_by_abonent_for_period(obj_title, obj_parent_title,electric_d
        date,
        time,
        c_date,
-       activ,
-       reactiv,
+       activ::numeric,
+       reactiv::numeric,
        '30',
        (EXTRACT(EPOCH FROM c_date) * 1000)::text as utc,
-       row_number() over(ORDER BY meter_name) num
+       row_number() over(ORDER BY c_date) num,       
+	   round((activ*ktt*2)::numeric,3)as moshnost_kvt_ch
 from 
 (select c_date
 from
@@ -11202,10 +11203,10 @@ WHERE
   link_abonents_taken_params.coefficient, 
   various_values.date, 
   various_values.time
-  ORDER BY
-  various_values.date ASC, 
-  various_values.time ASC) z1
+  ) z1
   on z1.date_time = z_date.c_date
+  ORDER BY
+ c_date ASC
     """ %(electric_data_start, electric_data_end,params[0], params[1], electric_data_start, electric_data_end, obj_title, obj_parent_title)
     #print(sQuery)
     cursor.execute(sQuery)  
@@ -15811,7 +15812,7 @@ SELECT '422611',
 z_end.attr1,
 z_end.type_meter,
 z_end.account_1,
-z_end.factory_number_manual,
+z_end.attr3||z_end.factory_number_manual,
 'ХОДЫНСКАЯ УЛ., Д 2, '||z_end.account_2,
 z_end.attr3,
 z_end.attr4,
@@ -15825,6 +15826,7 @@ substring(type_meter, 1, 2) as type_meter,
 water_pulsar_abons.account_1,
 water_pulsar_abons.account_2,
 water_pulsar_abons.factory_number_manual,
+water_pulsar_abons.attr2,
 water_pulsar_abons.attr3,
 water_pulsar_abons.attr4,
 z1.value as val_start,
@@ -15894,6 +15896,7 @@ substring(type_meter, 1, 2) as type_meter,
 water_pulsar_abons.account_1,
 water_pulsar_abons.account_2,
 water_pulsar_abons.factory_number_manual,
+water_pulsar_abons.attr2,
 water_pulsar_abons.attr3,
 water_pulsar_abons.attr4,
 z1.value as val_end,
@@ -15969,5 +15972,294 @@ def get_data_table_water_consumption_mosvodokanal(obj_parent_title, obj_title, e
     cursor.execute(sQuery)
     data_table = cursor.fetchall()
     #print(sQuery)
+    #print(data_table)
+    return data_table
+
+def get_data_table_electric_objects_with_30():
+    cursor = connection.cursor()
+    data_table=[]
+    sQuery = """
+    SELECT 
+parent_objects_for_progruz.obj_name2,
+parent_objects_for_progruz.obj_name1,
+  objects.guid, 
+  objects.name   
+FROM 
+  public.abonents, 
+  public.objects, 
+  public.link_abonents_taken_params, 
+  public.taken_params, 
+  public.params, 
+  public.types_params, 
+  parent_objects_for_progruz
+WHERE 
+  abonents.guid_objects = objects.guid AND
+  link_abonents_taken_params.guid_abonents = abonents.guid AND
+  link_abonents_taken_params.guid_taken_params = taken_params.guid AND
+  taken_params.guid_params = params.guid AND
+  types_params.guid = params.guid_types_params AND
+  parent_objects_for_progruz.obj_guid =  objects.guid AND
+  types_params.name = 'Получасовой'
+ GROUP BY
+ parent_objects_for_progruz.obj_name2,
+ parent_objects_for_progruz.obj_name1,
+ objects.guid, 
+ objects.name 
+order by parent_objects_for_progruz.obj_name2,
+parent_objects_for_progruz.obj_name1,
+objects.name
+"""
+    cursor.execute(sQuery)
+    data_table = cursor.fetchall()
+    return data_table
+
+def get_data_table_electric_abons_with_30(obj_title):
+    cursor = connection.cursor()
+    data_table=[]
+    sQuery = """
+--Список объектов и их приборов с номерами и ктт,ктн
+SELECT 
+parent_objects_for_progruz.obj_name2,
+parent_objects_for_progruz.obj_name1,
+  objects.guid, 
+  objects.name, 
+  abonents.guid, 
+  abonents.name,  
+  meters.factory_number_manual, 
+  link_abonents_taken_params.coefficient, 
+  link_abonents_taken_params.coefficient_2, 
+  link_abonents_taken_params.coefficient_3
+FROM 
+  public.abonents, 
+  public.objects, 
+  public.link_abonents_taken_params, 
+  public.taken_params, 
+  public.params, 
+  public.types_params, 
+  public.meters,
+  parent_objects_for_progruz
+WHERE 
+  abonents.guid_objects = objects.guid AND
+  link_abonents_taken_params.guid_abonents = abonents.guid AND
+  link_abonents_taken_params.guid_taken_params = taken_params.guid AND
+  taken_params.guid_params = params.guid AND
+  taken_params.guid_meters = meters.guid AND
+  types_params.guid = params.guid_types_params AND
+  parent_objects_for_progruz.obj_guid =  objects.guid AND
+  types_params.name = 'Получасовой' AND
+  objects.name = '%s'
+ GROUP BY
+  parent_objects_for_progruz.obj_name2,
+  parent_objects_for_progruz.obj_name1,
+  objects.guid, 
+  objects.name, 
+  abonents.guid, 
+  abonents.name, 
+  types_params.name, 
+  meters.factory_number_manual, 
+  link_abonents_taken_params.coefficient, 
+  link_abonents_taken_params.coefficient_2, 
+  link_abonents_taken_params.coefficient_3
+order by objects.name, 
+  abonents.name
+"""%(obj_title)
+    cursor.execute(sQuery)
+    data_table = cursor.fetchall()
+    return data_table
+
+def get_daily_consumption_by_30(obj_title, obj_parent_title,electric_data_start, electric_data_end, params):
+    cursor = connection.cursor()
+    data_table=[]   
+    sQuery="""
+    SELECT
+	   meter_name,
+       factory_number_manual,
+       ktt,
+       c_date::date,
+	   round((sum(activ)*2*ktt)::numeric,3) as moshnost_day
+FROM
+    (
+   Select 
+       meter_name,
+       factory_number_manual,
+       ktt,
+       date,
+       time,
+       c_date,
+       activ::numeric,
+       reactiv::numeric,
+       '30',
+       (EXTRACT(EPOCH FROM c_date) * 1000)::text as utc,
+       row_number() over(ORDER BY c_date) num,       
+	   round((activ*ktt*2)::numeric,3)as moshnost_kvt_ch
+from 
+(select c_date
+from
+generate_series('%s 00:00:00'::timestamp without time zone, '%s 23:30:00'::timestamp without time zone, interval '30 minutes') as c_date) as z_date
+Left join
+(SELECT 
+  objects.name as obj_name, 
+  abonents.name as ab_name, 
+  meters.name as meter_name, 
+  meters.factory_number_manual, 
+  link_abonents_taken_params.coefficient as ktt, 
+  various_values.date, 
+  various_values.time,   
+  (various_values.date + various_values.time)::timestamp as date_time,
+  SUM (CASE when names_params.name = '%s' then various_values.value else 0 end) as activ,
+  SUM (CASE when names_params.name = '%s' then various_values.value else 0 end) as reactiv
+FROM 
+  public.abonents, 
+  public.objects, 
+  public.link_abonents_taken_params, 
+  public.taken_params, 
+  public.meters, 
+  public.various_values, 
+  public.params, 
+  public.names_params
+WHERE 
+  abonents.guid_objects = objects.guid AND
+  link_abonents_taken_params.guid_abonents = abonents.guid AND
+  link_abonents_taken_params.guid_taken_params = taken_params.guid AND
+  taken_params.guid_meters = meters.guid AND
+  taken_params.guid_params = params.guid AND
+  various_values.id_taken_params = taken_params.id AND
+  params.guid_names_params = names_params.guid AND
+  various_values.date between '%s' and '%s' AND 
+  abonents.name = '%s' AND 
+  objects.name = '%s'
+  group by 
+  objects.name, 
+  abonents.name, 
+  meters.name, 
+  meters.factory_number_manual, 
+  link_abonents_taken_params.coefficient, 
+  various_values.date, 
+  various_values.time
+  ) z1
+  on z1.date_time = z_date.c_date
+) as z
+group by meter_name,
+       factory_number_manual,
+       ktt,
+       c_date::date
+order by c_date::date
+   """ %(electric_data_start, electric_data_end,params[0], params[1], electric_data_start, electric_data_end, obj_title, obj_parent_title)
+    #print(sQuery)
+    cursor.execute(sQuery)  
+    data_table = cursor.fetchall()
+    return data_table
+
+def get_electric_30_by_obj_for_period(obj_title,electric_data_start, electric_data_end, params, is_korp_str):
+    #is_korp_str - если данные нужны по корпусу, то эта строка пустая, если данные нужны по объекту всему, то '--' - таким образом закоментируется фрагмент-условие, гед выбор корпуса
+    cursor = connection.cursor()
+    data_table=[]   
+    sQuery="""
+   Select
+	   row_number() over(ORDER BY c_date) num,
+       date,
+       time,
+       c_date,
+       moshnost_kvt_ch::numeric  
+from
+(select c_date
+from
+generate_series('%s'::timestamp without time zone, '%s'::timestamp without time zone, interval '30 minutes') as c_date) as z_date
+Left join
+(SELECT
+  objects.name as obj_name, 
+  various_values.date,
+  various_values.time,
+  (various_values.date + various_values.time)::timestamp as date_time,
+  SUM (CASE when names_params.name = '%s' then various_values.value*link_abonents_taken_params.coefficient*2 else 0 end) as moshnost_kvt_ch
+FROM
+  public.abonents,
+  public.objects,
+  public.link_abonents_taken_params,
+  public.taken_params,
+  public.meters,
+  public.various_values,
+  public.params,
+  public.names_params
+WHERE
+  abonents.guid_objects = objects.guid AND
+  link_abonents_taken_params.guid_abonents = abonents.guid AND
+  link_abonents_taken_params.guid_taken_params = taken_params.guid AND
+  taken_params.guid_meters = meters.guid AND
+  taken_params.guid_params = params.guid AND
+  various_values.id_taken_params = taken_params.id AND
+  params.guid_names_params = names_params.guid AND
+  various_values.date between '%s' and '%s' 
+  %s AND objects.name = '%s'
+  group by
+  objects.name, 
+  various_values.date,
+  various_values.time
+  ) z1
+  on z1.date_time = z_date.c_date
+  ORDER BY
+ c_date ASC
+    """ %(electric_data_start, electric_data_end,params[0], electric_data_start, electric_data_end, is_korp_str, obj_title)
+    #print(sQuery)
+    cursor.execute(sQuery)  
+    data_table = cursor.fetchall()
+    #print(data_table)
+    return data_table
+
+def get_data_table_consumption_30_sum_and_average(electric_data_start, electric_data_end, obj_title, is_korp_str):
+    #is_korp_str - если данные нужны по корпусу, то эта строка пустая, если данные нужны по объекту всему, то '--' - таким образом закоментируется фрагмент-условие, гед выбор корпуса
+    cursor = connection.cursor()
+    data_table=[]   
+    sQuery="""
+Select
+	'%s - %s',
+	%s obj_name,
+    round(sum(moshnost_kvt_ch)::numeric,3),
+	round(avg(moshnost_kvt_ch)::numeric,3),
+	round(max(moshnost_kvt_ch)::numeric,3),
+	round(min(moshnost_kvt_ch)::numeric,3)
+from
+(select c_date
+from
+generate_series('%s'::timestamp without time zone, '%s'::timestamp without time zone, interval '30 minutes') as c_date) as z_date
+Left join
+(SELECT
+  objects.name as obj_name, 
+  various_values.date,
+  various_values.time,
+  (various_values.date + various_values.time)::timestamp as date_time,
+  SUM (CASE when names_params.name = 'A+ Профиль' then various_values.value*link_abonents_taken_params.coefficient*2 else 0 end) as moshnost_kvt_ch
+FROM
+  public.abonents,
+  public.objects,
+  public.link_abonents_taken_params,
+  public.taken_params,
+  public.meters,
+  public.various_values,
+  public.params,
+  public.names_params
+WHERE
+  abonents.guid_objects = objects.guid AND
+  link_abonents_taken_params.guid_abonents = abonents.guid AND
+  link_abonents_taken_params.guid_taken_params = taken_params.guid AND
+  taken_params.guid_meters = meters.guid AND
+  taken_params.guid_params = params.guid AND
+  various_values.id_taken_params = taken_params.id AND
+  params.guid_names_params = names_params.guid AND
+  various_values.date between '%s' and '%s' 
+ 
+  group by
+  objects.name, 
+  various_values.date,
+  various_values.time
+  ) z1
+  on z1.date_time = z_date.c_date
+  where obj_name IS NOT NULL
+  %s group by obj_name 
+   
+    """ %(electric_data_start, electric_data_end, is_korp_str, electric_data_start, electric_data_end, electric_data_start, electric_data_end, is_korp_str)
+    #print(sQuery)
+    cursor.execute(sQuery)  
+    data_table = cursor.fetchall()
     #print(data_table)
     return data_table
