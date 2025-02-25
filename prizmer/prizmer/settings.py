@@ -107,6 +107,7 @@ DATABASES = {
     'default': {
         'ENGINE':'django.db.backends.postgresql_psycopg2',
         # 'NAME': 'citybay',
+        'NAME': 'discovery',
         #'NAME': 'komunarka_k10',
         #'NAME': 'jd1-2-3',
         #'NAME': '4solnca',
@@ -120,7 +121,7 @@ DATABASES = {
         #'NAME': 'fresh',
         # 'NAME': 'pav',
         #'NAME': 'dubi',
-        'NAME': 'ogni2',
+        #'NAME': 'ogni2',
         #'NAME': 'ogni1',
         #'NAME': 'sobytie',
         #'NAME': 'pogodinka2',

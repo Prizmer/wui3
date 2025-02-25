@@ -15806,14 +15806,14 @@ def del_various_values_by_date( date):
     
     return data_table
 
-def Make_view_water_consumption_mosvodokanal(obj_parent_title, obj_title, electric_data_start, electric_data_end, sortDir):
+def Make_view_water_consumption_mosvodokanal(obj_parent_title, obj_title, electric_data_start, electric_data_end, sortDir, dogovor,address):
     sQuery = """
-SELECT '422611',
+SELECT '%s',
 z_end.attr1,
 z_end.type_meter,
 z_end.account_1,
 z_end.attr3||z_end.factory_number_manual,
-'ХОДЫНСКАЯ УЛ., Д 2, '||z_end.account_2,
+'%s'||z_end.account_2,
 z_end.attr3,
 z_end.attr4,
 z_start.val_start,
@@ -15960,14 +15960,14 @@ WHERE
 ) as z_end
   WHERE z_end.factory_number_manual = z_start.factory_number_manual
   order by z_end.obj_name, z_end.ab_name %s
-"""%(electric_data_start, electric_data_end, sortDir)
+"""%(dogovor, address, electric_data_start, electric_data_end, sortDir)
     #print(sQuery)
     return sQuery
 
-def get_data_table_water_consumption_mosvodokanal(obj_parent_title, obj_title, electric_data_start, electric_data_end, sortDir):
+def get_data_table_water_consumption_mosvodokanal(obj_parent_title, obj_title, electric_data_start, electric_data_end, sortDir, dogovor, address):
     cursor = connection.cursor()
     data_table=[1]
-    sQuery = Make_view_water_consumption_mosvodokanal(obj_parent_title, obj_title, electric_data_start, electric_data_end, sortDir)
+    sQuery = Make_view_water_consumption_mosvodokanal(obj_parent_title, obj_title, electric_data_start, electric_data_end, sortDir, dogovor, address)
     #sQuery = 'SELECT * from abonents'
     cursor.execute(sQuery)
     data_table = cursor.fetchall()
@@ -16262,4 +16262,173 @@ WHERE
     cursor.execute(sQuery)  
     data_table = cursor.fetchall()
     #print(data_table)
+    return data_table
+
+def Make_view_water_consumption_mosvodokanal2(obj_parent_title, obj_title, electric_data_start, electric_data_end, sortDir, dogovor,address):
+    sQuery = """
+SELECT '%s',
+z_end.account_1, --абонент
+z_end.type_meter,
+z_end.attr2, --узел учёта
+--SUBSTRING(z_end.attr3 FROM 9 FOR length(z_end.attr3))||'_' ||z_end.address, --номер прибора с преиндексом
+z_end.factory_number_manual,
+'%s'||z_end.account_2, -- адрес
+z_end.attr3,
+z_end.attr4,
+round(z_start.val_start::numeric,0),
+round(z_end.val_end::numeric, 0)
+FROM
+(
+SELECT
+water_pulsar_abons.attr1,
+substring(type_meter, 1, 2) as type_meter,
+water_pulsar_abons.account_1,
+water_pulsar_abons.account_2,
+water_pulsar_abons.factory_number_manual,
+water_pulsar_abons.attr2,
+water_pulsar_abons.attr3,
+water_pulsar_abons.attr4,
+z1.value as val_start,
+water_pulsar_abons.obj_name,
+water_pulsar_abons.ab_name
+from water_pulsar_abons
+LEFT JOIN
+(SELECT
+  objects.guid as obj_guid,
+  objects.name as obj_name,
+  abonents.guid as ab_guid,
+  abonents.name as ab_name,
+  abonents.account_1,
+  abonents.account_2,
+  daily_values.date,
+  daily_values.value,
+  meters.name as meter_name,
+  meters.factory_number_manual,
+  meters.attr1,
+  meters.attr2,
+  meters.attr3,
+  meters.attr4
+FROM
+  public.abonents,
+  public.objects,
+  public.link_abonents_taken_params,
+  public.taken_params,
+  public.resources,
+  public.meters,
+  public.params,
+  public.names_params,
+  public.daily_values
+WHERE
+  abonents.guid_objects = objects.guid AND
+  link_abonents_taken_params.guid_abonents = abonents.guid AND
+  link_abonents_taken_params.guid_taken_params = taken_params.guid AND
+  taken_params.guid_meters = meters.guid AND
+  taken_params.guid_params = params.guid AND
+  params.guid_names_params = names_params.guid AND
+  names_params.guid_resources = resources.guid AND
+  daily_values.id_taken_params = taken_params.id AND
+  (resources.name = 'ХВС' or resources.name = 'ГВС') AND
+  daily_values.date = '%s'
+ GROUP BY
+ objects.guid,
+  objects.name,
+  abonents.guid,
+  abonents.name,
+  abonents.account_1,
+  abonents.account_2,
+  daily_values.date,
+  daily_values.value,
+  meters.name,
+  meters.factory_number_manual,
+  meters.attr1,
+  meters.attr2,
+  meters.attr3,
+  meters.attr4
+ ) as z1
+  ON water_pulsar_abons.factory_number_manual = z1.factory_number_manual
+  where water_pulsar_abons.ab_name like '%%Квартира%%'
+  order by z1.obj_name, z1.ab_name) as z_start,
+
+(
+SELECT
+water_pulsar_abons.attr1,
+substring(type_meter, 1, 2) as type_meter,
+water_pulsar_abons.account_1,
+water_pulsar_abons.account_2,
+water_pulsar_abons.factory_number_manual,
+water_pulsar_abons.attr2,
+water_pulsar_abons.attr3,
+water_pulsar_abons.attr4,
+z1.value as val_end,
+water_pulsar_abons.obj_name,
+water_pulsar_abons.ab_name
+from water_pulsar_abons
+LEFT JOIN
+(SELECT
+  objects.guid as obj_guid,
+  objects.name as obj_name,
+  abonents.guid as ab_guid,
+  abonents.name as ab_name,
+  abonents.account_1,
+  abonents.account_2,
+  daily_values.date,
+  daily_values.value,
+  meters.name as meter_name,
+  meters.factory_number_manual,
+  meters.attr1,
+  meters.attr2,
+  meters.attr3,
+  meters.attr4
+FROM
+  public.abonents,
+  public.objects,
+  public.link_abonents_taken_params,
+  public.taken_params,
+  public.resources,
+  public.meters,
+  public.params,
+  public.names_params,
+  public.daily_values
+WHERE
+  abonents.guid_objects = objects.guid AND
+  link_abonents_taken_params.guid_abonents = abonents.guid AND
+  link_abonents_taken_params.guid_taken_params = taken_params.guid AND
+  taken_params.guid_meters = meters.guid AND
+  taken_params.guid_params = params.guid AND
+  params.guid_names_params = names_params.guid AND
+  names_params.guid_resources = resources.guid AND
+  daily_values.id_taken_params = taken_params.id AND
+  (resources.name = 'ХВС' or resources.name = 'ГВС') AND
+  daily_values.date = '%s'
+ GROUP BY
+ objects.guid,
+  objects.name,
+  abonents.guid,
+  abonents.name,
+  abonents.account_1,
+  abonents.account_2,
+  daily_values.date,
+  daily_values.value,
+  meters.name,
+  meters.factory_number_manual,
+  meters.attr1,
+  meters.attr2,
+  meters.attr3,
+  meters.attr4
+ ) as z1
+  ON water_pulsar_abons.factory_number_manual = z1.factory_number_manual
+  where water_pulsar_abons.ab_name like '%%Квартира%%'
+) as z_end
+  WHERE z_end.factory_number_manual = z_start.factory_number_manual
+  order by z_end.obj_name, z_end.ab_name %s
+"""%(dogovor, address, electric_data_start, electric_data_end, sortDir)
+    print(sQuery)
+    return sQuery
+
+def get_data_table_water_consumption_mosvodokanal2(obj_parent_title, obj_title, electric_data_start, electric_data_end, sortDir, dogovor, address):
+    cursor = connection.cursor()
+    data_table=[1]
+    sQuery = Make_view_water_consumption_mosvodokanal2(obj_parent_title, obj_title, electric_data_start, electric_data_end, sortDir, dogovor, address)
+    cursor.execute(sQuery)
+    data_table = cursor.fetchall()
     return data_table

@@ -210,10 +210,13 @@ urlpatterns = [
     
     url(r'^139/$', views.pulsar_water_consumption_mosvodokanal, name = 'pulsar_water_consumption_mosvodokanal'), # Отчёт поп отреблению для мосводокаанала на Пресня-Сити
 
+
     url(r'^140/$', views.pulsar_water_battery, name = 'water_pulsar_battery'), # Вода, батарейка
 
     url(r'^141/$', views.econom_water_period, name = 'period_water_econom'), # Показание за период с водосчётчиков Эконом
     url(r'^142/$', views.econom_water_daily, name = 'water_econom'), # Показание на дату с водосчётчиков ЭкоНом
    
     url(r'^143/$', views.electric_analize_extended, name = 'electric_analize_extended'), # Анализ потребления по получасовкам за период
+
+    url(r'^145/$', views.pulsar_water_consumption_mosvodokanal2, name = 'pulsar_water_consumption_mosvodokanal2'), # Отчёт поп отреблению для мосводокаанала на Дискавери
 ]

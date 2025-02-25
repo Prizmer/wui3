@@ -181,4 +181,6 @@ urlpatterns = [
     url(r'^142/$', views.report_econom_water_daily, name = '142'), # Показание на дату с водосчётчиков ЭкоНом
 
     url(r'^143/$', views.electric_analize_extended, name = '143'), # Анализ потребления по получасовкам за период
+
+    url(r'^145/$', views.pulsar_water_consumption_mosvodokanal2, name = '145'), # Отчёт по потреблению для мосводокаанала на Пресня-Сити
 ]
