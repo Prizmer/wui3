@@ -30,6 +30,9 @@ import zipfile
 import random 
 from datetime import datetime, timedelta
 
+import os
+BASE_DIR = os.path.dirname(os.path.dirname(__file__))
+
 #TODO: поправить в отчётам, там где datetime используется таким способом
 #from datetime import date, datetime, timedelta
 
@@ -21408,39 +21411,39 @@ def pulsar_water_consumption_mosvodokanal2(request):
         
 #Шапка
     ws['A1'] = 'Договор'
-    ws['A1'].style = "ali_grey"
+    #ws['A1'].style = "ali_grey"
     
     ws['B1'] = 'Абонент'
-    ws['B1'].style = "ali_grey"
+    #ws['B1'].style = "ali_grey"
     
     ws['C1'] = 'Тип воды'
-    ws['C1'].style = "ali_grey"
+    #ws['C1'].style = "ali_grey"
     
     ws['D1'] = 'Узел учёта'
-    ws['D1'].style = "ali_grey"
+    #ws['D1'].style = "ali_grey"
     
     ws['E1'] = '№ счётчика'
-    ws['E1'].style = "ali_grey"
+    #ws['E1'].style = "ali_grey"
     
     ws['F1'] = 'Адрес'
-    ws['F1'].style = "ali_grey"
+    #ws['F1'].style = "ali_grey"
     
     ws['G1'] = 'Дата поверки'
-    ws['G1'].style = "ali_grey"
+    #ws['G1'].style = "ali_grey"
     
     ws['H1'] = 'Дата следующей поверки'
-    ws['H1'].style = "ali_grey"
+    #ws['H1'].style = "ali_grey"
 
     ws['I1'] = 'Предыдущее показание'
-    ws['I1'].style = "ali_grey"
+    #ws['I1'].style = "ali_grey"
 
     ws['J1'] = 'Текущее показание'
-    ws['J1'].style = "ali_grey"
+    #ws['J1'].style = "ali_grey"
 
     ws['K1'] = 'Примечания'
-    ws['K1'].style = "ali_grey"
-    ws['L1'] = 'Принятые/непринятые показания (причина)'
-    ws['L1'].style = "ali_grey"
+    #ws['K1'].style = "ali_grey"
+    # ws['L1'] = 'Принятые/непринятые показания (причина)'
+    # ws['L1'].style = "ali_grey"
 #Запрашиваем данные для отчета
 
              
@@ -21455,83 +21458,83 @@ def pulsar_water_consumption_mosvodokanal2(request):
     data_table = common_sql.get_data_table_water_consumption_mosvodokanal2(obj_parent_title, obj_title, electric_data_start, electric_data_end, sortDir, dogovor, adress)
               
     if len(data_table)>0: 
-        data_table=common_sql.ChangeNull(data_table, None)
+        data_table=common_sql.ChangeNull_and_leave_empty(data_table, None)
 
     
 # Заполняем отчет значениями
     for row in range(2, len(data_table)+2):
         try:
             ws.cell('A%s'%(row)).value = '%s' % (data_table[row-2][0])  
-            ws.cell('A%s'%(row)).style = "ali_white"
+            #ws.cell('A%s'%(row)).style = "ali_white"
         except:
-            ws.cell('A%s'%(row)).style = "ali_white"
+            #ws.cell('A%s'%(row)).style = "ali_white"
             next
         
         try:
             ws.cell('B%s'%(row)).value = '%s' % (data_table[row-2][1])  
-            ws.cell('B%s'%(row)).style = "ali_white"
+            #ws.cell('B%s'%(row)).style = "ali_white"
         except:
-            ws.cell('B%s'%(row)).style = "ali_white"
+            #ws.cell('B%s'%(row)).style = "ali_white"
             next
             
         try:
             ws.cell('C%s'%(row)).value = '%s' % (data_table[row-2][2])  
-            ws.cell('C%s'%(row)).style = "ali_white"
+            #ws.cell('C%s'%(row)).style = "ali_white"
         except:
-            ws.cell('C%s'%(row)).style = "ali_white"
+            #ws.cell('C%s'%(row)).style = "ali_white"
             next
 
         try:
             ws.cell('D%s'%(row)).value = '%s' % (data_table[row-2][3]) 
-            ws.cell('D%s'%(row)).style = "ali_white"
+            #ws.cell('D%s'%(row)).style = "ali_white"
         except:
-            ws.cell('D%s'%(row)).style = "ali_white"
+            #ws.cell('D%s'%(row)).style = "ali_white"
             next
 
         try:
             ws.cell('E%s'%(row)).value = '%s' % (data_table[row-2][4]) 
-            ws.cell('E%s'%(row)).style = "ali_white"
+            #ws.cell('E%s'%(row)).style = "ali_white"
         except:
-            ws.cell('E%s'%(row)).style = "ali_white"
+            #ws.cell('E%s'%(row)).style = "ali_white"
             next
         
         try:
             ws.cell('F%s'%(row)).value = '%s' % (data_table[row-2][5])
-            ws.cell('F%s'%(row)).style = "ali_white"
+            #ws.cell('F%s'%(row)).style = "ali_white"
         except:
-            ws.cell('F%s'%(row)).style = "ali_white"
+            #ws.cell('F%s'%(row)).style = "ali_white"
             next
 
         try:
             ws.cell('G%s'%(row)).value = '%s' % (data_table[row-2][6])  
-            ws.cell('G%s'%(row)).style = "ali_white"
+            #ws.cell('G%s'%(row)).style = "ali_white"
         except:
-            ws.cell('G%s'%(row)).style = "ali_white"
+            #ws.cell('G%s'%(row)).style = "ali_white"
             next
 
         try:
             ws.cell('H%s'%(row)).value = '%s' % (data_table[row-2][7]) 
-            ws.cell('H%s'%(row)).style = "ali_white"
+            #ws.cell('H%s'%(row)).style = "ali_white"
         except:
-            ws.cell('H%s'%(row)).style = "ali_white"
+            #ws.cell('H%s'%(row)).style = "ali_white"
             next
 
         try:
-            ws.cell('I%s'%(row)).value = '%s' % (data_table[row-2][8]) 
-            ws.cell('I%s'%(row)).style = "ali_white"
+            ws.cell('I%s'%(row)).value = float(data_table[row-2][8]) #'%s' % (data_table[row-2][8]) 
+            #ws.cell('I%s'%(row)).style = "ali_white"
         except:
-            ws.cell('I%s'%(row)).style = "ali_white"
+            #ws.cell('I%s'%(row)).style = "ali_white"
             next
 
         try:
-            ws.cell('J%s'%(row)).value = '%s' % (data_table[row-2][9]) 
-            ws.cell('J%s'%(row)).style = "ali_white"
+            ws.cell('J%s'%(row)).value = float(data_table[row-2][9]) 
+            #ws.cell('J%s'%(row)).style = "ali_white"
         except:
-            ws.cell('J%s'%(row)).style = "ali_white"
+            #ws.cell('J%s'%(row)).style = "ali_white"
             next
             
      
-    ws.row_dimensions[1].height = 50
+    #ws.row_dimensions[1].height = 50
     ws.column_dimensions['A'].width = 15 
     ws.column_dimensions['B'].width = 15 
     ws.column_dimensions['D'].width = 15 
@@ -21547,95 +21550,95 @@ def pulsar_water_consumption_mosvodokanal2(request):
     ws2 = wb.create_sheet(title="Справочник примечаний")
 
     ws2['A1'] = 'Код'
-    ws2['A1'].style = "ali_grey"
+    #ws2['A1'].style = "ali_grey"
     
     ws2['B1'] = 'Описание'
-    ws2['B1'].style = "ali_grey"
+    #ws2['B1'].style = "ali_grey"
 
     ws2['A2'] = '4'
-    ws2['A2'].style = "ali_white"    
+    #ws2['A2'].style = "ali_white"    
     ws2['B2'] = 'Авария'
-    ws2['B2'].style = "ali_white"
+    #ws2['B2'].style = "ali_white"
 
     ws2['A3'] = '2'
-    ws2['A3'].style = "ali_white"    
+    #ws2['A3'].style = "ali_white"    
     ws2['B3'] = 'Ввод ликвидирован'
-    ws2['B3'].style = "ali_white"
+    #ws2['B3'].style = "ali_white"
 
     ws2['A4'] = '1'
-    ws2['A4'].style = "ali_white"    
+    #ws2['A4'].style = "ali_white"    
     ws2['B4'] = 'Ввод передан'
-    ws2['B4'].style = "ali_white"
+    #ws2['B4'].style = "ali_white"
 
     ws2['A5'] = '5'
-    ws2['A5'].style = "ali_white"    
+    #ws2['A5'].style = "ali_white"    
     ws2['B5'] = 'Выехали арендаторы'
-    ws2['B5'].style = "ali_white"
+    #ws2['B5'].style = "ali_white"
 
     ws2['A6'] = '6'
-    ws2['A6'].style = "ali_white"    
+    #ws2['A6'].style = "ali_white"    
     ws2['B6'] = 'Дом снесен'
-    ws2['B6'].style = "ali_white"
+    #ws2['B6'].style = "ali_white"
 
     ws2['A7'] = '7'
-    ws2['A7'].style = "ali_white"    
+    #ws2['A7'].style = "ali_white"    
     ws2['B7'] = 'Каникулы'
-    ws2['B7'].style = "ali_white"
+    #ws2['B7'].style = "ali_white"
 
     ws2['A8'] = '16'
-    ws2['A8'].style = "ali_white"    
+    #ws2['A8'].style = "ali_white"    
     ws2['B8'] = 'Летнее водопользование, не проживаем'
-    ws2['B8'].style = "ali_white"
+    #ws2['B8'].style = "ali_white"
 
     ws2['A9'] = '0'
-    ws2['A9'].style = "ali_white"    
+    #ws2['A9'].style = "ali_white"    
     ws2['B9'] = 'Не указано'
-    ws2['B9'].style = "ali_white"
+    #ws2['B9'].style = "ali_white"
 
     ws2['A10'] = '8'
-    ws2['A10'].style = "ali_white"    
+    #ws2['A10'].style = "ali_white"    
     ws2['B10'] = 'Отключена горячая вода'
-    ws2['B10'].style = "ali_white"
+    #ws2['B10'].style = "ali_white"
 
     ws2['A11'] = '3'
-    ws2['A11'].style = "ali_white"    
+    #ws2['A11'].style = "ali_white"    
     ws2['B11'] = 'Патрубок'
-    ws2['B11'].style = "ali_white"
+    #ws2['B11'].style = "ali_white"
 
     ws2['A12'] = '9'
-    ws2['A12'].style = "ali_white"    
+    #ws2['A12'].style = "ali_white"    
     ws2['B12'] = 'Переключен на другой в/в'
-    ws2['B12'].style = "ali_white"
+    #ws2['B12'].style = "ali_white"
 
     ws2['A13'] = '10'
-    ws2['A13'].style = "ali_white"    
+    #ws2['A13'].style = "ali_white"    
     ws2['B13'] = 'Подключен новый абонент'
-    ws2['B13'].style = "ali_white"
+    #ws2['B13'].style = "ali_white"
 
     ws2['A14'] = '14'
-    ws2['A14'].style = "ali_white"    
+    #ws2['A14'].style = "ali_white"    
     ws2['B14'] = 'Прокрутка счетчика'
-    ws2['B14'].style = "ali_white"
+    #ws2['B14'].style = "ali_white"
 
     ws2['A15'] = '11'
-    ws2['A15'].style = "ali_white"    
+    #ws2['A15'].style = "ali_white"    
     ws2['B15'] = 'Профилактический ремонт'
-    ws2['B15'].style = "ali_white"
+    #ws2['B15'].style = "ali_white"
 
     ws2['A16'] = '15'
-    ws2['A16'].style = "ali_white"    
+    #ws2['A16'].style = "ali_white"    
     ws2['B16'] = 'Смена водосчетчика'
-    ws2['B16'].style = "ali_white"
+    #ws2['B16'].style = "ali_white"
 
     ws2['A17'] = '12'
-    ws2['A17'].style = "ali_white"    
+    #ws2['A17'].style = "ali_white"    
     ws2['B17'] = 'Сокращение производства'
-    ws2['B17'].style = "ali_white"
+    #ws2['B17'].style = "ali_white"
 
     ws2['A18'] = '13'
-    ws2['A18'].style = "ali_white"    
+    #ws2['A18'].style = "ali_white"    
     ws2['B18'] = 'Увеличение производства'
-    ws2['B18'].style = "ali_white"
+    #ws2['B18'].style = "ali_white"
 
     ws2.column_dimensions['b'].width = 70 
 
@@ -22328,3 +22331,169 @@ def electric_analize_extended(request):
     file_ext = 'xlsx'    
     response['Content-Disposition'] = 'attachment;filename="%s.%s"' % (output_name.replace('"', '\"'), file_ext)   
     return response
+
+
+def pulsar_water_consumption_mosvodokanal_from_template(request):
+    response = io.StringIO()
+
+    electric_data_end   = request.session["electric_data_end"]
+    result = "1"
+    directory = os.path.join(BASE_DIR,'static\\cfg\\excel_template\\water') 
+    if  not(os.path.exists(directory)):
+        os.mkdir(directory)
+        result+="Директория создана %s"
+
+    files = os.listdir(directory) 
+    #print(files)
+    if len(files) > 1:
+        # result.append("%s"%(directory))
+        result+="В директории должен быть только один файл"
+    if len(files) == 1:
+        wb = load_workbook(directory+"\\"+files[0])
+        ws = wb.active
+        meter = ""
+        uzel_attr2 = ""
+        for row in ws.iter_rows(min_row=2):
+            meter = row[ord('E') - ord('A')].value 
+            uzel_attr2 = row[ord('D') - ord('A')].value
+             # Если значение не пустое, выполняем запрос в БД
+            if uzel_attr2:
+                try:
+                    val = common_sql.get_value_by_meter_by_date(uzel_attr2, electric_data_end, 'meters.attr2')  # Вызываем функцию для запроса в БД
+                    # Записываем результат в result_column
+                    #print(val)
+                    if len(val)>0:
+                        row[ord('J') - ord('A')].value = float(val[0][0])
+                except:
+                    next
+  
+        response.seek(0)
+        response = HttpResponse(save_virtual_workbook(wb),content_type="application/vnd.ms-excel")
+        
+        output_name = 'report_mosvodokanal_'+str(electric_data_end)
+        file_ext = 'xlsx'    
+        response['Content-Disposition'] = 'attachment;filename="%s.%s"' % (output_name.replace('"', '\"'), file_ext)   
+        return response
+    else:
+        response.seek(0)
+        response = HttpResponse(result, content_type="text/plain")
+        output_name = 'empty'
+        file_ext = 'txt'    
+        response['Content-Disposition'] = 'attachment;filename="%s.%s"' % (output_name.replace('"', '\"'), file_ext)  
+        return response
+        
+def pulsar_consumption_moselectrika_from_template(request):
+    response = io.StringIO()
+
+    electric_data_end   = request.session["electric_data_end"]
+    result = "1"
+    directory = os.path.join(BASE_DIR,'static\\cfg\\excel_template\\electric') 
+    if  not(os.path.exists(directory)):
+        os.mkdir(directory)
+        result+="Директория создана %s"
+
+    files = os.listdir(directory) 
+    #print(files)
+    if len(files) > 1:
+        # result.append("%s"%(directory))
+        result+="В директории должен быть только один файл"
+    if len(files) == 1:
+        wb = load_workbook(directory+"\\"+files[0])
+        ws = wb.active
+        meter = ""
+        uzel_attr2 = ""
+        for row in ws.iter_rows(min_row=2):
+            meter = row[ord('D') - ord('A')].value 
+            uzel_attr1 = row[ord('F') - ord('A')].value
+             # Если значение не пустое, выполняем запрос в БД
+            if meter:
+                try:
+                    val = common_sql.get_value_by_meter_by_date_electrika(meter, electric_data_end)  # Вызываем функцию для запроса в БД
+                # Записываем результат в result_column
+                #print(val)
+                    if len(val)>0:
+                        row[ord('H') - ord('A')].value = float(val[0][2])
+                        row[ord('I') - ord('A')].value = float(val[0][3])
+                        row[ord('J') - ord('A')].value = float(val[0][4])
+                        row[ord('K') - ord('A')].value = electric_data_end
+                except:
+                    next
+  
+        response.seek(0)
+        response = HttpResponse(save_virtual_workbook(wb),content_type="application/vnd.ms-excel")
+        
+        output_name = 'report_moselectrika_'+str(electric_data_end)
+        file_ext = 'xlsx'    
+        response['Content-Disposition'] = 'attachment;filename="%s.%s"' % (output_name.replace('"', '\"'), file_ext)   
+        return response
+    else:
+        response.seek(0)
+        response = HttpResponse(result, content_type="text/plain")
+        output_name = 'empty'
+        file_ext = 'txt'    
+        response['Content-Disposition'] = 'attachment;filename="%s.%s"' % (output_name.replace('"', '\"'), file_ext)  
+        return response
+        
+def pulsar_heat_consumption_from_template(request):
+    response = io.StringIO()
+
+    electric_data_end   = request.session["electric_data_end"]
+    result = "1"
+    directory = os.path.join(BASE_DIR,'static\\cfg\\excel_template\\heat') 
+    if  not(os.path.exists(directory)):
+        os.mkdir(directory)
+        result+="Директория создана %s"
+
+    files = os.listdir(directory) 
+    #print(files)
+    if len(files) > 1:
+        # result.append("%s"%(directory))
+        result+="В директории должен быть только один файл"
+    if len(files) == 1:
+        wb = load_workbook(directory+"\\"+files[0])
+        ws = wb.active
+        meter = ""
+        type_meter = ""
+        for row in ws.iter_rows(min_row=6):
+            meter = row[ord('C') - ord('A')].value 
+            type_meter = row[ord('D') - ord('A')].value
+            # Проверяем, содержит ли строка "_" или "-"
+            if "_" in meter or "-" in meter:
+                # Удаляем первые 3 символа
+                meter = meter[3:]            
+             # Если значение не пустое, выполняем запрос в БД
+            if meter:
+                if type_meter == 'ТЭ ИПУ':
+                    try:
+                        val = common_sql.get_value_by_meter_by_date_heat(meter, electric_data_end)  # Вызываем функцию для запроса в БД
+                        # Записываем результат в result_column
+                        #print(val)
+                        if len(val)>0:
+                            row[ord('H') - ord('A')].value = float(val[0][2])
+                            row[ord('I') - ord('A')].value = float(val[0][3])
+                            row[ord('G') - ord('A')].value = electric_data_end
+                    except:
+                        next
+                else:# ГВС Индивидуальный
+                    try:
+                        val = common_sql.get_value_by_meter_by_date(meter, electric_data_end, 'meters.address')  # Вызываем функцию для запроса в БД
+                        if len(val)>0:
+                            row[ord('G') - ord('A')].value = electric_data_end
+                            row[ord('H') - ord('A')].value = float(val[0][0])
+                    except:
+                        next
+      
+        response.seek(0)
+        response = HttpResponse(save_virtual_workbook(wb),content_type="application/vnd.ms-excel")
+        
+        output_name = 'report_moselectrika_'+str(electric_data_end)
+        file_ext = 'xlsx'    
+        response['Content-Disposition'] = 'attachment;filename="%s.%s"' % (output_name.replace('"', '\"'), file_ext)   
+        return response
+    else:
+        response.seek(0)
+        response = HttpResponse(result, content_type="text/plain")
+        output_name = 'empty'
+        file_ext = 'txt'    
+        response['Content-Disposition'] = 'attachment;filename="%s.%s"' % (output_name.replace('"', '\"'), file_ext)  
+        return response

@@ -182,5 +182,8 @@ urlpatterns = [
 
     url(r'^143/$', views.electric_analize_extended, name = '143'), # Анализ потребления по получасовкам за период
 
-    url(r'^145/$', views.pulsar_water_consumption_mosvodokanal2, name = '145'), # Отчёт по потреблению для мосводокаанала на Пресня-Сити
+    url(r'^145/$', views.pulsar_water_consumption_mosvodokanal2, name = '145'), # Отчёт по потреблению для мосводокаанала 
+    url(r'^146/$', views.pulsar_water_consumption_mosvodokanal_from_template, name = '146'), # Отчёт по потреблению для мосводокаанала из шаблона
+    url(r'^148/$', views.pulsar_consumption_moselectrika_from_template, name = '148'), # Отчёт по потреблению для мосэлетрика из шаблона
+    url(r'^150/$', views.pulsar_heat_consumption_from_template, name = '150'), # Отчёт по потреблению для тепла из шаблона
 ]

@@ -2694,6 +2694,37 @@ def ChangeNull(data_table, electric_data):
         data_table[i]=tuple(data_table[i])
     return data_table
 
+def ChangeNull_and_leave_empty(data_table, electric_data):
+    #обойти в цикле все строки и добавить "Н/Д" в ячейки, где null
+    if data_table == None: return []
+    for i in range(len(data_table)):
+        data_table[i]=list(data_table[i])
+        #if i<10: print data_table[i]
+        for j in range(1,len(data_table[i])):
+            #print data_table[i][j]
+            if (data_table[i][j] == None) or (data_table[i][j] is None) or (data_table[i][j] == "None"):
+                data_table[i][j]=''
+                #print data_table[i][j]
+        if (electric_data is not None):
+            data_table[i][0]=electric_data
+        data_table[i]=tuple(data_table[i])
+    return data_table
+
+def ChangeNull_to_empty(data_table, electric_data):
+    #обойти в цикле все строки и добавить "" в ячейки, где null
+    if data_table == None: return []
+    for i in range(len(data_table)):
+        data_table[i]=list(data_table[i])
+        for j in range(1,len(data_table[i])):
+            #print(data_table[i][j])
+            if (data_table[i][j] == None) or (data_table[i][j] is None) or (data_table[i][j] == "None"):
+                data_table[i][j]=''
+                #print(data_table[i][j])
+        if (electric_data is not None):
+            data_table[i][0]=electric_data
+        data_table[i]=tuple(data_table[i])
+    return data_table
+
 def ChangeNull_and_LeaveEmptyCol(data_table, electric_data, numColEmpty):
     #обойти в цикле все строки и добавить "Н/Д" в ячейки, где null
     for i in range(len(data_table)):
@@ -12783,6 +12814,7 @@ def get_electric_by_date(obj_parent_title, obj_title, electric_data, dm, isAbon)
     #isAbon - данные для абонента или объекта
     #sLevel - запрос один для объектов и абонентов, заменяется только конструкция в where с какой таблицей сравнивать    
     sQuery = makeSqlQuery_electric_by_date(obj_parent_title, obj_title, electric_data, params, dm, res, isAbon)
+    #print(sQuery)
     cursor.execute(sQuery)
     data_table = cursor.fetchall()    
     if len(data_table)>0: data_table=ChangeNull_and_LeaveEmptyCol(data_table, electric_data, 11)
@@ -12884,6 +12916,7 @@ def get_electric_by_date_level2(obj_parent_title, obj_title, electric_data_end, 
     #dm - строка, содержащая monthly or daily для sql-запроса    
     #print(obj_parent_title, obj_title, electric_data_end, dm)
     sQuery = makeSqlQuery_electric_by_date_level2(obj_parent_title, obj_title, electric_data_end, params, dm, res)
+    #print(sQuery)
     cursor.execute(sQuery)
     data_table = cursor.fetchall()    
     if len(data_table)>0: data_table=ChangeNull_and_LeaveEmptyCol(data_table, electric_data_end, 11)
@@ -16271,7 +16304,12 @@ z_end.account_1, --абонент
 z_end.type_meter,
 z_end.attr2, --узел учёта
 --SUBSTRING(z_end.attr3 FROM 9 FOR length(z_end.attr3))||'_' ||z_end.address, --номер прибора с преиндексом
-z_end.factory_number_manual,
+CASE when (position('-' in z_end.factory_number_manual))>0 
+			then substring(z_end.factory_number_manual,1,position('-' in z_end.factory_number_manual)-1)||substring(z_end.factory_number_manual,position('-' in z_end.factory_number_manual)+1, char_length(z_end.factory_number_manual)) 
+	when (position('_' in z_end.factory_number_manual))>0 
+			then substring(z_end.factory_number_manual,1,position('_' in z_end.factory_number_manual)-1)||substring(z_end.factory_number_manual,position('_' in z_end.factory_number_manual)+1, char_length(z_end.factory_number_manual)) 
+	else z_end.factory_number_manual
+END,
 '%s'||z_end.account_2, -- адрес
 z_end.attr3,
 z_end.attr4,
@@ -16420,15 +16458,139 @@ WHERE
   where water_pulsar_abons.ab_name like '%%Квартира%%'
 ) as z_end
   WHERE z_end.factory_number_manual = z_start.factory_number_manual
-  order by z_end.obj_name, z_end.ab_name %s
+  order by z_end.obj_name, z_end.ab_name %s, z_end.type_meter DESC
 """%(dogovor, address, electric_data_start, electric_data_end, sortDir)
-    print(sQuery)
+    #print(sQuery)
     return sQuery
 
 def get_data_table_water_consumption_mosvodokanal2(obj_parent_title, obj_title, electric_data_start, electric_data_end, sortDir, dogovor, address):
     cursor = connection.cursor()
-    data_table=[1]
+    data_table=[]
     sQuery = Make_view_water_consumption_mosvodokanal2(obj_parent_title, obj_title, electric_data_start, electric_data_end, sortDir, dogovor, address)
+    cursor.execute(sQuery)
+    data_table = cursor.fetchall()
+    return data_table
+
+def get_value_by_meter_by_date(uzel_attr2, electric_data_end, field):
+    cursor = connection.cursor()
+    data_table=[]
+    sQuery = """
+    SELECT 
+  round(daily_values.value::numeric,0)
+FROM 
+  public.meters, 
+  public.taken_params, 
+  public.daily_values
+WHERE 
+  taken_params.guid_meters = meters.guid AND
+  daily_values.id_taken_params = taken_params.id AND
+  daily_values.date = '%s' 
+  AND 
+  %s = '%s'
+GROUP BY  daily_values.value
+    """%(electric_data_end, field, uzel_attr2)
+    #print(sQuery)
+    cursor.execute(sQuery)
+    data_table = cursor.fetchall()
+    return data_table
+
+def get_value_by_meter_by_date_electrika(meter, electric_data_end):
+    cursor = connection.cursor()
+    data_table=[]
+    sQuery = """
+    SELECT z1.daily_date, z1.number_manual,
+sum(Case when z1.params_name = 'T1 A+' then z1.value_daily  end) as t1,
+sum(Case when z1.params_name = 'T2 A+' then z1.value_daily  end) as t2,
+sum(Case when z1.params_name = 'T3 A+' then z1.value_daily  end) as t3,
+z1.ktt,z1.ktn,z1.a
+
+                        FROM
+                        (SELECT daily_values.date as daily_date,                        
+                        meters.factory_number_manual as number_manual,
+                        daily_values.value as value_daily,
+                        names_params.name as params_name,
+                        link_abonents_taken_params.coefficient as ktt,
+                         link_abonents_taken_params.coefficient_2 as ktn,
+                         link_abonents_taken_params.coefficient_3 as a
+                        FROM
+                         public.daily_values,
+                         public.link_abonents_taken_params,
+                         public.taken_params,                        
+                         public.names_params,
+                         public.params,
+                         public.meters,
+                         public.types_meters
+                        WHERE
+                        taken_params.guid = link_abonents_taken_params.guid_taken_params AND
+                        taken_params.id = daily_values.id_taken_params AND
+                        taken_params.guid_params = params.guid AND
+                        taken_params.guid_meters = meters.guid AND                    
+                        names_params.guid = params.guid_names_params AND
+                        params.guid_names_params=names_params.guid and
+                        types_meters.guid=meters.guid_types_meters and                      
+                       	meters.factory_number_manual = '%s' AND
+                        daily_values.date = '%s'
+                         group by
+                        daily_values.date,                       
+                        meters.factory_number_manual,
+                        daily_values.value ,
+                        names_params.name ,
+                        link_abonents_taken_params.coefficient ,
+                         link_abonents_taken_params.coefficient_2 ,
+                          link_abonents_taken_params.coefficient_3
+                        ) z1
+group by z1.daily_date, z1.number_manual, z1.ktt,z1.ktn,z1.a
+    """%(meter, electric_data_end)
+    cursor.execute(sQuery)
+    data_table = cursor.fetchall()
+    return data_table
+
+def get_value_by_meter_by_date_heat(meter, electric_data_end):
+    cursor = connection.cursor()
+    data_table=[]
+    sQuery = """
+    SELECT z1.daily_date, z1.number_manual,
+round(sum(Case when z1.params_name = 'Энергия' then z1.value_daily  end)::numeric,4) as t1,
+round(sum(Case when z1.params_name = 'Объем' then z1.value_daily  end)::numeric,4) as t2
+
+                        FROM
+                        (SELECT daily_values.date as daily_date,                        
+                        meters.factory_number_manual as number_manual,
+                        daily_values.value as value_daily,
+                        names_params.name as params_name,
+                        link_abonents_taken_params.coefficient as ktt,
+                         link_abonents_taken_params.coefficient_2 as ktn,
+                         link_abonents_taken_params.coefficient_3 as a
+                        FROM
+                         public.daily_values,
+                         public.link_abonents_taken_params,
+                         public.taken_params,                        
+                         public.names_params,
+                         public.params,
+                         public.meters,
+                         public.types_meters
+                        WHERE
+                        taken_params.guid = link_abonents_taken_params.guid_taken_params AND
+                        taken_params.id = daily_values.id_taken_params AND
+                        taken_params.guid_params = params.guid AND
+                        taken_params.guid_meters = meters.guid AND                    
+                        names_params.guid = params.guid_names_params AND
+                        params.guid_names_params=names_params.guid and
+                        types_meters.guid=meters.guid_types_meters and                      
+                       	meters.factory_number_manual = '%s' AND
+                        daily_values.date = '%s'
+                         group by
+                        daily_values.date,                       
+                        meters.factory_number_manual,
+                        daily_values.value ,
+                        names_params.name ,
+                        link_abonents_taken_params.coefficient ,
+                         link_abonents_taken_params.coefficient_2 ,
+                          link_abonents_taken_params.coefficient_3
+                        ) z1
+group by z1.daily_date, z1.number_manual
+
+    """%(meter, electric_data_end)
     cursor.execute(sQuery)
     data_table = cursor.fetchall()
     return data_table
