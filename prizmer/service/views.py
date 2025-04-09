@@ -5648,12 +5648,21 @@ def delete_meters_by_excel(sPath, sheet):
         result.append('Удаление импульсных ПУ')
         m_col = 5
         c = 2
+        
+            
     i = 0
     for row in dtAll:
         if i<c: 
             i+=1
             continue
         meter = row[m_col]
+        if(row[6] == 'МЗТА'):
+            ind = str(row[3]).find('(')
+            if ind > 0:
+                meter =  str(row[3])[0:ind]
+            else:
+                meter =  str(row[3])
+            #print(meter)
         #print(meter, type(meter))
         try:
             del_meter = Meters.objects.get(factory_number_manual = str(meter))

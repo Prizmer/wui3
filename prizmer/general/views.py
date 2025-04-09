@@ -7948,6 +7948,7 @@ def translate(name):
     
 def makeOneCoords(graphic_data,numField1):
     labels=[]
+    import datetime
     for i in range(len(graphic_data)):
         graphic_data[i]=list(graphic_data[i]) 
         date=graphic_data[i][numField1]   

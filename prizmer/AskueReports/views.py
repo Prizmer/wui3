@@ -22405,6 +22405,7 @@ def pulsar_consumption_moselectrika_from_template(request):
         for row in ws.iter_rows(min_row=2):
             meter = row[ord('D') - ord('A')].value 
             uzel_attr1 = row[ord('F') - ord('A')].value
+            tarif  = row[ord('G') - ord('A')].value
              # Если значение не пустое, выполняем запрос в БД
             if meter:
                 try:
@@ -22412,10 +22413,18 @@ def pulsar_consumption_moselectrika_from_template(request):
                 # Записываем результат в result_column
                 #print(val)
                     if len(val)>0:
-                        row[ord('H') - ord('A')].value = float(val[0][2])
-                        row[ord('I') - ord('A')].value = float(val[0][3])
-                        row[ord('J') - ord('A')].value = float(val[0][4])
-                        row[ord('K') - ord('A')].value = electric_data_end
+                        # '%s' % get_val_by_round(float(data_table[row-6][4]),ROUND_SIZE, separator)
+                        #print(val)
+                        #print(get_val_by_round(float(val[0][2]),1, '.'))
+                        #print('!')
+                        row[ord('L') - ord('A')].value = '%s' % get_val_by_round(float(val[0][2]),1, '.') #float(val[0][2])
+                        if not(tarif == 'Однотарифный'):
+                            row[ord('M') - ord('A')].value = '%s' % get_val_by_round(float(val[0][3]),1, '.')#float(val[0][3])
+                        if tarif == 'Трёхтарифный':
+                            row[ord('N') - ord('A')].value = '%s' % get_val_by_round(float(val[0][4]),1, '.')#float(val[0][4])
+                        
+                            
+                        #row[ord('O') - ord('A')].value = electric_data_end
                 except:
                     next
   
@@ -22486,7 +22495,7 @@ def pulsar_heat_consumption_from_template(request):
         response.seek(0)
         response = HttpResponse(save_virtual_workbook(wb),content_type="application/vnd.ms-excel")
         
-        output_name = 'report_moselectrika_'+str(electric_data_end)
+        output_name = 'report_heat_'+str(electric_data_end)
         file_ext = 'xlsx'    
         response['Content-Disposition'] = 'attachment;filename="%s.%s"' % (output_name.replace('"', '\"'), file_ext)   
         return response
