@@ -7148,7 +7148,7 @@ order by water_pulsar_abons.ab_name) as z_end
 where z_end.ab_guid=z_start.ab_guid
     """%(my_params[2], my_params[2],my_params[3],my_params[3], obj_title,electric_data_start,my_params[0],my_params[1], obj_title, 
          my_params[2], my_params[2],my_params[3],my_params[3], obj_title,electric_data_end,my_params[0],my_params[1], obj_title)
-    #print sQuery    
+    #print(sQuery)    
     return sQuery
     
 def get_data_table_pulsar_water_for_period_Skladochnaya(obj_parent_title, obj_title, electric_data_start, electric_data_end, isAbon):
@@ -16591,6 +16591,150 @@ round(sum(Case when z1.params_name = 'Объем' then z1.value_daily  end)::num
 group by z1.daily_date, z1.number_manual
 
     """%(meter, electric_data_end)
+    cursor.execute(sQuery)
+    data_table = cursor.fetchall()
+    return data_table
+
+
+def make_sql_query_analize_water_consumption(obj_parent_title, obj_title, electric_data_start,electric_data_end, isAbon, sortDir):
+    if isAbon:
+      abon = obj_title
+      obj = obj_parent_title
+      strComment =''
+    else:
+      abon = obj_title
+      obj = obj_title
+      strComment = '--'
+    sQuery="""
+Select ab_name, attr1, hot_water, cold_water,
+(ABS(hot_water - cold_water)) as diff,
+CASE 
+        WHEN (hot_water - cold_water) > 2 THEN 'Превышение ГВ'
+        WHEN (cold_water - hot_water) > 2 THEN 'Превышение ХВ'
+		WHEN (cold_water - hot_water) is null THEN 'Не хватает данных'
+        ELSE 'Разница в пределах нормы'
+    END AS status
+FROM
+(Select
+ab_name, 
+attr1, 
+ SUM(CASE WHEN type_meter = 'ХВС' THEN delta ELSE null END) AS cold_water,
+ SUM(CASE WHEN type_meter = 'ГВС' THEN delta ELSE null END) AS hot_water
+FROM
+(
+Select z_start.ab_name, 
+z_start.type_meter, 
+z_start.attr1, 
+z_start.factory_number_manual,
+round(z_start.value::numeric,3) as start_value,
+round(z_end.value::numeric,3) as end_value, 
+round((z_end.value-z_start.value)::numeric,3) as delta
+from
+(SELECT water_pulsar_abons.ab_name, water_pulsar_abons.type_meter, water_pulsar_abons.attr1, water_pulsar_abons.factory_number_manual, z1.value
+from
+water_pulsar_abons
+Left join
+(SELECT
+  objects.name,
+  abonents.name,
+  daily_values.date,
+  (Case when (types_meters.name = 'Пульс СТК ХВС' or types_meters.name = 'Пульс СТК ГВС') then daily_values.value/1000 else daily_values.value end)
+             AS value,
+  meters.name,
+  meters.factory_number_manual,
+  resources.name
+FROM
+  public.abonents,
+  public.objects,
+  public.link_abonents_taken_params,
+  public.taken_params,
+  public.meters,
+  public.daily_values,
+  public.params,
+  public.names_params,
+  public.resources,
+  types_meters
+WHERE
+  ((meters.guid_types_meters)::text = (types_meters.guid)::text) AND
+  abonents.guid_objects = objects.guid AND
+  link_abonents_taken_params.guid_abonents = abonents.guid AND
+  link_abonents_taken_params.guid_taken_params = taken_params.guid AND
+  taken_params.guid_meters = meters.guid AND
+  taken_params.guid_params = params.guid AND
+  daily_values.id_taken_params = taken_params.id AND
+  params.guid_names_params = names_params.guid AND
+  names_params.guid_resources = resources.guid AND
+  daily_values.date = '%s' AND
+  (resources.name like 'ГВС' OR   resources.name like 'ХВС')
+   AND   taken_params.name not like '%%battery%%')as z1
+  on z1.factory_number_manual=water_pulsar_abons.factory_number_manual
+  where water_pulsar_abons.obj_name='%s'
+  %s AND  water_pulsar_abons.ab_name = '%s'
+  order by ab_name) as z_end,
+(SELECT water_pulsar_abons.ab_name, water_pulsar_abons.type_meter, water_pulsar_abons.attr1, water_pulsar_abons.factory_number_manual, z1.value
+from
+water_pulsar_abons
+Left join
+(SELECT
+  objects.name,
+  abonents.name,
+  daily_values.date,
+  (Case when (types_meters.name = 'Пульс СТК ХВС' or types_meters.name = 'Пульс СТК ГВС') then daily_values.value/1000 else daily_values.value end)
+             AS value,
+  meters.name,
+  meters.factory_number_manual,
+  resources.name
+FROM
+  public.abonents,
+  public.objects,
+  public.link_abonents_taken_params,
+  public.taken_params,
+  public.meters,
+  public.daily_values,
+  public.params,
+  public.names_params,
+  public.resources,
+  types_meters
+WHERE
+  ((meters.guid_types_meters)::text = (types_meters.guid)::text) AND
+  abonents.guid_objects = objects.guid AND
+  link_abonents_taken_params.guid_abonents = abonents.guid AND
+  link_abonents_taken_params.guid_taken_params = taken_params.guid AND
+  taken_params.guid_meters = meters.guid AND
+  taken_params.guid_params = params.guid AND
+  daily_values.id_taken_params = taken_params.id AND
+  params.guid_names_params = names_params.guid AND
+  names_params.guid_resources = resources.guid AND
+  daily_values.date = '%s' AND
+  (resources.name like 'ГВС' OR   resources.name like 'ХВС')
+   AND   taken_params.name not like '%%battery%%')as z1
+  on z1.factory_number_manual=water_pulsar_abons.factory_number_manual
+  where water_pulsar_abons.obj_name='%s'
+  %s AND  water_pulsar_abons.ab_name = '%s'
+  order by ab_name) as z_start
+where z_end.factory_number_manual=z_start.factory_number_manual
+group by z_start.ab_name,
+z_start.type_meter,
+z_start.attr1,
+z_start.factory_number_manual,z_start.value,
+z_end.value
+order by z_start.ab_name ASC, z_start.attr1 ASC, z_start.type_meter ASC
+) as difference
+GROUP BY
+ab_name, 
+attr1
+) as line
+
+Group by ab_name, attr1, hot_water,cold_water
+order by ab_name
+    """%(electric_data_end, obj, strComment, abon, electric_data_start, obj, strComment, abon)
+    #print(sQuery)
+    return sQuery
+
+def get_data_table_analize_water_consumpton(obj_parent_title, obj_title, electric_data_start,electric_data_end, isAbon, sortDir):
+    cursor = connection.cursor()
+    data_table=[]
+    sQuery = make_sql_query_analize_water_consumption(obj_parent_title, obj_title, electric_data_start,electric_data_end, isAbon, sortDir)
     cursor.execute(sQuery)
     data_table = cursor.fetchall()
     return data_table

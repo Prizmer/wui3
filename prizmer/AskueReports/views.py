@@ -75,6 +75,7 @@ ali_blue   = NamedStyle(name = "ali_blue", fill=PatternFill(fill_type='solid', s
 ali_pink   = NamedStyle(name = "ali_pink", fill=PatternFill(fill_type='solid', start_color='FFF0F5'), border=Border(left=Side(border_style='thin',color='FF000000'), bottom=Side(border_style='thin',color='FF000000'), right=Side(border_style='thin',color='FF000000'), top=Side(border_style='thin',color='FF000000')), alignment = Alignment(horizontal='center', vertical='center', wrap_text=True, shrink_to_fit=True))
 ali_red    = NamedStyle(name = "ali_red", fill=PatternFill(fill_type='solid', start_color='FF3333'), border=Border(left=Side(border_style='thin',color='FF000000'), bottom=Side(border_style='thin',color='FF000000'), right=Side(border_style='thin',color='FF000000'), top=Side(border_style='thin',color='FF000000')), alignment = Alignment(horizontal='center', vertical='center', wrap_text=True, shrink_to_fit=True))
 
+ali_light_yellow = NamedStyle(name = "ali_light_yellow", fill=PatternFill(fill_type='solid', start_color='FFFFC5'), border=Border(left=Side(border_style='thin',color='FF000000'), bottom=Side(border_style='thin',color='FF000000'), right=Side(border_style='thin',color='FF000000'), top=Side(border_style='thin',color='FF000000')), alignment = Alignment(horizontal='center', vertical='center', wrap_text=True, shrink_to_fit=True))
 
 ali_yellow = NamedStyle(name = "ali_yellow", fill=PatternFill(fill_type='solid', start_color='EEEE00'), border=Border(left=Side(border_style='thin',color='FF000000'), bottom=Side(border_style='thin',color='FF000000'), right=Side(border_style='thin',color='FF000000'), top=Side(border_style='thin',color='FF000000')), alignment = Alignment(horizontal='center', vertical='center', wrap_text=True, shrink_to_fit=True))
 ali_white_size_18  = NamedStyle(name = "ali_white_size_18", font=Font(size=18))
@@ -22506,3 +22507,129 @@ def pulsar_heat_consumption_from_template(request):
         file_ext = 'txt'    
         response['Content-Disposition'] = 'attachment;filename="%s.%s"' % (output_name.replace('"', '\"'), file_ext)  
         return response
+
+def report_analize_water_consumption(request):
+    ROUND_SIZE = getattr(settings, 'ROUND_SIZE', 3)
+    response = io.StringIO()
+    wb = Workbook()
+    wb.add_named_style(ali_grey)
+    wb.add_named_style(ali_white)
+    wb.add_named_style(ali_blue)
+    wb.add_named_style(ali_pink)
+    wb.add_named_style(ali_light_yellow)
+
+    ws = wb.active
+    obj_parent_title         = request.session['obj_parent_title']
+    obj_title         = request.session['obj_title']
+    electric_data_end   = request.session['electric_data_end']
+    electric_data_start   = request.session['electric_data_start']            
+    obj_key             = request.session['obj_key']
+
+    ws['A1'] = obj_parent_title + ', ' + obj_title + '. Анализ потребления ХВС и ГВС по-квартирно в период с ' + str(electric_data_start) + ' по ' + str(electric_data_end)
+#Шапка
+    ws['A2'] = 'Абонент'
+    ws['A2'].style = "ali_grey"
+    
+    ws['B2'] = 'Стояк'
+    ws['B2'].style = "ali_grey"
+    
+    ws['c2'] = 'Потребление горячей воды, м3'
+    ws['c2'].style = "ali_grey"
+    
+    ws['d2'] = 'Потребление горячей воды, м3'
+    ws['d2'].style = "ali_grey"   
+        
+    ws['e2'] = 'Разница между ХВС и ГВС, м3'
+    ws['e2'].style = "ali_grey"
+    
+    ws['f2'] = 'Статус'
+    ws['f2'].style = "ali_grey"
+    
+#Запрашиваем данные для отчета
+    
+    is_abonent_level = re.compile(r'abonent')
+    is_object_level_2 = re.compile(r'level2')
+    
+    obj_parent_title         = request.session['obj_parent_title']
+    obj_title         = request.session['obj_title']
+    electric_data_end   = request.session['electric_data_end']
+    electric_data_start   = request.session['electric_data_start']            
+    obj_key             = request.session['obj_key']
+             
+    sortDir = "ASC"              
+    if (bool(is_abonent_level.search(obj_key))):
+        data_table = common_sql.get_data_table_analize_water_consumpton(obj_parent_title, obj_title, electric_data_start, electric_data_end, True, sortDir)                      
+    elif (bool(is_object_level_2.search(obj_key))):
+        data_table = common_sql.get_data_table_analize_water_consumpton(obj_parent_title, obj_title, electric_data_start,electric_data_end, False, sortDir)
+              
+    if len(data_table)>0: 
+        data_table=common_sql.ChangeNull(data_table, None)
+    
+# Заполняем отчет значениями
+    for row in range(3, len(data_table)+3):
+        try:
+            ws.cell('A%s'%(row)).value = '%s' % (data_table[row-3][0])  # абонент
+            ws.cell('A%s'%(row)).style = "ali_white"
+        except:
+            ws.cell('A%s'%(row)).style = "ali_white"
+            next
+        
+        try:
+            ws.cell('B%s'%(row)).value = '%s' % (data_table[row-3][1])  # 
+            ws.cell('B%s'%(row)).style = "ali_white"
+        except:
+            ws.cell('B%s'%(row)).style = "ali_white"
+            next
+            
+        try:
+            ws.cell('C%s'%(row)).value = '%s' % (data_table[row-3][2])  #         
+            ws.cell('C%s'%(row)).style = "ali_pink"
+        except:
+            ws.cell('C%s'%(row)).style = "ali_pink"
+            next
+        
+        try:
+            ws.cell('d%s'%(row)).value = '%s' % (data_table[row-3][3])  #         
+            ws.cell('d%s'%(row)).style = "ali_blue"
+        except:
+            ws.cell('d%s'%(row)).style = "ali_blue"
+            next
+            
+        try:
+            ws.cell('e%s'%(row)).value = '%s' % (data_table[row-3][4])
+            ws.cell('e%s'%(row)).style = "ali_white"
+        except:
+            ws.cell('e%s'%(row)).style = "ali_white"
+            next
+
+        try:
+            val = data_table[row-3][5]
+            #print(val, bool(val == 1), bool(val < 3.2))            
+            if (val == 'Разница в пределах нормы' or val == 'Не хватает данных'):
+                ws.cell('f%s'%(row)).value = '%s' % (val)  
+                ws.cell('f%s'%(row)).style = "ali_white"
+            else:
+                ws.cell('f%s'%(row)).value = '%s' % (val)  
+                ws.cell('f%s'%(row)).style = "ali_light_yellow"            
+        except:
+            ws.cell('f%s'%(row)).style = "ali_white"
+            next
+            
+               
+
+    ws.row_dimensions[2].height = 30
+    ws.column_dimensions['A'].width = 20 
+    ws.column_dimensions['c'].width = 17 
+    ws.column_dimensions['d'].width = 17 
+    ws.column_dimensions['e'].width = 17 
+    ws.column_dimensions['f'].width = 35 
+        
+    #wb.save(response)
+    response.seek(0)
+    response = HttpResponse(save_virtual_workbook(wb),content_type="application/vnd.ms-excel")
+    #response['Content-Disposition'] = "attachment; filename=profil.xlsx"
+    
+    output_name = 'report_water_analize_'+translate(obj_parent_title)+'_'+translate(obj_title)+'_'+str(electric_data_start)+'_'+str(electric_data_end)
+    file_ext = 'xlsx'    
+    response['Content-Disposition'] = 'attachment;filename="%s.%s"' % (output_name.replace('"', '\"'), file_ext)   
+    return response

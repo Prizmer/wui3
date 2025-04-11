@@ -1,0 +1,45 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<title>Удельный расход</title>
+</head>
+<body>
+<br>
+<br>
+<span>Абонент: <strong>{{obj_title}}</strong></span>
+<br>
+		
+		
+<br>
+{% if data_table %}
+<span>Если в период с <strong>{{electric_data_start}}</strong> по <strong>{{electric_data_end}}</strong> потребление ХВС относительно ГВС будет превышено на 2 м3, это будет отражено в отчёте</span> 
+
+<table class="content" id="data-table" >
+<tr>
+<th>Абонент</th>
+<th>Стояк</th>
+<th>Потребление горячей воды, м3</th>
+<th>Потребление холодной воды, м3</th>
+<th>Разница между ХВ и ГВ, м3</th>
+<th>Статус</th>
+</tr>
+{% for value in data_table %}
+<tr>
+<td>{{value.0}}</td>
+<td>{{value.1}}</td>
+<td>{{value.2|floatformat:3}}</td>
+<td>{{value.3|floatformat:3}}</td>
+<td><b>{{value.4|floatformat:3}}</b></td>
+<td>{{value.5}}</td>
+</tr>
+   {% endfor %}
+</table>
+{% else %}
+<span><strong>Нет данных.</strong></span>
+{% endif %}
+<br>
+<br>
+<br>
+</body>
+</html>
