@@ -15492,7 +15492,7 @@ and danfoss_water_from_heat.factory_number_manual=z2.factory_number_manual
 where %s
 order by  danfoss_water_from_heat.obj_name, danfoss_water_from_heat.ab_name, danfoss_water_from_heat.factory_number_manual, z2.params_name
     """%(electric_data_end, electric_data_end, where_str)
-    print(sQuery)
+    #print(sQuery)
     return sQuery
 
 def get_data_table_danfoss_impulse_water_daily(obj_parent_title, obj_title, electric_data_end, isAbon):
@@ -16499,9 +16499,9 @@ def get_value_by_meter_by_date_electrika(meter, electric_data_end):
     data_table=[]
     sQuery = """
     SELECT z1.daily_date, z1.number_manual,
-sum(Case when z1.params_name = 'T1 A+' then z1.value_daily  end) as t1,
-sum(Case when z1.params_name = 'T2 A+' then z1.value_daily  end) as t2,
-sum(Case when z1.params_name = 'T3 A+' then z1.value_daily  end) as t3,
+sum(Case when z1.params_name = 'T1 A+' then ceil(z1.value_daily::numeric)  end) as t1,
+sum(Case when z1.params_name = 'T2 A+' then ceil(z1.value_daily::numeric)  end) as t2,
+sum(Case when z1.params_name = 'T3 A+' then ceil(z1.value_daily::numeric)  end) as t3,
 z1.ktt,z1.ktn,z1.a
 
                         FROM

@@ -1,4 +1,3 @@
--- View: public.danfoss_water_from_heat
 DROP VIEW public.danfoss_water_from_heat;
 
 CREATE OR REPLACE VIEW public.danfoss_water_from_heat
