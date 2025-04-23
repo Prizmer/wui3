@@ -22465,8 +22465,9 @@ def pulsar_heat_consumption_from_template(request):
         meter = ""
         type_meter = ""
         for row in ws.iter_rows(min_row=6):
-            meter = row[ord('C') - ord('A')].value 
-            type_meter = row[ord('D') - ord('A')].value
+            meter = row[ord('C') - ord('A')].value.strip() 
+            type_meter = row[ord('D') - ord('A')].value.strip()
+            #print(meter,type_meter)
             # Проверяем, содержит ли строка "_" или "-"
             if "_" in meter or "-" in meter:
                 # Удаляем первые 3 символа
@@ -22487,6 +22488,7 @@ def pulsar_heat_consumption_from_template(request):
                 else:# ГВС Индивидуальный
                     try:
                         val = common_sql.get_value_by_meter_by_date(meter, electric_data_end, 'meters.address')  # Вызываем функцию для запроса в БД
+                        #print(val)
                         if len(val)>0:
                             row[ord('G') - ord('A')].value = electric_data_end
                             row[ord('H') - ord('A')].value = float(val[0][0])

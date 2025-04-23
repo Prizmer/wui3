@@ -106,8 +106,8 @@ WSGI_APPLICATION = 'prizmer.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE':'django.db.backends.postgresql_psycopg2',
-        'NAME': 'fresh',
-        #'NAME': 'hovrino-sever',
+        #'NAME': 'fresh',
+        'NAME': 'hovrino-sever',
         # 'NAME': 'citybay',
         #'NAME': 'discovery',
         #'NAME': 'komunarka_k10',

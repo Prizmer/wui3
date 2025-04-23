@@ -16591,6 +16591,7 @@ round(sum(Case when z1.params_name = 'Объем' then z1.value_daily  end)::num
 group by z1.daily_date, z1.number_manual
 
     """%(meter, electric_data_end)
+    #print(sQuery)
     cursor.execute(sQuery)
     data_table = cursor.fetchall()
     return data_table
