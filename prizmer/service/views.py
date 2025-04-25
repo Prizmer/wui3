@@ -1881,6 +1881,8 @@ def add_taken_param(sender, instance, created, **kwargs): # Добавляем �
         add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "230e16d7-d4d1-4a31-86a9-c962791dd0e0"))
         add_param.save()
 
+        # ! Создание параметров добавлять в другую функцию no_signals
+
     else:
         pass
         #print u'Тип счётчика не определен'
@@ -3124,6 +3126,22 @@ def add_taken_param_no_signals(instance, isR, isHalfs): # Добавляем с�
         #------------Суточные
         # "Показание Расход воды" Объем, м3
         add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "a2df1925-fa6a-4e41-9ded-01f17f8db55d"))
+        add_param.save()
+
+    elif instance.guid_types_meters.name == 'Danfoss SonoMeter-500':
+        #print u'Добавляем параметры для счётчика Danfoss SonoMeter-500'
+        #Суточные 
+        #Объём     
+        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "bad0b995-04ac-4650-ada1-9ddec3574606"))
+        add_param.save()
+        #Энергия  
+        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "751b8d48-b7f9-4b68-85a1-b1cb00e08dc2"))
+        add_param.save()
+        #Т вход
+        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "bc847426-44cf-4788-8abf-8ec84e81fb5f"))
+        add_param.save()
+        #Т выход    
+        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "230e16d7-d4d1-4a31-86a9-c962791dd0e0"))
         add_param.save()
 
     else:
