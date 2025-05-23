@@ -110,7 +110,7 @@ DATABASES = {
         'NAME': 'hovrino-sever',
         # 'NAME': 'citybay',
         #'NAME': 'discovery',
-        'NAME': 'komunarka_k10',
+        #'NAME': 'komunarka_k10',
         #'NAME': 'jd1-2-3',
         #'NAME': '4solnca',
         #'NAME': 'woods',
