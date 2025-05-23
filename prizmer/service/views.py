@@ -738,6 +738,10 @@ def LoadElectricMeters(sPath, sSheet):
                 add_meter = Meters(name = str(type_meter) + ' ' + str(meter), address = str(adr), factory_number_manual = str(meter), attr1 = str(attr1), guid_types_meters = TypesMeters.objects.get(guid = "b95134db-af0c-4eea-bc8e-32b2bcfc7e1d") )
                 add_meter.save()
                 writeToLog('Device added' + ' --->   ' + 'Декаст Теплосчётчик')
+            elif str(type_meter) == 'Danfoss SonoMeter-500':
+                add_meter = Meters(name = str(type_meter) + ' ' + str(meter), address = str(adr), factory_number_manual = str(meter), attr1 = str(attr1), guid_types_meters = TypesMeters.objects.get(guid = "5e1dbf09-6c37-4982-aa1e-a693d2b4f079") )
+                add_meter.save()
+                writeToLog('Device added' + ' --->   ' + 'Danfoss SonoMeter-500')
 
             else:
                 writeToLog('Не найдено совпадение с существующим типом прибора')
@@ -1861,6 +1865,23 @@ def add_taken_param(sender, instance, created, **kwargs): # Добавляем �
 #        #R+ Профиль
         add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = u"610a6bf6-d00a-4fd4-a41e-0a0d9ffcba2f")) # R+ 30-мин. срез мощности
         add_param.save()
+    elif instance.guid_types_meters.name == 'Danfoss SonoMeter-500':
+        #print u'Добавляем параметры для счётчика Danfoss SonoMeter-500'
+        #Суточные 
+        #Объём     
+        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "bad0b995-04ac-4650-ada1-9ddec3574606"))
+        add_param.save()
+        #Энергия  
+        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "751b8d48-b7f9-4b68-85a1-b1cb00e08dc2"))
+        add_param.save()
+        #Т вход
+        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "bc847426-44cf-4788-8abf-8ec84e81fb5f"))
+        add_param.save()
+        #Т выход    
+        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "230e16d7-d4d1-4a31-86a9-c962791dd0e0"))
+        add_param.save()
+
+        # ! Создание параметров добавлять в другую функцию no_signals
 
     else:
         pass
@@ -3105,6 +3126,22 @@ def add_taken_param_no_signals(instance, isR, isHalfs): # Добавляем с�
         #------------Суточные
         # "Показание Расход воды" Объем, м3
         add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "a2df1925-fa6a-4e41-9ded-01f17f8db55d"))
+        add_param.save()
+
+    elif instance.guid_types_meters.name == 'Danfoss SonoMeter-500':
+        #print u'Добавляем параметры для счётчика Danfoss SonoMeter-500'
+        #Суточные 
+        #Объём     
+        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "bad0b995-04ac-4650-ada1-9ddec3574606"))
+        add_param.save()
+        #Энергия  
+        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "751b8d48-b7f9-4b68-85a1-b1cb00e08dc2"))
+        add_param.save()
+        #Т вход
+        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "bc847426-44cf-4788-8abf-8ec84e81fb5f"))
+        add_param.save()
+        #Т выход    
+        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "230e16d7-d4d1-4a31-86a9-c962791dd0e0"))
         add_param.save()
 
     else:
