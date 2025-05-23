@@ -16,8 +16,8 @@ class ObjectsAPIView(generics.ListAPIView):
     queryset = Objects.objects.all()
     serializer_class = ObjectsSerializer
     print('Запрос файла')
-    with open('api_request.txt', 'a') as f:
-        f.write('HHello')
+    # with open('api_request.txt', 'a') as f:
+    #     f.write('HHello')
         
 
 
@@ -140,6 +140,48 @@ class AllMetersDataStatusAPIView(APIView):
 
 
         # json_str = json.dumps(new_res, ensure_ascii=False)
+        json_str = json.dumps(res_list_of_dicts, ensure_ascii=False)
+        time_delta = datetime.datetime.now() - time_start
+        print(time_delta)
+        return Response(json.loads(json_str))
+    
+class AllMetersDataIdAPIView(APIView):
+    def get(self, request):
+        time_start = datetime.datetime.now()
+        try:
+            # print('дата в запросе', request.GET["date"])
+            date = request.GET["date"]
+            #print(date)
+        except MultiValueDictKeyError:
+            print(datetime.datetime.now())
+            date = datetime.datetime.now().strftime('%Y-%m-%d')
+            #date = '2025-04-01'
+            #print('!!!now', date)
+        res = common_sql.get_all_meters_data_with_id_only_digital_api(date)
+        #print(res)
+        new_res = []
+        for item in res:
+            new_res.append(list(item))
+        
+        res_list_of_dicts = []
+
+        if len(new_res) % 7 == 0:
+            for x in range(0, len(new_res)-7, 7):
+                temp_dict = {}
+                temp_dict["address"] = 'Дыбенко 7/1'
+                temp_dict["addressType"] = 'flat'
+                temp_dict["HouseId"] = new_res[x][0]
+                temp_dict["HouseName"] = new_res[x][1]
+                temp_dict["FlatId"]  = new_res[x][2]
+                temp_dict["FlatName"] = new_res[x][3]
+                temp_dict["Counters"] = [{"water_hot":{"resourse":new_res[x][4], "parametr":new_res[x][5], "serial":new_res[x][6], "value": new_res[x][8], "verification":new_res[x][9], "status": new_res[x][10]}},
+                                         {"water_cold":{"resourse":new_res[x+2][4], "parametr":new_res[x+2][5], "serial":new_res[x+2][6], "value": new_res[x+2][8], "verification":new_res[x+2][9], "status": new_res[x+2][10]}},
+                                         {"heat":{"resourse":new_res[x+1][4], "parametr":new_res[x+1][5], "serial":new_res[x+1][6], "value": new_res[x+1][8], "verification":new_res[x+1][9], "status": new_res[x+1][10]}},
+                                         {"electric":{"resourse":new_res[x+3][4], "parametr":new_res[x+3][5], "serial":new_res[x+3][6], "value0": new_res[x+3][8], "value1": new_res[x+4][8], "value2": new_res[x+5][8], "value3": new_res[x+6][8], "verification":new_res[x+3][9], "status": new_res[x+3][10]}}]#,
+
+                res_list_of_dicts.append(temp_dict)
+
+       
         json_str = json.dumps(res_list_of_dicts, ensure_ascii=False)
         time_delta = datetime.datetime.now() - time_start
         print(time_delta)

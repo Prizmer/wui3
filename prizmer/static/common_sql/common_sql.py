@@ -16739,3 +16739,94 @@ def get_data_table_analize_water_consumpton(obj_parent_title, obj_title, electri
     cursor.execute(sQuery)
     data_table = cursor.fetchall()
     return data_table
+
+
+def get_all_meters_data_with_id_only_digital_api(date):
+    data_table = []
+    cursor = connection.cursor()
+    sQuery = """
+              SELECT 
+              all_res_abons_with_check_params.obj_guid::text, 
+              all_res_abons_with_check_params.obj_name, 
+              all_res_abons_with_check_params.ab_guid::text, 
+              all_res_abons_with_check_params.ab_name,
+              --all_res_abons_with_check_params.res_name,
+              CASE 	WHEN all_res_abons_with_check_params.res_name = 'Электричество' then 'ElectricityTotalKwh-3' 
+                  WHEN all_res_abons_with_check_params.res_name = 'ГВС' then 'WaterHotM3' 
+                  When all_res_abons_with_check_params.res_name = 'ХВС' then 'WaterColdM3' 
+                  WHEN all_res_abons_with_check_params.res_name = 'Тепло' then 'HeatingTotalGkal' 
+                  end as res,
+              CASE 	WHEN all_res_abons_with_check_params.res_name = 'Электричество' then 'Квт*ч' 
+                  WHEN all_res_abons_with_check_params.res_name = 'ГВС' or all_res_abons_with_check_params.res_name = 'ХВС' then 'м3' 
+                  WHEN all_res_abons_with_check_params.res_name = 'Тепло' then 'Гкал' 
+                  end as mesure,
+              all_res_abons_with_check_params.factory_number_manual,              
+              all_res_abons_with_check_params.name_param,
+              vals.value,
+              all_res_abons_with_check_params.date_verification,
+              case
+              when all_res_abons_with_check_params.status = 'irrelevant' then 'irrelevant'
+              when vals.value is null then 'irrelevant'
+              else 'relevant'
+              end as status
+                  
+              FROM all_res_abons_with_check_params
+              LEFT JOIN
+              (
+              SELECT 
+                objects.guid, 
+                objects.name, 
+                abonents.guid as ab_guid, 
+                abonents.name, 
+                meters.name, 
+                meters.address, 
+                meters.factory_number_manual, 
+                
+                daily_values.date, 
+                daily_values.value,
+                names_params.name as name_param
+              FROM 
+                public.abonents, 
+                public.objects, 
+                public.link_abonents_taken_params, 
+                public.taken_params, 
+                public.params, 
+                public.meters, 
+                public.daily_values, 
+                public.names_params, 
+                public.resources
+              WHERE 
+                abonents.guid_objects = objects.guid AND
+                link_abonents_taken_params.guid_abonents = abonents.guid AND
+                link_abonents_taken_params.guid_taken_params = taken_params.guid AND
+                taken_params.guid_params = params.guid AND
+                taken_params.guid_meters = meters.guid AND
+                params.guid_names_params = names_params.guid AND
+                daily_values.id_taken_params = taken_params.id AND
+                names_params.guid_resources = resources.guid AND
+                daily_values.date = '%s'
+                AND abonents.name like '%%Квартира%%'
+                AND names_params.name != 'Ti' AND names_params.name != 'To'
+
+              ) as vals
+              on vals.ab_guid = all_res_abons_with_check_params.ab_guid and vals.factory_number_manual = all_res_abons_with_check_params.factory_number_manual and all_res_abons_with_check_params.name_param = vals.name_param
+              where all_res_abons_with_check_params.ab_name like '%%Квартира%%'
+              AND  all_res_abons_with_check_params.name_param != 'Ti' AND  all_res_abons_with_check_params.name_param != 'To' AND  all_res_abons_with_check_params.name_param != 'Объем'
+              GROUP BY
+              all_res_abons_with_check_params.obj_guid, 
+              all_res_abons_with_check_params.obj_name, 
+              all_res_abons_with_check_params.ab_guid, 
+              all_res_abons_with_check_params.ab_name,
+              all_res_abons_with_check_params.res_name,
+              all_res_abons_with_check_params.factory_number_manual,
+              all_res_abons_with_check_params.name_param,
+              vals.value,
+              all_res_abons_with_check_params.status,
+              all_res_abons_with_check_params.date_verification
+              ORDER BY
+                all_res_abons_with_check_params.obj_name ASC, 
+                all_res_abons_with_check_params.ab_name ASC"""%(date)
+    # print(sQuery)
+    cursor.execute(sQuery)
+    data_table = cursor.fetchall()    
+    return data_table
