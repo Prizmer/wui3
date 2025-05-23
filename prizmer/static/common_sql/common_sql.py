@@ -4558,7 +4558,7 @@ Select z3.account_2,z3.date_install, z3.factory_number,z3.type_energo,z3.meters_
 from z3 
 order by account_2, obj_name, abonent, type_energo
     """%(my_params[0], electric_data_end, my_params[1], electric_data_end, my_params[2], electric_data_end, my_params[3])
-    #print sQuery
+    #print(sQuery)
     return sQuery
 def get_data_table_report_all_res_by_date(electric_data_end):
     cursor = connection.cursor()
@@ -16471,12 +16471,12 @@ def get_data_table_water_consumption_mosvodokanal2(obj_parent_title, obj_title, 
     data_table = cursor.fetchall()
     return data_table
 
-def get_value_by_meter_by_date(uzel_attr2, electric_data_end, field):
+def get_value_by_meter_by_date(uzel_attr2, electric_data_end, field, round_num):
     cursor = connection.cursor()
     data_table=[]
     sQuery = """
     SELECT 
-  round(daily_values.value::numeric,0)
+  round(daily_values.value::numeric,%s)
 FROM 
   public.meters, 
   public.taken_params, 
@@ -16488,7 +16488,7 @@ WHERE
   AND 
   %s = '%s'
 GROUP BY  daily_values.value
-    """%(electric_data_end, field, uzel_attr2)
+    """%(round_num, electric_data_end, field, uzel_attr2)
     #print(sQuery)
     cursor.execute(sQuery)
     data_table = cursor.fetchall()

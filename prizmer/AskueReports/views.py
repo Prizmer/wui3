@@ -22339,7 +22339,7 @@ def pulsar_water_consumption_mosvodokanal_from_template(request):
 
     electric_data_end   = request.session["electric_data_end"]
     result = "1"
-    directory = os.path.join(BASE_DIR,'static\\cfg\\excel_template\\water') 
+    directory = os.path.join(BASE_DIR,'static\\excel\\excel_template\\water') 
     if  not(os.path.exists(directory)):
         os.mkdir(directory)
         result+="Директория создана %s"
@@ -22360,7 +22360,8 @@ def pulsar_water_consumption_mosvodokanal_from_template(request):
              # Если значение не пустое, выполняем запрос в БД
             if uzel_attr2:
                 try:
-                    val = common_sql.get_value_by_meter_by_date(uzel_attr2, electric_data_end, 'meters.attr2')  # Вызываем функцию для запроса в БД
+                    round_num = 0
+                    val = common_sql.get_value_by_meter_by_date(uzel_attr2, electric_data_end, 'meters.attr2', round_num)  # Вызываем функцию для запроса в БД
                     # Записываем результат в result_column
                     #print(val)
                     if len(val)>0:
@@ -22388,7 +22389,7 @@ def pulsar_consumption_moselectrika_from_template(request):
 
     electric_data_end   = request.session["electric_data_end"]
     result = "1"
-    directory = os.path.join(BASE_DIR,'static\\cfg\\excel_template\\electric') 
+    directory = os.path.join(BASE_DIR,'static\\excel\\excel_template\\electric') 
     if  not(os.path.exists(directory)):
         os.mkdir(directory)
         result+="Директория создана %s"
@@ -22449,7 +22450,7 @@ def pulsar_heat_consumption_from_template(request):
 
     electric_data_end   = request.session["electric_data_end"]
     result = "1"
-    directory = os.path.join(BASE_DIR,'static\\cfg\\excel_template\\heat') 
+    directory = os.path.join(BASE_DIR,'static\\excel\\excel_template\\heat') 
     if  not(os.path.exists(directory)):
         os.mkdir(directory)
         result+="Директория создана %s"
@@ -22471,7 +22472,10 @@ def pulsar_heat_consumption_from_template(request):
             # Проверяем, содержит ли строка "_" или "-"
             if "_" in meter or "-" in meter:
                 # Удаляем первые 3 символа
-                meter = meter[3:]            
+                meter = meter[3:]
+            if meter.startswith('0'):
+                print(meter)
+                meter = meter[1:]            
              # Если значение не пустое, выполняем запрос в БД
             if meter:
                 if type_meter == 'ТЭ ИПУ':
@@ -22480,19 +22484,24 @@ def pulsar_heat_consumption_from_template(request):
                         # Записываем результат в result_column
                         #print(val)
                         if len(val)>0:
-                            row[ord('H') - ord('A')].value = float(val[0][2])
-                            row[ord('I') - ord('A')].value = float(val[0][3])
+                            row[ord('H') - ord('A')].value = float(val[0][2])                            
                             row[ord('G') - ord('A')].value = electric_data_end
                     except:
                         next
                 else:# ГВС Индивидуальный
                     try:
-                        val = common_sql.get_value_by_meter_by_date(meter, electric_data_end, 'meters.address')  # Вызываем функцию для запроса в БД
+                        round_num = 0
+                        val = common_sql.get_value_by_meter_by_date(meter, electric_data_end, 'meters.address', round_num)  # Вызываем функцию для запроса в БД
                         #print(val)
                         if len(val)>0:
                             row[ord('G') - ord('A')].value = electric_data_end
-                            row[ord('H') - ord('A')].value = float(val[0][0])
+                            row[ord('H') - ord('A')].value = float('{:.4f}'.format(float(val[0][0]))) 
                     except:
+                        next
+                try:
+                    dif = float(row[ord('H') - ord('A')].value) - float(row[ord('F') - ord('A')].value)
+                    row[ord('I') - ord('A')].value =  float('{:.4f}'.format(float(dif)))
+                except:
                         next
       
         response.seek(0)
@@ -22635,3 +22644,69 @@ def report_analize_water_consumption(request):
     file_ext = 'xlsx'    
     response['Content-Disposition'] = 'attachment;filename="%s.%s"' % (output_name.replace('"', '\"'), file_ext)   
     return response
+
+def pulsar_water_consumption_mosvodokanal_from_template_by_2_date(request):
+    ROUND_SIZE = getattr(settings, 'ROUND_SIZE', 2)
+    response = io.StringIO()
+
+    electric_data_end   = ""
+    electric_data_start   = ""
+
+    electric_data_end   = request.session["electric_data_end"]
+    electric_data_start   = request.session["electric_data_start"]
+
+    result = "1"
+    directory = os.path.join(BASE_DIR,'static\\excel\\excel_template\\water') 
+    if  not(os.path.exists(directory)):
+        os.mkdir(directory)
+        result+="Директория создана %s"
+
+    files = os.listdir(directory) 
+    #print(files)
+    if len(files) > 1:
+        # result.append("%s"%(directory))
+        result+="В директории должен быть только один файл"
+    if len(files) == 1:
+        wb = load_workbook(directory+"\\"+files[0])
+        ws = wb.active
+        meter = ""
+        uzel_attr2 = ""
+        for row in ws.iter_rows(min_row=2):
+            meter = row[ord('E') - ord('A')].value 
+            uzel_attr2 = row[ord('D') - ord('A')].value
+            type_res = row[ord('C') - ord('A')].value#ХВ или ГВ
+            prev_val = row[ord('I') - ord('A')].value
+             # Если значение не пустое, выполняем запрос в БД
+            if uzel_attr2:
+                try:
+                    round_num = 0
+                    if type_res == 'ХВ':
+                        val = common_sql.get_value_by_meter_by_date(uzel_attr2, electric_data_end, 'meters.attr2', round_num)  # Вызываем функцию для запроса в БД
+                    else:
+                        val = common_sql.get_value_by_meter_by_date(uzel_attr2, electric_data_start, 'meters.attr2', round_num)  # Вызываем функцию для запроса в БД
+                    # Записываем результат в result_column
+                    #print(meter, uzel_attr2, val)
+
+                    if len(val)>0:
+                        #проверяем, чтобы значение было не больше предыдущего
+                        if float(val[0][0]) < float(prev_val):
+                            row[ord('J') - ord('A')].value = float(prev_val)
+                        else:
+                            row[ord('J') - ord('A')].value = float(val[0][0])
+                except:
+                    next
+  
+        response.seek(0)
+        response = HttpResponse(save_virtual_workbook(wb),content_type="application/vnd.ms-excel")
+        
+        output_name = 'report_mosvodokanal_'+str(electric_data_end)
+        file_ext = 'xlsx'    
+        response['Content-Disposition'] = 'attachment;filename="%s.%s"' % (output_name.replace('"', '\"'), file_ext)   
+        return response
+    else:
+        response.seek(0)
+        response = HttpResponse(result, content_type="text/plain")
+        output_name = 'empty'
+        file_ext = 'txt'    
+        response['Content-Disposition'] = 'attachment;filename="%s.%s"' % (output_name.replace('"', '\"'), file_ext)  
+        return response

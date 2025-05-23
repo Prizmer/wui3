@@ -224,4 +224,5 @@ urlpatterns = [
     url(r'^150/$', views.pulsar_heat_consumption_from_template, name = 'pulsar_heat_consumption_from_template'), # Отчёт по отреблению тепла на Дискавери с загрузкой из шаблона
 
     url(r'^147/$', views.analize_water_consumption, name = 'analize_water_consumption'), # отчёт-анализ потребления воды, в рамках квартиры суммируется вода ХВ и ГВ, если разница потребления ГВ отнсоительно ХВ больше 2 кубов за выбранный период, то об этом сигнализируется
+    url(r'^151/$', views.water_consumption_mosvodokanal_from_template_by_2_date, name = 'water_consumption_mosvodokanal_from_template_by_2_date'), # загрузка показаний на 2 даты - ГВС на date_start, а ХВС на date_end
 ]

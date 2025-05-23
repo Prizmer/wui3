@@ -11769,7 +11769,8 @@ def danfoss_water_impulse_daily(request):
             request.session["electric_data_end"]   = electric_data_end   = request.GET['electric_data_end'] 
                
     if (bool(is_abonent_level.search(obj_key))):
-        data_table = common_sql.get_data_table_danfoss_impulse_water_daily(obj_parent_title, obj_title, electric_data_end, True)
+                data_table = common_sql.get_data_table_danfoss_impulse_water_daily(obj_parent_title, obj_title, electric_data_end, True)
+
     elif (bool(is_object_level_2.search(obj_key))):
         data_table = common_sql.get_data_table_danfoss_impulse_water_daily(obj_parent_title, obj_title, electric_data_end, False)
               
@@ -12135,7 +12136,7 @@ def pulsar_water_consumption_mosvodokanal_from_template(request):
     # проверяем наличие шаблона и выводим его имя в отчёт
     #в report уже анализируем файл и заполняем данными
     result = []
-    directory = os.path.join(BASE_DIR,'static\\cfg\\excel_template\\water') 
+    directory = os.path.join(BASE_DIR,'static\\excel\\excel_template\\water') 
     if  not(os.path.exists(directory)):
         os.mkdir(directory)
         result.append("Директория создана %s"%(directory))
@@ -12179,7 +12180,7 @@ def pulsar_consumption_moselectrika_from_template(request):
     # проверяем наличие шаблона и выводим его имя в отчёт
     #в report уже анализируем файл и заполняем данными
     result = []
-    directory = os.path.join(BASE_DIR,'static\\cfg\\excel_template\\electric') 
+    directory = os.path.join(BASE_DIR,'static\\excel\\excel_template\\electric') 
     if  not(os.path.exists(directory)):
         os.mkdir(directory)
         result.append("Директория создана %s"%(directory))
@@ -12223,7 +12224,7 @@ def pulsar_heat_consumption_from_template(request):
     # проверяем наличие шаблона и выводим его имя в отчёт
     #в report уже анализируем файл и заполняем данными
     result = []
-    directory = os.path.join(BASE_DIR,'static\\cfg\\excel_template\\heat') 
+    directory = os.path.join(BASE_DIR,'static\\excel\\excel_template\\heat') 
     if  not(os.path.exists(directory)):
         os.mkdir(directory)
         result.append("Директория создана %s"%(directory))
@@ -12288,3 +12289,48 @@ def analize_water_consumption(request):
     args['electric_data_end'] = electric_data_end
 
     return render(request, "data_table/water/147.html", args)
+
+def water_consumption_mosvodokanal_from_template_by_2_date(request):
+    args = {}
+    is_abonent_level = re.compile(r'abonent')
+    is_object_level_2 = re.compile(r'level2')
+    data_table = []
+    obj_title = 'Не выбран'
+    obj_key = 'Не выбран'
+    obj_parent_title = 'Не выбран'
+    electric_data_start = ''
+    electric_data_end = ''
+
+    if request.is_ajax():
+        if request.method == 'GET':
+            request.session["obj_title"]           = obj_title           = request.GET['obj_title']
+            request.session["obj_key"]             = obj_key             = request.GET['obj_key']
+            request.session["obj_parent_title"]    = obj_parent_title    = request.GET['obj_parent_title']
+            request.session["electric_data_end"]   = electric_data_end   = request.GET['electric_data_end']
+
+    # проверяем наличие шаблона и выводим его имя в отчёт
+    #в report уже анализируем файл и заполняем данными
+    result = []
+    directory = os.path.join(BASE_DIR,'static\\excel\\excel_template\\water') 
+    if  not(os.path.exists(directory)):
+        os.mkdir(directory)
+        result.append("Директория создана %s"%(directory))
+        result.append("Поместите в неё Ваш файл-шаблон")
+    files = os.listdir(directory) 
+    #print(files)
+    if len(files) > 1:
+        # result.append("%s"%(directory))
+        result.append("В директории должен быть только один файл, сейчас там: %s" %(files))
+    if len(files) == 1:
+        #result.append("%s"%(directory))
+        result.append("В директории один файл '%s', для загрузки в него показаний нажмите кнопку ЭКСПОРТ"%(files[0]))
+ 
+    args['directory'] = directory
+    args['result'] = result
+    args['obj_title'] = obj_title
+    args['obj_key'] = obj_key
+    args['obj_parent_title'] = obj_parent_title
+    args['electric_data_end'] = electric_data_end
+    args['electric_data_start'] = electric_data_start
+
+    return render(request, "data_table/151.html", args)
