@@ -1,6 +1,6 @@
 -- View: public.heat_abons
 
--- DROP VIEW public.heat_abons;
+DROP VIEW public.heat_abons;
 
 CREATE OR REPLACE VIEW public.heat_abons
 AS
@@ -23,7 +23,11 @@ AS
     last_comment.comment,
     z1.account_1,
     z1.account_2,
-	type_meter
+	type_meter,
+	z1.attr1,
+		  z1.attr2,
+		  z1.attr3,
+		  z1.attr4
    FROM (( SELECT abonents.guid AS ab_guid,
             abonents.name AS ab_name,
             objects.name AS obj_name,
@@ -31,7 +35,11 @@ AS
             resources.name AS res_name,
             abonents.account_1,
             abonents.account_2,
-		  types_meters.name as type_meter
+		  types_meters.name as type_meter,
+		  meters.attr1,
+		  meters.attr2,
+		  meters.attr3,
+		  meters.attr4
            FROM abonents,
             objects,
             link_abonents_taken_params,
@@ -50,9 +58,12 @@ AS
 				 ((names_params.guid_resources)::text = (resources.guid)::text) AND 
 				 ((resources.name)::text = 'Тепло'::text)) AND
 		  (meters.guid_types_meters = types_meters.guid)
-          GROUP BY abonents.guid, abonents.name, objects.name, meters.factory_number_manual, resources.name, 	  types_meters.name) z1
+          GROUP BY abonents.guid, abonents.name, objects.name, meters.factory_number_manual, resources.name, 	  types_meters.name,meters.attr1,
+		  meters.attr2,
+		  meters.attr3,
+		  meters.attr4) z1
      LEFT JOIN last_comment ON (((last_comment.guid_abonents)::text = (z1.ab_guid)::text)));
 
-ALTER TABLE public.heat_abons
-  OWNER TO postgres;
+--ALTER TABLE public.heat_abons
+--  OWNER TO postgres;
 

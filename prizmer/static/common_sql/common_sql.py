@@ -5985,8 +5985,8 @@ round(z2.t_in::numeric,1),
 round(z2.t_out::numeric,1),
 heat_abons.comment,
 heat_abons.ab_guid,
-
-round((z2.energy::numeric*0.0008604206500956)::numeric,3) as energy_gkal
+round((z2.energy::numeric*0.0008604206500956)::numeric,3) as energy_gkal,
+heat_abons.attr4
 from heat_abons
 left join
 (SELECT z1.daily_date, z1.name_objects, z1.name_abonents, z1.number_manual, 
@@ -6055,7 +6055,8 @@ round(z2.t_out::numeric,1),
 heat_abons.comment,
 heat_abons.ab_guid,
 
-round((z2.energy::numeric*0.0008604206500956)::numeric,3) as energy_gkal
+round((z2.energy::numeric*0.0008604206500956)::numeric,3) as energy_gkal,
+ heat_abons.attr4
 from heat_abons
 left join
 (SELECT z1.daily_date, z1.name_objects, z1.name_abonents, z1.number_manual, 
@@ -6809,7 +6810,8 @@ def MakeSqlQuery_water_pulsar_daily_for_abonent(obj_parent_title, obj_title, ele
     sQuery="""
     Select z1.date,water_pulsar_abons.ab_name, water_pulsar_abons.type_meter, water_pulsar_abons.attr1, water_pulsar_abons.factory_number_manual, round(z1.value::numeric,3),
      water_pulsar_abons.ab_guid, 
-    water_pulsar_abons.comment
+    water_pulsar_abons.comment,
+    water_pulsar_abons.attr4
 from water_pulsar_abons
 left join
 (SELECT 
@@ -6859,7 +6861,8 @@ water_pulsar_abons.attr1,
 water_pulsar_abons.factory_number_manual, 
 z1.value,
  water_pulsar_abons.ab_guid, 
- water_pulsar_abons.comment
+ water_pulsar_abons.comment,
+water_pulsar_abons.attr4
  order by water_pulsar_abons.ab_name ASC, 
 water_pulsar_abons.type_meter %s
     """%(obj_parent_title, obj_title, electric_data_end, my_params[0],my_params[1],obj_parent_title, obj_title, sortDir)
@@ -6869,8 +6872,8 @@ water_pulsar_abons.type_meter %s
     
 def MakeSqlQuery_water_pulsar_daily_for_all(obj_parent_title, obj_title, electric_data_end, my_params, sortDir):
     sQuery="""
-    Select z1.date, water_pulsar_abons.ab_name, z1.type_meter, z1.attr1, water_pulsar_abons.factory_number_manual, round(z1.value::numeric,3),water_pulsar_abons.ab_guid,
- water_pulsar_abons.comment
+    Select z1.date, water_pulsar_abons.ab_name, water_pulsar_abons.type_meter, water_pulsar_abons.attr1, water_pulsar_abons.factory_number_manual, round(z1.value::numeric,3),water_pulsar_abons.ab_guid,
+ water_pulsar_abons.comment, water_pulsar_abons.attr4
 from water_pulsar_abons
 left join 
 (SELECT 
@@ -6911,13 +6914,14 @@ on water_pulsar_abons.factory_number_manual=z1.factory_number_manual
   where water_pulsar_abons.obj_name='%s'
   group by z1.date, 
 water_pulsar_abons.ab_name, 
-z1.type_meter, 
-z1.attr1, 
+water_pulsar_abons.type_meter,  
 water_pulsar_abons.factory_number_manual, z1.value,
 water_pulsar_abons.ab_guid,
 water_pulsar_abons.ab_guid, 
- water_pulsar_abons.comment
-  order by water_pulsar_abons.ab_name ASC, z1.attr1 ASC, z1.type_meter %s
+ water_pulsar_abons.comment,
+ water_pulsar_abons.attr4,
+ water_pulsar_abons.attr1
+  order by water_pulsar_abons.ab_name ASC, water_pulsar_abons.attr1 ASC, water_pulsar_abons.type_meter %s
   
     """%(obj_title, electric_data_end, my_params[0],my_params[1],obj_title, sortDir)
     #print(sQuery)

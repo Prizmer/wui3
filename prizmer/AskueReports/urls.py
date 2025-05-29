@@ -189,4 +189,7 @@ urlpatterns = [
     url(r'^150/$', views.pulsar_heat_consumption_from_template, name = '150'), # Отчёт по потреблению для тепла из шаблона
 
     url(r'^147/$', views.report_analize_water_consumption, name = '151'), # Отчёт по потреблению воды-анализ
+
+    url(r'^152/$', views.report_pulsar_water_daily_floors, name = '152'), # Показание на дату с водосчётчиков Пульсар
+    url(r'^144/$', views.report_pulsar_heat_daily_floors, name = '144'), # Показание на дату с теплосчётчиков Пульсар
 ]

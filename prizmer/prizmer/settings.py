@@ -107,7 +107,8 @@ DATABASES = {
     'default': {
         'ENGINE':'django.db.backends.postgresql_psycopg2',
         #'NAME': 'fresh',
-        'NAME': 'hovrino-sever',
+        'NAME': 'grand_city',
+        #'NAME': 'hovrino-sever',
         # 'NAME': 'citybay',
         #'NAME': 'discovery',
         #'NAME': 'komunarka_k10',
@@ -142,7 +143,7 @@ DATABASES = {
         'USER': 'postgres',
         'PASSWORD': '1',
         'HOST': 'localhost',
-        'HOST': '192.168.50.29',
+        #'HOST': '192.168.50.29',
         #'HOST': '94.199.105.211',
         'PORT': '5432',
         #'PORT': '14012',
@@ -201,3 +202,5 @@ SHOW_LIC_NUM = False #Показывать лицевой номер в отчё
 SEPARATOR = ',' # Какой разделитель использовать при экспорте в excel '.' or ','
 ROUND_SIZE = 3 #Сколько знаков после запятой будет выводится в отчёт excel
 COMMENT_TO_EXCEL = True #Выводятся ли комменты в excel  в отчётах 114,58,56
+SHOW_STOYAK = False #для отчёта 152  - показывать ли стояк в отчёте/выводить в эксель
+SHOW_FLOORS = True #для отчёта 152 и 144 - показывать ли 'этаж в отчёте/выводить в эксель

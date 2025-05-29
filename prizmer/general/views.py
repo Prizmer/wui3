@@ -12334,3 +12334,111 @@ def water_consumption_mosvodokanal_from_template_by_2_date(request):
     args['electric_data_start'] = electric_data_start
 
     return render(request, "data_table/151.html", args)
+
+def pulsar_water_daily_floors(request):
+    SHOW_STOYAK = getattr(settings, 'SHOW_STOYAK', 'False')
+    SHOW_FLOORS = getattr(settings, 'SHOW_FLOORS', 'True')
+    args = {}
+    is_abonent_level = re.compile(r'abonent')
+    is_object_level_2 = re.compile(r'level2')
+    data_table = []
+    obj_title = 'Не выбран'
+    obj_key = 'Не выбран'
+    obj_parent_title = 'Не выбран'
+    is_electric_monthly = ''
+    is_electric_daily = ''
+    is_electric_current = ''
+    is_electric_delta = ''
+    electric_data_start = ''
+    electric_data_end = ''
+
+    if request.is_ajax():
+        if request.method == 'GET':
+            request.session["obj_title"]           = obj_title           = request.GET['obj_title']
+            request.session["obj_key"]             = obj_key             = request.GET['obj_key']
+            request.session["obj_parent_title"]    = obj_parent_title    = request.GET['obj_parent_title']
+            #request.session["obj_parent_title"]    = obj_title         = request.GET['obj_title']
+            request.session["electric_data_end"]   = electric_data_end   = request.GET['electric_data_end']            
+    sortDir = 'ASC'
+    if (bool(is_abonent_level.search(obj_key))):
+        data_table = common_sql.get_data_table_pulsar_water_daily(obj_parent_title, obj_title, electric_data_end, True, sortDir)
+    elif (bool(is_object_level_2.search(obj_key))):
+        data_table = common_sql.get_data_table_pulsar_water_daily(obj_parent_title, obj_title, electric_data_end, False, sortDir)
+              
+    if len(data_table)>0: 
+        data_table=common_sql.ChangeNull_and_LeaveEmptyCol(data_table, None, 7)
+        
+    args['data_table'] = data_table
+    args['obj_title'] = obj_title
+    args['obj_key'] = obj_key
+    args['obj_parent_title'] = obj_parent_title
+    args['is_electric_monthly'] = is_electric_monthly
+    args['is_electric_daily'] = is_electric_daily
+    args['is_electric_current'] = is_electric_current
+    args['is_electric_delta'] = is_electric_delta
+    args['electric_data_start'] = electric_data_start
+    args['electric_data_end'] = electric_data_end
+    args['SHOW_FLOORS'] = SHOW_FLOORS
+    args['SHOW_STOYAK'] = SHOW_STOYAK
+   
+    return render(request, "data_table/water/152.html", args)
+
+def pulsar_heat_daily_floors(request):
+    SHOW_STOYAK = getattr(settings, 'SHOW_STOYAK', 'False')
+    SHOW_FLOORS = getattr(settings, 'SHOW_FLOORS', 'True')
+    args = {}
+    is_abonent_level = re.compile(r'abonent')
+    is_object_level_2 = re.compile(r'level2')
+    is_group_level = re.compile(r'group')
+    data_table = []
+    obj_title = 'Не выбран'
+    obj_key = 'Не выбран'
+    obj_parent_title = 'Не выбран'
+    is_electric_monthly = ''
+    is_electric_daily = ''
+    is_electric_current = ''
+    is_electric_delta = ''
+    electric_data_start = ''
+    electric_data_end = ''
+    dates = None
+    is_electric_period = None
+    if request.is_ajax():
+        if request.method == 'GET':
+            request.session["obj_title"]           = obj_title           = request.GET['obj_title']
+            request.session["obj_key"]             = obj_key             = request.GET['obj_key']
+            request.session["obj_parent_title"]    = obj_parent_title    = request.GET['obj_parent_title']
+            request.session["is_electric_monthly"] = is_electric_monthly = request.GET['is_electric_monthly']
+            request.session["is_electric_daily"]   = is_electric_daily   = request.GET['is_electric_daily']
+            request.session["is_electric_current"] = is_electric_current = request.GET['is_electric_current']
+            request.session["is_electric_delta"]   = is_electric_delta   = request.GET['is_electric_delta']
+            request.session["electric_data_start"] = electric_data_start = request.GET['electric_data_start']
+            request.session["electric_data_end"]   = electric_data_end   = request.GET['electric_data_end']
+            request.session["is_electric_period"]  = is_electric_period  = request.GET['is_electric_period']
+            request.session["is_electric_monthly"]  = is_electric_monthly  = request.GET['is_electric_monthly']
+
+            dm = 'daily'
+            if is_electric_monthly == "1":
+                dm = 'monthly'
+#*********************************************************************************************************************************************************************
+            if (bool(is_abonent_level.search(obj_key))):
+                data_table = common_sql.get_data_table_by_date_daily_pulsar_teplo(obj_parent_title, obj_title, electric_data_end, True, dm)
+            elif (bool(is_object_level_2.search(obj_key))):
+                data_table = common_sql.get_data_table_by_date_daily_pulsar_teplo(obj_parent_title, obj_title, electric_data_end, False, dm)
+                
+    args['data_table'] = data_table
+    args['obj_title'] = obj_title
+    args['obj_key'] = obj_key
+    args['obj_parent_title'] = obj_parent_title
+    args['is_electric_monthly'] = is_electric_monthly
+    args['is_electric_daily'] = is_electric_daily
+    args['is_electric_current'] = is_electric_current
+    args['is_electric_delta'] = is_electric_delta
+    args['electric_data_start'] = electric_data_start
+    args['electric_data_end'] = electric_data_end
+    args['is_electric_period'] = is_electric_period
+    args['dates'] = dates
+    args['SHOW_FLOORS'] = SHOW_FLOORS
+    args['SHOW_STOYAK'] = SHOW_STOYAK
+    
+
+    return render(request, "data_table/heat/144.html", args)
