@@ -228,4 +228,8 @@ urlpatterns = [
 
     url(r'^152/$', views.pulsar_water_daily_floors, name = 'water_pulsar_floors'), # Показание на дату с водосчётчиков Пульсар - аналог 58, но с этажами и без стояка
     url(r'^144/$', views.pulsar_heat_daily_floors, name = 'heat_pulsar_floors'), # Показание на дату с теплосчётчиков Пульсар
+    url(r'^154/$', views.pulsar_frost_daily_floors, name = 'frost_pulsar_floors'), # Показание на дату с холодосчётчиков Пульсар
+
+    url(r'^155/$', views.impulse_heat_consumption, name = 'impulse_heat_consumption,'), #тепло имп, показания за период Импульсные 
+    url(r'^156/$', views.impulse_heat_by_date, name = 'impulse_heat_by_date'), # тепло импульсная, показания на дату
 ]

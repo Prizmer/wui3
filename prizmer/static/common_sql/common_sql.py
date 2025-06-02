@@ -5058,8 +5058,8 @@ def MakeSqlQuery_water_by_date_for_korp(meters_name, parent_name, electric_data_
     sQuery="""
 Select z2.date, obj_name as ab_name, 
 water_abons_report.ab_name as meter_name,  
-z2.meter_name, 
-z2.name_params, 
+water_abons_report.meter_name,
+water_abons_report.channel, 
 round(z2.value::numeric,2)
 from water_abons_report
 
@@ -5456,7 +5456,6 @@ def get_data_table_water_period_pulsar(meters_name, parent_name, electric_data_s
     else:
         cursor.execute(MakeSqlQuery_water_period_for_korp(meters_name, parent_name,electric_data_start, electric_data_end, my_param))
     data_table = cursor.fetchall()
-
     return data_table
 
 def MakeSqlQuery_water_tekon_for_abonent_for_period(obj_parent_title, obj_title, electric_data_start,electric_data_end, chanel, my_params, type_meter):
@@ -16833,4 +16832,316 @@ def get_all_meters_data_with_id_only_digital_api(date):
     # print(sQuery)
     cursor.execute(sQuery)
     data_table = cursor.fetchall()    
+    return data_table
+
+
+
+def MakeSqlQuery_impulse_heat_by_date_for_korp(meters_name, parent_name, electric_data_end, my_param, dc):
+    sQuery="""
+Select z2.date, obj_name as ab_name, 
+heat_impulse_report.ab_name as meter_name,  
+heat_impulse_report.meter_name,
+heat_impulse_report.channel, 
+round(z2.value::numeric,2)
+from heat_impulse_report
+
+LEFT JOIN (
+SELECT 
+  daily_values.date,
+  obj_name as ab_name,
+  abonents.name as meters,
+  meters.name as meter_name,  
+  names_params.name as name_params,
+  daily_values.value,    
+  abonents.guid,
+  heat_impulse_report.name,
+  resources.name as res
+FROM 
+  public.meters, 
+  public.taken_params, 
+  public.daily_values, 
+  public.abonents, 
+  public.link_abonents_taken_params,
+  heat_impulse_report,
+  params,
+  names_params,
+  resources
+WHERE 
+  taken_params.guid_meters = meters.guid AND
+  daily_values.id_taken_params = taken_params.id AND
+  link_abonents_taken_params.guid_taken_params = taken_params.guid AND
+  link_abonents_taken_params.guid_abonents = abonents.guid AND
+  heat_impulse_report.ab_name=abonents.name and
+  params.guid=taken_params.guid_params  and
+  names_params.guid=params.guid_names_params and
+  resources.guid=names_params.guid_resources and
+  resources.name='%s'
+  and date='%s' and
+  heat_impulse_report.name='%s'
+  group by
+	daily_values.date,
+  obj_name,
+  abonents.name,
+  meters.name,  
+  names_params.name,
+  daily_values.value,    
+  abonents.guid,
+  heat_impulse_report.name,
+  resources.name 
+  order by obj_name, names_params.name ) z2
+  on z2.meters=heat_impulse_report.ab_name
+  where heat_impulse_report.name='%s'  
+  order by obj_name, z2.name_params
+    """%(my_param[0],electric_data_end, meters_name,meters_name)
+    # if dc == u'current':
+    #   sQuery=sQuery.replace('daily', dc)
+    #print(sQuery)
+    return sQuery
+    
+def MakeSqlQuery_impulse_heat_by_date_for_abon(meters_name, parent_name, electric_data_end, my_param, dc):
+    sQuery="""SELECT 
+  daily_values.date,
+  obj_name as ab_name,
+  abonents.name as meters,
+  meters.name as meter_name,  
+  names_params.name as name_params,
+  round(daily_values.value::numeric,2),    
+  abonents.guid,
+  heat_impulse_report.name,
+  resources.name
+FROM 
+  public.meters, 
+  public.taken_params, 
+  public.daily_values, 
+  public.abonents, 
+  public.link_abonents_taken_params,
+  heat_impulse_report,
+  params,
+  names_params,
+  resources
+WHERE 
+  taken_params.guid_meters = meters.guid AND
+  daily_values.id_taken_params = taken_params.id AND
+  link_abonents_taken_params.guid_taken_params = taken_params.guid AND
+  link_abonents_taken_params.guid_abonents = abonents.guid AND
+  heat_impulse_report.ab_name=abonents.name and
+  params.guid=taken_params.guid_params  and
+  names_params.guid=params.guid_names_params and
+  resources.guid=names_params.guid_resources and
+  resources.name='%s'
+  and date='%s' and
+  heat_impulse_report.name='%s'
+  and obj_name='%s'
+  group by
+	daily_values.date,
+  obj_name,
+  abonents.name,
+  meters.name,  
+  names_params.name,
+  daily_values.value,    
+  abonents.guid,
+  heat_impulse_report.name,
+  resources.name 
+  order by obj_name, names_params.name     
+    """%(my_param[0],electric_data_end, parent_name, meters_name)
+    #print(sQuery)
+    # if dc == u'current':
+    #   sQuery=sQuery.replace('daily', dc)
+      #print sQuery
+
+    #print dc
+    return sQuery
+    
+def get_data_table_impulse_heat_by_date(meters_name, parent_name, electric_data_end, isAbon, dc):
+    cursor = connection.cursor()
+    data_table=[]
+    my_param=['Импульс',]
+    #print "meters_name, parent_name, electric_data_end", meters_name, parent_name, electric_data_end
+    if (isAbon):
+        cursor.execute(MakeSqlQuery_impulse_heat_by_date_for_abon(meters_name, parent_name, electric_data_end, my_param,dc))
+    else:
+        cursor.execute(MakeSqlQuery_impulse_heat_by_date_for_korp(meters_name, parent_name, electric_data_end, my_param, dc))
+    data_table = cursor.fetchall()
+
+    return data_table
+
+
+
+
+
+def MakeSqlQuery_heat_impulse_consumption_for_korp(meters_name, parent_name,electric_data_start, electric_data_end, my_param):
+    sQuery="""  SELECT  z.ab_name, z.account_2,z.date_st, z.meter_name,
+'Имп.тепло',
+round(z.value_st::numeric,3),
+round(z.value_end::numeric,3),
+round(delta::numeric,3), z.date_install, z.date_end
+From
+(Select z_st.ab_name, z_st.account_2,z_st.date as date_st, z_st.meter_name, z_st.value as value_st,z_end.value as value_end,round(z_end.value::numeric-z_st.value::numeric,3) as delta, z_st.date_install, z_end.date as date_end
+from
+(Select  obj_name as ab_name, account_2,z2.date, heat_impulse_report.ab_name as meter_name, z2.value,date_install
+from heat_impulse_report
+LEFT JOIN (
+SELECT
+  meters.name,
+  daily_values.date,
+  daily_values.value,
+  abonents.name as ab_name,
+  abonents.guid
+FROM
+  public.meters,
+  public.taken_params,
+  public.daily_values,
+  public.abonents,
+  public.link_abonents_taken_params,
+  params,
+  names_params,
+  resources
+WHERE
+  taken_params.guid_meters = meters.guid AND
+  daily_values.id_taken_params = taken_params.id AND
+  link_abonents_taken_params.guid_taken_params = taken_params.guid AND
+  link_abonents_taken_params.guid_abonents = abonents.guid
+and
+  params.guid=taken_params.guid_params  and
+  names_params.guid=params.guid_names_params and
+  resources.guid=names_params.guid_resources and
+  resources.name='%s'
+  and date='%s'
+
+)z2
+on z2.ab_name=heat_impulse_report.ab_name
+where heat_impulse_report.name='%s'
+order by obj_name, heat_impulse_report.ab_name) z_st,
+(
+Select  obj_name as ab_name, account_2,z2.date, heat_impulse_report.ab_name as meter_name, z2.value,date_install
+from heat_impulse_report
+LEFT JOIN (
+SELECT
+  meters.name,
+  daily_values.date,
+  daily_values.value,
+  abonents.name as ab_name,
+  abonents.guid
+FROM
+  public.meters,
+  public.taken_params,
+  public.daily_values,
+  public.abonents,
+  public.link_abonents_taken_params,
+  params,
+  names_params,
+  resources
+WHERE
+  taken_params.guid_meters = meters.guid AND
+  daily_values.id_taken_params = taken_params.id AND
+  link_abonents_taken_params.guid_taken_params = taken_params.guid AND
+  link_abonents_taken_params.guid_abonents = abonents.guid
+and
+  params.guid=taken_params.guid_params  and
+  names_params.guid=params.guid_names_params and
+  resources.guid=names_params.guid_resources and
+  resources.name='%s'
+  and date='%s'
+
+)z2
+on z2.ab_name=heat_impulse_report.ab_name
+where heat_impulse_report.name='%s'
+order by obj_name, heat_impulse_report.ab_name) z_end
+where z_st.meter_name=z_end.meter_name) z
+order by ab_name, meter_name
+    """%( my_param[0], electric_data_start,meters_name,my_param[0], electric_data_end,meters_name)
+    #print(sQuery) 
+    return sQuery
+
+def MakeSqlQuery_heat_impulse_consumption_for_abon(meters_name, parent_name,electric_data_start, electric_data_end, my_param):
+    sQuery="""
+Select z_st.ab_name, z_st.account_2,z_st.date, z_st.meter_name,
+'Имп.тепло', 
+round(z_st.value::numeric,3),
+round(z_end.value::numeric,3),
+round((z_end.value-z_st.value)::numeric,3) as delta, z_st.date_install, z_end.date
+from 
+(Select  obj_name as ab_name, account_2,z2.date, heat_impulse_report.ab_name as meter_name, z2.value,date_install
+from heat_impulse_report
+LEFT JOIN (
+SELECT
+  meters.name,
+  daily_values.date,
+  daily_values.value,
+  abonents.name as ab_name,
+  abonents.guid
+FROM
+  public.meters,
+  public.taken_params,
+  public.daily_values,
+  public.abonents,
+  public.link_abonents_taken_params,
+  params,
+  names_params,
+  resources
+WHERE
+  taken_params.guid_meters = meters.guid AND
+  daily_values.id_taken_params = taken_params.id AND
+  link_abonents_taken_params.guid_taken_params = taken_params.guid AND
+  link_abonents_taken_params.guid_abonents = abonents.guid
+and
+  params.guid=taken_params.guid_params  and
+  names_params.guid=params.guid_names_params and
+  resources.guid=names_params.guid_resources and
+  resources.name='%s'
+  and date='%s'
+
+)z2
+on z2.ab_name=heat_impulse_report.ab_name
+where heat_impulse_report.name='%s' and heat_impulse_report.obj_name='%s' 
+
+order by account_2, obj_name) z_st,
+(
+Select  obj_name as ab_name, account_2,z2.date, heat_impulse_report.ab_name as meter_name, z2.value,date_install
+from heat_impulse_report
+LEFT JOIN (
+SELECT
+  meters.name,
+  daily_values.date,
+  daily_values.value,
+  abonents.name as ab_name,
+  abonents.guid
+FROM
+  public.meters,
+  public.taken_params,
+  public.daily_values,
+  public.abonents,
+  public.link_abonents_taken_params,
+  params,
+  names_params,
+  resources
+WHERE
+  taken_params.guid_meters = meters.guid AND
+  daily_values.id_taken_params = taken_params.id AND
+  link_abonents_taken_params.guid_taken_params = taken_params.guid AND
+  link_abonents_taken_params.guid_abonents = abonents.guid
+and
+  params.guid=taken_params.guid_params  and
+  names_params.guid=params.guid_names_params and
+  resources.guid=names_params.guid_resources and
+  resources.name='%s'
+  and date='%s'
+
+)z2
+on z2.ab_name=heat_impulse_report.ab_name
+where heat_impulse_report.name='%s' and heat_impulse_report.obj_name='%s' 
+order by account_2, obj_name) z_end
+where z_st.meter_name=z_end.meter_name
+    """%(my_param[0], electric_data_start, parent_name, meters_name,   my_param[0], electric_data_end,parent_name, meters_name )
+    return sQuery
+def get_data_table_heat_impulse_consumption(meters_name, parent_name, electric_data_start, electric_data_end, isAbon):
+    cursor = connection.cursor()
+    data_table=[]
+    my_param=['Импульс',]
+    #print "meters_name, parent_name, electric_data_end", meters_name, parent_name, electric_data_end
+    if (isAbon):
+        cursor.execute(MakeSqlQuery_heat_impulse_consumption_for_abon(meters_name, parent_name,electric_data_start, electric_data_end, my_param))
+    else:
+        cursor.execute(MakeSqlQuery_heat_impulse_consumption_for_korp(meters_name, parent_name,electric_data_start, electric_data_end, my_param))
+    data_table = cursor.fetchall()
     return data_table

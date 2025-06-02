@@ -1,0 +1,44 @@
+<html>
+<head>
+<script src="/static/libs/liHighLight.js" type=text/javascript></script>
+</head>
+<body>
+<span>Показания по воде за <strong>{{electric_data_end}}</strong></span>
+<br>
+<span>Абонент: <strong>{{obj_title}}</strong></span>
+<br>
+{{progress}}
+{% if data_table %} 
+<table class="content" id="data-table" >
+<tr>
+<th>Абонент</th>
+<th>Счётчик</th>
+<th>Пульсар</th>
+<th>Канал</th>
+<th>Энергия</th>
+
+<!--<th>Дата</th>-->
+
+</tr>
+{% for value in data_table %}
+<tr>
+<td>{{value.1}}</td>
+<td>{{value.2}}</td>
+<td>{{value.3}}</td>
+<td>{{value.4}}</td>
+<td><strong>{{value.5|floatformat:3}}</strong></td>
+
+<!--<td>{{value.3}}</td>-->
+</tr>
+{% endfor %}
+</table>
+{% else %}
+<br>
+<br>
+<span><strong>Нет данных.</strong> 
+
+{% endif %}
+
+<br>
+</body>
+</html>
