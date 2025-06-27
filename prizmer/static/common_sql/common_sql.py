@@ -16749,7 +16749,7 @@ def get_all_meters_data_with_id_only_digital_api(date):
     cursor = connection.cursor()
     sQuery = """
               SELECT 
-              all_res_abons_with_check_params.obj_guid::text, 
+              all_res_abons_with_check_params.parent_guid::text, 
               all_res_abons_with_check_params.obj_name, 
               all_res_abons_with_check_params.ab_guid::text, 
               all_res_abons_with_check_params.ab_name,
@@ -16816,7 +16816,7 @@ def get_all_meters_data_with_id_only_digital_api(date):
               where all_res_abons_with_check_params.ab_name like '%%Квартира%%'
               AND  all_res_abons_with_check_params.name_param != 'Ti' AND  all_res_abons_with_check_params.name_param != 'To' AND  all_res_abons_with_check_params.name_param != 'Объем'
               GROUP BY
-              all_res_abons_with_check_params.obj_guid, 
+              all_res_abons_with_check_params.parent_guid, 
               all_res_abons_with_check_params.obj_name, 
               all_res_abons_with_check_params.ab_guid, 
               all_res_abons_with_check_params.ab_name,
