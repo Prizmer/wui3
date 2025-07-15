@@ -22416,18 +22416,21 @@ def pulsar_consumption_moselectrika_from_template(request):
                 # Записываем результат в result_column
                 #print(val)
                     if len(val)>0:
-                        # '%s' % get_val_by_round(float(data_table[row-6][4]),ROUND_SIZE, separator)
-                        #print(val)
-                        #print(get_val_by_round(float(val[0][2]),1, '.'))
-                        #print('!')
-                        row[ord('L') - ord('A')].value = '%s' % get_val_by_round(float(val[0][2]),1, '.') #float(val[0][2])
-                        if not(tarif == 'Однотарифный'):
-                            row[ord('M') - ord('A')].value = '%s' % get_val_by_round(float(val[0][3]),1, '.')#float(val[0][3])
-                        if tarif == 'Трёхтарифный':
-                            row[ord('N') - ord('A')].value = '%s' % get_val_by_round(float(val[0][4]),1, '.')#float(val[0][4])
+                        t1 = float(val[0][2])
+                        t2 = float(val[0][3])
+                        t3 = float(val[0][4])
                         
-                            
-                        #row[ord('O') - ord('A')].value = electric_data_end
+                        if tarif == 'Трёхтарифный':
+                            row[ord('L') - ord('A')].value = '%s' % get_val_by_round(t1,1, '.') #t1
+                            row[ord('M') - ord('A')].value = '%s' % get_val_by_round(t2,1, '.') #t2
+                            row[ord('N') - ord('A')].value = '%s' % get_val_by_round(t3,1, '.') #t3
+                        elif tarif == 'Двухтарифный':
+                            #print(meter, tarif, t1, t2, t3)                            
+                            row[ord('L') - ord('A')].value = '%s' % get_val_by_round(float(t1 + t3),1, '.') #t1
+                            row[ord('M') - ord('A')].value = '%s' % get_val_by_round(t2,1, '.') #t2
+                        elif tarif == 'Однотарифный':
+                            #print(meter, tarif, t1, t2, t3)                                                        
+                            row[ord('L') - ord('A')].value = '%s' % get_val_by_round(float(t1 + t2 + t3),1, '.') #t1
                 except:
                     next
   
