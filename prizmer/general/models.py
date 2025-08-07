@@ -490,7 +490,7 @@ class LinkGroups80020Meters(models.Model):
     guid = models.UUIDField(primary_key = True, default = uuid.uuid4 )
     guid_groups_80020 = models.ForeignKey('Groups80020', db_column = 'guid_groups_80020', on_delete=models.CASCADE)
     guid_meters = models.ForeignKey('Meters', db_column='guid_meters', on_delete=models.CASCADE)
-    measuringpoint_code = models.DecimalField(max_digits=18, decimal_places=0)
+    measuringpoint_code = models.CharField(max_length=250)
     measuringpoint_name = models.CharField(max_length=250)    
     class Meta:
         db_table = 'link_groups_80020_meters'

@@ -2697,6 +2697,15 @@ def add_taken_param_no_signals(instance, isR, isHalfs): # Добавляем с�
         add_param.save()
         #add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "7f273543-3985-43b0-a027-21311961ecb7")) #T4
         #add_param.save()
+
+        # Профиль мощности
+        # А+ профиль
+        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "b29f02ba-a5bf-4236-acae-6de1185536cf"))
+        add_param.save()
+
+        # R+ профиль
+        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "16087cc4-9360-4568-b15f-14a5e09dbd56")) #T4
+        add_param.save()
         
     elif instance.guid_types_meters.name == 'Пульсар ХВС':
         #Добавляем параметры для водосчётчика Пульсар ХВС.
@@ -3143,7 +3152,24 @@ def add_taken_param_no_signals(instance, isR, isHalfs): # Добавляем с�
         #Т выход    
         add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "230e16d7-d4d1-4a31-86a9-c962791dd0e0"))
         add_param.save()
-
+    elif instance.guid_types_meters.name == 'Пульсар IoT ВС':
+        #Добавляем параметры для водосчётчика Пульсар IoT ВС.
+        #------------Суточные
+        # "Показание Расход воды" Объем, м3
+        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "dc619965-fe10-4ef8-b41f-9506cd579297"))
+        add_param.save()
+    elif instance.guid_types_meters.name == 'Пульсар IoT Тепло-энергия':
+        #Добавляем параметры для теплочётчика Пульсар IoT Тепло-энергия.
+        #------------Суточные
+        # "Показание Энергия"
+        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "ae250bd8-db9b-49ef-8153-adf2cee5b80e"))
+        add_param.save()
+    elif instance.guid_types_meters.name == 'Пульсар IoT Тепло-объем':
+        #Добавляем параметры для теплочётчика Пульсар IoT Тепло-энергия.
+        #------------Суточные
+        # "Показание Объем" Объем, м3
+        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "af6b27af-03dd-4128-86b9-d58849950220"))
+        add_param.save()
     else:
         pass
         #print('!!!!!!!!!!!!!!', instance.guid_types_meters.name)
