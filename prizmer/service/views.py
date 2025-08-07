@@ -742,6 +742,18 @@ def LoadElectricMeters(sPath, sSheet):
                 add_meter = Meters(name = str(type_meter) + ' ' + str(meter), address = str(adr), factory_number_manual = str(meter), attr1 = str(attr1), guid_types_meters = TypesMeters.objects.get(guid = "5e1dbf09-6c37-4982-aa1e-a693d2b4f079") )
                 add_meter.save()
                 writeToLog('Device added' + ' --->   ' + 'Danfoss SonoMeter-500')
+            elif str(type_meter) == 'Пульсар IoT ВС':
+                add_meter = Meters(name = str(type_meter) + ' ' + str(meter), address = str(adr), factory_number_manual = str(meter), attr1 = str(attr1), guid_types_meters = TypesMeters.objects.get(guid = "bc61d16e-4059-4f9b-b7df-55915a7a844b") )
+                add_meter.save()
+                writeToLog('Device added' + ' --->   ' + 'Пульсар IoT ВС')
+            elif str(type_meter) == 'Пульсар IoT Тепло-объем':
+                add_meter = Meters(name = str(type_meter) + ' ' + str(meter), address = str(adr), factory_number_manual = str(meter), attr1 = str(attr1), guid_types_meters = TypesMeters.objects.get(guid = "84bf3b54-d51d-48d7-902d-4826cdef7101") )
+                add_meter.save()
+                writeToLog('Device added' + ' --->   ' + 'Пульсар IoT Тепло-объем')
+            elif str(type_meter) == 'Пульсар IoT Тепло-энергия':
+                add_meter = Meters(name = str(type_meter) + ' ' + str(meter), address = str(adr), factory_number_manual = str(meter), attr1 = str(attr1), guid_types_meters = TypesMeters.objects.get(guid = "a3aa2833-4104-4ac4-a0fb-c34e4402d1d6") )
+                add_meter.save()
+                writeToLog('Device added' + ' --->   ' + 'Пульсар IoT Тепло-энергия')
 
             else:
                 writeToLog('Не найдено совпадение с существующим типом прибора')
