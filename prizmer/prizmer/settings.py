@@ -106,7 +106,8 @@ WSGI_APPLICATION = 'prizmer.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE':'django.db.backends.postgresql_psycopg2',
-        'NAME': 'prizmer',
+        #'NAME': 'prizmer',
+        'NAME': 'iot',
         # 'NAME': 'template',
         'USER': 'postgres',
         'PASSWORD': '1',
@@ -167,5 +168,5 @@ SHOW_LIC_NUM = False #Показывать лицевой номер в отчё
 SEPARATOR = ',' # Какой разделитель использовать при экспорте в excel '.' or ','
 ROUND_SIZE = 3 #Сколько знаков после запятой будет выводится в отчёт excel
 COMMENT_TO_EXCEL = True #Выводятся ли комменты в excel  в отчётах 114,58,56
-SHOW_STOYAK = False #для отчёта 152  - показывать ли стояк в отчёте/выводить в эксель
-SHOW_FLOORS = True #для отчёта 152 и 144 - показывать ли 'этаж в отчёте/выводить в эксель
+SHOW_STOYAK = True #для отчёта 152,157,158  - показывать ли стояк в отчёте/выводить в эксель
+SHOW_FLOORS = False #для отчёта 152 и 144 - показывать ли 'этаж в отчёте/выводить в эксель

@@ -17145,3 +17145,166 @@ def get_data_table_heat_impulse_consumption(meters_name, parent_name, electric_d
         cursor.execute(MakeSqlQuery_heat_impulse_consumption_for_korp(meters_name, parent_name,electric_data_start, electric_data_end, my_param))
     data_table = cursor.fetchall()
     return data_table
+
+
+def MakeSqlQuery_iot_water_daily(meters_name, parent_name, electric_data_end, isAbon, dir, type_meter):
+    if isAbon:
+        strWhere = """
+                    AND objects.name = '%s' 
+                    AND abonents.name = '%s'""" % (parent_name, meters_name)
+    else:
+        strWhere = """AND parent_obj.obj_name = '%s'
+                    AND objects.name = '%s' """ % (parent_name, meters_name)
+
+    sQuery="""
+WITH parent_obj AS (
+    SELECT 
+        guid AS obj_guid,
+        name AS obj_name,
+        level,
+        guid_parent AS parent1_guid
+    FROM objects
+)
+SELECT DISTINCT
+  parent_obj.obj_name,
+  objects.guid, 
+  objects.name, 
+  abonents.guid, 
+  abonents.name, 
+  meters.name, 
+  meters.address, 
+  meters.factory_number_manual, 
+  meters.attr1, 
+  meters.attr2, --тут тип прибора ХВС или ГВС
+  meters.attr3, 
+  meters.attr4, 
+  daily_values.date, 
+  round(daily_values.value::numeric,5), 
+  types_meters.name
+FROM public.objects
+JOIN public.abonents ON objects.guid = abonents.guid_objects
+JOIN public.link_abonents_taken_params ON link_abonents_taken_params.guid_abonents = abonents.guid
+JOIN public.taken_params ON link_abonents_taken_params.guid_taken_params = taken_params.guid
+JOIN public.meters ON taken_params.guid_meters = meters.guid
+JOIN public.types_meters ON meters.guid_types_meters = types_meters.guid
+JOIN parent_obj ON objects.guid_parent::text = parent_obj.obj_guid::text
+LEFT JOIN public.daily_values ON (
+  daily_values.id_taken_params = taken_params.id
+  AND daily_values.date = '%s' 
+)
+WHERE 
+  types_meters.name = '%s'
+  %s 
+  ORDER BY  objects.name ASC, abonents.name ASC, meters.attr2 %s
+    """ % (electric_data_end, type_meter, strWhere, dir)
+    #print(sQuery)
+    return sQuery
+
+def get_data_table_iot_water_daily(meters_name, parent_name, electric_data_end, isAbon,dir, type_meter):
+    cursor = connection.cursor()
+    data_table=[]
+    cursor.execute(MakeSqlQuery_iot_water_daily(meters_name, parent_name, electric_data_end, isAbon, dir, type_meter))
+    data_table = cursor.fetchall()
+    #print(data_table)
+    return data_table
+
+
+def MakeSqlQuery_iot_water_consumption(meters_name, parent_name, electric_data_start, electric_data_end, isAbon, dir, type_meter):
+    # print(meters_name, parent_name, electric_data_start, electric_data_end, isAbon, dir)
+    if isAbon:
+        strWhere = """
+                    AND objects.name = '%s' 
+                    AND abonents.name = '%s'""" % (parent_name, meters_name)
+    else:
+        strWhere = """ AND objects.name = '%s' """ % ( meters_name)
+ 
+    sQuery ="""
+    WITH 
+-- Показания на первую дату
+first_date AS (
+    SELECT
+	   	objects.name as obj_name,
+    	abonents.name as ab_name,    	
+    	meters.factory_number_manual,
+    	meters.address,
+        meters.guid AS meter_guid,
+        daily_values.value AS first_value,
+        daily_values.date AS first_date,
+	    meters.attr1,
+	 	meters.attr2,
+	 	meters.attr3,
+	 	meters.attr4,
+		types_meters.name as type_meter
+    FROM 
+        public.objects
+        JOIN public.abonents ON objects.guid = abonents.guid_objects
+        JOIN public.link_abonents_taken_params ON link_abonents_taken_params.guid_abonents = abonents.guid
+        JOIN public.taken_params ON link_abonents_taken_params.guid_taken_params = taken_params.guid
+        JOIN public.meters ON taken_params.guid_meters = meters.guid
+        JOIN public.types_meters ON meters.guid_types_meters = types_meters.guid
+        LEFT JOIN public.daily_values ON (
+  		daily_values.id_taken_params = taken_params.id
+  		AND daily_values.date = '%s'  -- Первая дата
+		)
+    WHERE 
+        types_meters.name = '%s'
+        %s        
+),
+
+-- Показания на вторую дату
+second_date AS (
+    SELECT 
+        meters.guid AS meter_guid,
+        daily_values.value AS second_value,
+        daily_values.date AS second_date
+    FROM 
+        public.objects
+        JOIN public.abonents ON objects.guid = abonents.guid_objects
+        JOIN public.link_abonents_taken_params ON link_abonents_taken_params.guid_abonents = abonents.guid
+        JOIN public.taken_params ON link_abonents_taken_params.guid_taken_params = taken_params.guid
+        JOIN public.meters ON taken_params.guid_meters = meters.guid
+        JOIN public.types_meters ON meters.guid_types_meters = types_meters.guid
+        LEFT JOIN public.daily_values ON (
+  		daily_values.id_taken_params = taken_params.id
+  		AND daily_values.date = '%s'  -- Вторая дата
+		)
+    WHERE 
+        types_meters.name = '%s'
+        %s       
+)
+
+-- Итоговый запрос с расчётом разницы
+SELECT 
+    first_date.obj_name,
+    first_date.ab_name,
+    first_date.type_meter,    	
+    first_date.factory_number_manual,
+    first_date.address,
+    first_date.first_date,
+    round(first_date.first_value::numeric, 5),
+    second_date.second_date,
+    round(second_date.second_value::numeric, 5),
+    CASE 
+        WHEN first_date.first_value IS NOT NULL AND second_date.second_value IS NOT NULL 
+        THEN round((second_date.second_value - first_date.first_value)::numeric, 5)
+        ELSE NULL
+		END as diff,
+	first_date.attr1,
+  first_date.attr2,
+	first_date.attr3,
+	first_date.attr4
+FROM   
+    first_date LEFT JOIN second_date ON first_date.meter_guid = second_date.meter_guid
+ORDER BY   first_date.obj_name ASC,  first_date.ab_name ASC, first_date.attr2 %s
+    """%(electric_data_start, type_meter, strWhere,  electric_data_end, type_meter, strWhere, dir)
+    #print(sQuery)
+    return sQuery
+def get_data_table_iot_water_consumption(meters_name, parent_name, electric_data_start, electric_data_end, isAbon, dir, type_meter):
+    cursor = connection.cursor()
+    data_table=[]
+    cursor.execute(MakeSqlQuery_iot_water_consumption(meters_name, parent_name, electric_data_start, electric_data_end, isAbon, dir, type_meter))
+    data_table = cursor.fetchall()
+    #print(data_table)
+    return data_table
+
+

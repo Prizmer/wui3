@@ -12577,3 +12577,157 @@ def impulse_heat_consumption(request):
     args['obj_title'] = meters_name 
       
     return render(request, "data_table/water/155.html", args)
+
+def water_iot_daily(request):
+    args= {}
+    is_abonent_level = re.compile(r'abonent')
+    is_object_level_2 = re.compile(r'level2')   
+    parent_name         = request.GET['obj_parent_title']
+    meters_name         = request.GET['obj_title']
+    electric_data_end   = request.GET['electric_data_end']            
+    obj_key             = request.GET['obj_key']
+    
+    data_table = []
+    if request.is_ajax():
+        if request.method == 'GET':
+            request.session["obj_parent_title"]    = parent_name         = request.GET['obj_parent_title']
+            request.session["obj_title"]           = meters_name         = request.GET['obj_title']
+            request.session["electric_data_end"]   = electric_data_end   = request.GET['electric_data_end']
+            request.session["obj_key"]             = obj_key             = request.GET['obj_key']
+
+    # dir - сортировка для ХВС и ГВС
+    dir = 'DESC'
+
+    if (bool(is_abonent_level.search(obj_key))): 
+        data_table = common_sql.get_data_table_iot_water_daily(meters_name, parent_name, electric_data_end, True, dir, 'Пульсар IoT ВС')
+    elif (bool(is_object_level_2.search(obj_key))):
+        data_table = common_sql.get_data_table_iot_water_daily(meters_name, parent_name, electric_data_end, False,dir, 'Пульсар IoT ВС')
+
+    #zamenyem None na N/D vezde
+    if len(data_table)>0: 
+        data_table=common_sql.ChangeNull(data_table, None)
+    
+    args['data_table'] = data_table
+    args['obj_parent_title'] = parent_name
+    args['electric_data_end'] = electric_data_end
+    args['obj_title'] = meters_name 
+      
+    return render(request, "data_table/water/158.html", args)
+
+def water_iot_consumption(request):
+    args= {}
+    is_abonent_level = re.compile(r'abonent')
+    is_object_level_2 = re.compile(r'level2')   
+    parent_name         = request.GET['obj_parent_title']
+    meters_name         = request.GET['obj_title']
+    electric_data_end   = request.GET['electric_data_end']
+    electric_data_start   = request.GET['electric_data_start']            
+    obj_key             = request.GET['obj_key']
+    
+    data_table = []
+    if request.is_ajax():
+        if request.method == 'GET':
+            request.session["obj_parent_title"]    = parent_name         = request.GET['obj_parent_title']
+            request.session["obj_title"]           = meters_name         = request.GET['obj_title']
+            request.session["electric_data_end"]   = electric_data_end   = request.GET['electric_data_end']
+            request.session["electric_data_start"]   = electric_data_start   = request.GET['electric_data_start']
+            request.session["obj_key"]             = obj_key             = request.GET['obj_key']
+
+    # dir - сортировка для ХВС и ГВС
+    dir = 'DESC'
+    try:
+        if (bool(is_abonent_level.search(obj_key))): 
+            data_table = common_sql.get_data_table_iot_water_consumption(meters_name, parent_name, electric_data_start, electric_data_end, True, dir,'Пульсар IoT ВС')
+        elif (bool(is_object_level_2.search(obj_key))):
+            data_table = common_sql.get_data_table_iot_water_consumption(meters_name, parent_name, electric_data_start, electric_data_end, False, dir,'Пульсар IoT ВС')
+    except:
+        data_table = []
+
+    #zamenyem None na N/D vezde
+    if len(data_table)>0: 
+        data_table=common_sql.ChangeNull(data_table, None)
+    
+    args['data_table'] = data_table
+    args['electric_data_end'] = electric_data_end
+    args['electric_data_start'] = electric_data_start
+    args['obj_parent_title'] = parent_name
+    args['obj_title'] = meters_name 
+      
+    return render(request, "data_table/water/157.html", args)
+
+def heat_iot_daily(request):
+    args= {}
+    is_abonent_level = re.compile(r'abonent')
+    is_object_level_2 = re.compile(r'level2')   
+    parent_name         = request.GET['obj_parent_title']
+    meters_name         = request.GET['obj_title']
+    electric_data_end   = request.GET['electric_data_end']            
+    obj_key             = request.GET['obj_key']
+    
+    data_table = []
+    if request.is_ajax():
+        if request.method == 'GET':
+            request.session["obj_parent_title"]    = parent_name         = request.GET['obj_parent_title']
+            request.session["obj_title"]           = meters_name         = request.GET['obj_title']
+            request.session["electric_data_end"]   = electric_data_end   = request.GET['electric_data_end']
+            request.session["obj_key"]             = obj_key             = request.GET['obj_key']
+
+    # dir - сортировка для ХВС и ГВС
+    dir = 'DESC'
+
+    if (bool(is_abonent_level.search(obj_key))): 
+        data_table = common_sql.get_data_table_iot_water_daily(meters_name, parent_name, electric_data_end, True, dir,'Пульсар IoT Тепло-энергия')
+    elif (bool(is_object_level_2.search(obj_key))):
+        data_table = common_sql.get_data_table_iot_water_daily(meters_name, parent_name, electric_data_end, False,dir,'Пульсар IoT Тепло-энергия')
+
+    #zamenyem None na N/D vezde
+    if len(data_table)>0: 
+        data_table=common_sql.ChangeNull(data_table, None)
+    
+    args['data_table'] = data_table
+    args['obj_parent_title'] = parent_name
+    args['electric_data_end'] = electric_data_end
+    args['obj_title'] = meters_name 
+      
+    return render(request, "data_table/heat/160.html", args)
+
+def heat_iot_consumption(request):
+    args= {}
+    is_abonent_level = re.compile(r'abonent')
+    is_object_level_2 = re.compile(r'level2')   
+    parent_name         = request.GET['obj_parent_title']
+    meters_name         = request.GET['obj_title']
+    electric_data_end   = request.GET['electric_data_end']
+    electric_data_start   = request.GET['electric_data_start']            
+    obj_key             = request.GET['obj_key']
+    
+    data_table = []
+    if request.is_ajax():
+        if request.method == 'GET':
+            request.session["obj_parent_title"]    = parent_name         = request.GET['obj_parent_title']
+            request.session["obj_title"]           = meters_name         = request.GET['obj_title']
+            request.session["electric_data_end"]   = electric_data_end   = request.GET['electric_data_end']
+            request.session["electric_data_start"]   = electric_data_start   = request.GET['electric_data_start']
+            request.session["obj_key"]             = obj_key             = request.GET['obj_key']
+
+    # dir - сортировка для ХВС и ГВС
+    dir = 'DESC'
+    try:
+        if (bool(is_abonent_level.search(obj_key))): 
+            data_table = common_sql.get_data_table_iot_water_consumption(meters_name, parent_name, electric_data_start, electric_data_end, True, dir, 'Пульсар IoT Тепло-энергия')
+        elif (bool(is_object_level_2.search(obj_key))):
+            data_table = common_sql.get_data_table_iot_water_consumption(meters_name, parent_name, electric_data_start, electric_data_end, False, dir, 'Пульсар IoT Тепло-энергия')
+    except:
+        data_table = []
+
+    #zamenyem None na N/D vezde
+    if len(data_table)>0: 
+        data_table=common_sql.ChangeNull(data_table, None)
+    
+    args['data_table'] = data_table
+    args['electric_data_end'] = electric_data_end
+    args['electric_data_start'] = electric_data_start
+    args['obj_parent_title'] = parent_name
+    args['obj_title'] = meters_name 
+      
+    return render(request, "data_table/heat/159.html", args)

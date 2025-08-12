@@ -196,4 +196,10 @@ urlpatterns = [
 
     url(r'^155/$', views.report_impulse_heat_consumption, name = '155'), #показания по теплу, сидящему на РИ Пульсар
     url(r'^156/$', views.report_impulse_heat_by_date, name = '156'), #показания по теплу, сидящему на РИ Пульсар
+
+    url(r'^157/$', views.report_water_iot_consumption, name = '157'), #вода с приборов iot
+    url(r'^158/$', views.report_water_iot_daily, name = '158'), #вода с приборов iot
+
+    url(r'^159/$', views.report_heat_iot_consumption, name = '159'), #вода с приборов iot
+    url(r'^160/$', views.report_heat_iot_daily, name = '160'), #вода с приборов iot
 ]

@@ -743,7 +743,7 @@ def LoadElectricMeters(sPath, sSheet):
                 add_meter.save()
                 writeToLog('Device added' + ' --->   ' + 'Danfoss SonoMeter-500')
             elif str(type_meter) == 'Пульсар IoT ВС':
-                add_meter = Meters(name = str(type_meter) + ' ' + str(meter), address = str(adr), factory_number_manual = str(meter), attr1 = str(attr1), guid_types_meters = TypesMeters.objects.get(guid = "bc61d16e-4059-4f9b-b7df-55915a7a844b") )
+                add_meter = Meters(name = str(type_meter) + ' ' + str(meter), address = str(adr), factory_number_manual = str(meter), attr1 = str(attr1), attr2 = str(attr2), guid_types_meters = TypesMeters.objects.get(guid = "bc61d16e-4059-4f9b-b7df-55915a7a844b") )
                 add_meter.save()
                 writeToLog('Device added' + ' --->   ' + 'Пульсар IoT ВС')
             elif str(type_meter) == 'Пульсар IoT Тепло-объем':

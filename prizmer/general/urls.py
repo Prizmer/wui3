@@ -230,6 +230,12 @@ urlpatterns = [
     url(r'^144/$', views.pulsar_heat_daily_floors, name = 'heat_pulsar_floors'), # Показание на дату с теплосчётчиков Пульсар
     url(r'^154/$', views.pulsar_frost_daily_floors, name = 'frost_pulsar_floors'), # Показание на дату с холодосчётчиков Пульсар
 
-    url(r'^155/$', views.impulse_heat_consumption, name = 'impulse_heat_consumption,'), #тепло имп, показания за период Импульсные 
+    url(r'^155/$', views.impulse_heat_consumption, name = 'impulse_heat_consumption'), #тепло имп, показания за период Импульсные 
     url(r'^156/$', views.impulse_heat_by_date, name = 'impulse_heat_by_date'), # тепло импульсная, показания на дату
+
+    url(r'^157/$', views.water_iot_consumption, name = 'water_iot_consumption'), #вода с приборов iot - потребление
+    url(r'^158/$', views.water_iot_daily, name = 'water_iot_daily'), # вода с приборов iot
+
+    url(r'^159/$', views.heat_iot_consumption, name = 'heat_iot_consumption'), #тепло с приборов iot - потребление
+    url(r'^160/$', views.heat_iot_daily, name = 'heat_iot_daily'), # тепло с приборов iot
 ]
