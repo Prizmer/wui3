@@ -17307,4 +17307,67 @@ def get_data_table_iot_water_consumption(meters_name, parent_name, electric_data
     #print(data_table)
     return data_table
 
-
+def MakeSqlQuery_vkt9_water_consumption(meters_name, parent_name, electric_data_end, isAbon, dir, type_meter):
+    if isAbon:
+        strWhere = """AND objects.name = '%s'
+	AND abonents.name = '%s'"""%(parent_name, meters_name)
+    else:
+        strWhere = """AND objects.name = '%s'"""%(meters_name)
+    
+    sQuery = """
+    SELECT z1.obj_name, z1.ab_name, z1.address, z1.factory_number_manual, 
+            max(Case when z1.params_name = 'Энергия' then z1.value_daily  end) as energy,
+            max(Case when z1.params_name = 'Энергия_ГВС' then z1.value_daily  end) as energy_gvs,
+			      max(Case when z1.params_name = 'Объем_1' then round(z1.value_daily::numeric,1)  end) as volume_1,
+			      max(Case when z1.params_name = 'Объем_2' then round(z1.value_daily::numeric,1)  end) as volume_2,
+            max(Case when z1.params_name = 'Температура_1' then round(z1.value_daily::numeric,1)  end) as t_in,
+            max(Case when z1.params_name = 'Температура_2' then round(z1.value_daily::numeric,1)  end) as t_out,
+			      max(Case when z1.params_name = 'THW' then round(z1.value_daily::numeric,1)  end) as THW,
+			      max(Case when z1.params_name = 'dt_1' then round(z1.value_daily::numeric,1)  end) as dt_1,
+			      max(Case when z1.params_name = 'dt_2' then round(z1.value_daily::numeric,1)  end) as dt_2            
+FROM
+(
+SELECT DISTINCT
+  objects.guid, 
+  objects.name as obj_name, 
+  abonents.guid, 
+  abonents.name as ab_name, 
+  meters.name, 
+  meters.address, 
+  meters.factory_number_manual, 
+  meters.attr1, 
+  meters.attr2,
+  meters.attr3, 
+  meters.attr4, 
+  daily_values.date, 
+  round(daily_values.value::numeric,5) as value_daily, 
+  types_meters.name,
+  names_params.name as params_name
+FROM public.objects
+JOIN public.abonents ON objects.guid = abonents.guid_objects
+JOIN public.link_abonents_taken_params ON link_abonents_taken_params.guid_abonents = abonents.guid
+JOIN public.taken_params ON link_abonents_taken_params.guid_taken_params = taken_params.guid
+JOIN public.meters ON taken_params.guid_meters = meters.guid
+JOIN public.types_meters ON meters.guid_types_meters = types_meters.guid
+JOIN params on params.guid = taken_params.guid_params
+JOIN names_params on names_params.guid = params.guid_names_params
+LEFT JOIN public.daily_values ON (
+  daily_values.id_taken_params = taken_params.id
+  AND daily_values.date = '%s' 
+)
+WHERE 
+  types_meters.name = '%s'
+  %s
+) as z1
+group by z1.obj_name, z1.ab_name, z1.address, z1.factory_number_manual
+order by z1.obj_name, z1.ab_name
+    """%(electric_data_end, type_meter, strWhere)
+    return(sQuery)
+    
+def get_data_table_vkt9_water_daily(meters_name, parent_name, electric_data_end, isAbon, dir, type_meter):
+    cursor = connection.cursor()
+    data_table=[]
+    cursor.execute(MakeSqlQuery_vkt9_water_consumption(meters_name, parent_name, electric_data_end, isAbon, dir, type_meter))
+    data_table = cursor.fetchall()
+    #print(data_table)
+    return data_table

@@ -107,7 +107,7 @@ DATABASES = {
     'default': {
         'ENGINE':'django.db.backends.postgresql_psycopg2',
         #'NAME': 'prizmer',
-        'NAME': 'iot',
+        'NAME': 'vkt9',
         # 'NAME': 'template',
         'USER': 'postgres',
         'PASSWORD': '1',

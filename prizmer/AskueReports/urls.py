@@ -202,4 +202,6 @@ urlpatterns = [
 
     url(r'^159/$', views.report_heat_iot_consumption, name = '159'), #вода с приборов iot
     url(r'^160/$', views.report_heat_iot_daily, name = '160'), #вода с приборов iot
+
+    url(r'^162/$', views.report_heat_vkt9_daily, name = '162'), #вода с приборов vkt9
 ]

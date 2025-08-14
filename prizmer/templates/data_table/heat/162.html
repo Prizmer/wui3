@@ -1,0 +1,50 @@
+<html>
+<head>
+<script src="/static/libs/liHighLight.js" type=text/javascript></script>
+</head>
+<body>
+&#127777 <span>Показания по ВКТ9-теплосчётчикам на <strong>{{electric_data_end}}</strong></span>
+<br>
+&#127968; <span>Абонент: <strong>{{obj_parent_title}}  <img src="/static/images/right-ico20.png">  {{obj_title}}</strong></span>
+<br>
+{{progress}}
+{% if data_table %} 
+<table class="content" id="data-table" >
+<tr>
+<th>Абонент</th>
+<th>Счётчик</th>
+<th>Энергия, Гкал</th>
+<th>Энергия ГВС, Гкал</th>
+<th>Объём 1,м3</th>
+<th>Объём 2,м3</th>
+<th>Т1, С</th>
+<th>Т2, С</th>
+<th>Температура горячей воды(ТГВ), С</th>
+<th>Разница между Т1 и Т2, C</th>
+<th>Разница между Т2 и ТГВ, C</th>
+</tr>
+{% for value in data_table %}
+<tr>
+<td>{{value.1}}</td>
+<td>{{value.3}}</td>
+<td>{{value.4}}</td>
+<td>{{value.5}}</td>
+<td>{{value.6}}</td>
+<td>{{value.7}}</td>
+<td>{{value.8}}</td>
+<td>{{value.9}}</td>
+<td>{{value.10}}</td>
+<td>{{value.11}}</td>
+<td>{{value.12}}</td>
+</tr>
+{% endfor %}
+</table>
+{% else %}
+<br>
+<br>
+<span><strong>Нет данных.</strong> 
+{% endif %}
+
+<br>
+</body>
+</html>
