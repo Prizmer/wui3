@@ -575,16 +575,20 @@ def LoadElectricMeters(sPath, sSheet):
         attr1=str(dtAll[i][13]).strip() 
         attr2=str(dtAll[i][14]).strip()
         attr3=str(dtAll[i][15]).strip() 
-        attr4=str(dtAll[i][16]).strip()  
+        attr4=str(dtAll[i][16]).strip()
+        flag_impulse_ridan_col_o = str(dtAll[i][14]).strip()  
         isNewMeter=SimpleCheckIfExist('meters','factory_number_manual',meter,"","","")
         isNewAbon=SimpleCheckIfExist('objects','name', obj_l2,'abonents', 'name', abon)
         isR = False
         isHalfs = False
+        is_ridan_impulse = False
         #print('attr1, attr2', meter, attr1, attr2)
         if (attr1 == '+'):
             isR = True    
         if (attr2 == '+'):
             isHalfs = True
+        if (flag_impulse_ridan_col_o == 'да'):
+            is_ridan_impulse = True
         #print('attr1, attr2', meter, isR, isHalfs)
         #writeToLog( u'счётчик существует ', isNewMeter)
         if not (isNewAbon):
@@ -754,6 +758,18 @@ def LoadElectricMeters(sPath, sSheet):
                 add_meter = Meters(name = str(type_meter) + ' ' + str(meter), address = str(adr), factory_number_manual = str(meter), attr1 = str(attr1), guid_types_meters = TypesMeters.objects.get(guid = "a3aa2833-4104-4ac4-a0fb-c34e4402d1d6") )
                 add_meter.save()
                 writeToLog('Device added' + ' --->   ' + 'Пульсар IoT Тепло-энергия')
+            elif str(type_meter) == 'ВКТ9':
+                add_meter = Meters(name = str(type_meter) + ' ' + str(meter), address = str(adr), factory_number_manual = str(meter), attr1 = str(attr1), guid_types_meters = TypesMeters.objects.get(guid = "59963730-468e-441c-86d9-d08a3ed062fc") )
+                add_meter.save()
+                writeToLog('Device added' + ' --->   ' + 'ВКТ9')
+            elif str(type_meter) == 'Теплосчётчик Ридан РУТ-01':
+                add_meter = Meters(name = str(type_meter) + ' ' + str(meter), address = str(adr), factory_number_manual = str(meter), attr1 = str(attr1), guid_types_meters = TypesMeters.objects.get(guid = "4d714a5e-3af5-40fe-ab72-199ed8760ac3") )
+                add_meter.save()
+                writeToLog('Device added' + ' --->   ' + 'Теплосчётчик Ридан РУТ-01')
+            elif str(type_meter) == 'Водосчётчик Ридан СГВ-15':
+                add_meter = Meters(name = str(type_meter) + ' ' + str(meter), address = str(adr), factory_number_manual = str(meter), attr1 = str(attr1), guid_types_meters = TypesMeters.objects.get(guid = "0a5753cf-debd-45cb-8dd0-3905f36293fc") )
+                add_meter.save()
+                writeToLog('Device added' + ' --->   ' + 'Водосчётчик Ридан СГВ-15')
 
             else:
                 writeToLog('Не найдено совпадение с существующим типом прибора')
@@ -761,7 +777,7 @@ def LoadElectricMeters(sPath, sSheet):
             
             #Если экземпляр был создан, то добавляем считываемые параметры
             try:
-                add_taken_param_no_signals(instance = add_meter, isR = isR, isHalfs = isHalfs)
+                add_taken_param_no_signals(instance = add_meter, isR = isR, isHalfs = isHalfs, is_ridan_impulse = is_ridan_impulse)
             except:
                 e = sys.exc_info()[0]
                 #print(e)
@@ -1915,7 +1931,7 @@ else:
 
 
 
-def add_taken_param_no_signals(instance, isR, isHalfs): # Добавляем считываемые параметры при создании счётчика
+def add_taken_param_no_signals(instance, isR, isHalfs, is_ridan_impulse): # Добавляем считываемые параметры при создании счётчика
     #print(instance.guid_types_meters.name, isR, isHalfs)
     if instance.guid_types_meters.name == 'Меркурий 230':
         #Добавляем параметры для Меркурия 230
@@ -3182,6 +3198,91 @@ def add_taken_param_no_signals(instance, isR, isHalfs): # Добавляем с�
         # "Показание Объем" Объем, м3
         add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "af6b27af-03dd-4128-86b9-d58849950220"))
         add_param.save()
+    elif instance.guid_types_meters.name == 'ВКТ9':
+        #Добавляем параметры для счётчика ВКТ9
+    
+        #-------------Суточные
+        # "Q" Тепловая энергия.
+        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "26f1708f-a6d7-4755-a8de-5773f5d78d1e"))
+        add_param.save()    
+        # "Q" Тепловая энергия ГВС. Канал2
+        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "09372faf-0a0f-4e01-8922-e0e0727d5908"))
+        add_param.save() 
+        # Объем 1.
+        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "27ef159a-156b-485f-9a78-93516fdb1f49"))
+        add_param.save() 
+        # Объем 2.
+        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "54bda39f-0a0b-4d18-b3bd-383340bcf483"))
+        add_param.save() 
+        # Температура 1.
+        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "9798a726-739d-419f-8ed6-41a3651c90ba"))
+        add_param.save() 
+        # Температура 2. 
+        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "232bd7a4-497b-4dde-94d0-7dde4a78e8f1"))
+        add_param.save() 
+        # Температура THW. Температура горячей воды
+        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "71b0014f-87b8-400f-a589-c9f73baca185"))
+        add_param.save() 
+        # Температура dt_1. разница между temperature_1 и temperature_2, C
+        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "1d105023-cd5d-4df8-a020-705f44ce7311"))
+        add_param.save() 
+        # Температура dt_2. разница между temperature_2 и thw, C
+        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "9cf42823-594a-41ba-9273-9b36c5a04e59"))
+        add_param.save()
+
+    elif instance.guid_types_meters.name == 'Теплосчётчик Ридан РУТ-01':
+        #Добавляем параметры для счётчика Теплосчётчик Ридан РУТ-01
+    
+        #-------------Суточные
+        # "Q" Тепловая энергия.
+        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "da5b2c6e-d222-437c-8222-201b67ebfef6"))
+        add_param.save()    
+        # "Q" Энергия холод.
+        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "7072151e-6e29-41e4-bc55-0665942c4b6d"))
+        add_param.save() 
+        # Объем.
+        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "21ec90c8-4722-4933-9d93-f3d531ac4086"))
+        add_param.save() 
+
+        # Температура входа.
+        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "aaca1772-5c13-4ab5-b983-b3bb3cd6f9b0"))
+        add_param.save() 
+        # Температура выхода. 
+        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "a9a6a79b-e490-4efd-a85a-e7a19b68a700"))
+        add_param.save()
+        # Ошибки. 
+        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "de41dc3f-d837-4772-a142-99f49b8dd5f7"))
+        add_param.save()
+
+        if is_ridan_impulse:
+            # Импульсный канал 1.
+            add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "7a82197a-aee7-400c-8d63-8d9b9f3be475"))
+            add_param.save() 
+            # Импульсный канал 2.
+            add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "89a38afd-9b1c-4c57-b851-95e3a49205be"))
+            add_param.save() 
+            # Импульсный канал 3.
+            add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "63f8d3c1-15f7-4fdc-954a-f4c080e36b3b"))
+            add_param.save() 
+            # Импульсный канал 4.
+            add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "626464e3-25f7-46e2-9b7c-c7400858b783"))
+            add_param.save()
+
+    elif instance.guid_types_meters.name == 'Водосчётчик Ридан СГВ-15':
+        #Добавляем параметры для водосчётчика Ридан СГВ-15.
+        #------------Суточные
+        # Объем_входящий, м3
+        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "2dedf3cf-05f1-4c30-ab6e-e51315136d17"))
+        add_param.save() 
+        # Объем_выходящий, м3
+        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "e676cd88-ef85-4d3c-852e-14627b7c056b"))
+        add_param.save() 
+        # Время воздействия магника на прибор, Часы
+        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "bf418620-56a2-4490-a5c2-856b62a2b1a0"))
+        add_param.save() 
+        # Флаг воздействия магнита на прибор, Флаг
+        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "3fc2ea8f-237a-42ec-8f2f-d1b69e170ae4"))
+        add_param.save() 
     else:
         pass
         #print('!!!!!!!!!!!!!!', instance.guid_types_meters.name)
