@@ -71,8 +71,10 @@ def zagotovka(request):
 # Стили
 ali_grey   = NamedStyle(name = "ali_grey", fill=PatternFill(fill_type='solid', start_color='DCDCDC'), border=Border(left=Side(border_style='thin',color='FF000000'), bottom=Side(border_style='thin',color='FF000000'), right=Side(border_style='thin',color='FF000000'), top=Side(border_style='thin',color='FF000000')), alignment = Alignment(horizontal='center', vertical='center', wrap_text=True, shrink_to_fit=True))
 ali_white  = NamedStyle(name = "ali_white", border=Border(left=Side(border_style='thin',color='FF000000'), bottom=Side(border_style='thin',color='FF000000'), right=Side(border_style='thin',color='FF000000'), top=Side(border_style='thin',color='FF000000')), alignment = Alignment(horizontal='center', vertical='center', wrap_text=True, shrink_to_fit=True))
-ali_blue   = NamedStyle(name = "ali_blue", fill=PatternFill(fill_type='solid', start_color='E6E6FA'), border=Border(left=Side(border_style='thin',color='FF000000'), bottom=Side(border_style='thin',color='FF000000'), right=Side(border_style='thin',color='FF000000'), top=Side(border_style='thin',color='FF000000')), alignment = Alignment(horizontal='center', vertical='center', wrap_text=True, shrink_to_fit=True))
-ali_pink   = NamedStyle(name = "ali_pink", fill=PatternFill(fill_type='solid', start_color='FFF0F5'), border=Border(left=Side(border_style='thin',color='FF000000'), bottom=Side(border_style='thin',color='FF000000'), right=Side(border_style='thin',color='FF000000'), top=Side(border_style='thin',color='FF000000')), alignment = Alignment(horizontal='center', vertical='center', wrap_text=True, shrink_to_fit=True))
+ali_white_bold  = NamedStyle(name = "ali_white_bold", border=Border(left=Side(border_style='thin',color='FF000000'), bottom=Side(border_style='thin',color='FF000000'), right=Side(border_style='thin',color='FF000000'), top=Side(border_style='thin',color='FF000000')), alignment = Alignment(horizontal='center', vertical='center', wrap_text=True, shrink_to_fit=True), font=Font(bold=True))
+ali_blue   = NamedStyle(name = "ali_blue", fill=PatternFill(fill_type='solid', start_color='DCECFF'), border=Border(left=Side(border_style='thin',color='FF000000'), bottom=Side(border_style='thin',color='FF000000'), right=Side(border_style='thin',color='FF000000'), top=Side(border_style='thin',color='FF000000')), alignment = Alignment(horizontal='center', vertical='center', wrap_text=True, shrink_to_fit=True))
+ali_pink   = NamedStyle(name = "ali_pink", fill=PatternFill(fill_type='solid', start_color='FFDCE5'), border=Border(left=Side(border_style='thin',color='FF000000'), bottom=Side(border_style='thin',color='FF000000'), right=Side(border_style='thin',color='FF000000'), top=Side(border_style='thin',color='FF000000')), alignment = Alignment(horizontal='center', vertical='center', wrap_text=True, shrink_to_fit=True))
+ali_green   = NamedStyle(name = "ali_green", fill=PatternFill(fill_type='solid', start_color='E6F4EA'), border=Border(left=Side(border_style='thin',color='FF000000'), bottom=Side(border_style='thin',color='FF000000'), right=Side(border_style='thin',color='FF000000'), top=Side(border_style='thin',color='FF000000')), alignment = Alignment(horizontal='center', vertical='center', wrap_text=True, shrink_to_fit=True))
 ali_red    = NamedStyle(name = "ali_red", fill=PatternFill(fill_type='solid', start_color='FF3333'), border=Border(left=Side(border_style='thin',color='FF000000'), bottom=Side(border_style='thin',color='FF000000'), right=Side(border_style='thin',color='FF000000'), top=Side(border_style='thin',color='FF000000')), alignment = Alignment(horizontal='center', vertical='center', wrap_text=True, shrink_to_fit=True))
 
 ali_light_yellow = NamedStyle(name = "ali_light_yellow", fill=PatternFill(fill_type='solid', start_color='FFFFC5'), border=Border(left=Side(border_style='thin',color='FF000000'), bottom=Side(border_style='thin',color='FF000000'), right=Side(border_style='thin',color='FF000000'), top=Side(border_style='thin',color='FF000000')), alignment = Alignment(horizontal='center', vertical='center', wrap_text=True, shrink_to_fit=True))
@@ -23309,9 +23311,9 @@ def report_impulse_heat_consumption(request):
     data_table=[]
     
     if (bool(is_abonent_level.search(obj_key))): 
-        data_table = common_sql.get_data_table_heat_impulse_consumption(meters_name, parent_name,electric_data_start, electric_data_end, True)
+        data_table = common_sql.get_data_table_heat_impulse_consumption(meters_name, parent_name,electric_data_start, electric_data_end, True,'Пульсар IoT ВС')
     elif (bool(is_object_level_2.search(obj_key))):
-        data_table = common_sql.get_data_table_heat_impulse_consumption(meters_name, parent_name,electric_data_start, electric_data_end, False)
+        data_table = common_sql.get_data_table_heat_impulse_consumption(meters_name, parent_name,electric_data_start, electric_data_end, False,'Пульсар IoT ВС')
 
     #zamenyem None na N/D vezde
     if len(data_table)>0: 
@@ -23386,4 +23388,662 @@ def report_impulse_heat_consumption(request):
     file_ext = 'xlsx'
     
     response['Content-Disposition'] = 'attachment;filename="%s.%s"' % (output_name.replace('"', '\"'), file_ext)   
+    return response
+
+
+def report_water_iot_daily(request):
+    SHOW_STOYAK = getattr(settings, 'SHOW_STOYAK', 'True')
+    SHOW_FLOORS = getattr(settings, 'SHOW_FLOORS', 'False')
+
+    response = io.StringIO()
+    wb = Workbook()
+    wb.add_named_style(ali_grey)
+    wb.add_named_style(ali_white)
+    wb.add_named_style(ali_white_bold)
+    wb.add_named_style(ali_yellow)
+    wb.add_named_style(ali_pink)
+    wb.add_named_style(ali_blue)
+    ws = wb.active
+
+#Шапка
+    ws.merge_cells('A2:E2')
+    ws['A2'] = 'Пульсар IoT. Показания воды на ' + str(request.session["electric_data_end"])
+    
+
+    ws['A5'] = 'Абонент'
+    ws['A5'].style = "ali_grey"
+    
+    ws['B5'] = 'Тип'
+    ws['B5'].style = "ali_grey"        
+   
+    ws['C5'] = 'Счётчик'
+    ws['C5'].style = "ali_grey"    
+  
+    ws['D5'] = 'Регистратор'
+    ws['D5'].style = "ali_grey"
+    
+    ws['E5'] = 'Показания на '  + str(request.session["electric_data_end"])+', м3'
+    ws['E5'].style = "ali_grey"
+    
+    ws.column_dimensions["G"].hidden = not SHOW_STOYAK
+    ws['F5'] = 'Стояк'
+    ws['F5'].style = "ali_grey"
+    
+#Запрашиваем данные для отчета
+    is_abonent_level = re.compile(r'abonent')
+    is_object_level_2 = re.compile(r'level2')
+    
+    parent_name         = request.GET['obj_parent_title']
+    meters_name         = request.GET['obj_title']
+    electric_data_end   = request.GET['electric_data_end']            
+    obj_key             = request.GET['obj_key']
+    
+    data_table = []
+        
+    # dir - сортировка для ХВС и ГВС
+    dir = 'DESC'
+
+    if (bool(is_abonent_level.search(obj_key))): 
+        data_table = common_sql.get_data_table_iot_water_daily(meters_name, parent_name, electric_data_end, True, dir,'Пульсар IoT ВС')
+    elif (bool(is_object_level_2.search(obj_key))):
+        data_table = common_sql.get_data_table_iot_water_daily(meters_name, parent_name, electric_data_end, False, dir,'Пульсар IoT ВС')
+
+    #zamenyem None na N/D vezde
+    if len(data_table)>0: 
+        data_table=common_sql.ChangeNull(data_table, None)
+        
+# Заполняем отчет значениями
+    for row in range(6, len(data_table)+6):
+        
+        try:
+            ws.cell('A%s'%(row)).value = '%s' % (data_table[row-6][4])  # Абонент
+            ws.cell('A%s'%(row)).style = "ali_white"
+        except:
+            ws.cell('A%s'%(row)).style = "ali_white"
+            next
+        
+        try:
+            ws.cell('B%s'%(row)).value = '%s' % (data_table[row-6][9])  # тип
+            ws.cell('B%s'%(row)).style = "ali_white"
+        except:
+            ws.cell('B%s'%(row)).style = "ali_white"
+            next
+
+
+        try:
+            ws.cell('C%s'%(row)).value = '%s' % (data_table[row-6][7])  # счётчик
+            ws.cell('C%s'%(row)).style = "ali_white_bold"
+        except:
+            ws.cell('C%s'%(row)).style = "ali_white_bold"
+            next
+
+
+        try:
+            ws.cell('D%s'%(row)).value = '%s' % (data_table[row-6][6])  # регистратор
+            ws.cell('D%s'%(row)).style = "ali_white"
+        except:
+            ws.cell('D%s'%(row)).style = "ali_white"
+            next
+
+            
+        try:
+            ws.cell('E%s'%(row)).value = '%s' % (data_table[row-6][13])  # показания
+            if (data_table[row-6][9]) == 'ХВС':
+                ws.cell('E%s'%(row)).style = "ali_blue"
+            else:
+                ws.cell('E%s'%(row)).style = "ali_pink"
+        except:
+            if (data_table[row-6][9]) == 'ХВС':
+                ws.cell('E%s'%(row)).style = "ali_blue"
+            else:
+                ws.cell('E%s'%(row)).style = "ali_pink"
+            next
+        if SHOW_STOYAK:
+            try:
+                ws.cell('F%s'%(row)).value = '%s' % (data_table[row-6][8])  # стояк
+                ws.cell('F%s'%(row)).style = "ali_white"
+            except:
+                ws.cell('F%s'%(row)).style = "ali_white"
+                next
+        
+        for col in ['A', 'B',  'D', 'E', 'F']:
+            try:
+                if (data_table[row-6][9]) == 'ХВС':
+                    ws.cell(f'{col}{row}').style = "ali_blue"
+                else:
+                     ws.cell(f'{col}{row}').style = "ali_pink"
+            except:
+                 ws.cell(f'{col}{row}').style = "ali_white"
+        
+
+
+    ws.row_dimensions[5].height = 63
+    ws.column_dimensions['A'].width = 23 
+    ws.column_dimensions['C'].width = 13 
+    ws.column_dimensions['D'].width = 13 
+    ws.column_dimensions['E'].width = 17 
+    ws.column_dimensions['F'].width = 17
+
+#------------
+
+    response.seek(0)
+    response = HttpResponse(save_virtual_workbook(wb),content_type="application/vnd.ms-excel")
+    #response['Content-Disposition'] = "attachment; filename=profil.xlsx"
+    
+    output_name = 'pulsar_water_report_'+translate(meters_name)+'_'+electric_data_end
+    file_ext = 'xlsx'
+    
+    response['Content-Disposition'] = 'attachment;filename="%s.%s"' % (output_name.replace('"', '\"'), file_ext)   
+    return response
+
+
+def report_heat_iot_consumption(request):
+    SHOW_STOYAK = getattr(settings, 'SHOW_STOYAK', 'True')
+
+    response = io.StringIO()
+    wb = Workbook()
+    wb.add_named_style(ali_grey)
+    wb.add_named_style(ali_white)
+    wb.add_named_style(ali_white_bold)
+    wb.add_named_style(ali_yellow)
+    wb.add_named_style(ali_pink)
+    wb.add_named_style(ali_blue)
+    ws = wb.active
+
+#Шапка
+    ws.merge_cells('A2:E2')
+    ws['A2'] = 'Пульсар IoT. Потребление тепло-энергии с ' + str(request.session["electric_data_start"]) + ' по ' + str(request.session["electric_data_end"])
+    
+
+    ws['A5'] = 'Абонент'
+    ws['A5'].style = "ali_grey"
+    
+    ws['B5'] = 'Счётчик'
+    ws['B5'].style = "ali_grey"    
+    
+    # ws.column_dimensions["C"].hidden = not SHOW_STOYAK
+    ws['C5'] = 'Регистратор'
+    ws['C5'].style = "ali_grey"    
+    
+    ws['d5'] = 'Показания на '  + str(request.session["electric_data_start"])+', Гкал'
+    ws['d5'].style = "ali_grey"
+    
+    ws['e5'] = 'Показания на '  + str(request.session["electric_data_end"])+', Гкал'
+    ws['e5'].style = "ali_grey"
+    
+    ws['f5'] = 'Расход, Гкал'
+    ws['f5'].style = "ali_grey"
+
+
+
+    
+#Запрашиваем данные для отчета
+    is_abonent_level = re.compile(r'abonent')
+    is_object_level_2 = re.compile(r'level2')   
+    parent_name         = request.GET['obj_parent_title']
+    meters_name         = request.GET['obj_title']
+    electric_data_end   = request.GET['electric_data_end']
+    electric_data_start   = request.GET['electric_data_start']            
+    obj_key             = request.GET['obj_key']
+    
+    data_table = []
+        
+    # dir - сортировка для ХВС и ГВС
+    dir = 'DESC'
+    try:
+        if (bool(is_abonent_level.search(obj_key))): 
+            data_table = common_sql.get_data_table_iot_water_consumption(meters_name, parent_name, electric_data_start, electric_data_end, True, dir,'Пульсар IoT Тепло-энергия')
+        elif (bool(is_object_level_2.search(obj_key))):
+            data_table = common_sql.get_data_table_iot_water_consumption(meters_name, parent_name, electric_data_start, electric_data_end, False, dir,'Пульсар IoT Тепло-энергия')
+    except:
+        data_table = []
+
+    #zamenyem None na N/D vezde
+    if len(data_table)>0: 
+        data_table=common_sql.ChangeNull(data_table, None)
+        
+# Заполняем отчет значениями
+    for row in range(6, len(data_table)+6):
+        try:
+            ws.cell('A%s'%(row)).value = '%s' % (data_table[row-6][1])  # Абонент
+            ws.cell('A%s'%(row)).style = "ali_white"
+        except:
+            ws.cell('A%s'%(row)).style = "ali_white"
+            next
+        
+        try:
+            ws.cell('B%s'%(row)).value = '%s' % (data_table[row-6][3])  # счётчик
+            ws.cell('B%s'%(row)).style = "ali_white_bold"
+        except:
+            ws.cell('B%s'%(row)).style = "ali_white_bold"
+            next
+
+        try:
+            ws.cell('C%s'%(row)).value = '%s' % (data_table[row-6][4])  # регистратор
+            ws.cell('C%s'%(row)).style = "ali_white"
+        except:
+            ws.cell('C%s'%(row)).style = "ali_white"
+            next
+
+
+        try:
+            ws.cell('D%s'%(row)).value = '%s' % (data_table[row-6][6])  # тип
+            ws.cell('D%s'%(row)).style = "ali_white"
+        except:
+            ws.cell('D%s'%(row)).style = "ali_white"
+            next
+
+            
+        try:
+            ws.cell('E%s'%(row)).value = '%s' % (data_table[row-6][8])  # показаня
+            ws.cell('E%s'%(row)).style = "ali_white"
+        except:
+            ws.cell('E%s'%(row)).style = "ali_white"
+            next
+            
+
+        try:
+            val = '%s' % (data_table[row-6][9])
+            if val == 'Н/Д':
+                ws.cell('f%s'%(row)).value = ""   # результат
+            else:
+                ws.cell('f%s'%(row)).value = val   # результат
+            ws.cell('f%s'%(row)).style = "ali_white"
+        except:
+            ws.cell('f%s'%(row)).style = "ali_white"
+            next
+
+
+
+    ws.row_dimensions[5].height = 63
+    ws.column_dimensions['A'].width = 23 
+    ws.column_dimensions['B'].width = 17 
+    ws.column_dimensions['C'].width = 17
+    ws.column_dimensions['D'].width = 17  
+    ws.column_dimensions['E'].width = 17 
+    ws.column_dimensions['F'].width = 17
+
+#------------
+
+    response.seek(0)
+    response = HttpResponse(save_virtual_workbook(wb),content_type="application/vnd.ms-excel")
+    #response['Content-Disposition'] = "attachment; filename=profil.xlsx"
+    
+    output_name = 'pulsar_heat_report_'+translate(meters_name)+'_'+electric_data_end
+    file_ext = 'xlsx'
+    
+    response['Content-Disposition'] = 'attachment;filename="%s.%s"' % (output_name.replace('"', '\"'), file_ext)   
+    return response
+
+
+def report_heat_iot_daily(request):
+    SHOW_STOYAK = getattr(settings, 'SHOW_STOYAK', 'True')
+    SHOW_FLOORS = getattr(settings, 'SHOW_FLOORS', 'False')
+
+    response = io.StringIO()
+    wb = Workbook()
+    wb.add_named_style(ali_grey)
+    wb.add_named_style(ali_white)
+    wb.add_named_style(ali_white_bold)
+    wb.add_named_style(ali_yellow)
+    wb.add_named_style(ali_pink)
+    wb.add_named_style(ali_blue)
+    ws = wb.active
+
+#Шапка
+    ws.merge_cells('A2:E2')
+    ws['A2'] = 'Пульсар IoT. Показания тепло-энергии на ' + str(request.session["electric_data_end"])
+    
+
+    ws['A5'] = 'Абонент'
+    ws['A5'].style = "ali_grey"
+    
+    ws.column_dimensions["B"].hidden = True
+    ws['B5'] = 'Тип'
+    ws['B5'].style = "ali_grey"        
+   
+    ws['C5'] = 'Счётчик'
+    ws['C5'].style = "ali_grey"    
+  
+    ws['D5'] = 'Регистратор'
+    ws['D5'].style = "ali_grey"
+    
+    ws['E5'] = 'Показания на '  + str(request.session["electric_data_end"])+', Гкал'
+    ws['E5'].style = "ali_grey"
+    
+
+    
+#Запрашиваем данные для отчета
+    is_abonent_level = re.compile(r'abonent')
+    is_object_level_2 = re.compile(r'level2')
+    
+    parent_name         = request.GET['obj_parent_title']
+    meters_name         = request.GET['obj_title']
+    electric_data_end   = request.GET['electric_data_end']            
+    obj_key             = request.GET['obj_key']
+    
+    data_table = []
+        
+    # dir - сортировка для ХВС и ГВС
+    dir = 'DESC'
+
+    if (bool(is_abonent_level.search(obj_key))): 
+        data_table = common_sql.get_data_table_iot_water_daily(meters_name, parent_name, electric_data_end, True, dir,'Пульсар IoT Тепло-энергия')
+    elif (bool(is_object_level_2.search(obj_key))):
+        data_table = common_sql.get_data_table_iot_water_daily(meters_name, parent_name, electric_data_end, False, dir,'Пульсар IoT Тепло-энергия')
+
+    #zamenyem None na N/D vezde
+    if len(data_table)>0: 
+        data_table=common_sql.ChangeNull(data_table, None)
+        
+# Заполняем отчет значениями
+    for row in range(6, len(data_table)+6):
+        
+        try:
+            ws.cell('A%s'%(row)).value = '%s' % (data_table[row-6][4])  # Абонент
+            ws.cell('A%s'%(row)).style = "ali_white"
+        except:
+            ws.cell('A%s'%(row)).style = "ali_white"
+            next
+        
+        try:
+            ws.cell('B%s'%(row)).value = '%s' % (data_table[row-6][9])  # тип
+            ws.cell('B%s'%(row)).style = "ali_white"
+        except:
+            ws.cell('B%s'%(row)).style = "ali_white"
+            next
+
+
+        try:
+            ws.cell('C%s'%(row)).value = '%s' % (data_table[row-6][7])  # счётчик
+            ws.cell('C%s'%(row)).style = "ali_white_bold"
+        except:
+            ws.cell('C%s'%(row)).style = "ali_white_bold"
+            next
+
+
+        try:
+            ws.cell('D%s'%(row)).value = '%s' % (data_table[row-6][6])  # регистратор
+            ws.cell('D%s'%(row)).style = "ali_white"
+        except:
+            ws.cell('D%s'%(row)).style = "ali_white"
+            next
+
+            
+        try:
+            ws.cell('E%s'%(row)).value = '%s' % (data_table[row-6][13])  # показания
+            ws.cell('E%s'%(row)).style = "ali_white"
+        except:           
+                ws.cell('E%s'%(row)).style = "ali_white"           
+                next
+   
+    ws.row_dimensions[5].height = 63
+    ws.column_dimensions['A'].width = 23 
+    ws.column_dimensions['C'].width = 13 
+    ws.column_dimensions['D'].width = 13 
+    ws.column_dimensions['E'].width = 17 
+
+#------------
+
+    response.seek(0)
+    response = HttpResponse(save_virtual_workbook(wb),content_type="application/vnd.ms-excel")
+    #response['Content-Disposition'] = "attachment; filename=profil.xlsx"
+    
+    output_name = 'pulsar_heat_report_'+translate(meters_name)+'_'+electric_data_end
+    file_ext = 'xlsx'
+    
+    response['Content-Disposition'] = 'attachment;filename="%s.%s"' % (output_name.replace('"', '\"'), file_ext)   
+    return response
+
+
+def report_water_iot_consumption(request):
+    SHOW_STOYAK = getattr(settings, 'SHOW_STOYAK', 'True')
+
+    response = io.StringIO()
+    wb = Workbook()
+    wb.add_named_style(ali_grey)
+    wb.add_named_style(ali_white)
+    wb.add_named_style(ali_white_bold)
+    wb.add_named_style(ali_yellow)
+    wb.add_named_style(ali_pink)
+    wb.add_named_style(ali_blue)
+    ws = wb.active
+
+#Шапка
+    ws.merge_cells('A2:E2')
+    ws['A2'] = 'Пульсар IoT. Поотребление воды с ' + str(request.session["electric_data_start"]) + ' по ' + str(request.session["electric_data_end"])
+    
+
+    ws['A5'] = 'Абонент'
+    ws['A5'].style = "ali_grey"
+    
+    ws['B5'] = 'Счётчик'
+    ws['B5'].style = "ali_grey"    
+    
+    # ws.column_dimensions["C"].hidden = not SHOW_STOYAK
+    ws['C5'] = 'Регистратор'
+    ws['C5'].style = "ali_grey"    
+
+    # ws.column_dimensions["D"].hidden = True  
+    ws['D5'] = 'Тип'
+    ws['D5'].style = "ali_grey"
+    
+    ws['E5'] = 'Показания на '  + str(request.session["electric_data_start"])+', м3'
+    ws['E5'].style = "ali_grey"
+    
+    ws['F5'] = 'Показания на '  + str(request.session["electric_data_end"])+', м3'
+    ws['F5'].style = "ali_grey"
+    
+    ws['G5'] = 'Расход, м3'
+    ws['G5'].style = "ali_grey"
+
+
+
+    
+#Запрашиваем данные для отчета
+    is_abonent_level = re.compile(r'abonent')
+    is_object_level_2 = re.compile(r'level2')   
+    parent_name         = request.GET['obj_parent_title']
+    meters_name         = request.GET['obj_title']
+    electric_data_end   = request.GET['electric_data_end']
+    electric_data_start   = request.GET['electric_data_start']            
+    obj_key             = request.GET['obj_key']
+    
+    data_table = []
+        
+    # dir - сортировка для ХВС и ГВС
+    dir = 'DESC'
+    try:
+        if (bool(is_abonent_level.search(obj_key))): 
+            data_table = common_sql.get_data_table_iot_water_consumption(meters_name, parent_name, electric_data_start, electric_data_end, True, dir,'Пульсар IoT ВС')
+        elif (bool(is_object_level_2.search(obj_key))):
+            data_table = common_sql.get_data_table_iot_water_consumption(meters_name, parent_name, electric_data_start, electric_data_end, False, dir,'Пульсар IoT ВС')
+    except:
+        data_table = []
+
+    #zamenyem None na N/D vezde
+    if len(data_table)>0: 
+        data_table=common_sql.ChangeNull(data_table, None)
+        
+# Заполняем отчет значениями
+    for row in range(6, len(data_table)+6):
+        try:
+            ws.cell('A%s'%(row)).value = '%s' % (data_table[row-6][1])  # Абонент
+            ws.cell('A%s'%(row)).style = "ali_white"
+        except:
+            ws.cell('A%s'%(row)).style = "ali_white"
+            next
+        
+        try:
+            ws.cell('B%s'%(row)).value = '%s' % (data_table[row-6][3])  # счётчик
+            ws.cell('B%s'%(row)).style.font = Font(bold=True)
+        except:
+            ws.cell('B%s'%(row)).style = "ali_white_bold"
+            next
+
+
+        try:
+            ws.cell('C%s'%(row)).value = '%s' % (data_table[row-6][4])  # регистратор
+            ws.cell('C%s'%(row)).style = "ali_white"
+        except:
+            ws.cell('C%s'%(row)).style = "ali_white"
+            next
+
+
+        try:
+            ws.cell('D%s'%(row)).value = '%s' % (data_table[row-6][11])  # тип
+            ws.cell('D%s'%(row)).style = "ali_white"
+        except:
+            ws.cell('D%s'%(row)).style = "ali_white"
+            next
+
+            
+        try:
+            ws.cell('E%s'%(row)).value = '%s' % (data_table[row-6][6])  # показаня
+            ws.cell('E%s'%(row)).style = "ali_white"
+        except:
+            ws.cell('E%s'%(row)).style = "ali_white"
+            next
+            
+        try:
+            ws.cell('F%s'%(row)).value = '%s' % (data_table[row-6][8])  # показаня
+            ws.cell('F%s'%(row)).style = "ali_white"
+        except:
+            ws.cell('F%s'%(row)).style = "ali_white"
+            next        
+
+        try:
+            val = '%s' % (data_table[row-6][9])
+            if val == 'Н/Д':
+                ws.cell('g%s'%(row)).value = ""   # результат
+            else:
+                ws.cell('g%s'%(row)).value = val   # результат
+            ws.cell('g%s'%(row)).style = "ali_white"
+        except:
+            ws.cell('g%s'%(row)).style = "ali_white"
+            next
+
+        for col in ['A', 'C', 'D', 'E', 'F', 'G']:
+            try:
+                if (data_table[row-6][11]) == 'ХВС':
+                    ws.cell(f'{col}{row}').style = "ali_blue"                  
+                else:
+                     ws.cell(f'{col}{row}').style = "ali_pink"                
+            except:
+                 ws.cell(f'{col}{row}').style = "ali_white"
+
+    ws.row_dimensions[5].height = 63
+    ws.column_dimensions['A'].width = 23 
+    ws.column_dimensions['B'].width = 17 
+    ws.column_dimensions['C'].width = 17 
+    ws.column_dimensions['E'].width = 17 
+    ws.column_dimensions['F'].width = 17
+    ws.column_dimensions['G'].width = 17
+
+#------------
+
+    response.seek(0)
+    response = HttpResponse(save_virtual_workbook(wb),content_type="application/vnd.ms-excel")
+    #response['Content-Disposition'] = "attachment; filename=profil.xlsx"
+    
+    output_name = 'pulsar_water_report_'+translate(meters_name)+'_'+electric_data_end
+    file_ext = 'xlsx'
+    
+    response['Content-Disposition'] = 'attachment;filename="%s.%s"' % (output_name.replace('"', '\"'), file_ext)   
+    return response
+
+
+def report_heat_vkt9_daily(request):
+    response = io.StringIO()
+    wb = Workbook()
+    wb.add_named_style(ali_grey)
+    wb.add_named_style(ali_white)
+    wb.add_named_style(ali_green)
+    ws = wb.active
+    ws.title = "Показания ВКТ9" 
+
+#Шапка
+    ws.merge_cells('A2:E2')
+    ws['A2'] = 'Пульсар ВКТ9. Показания тепло-энергии на ' + str(request.session["electric_data_end"])    
+
+    # Заголовки таблицы
+    headers = [
+    ('Абонент', 23),
+    ('Счётчик', None),
+    ('Энергия, Гкал', 13),
+    ('Энергия ГВС, Гкал', 13),
+    ('Объём 1, м³', 15),
+    ('Объём 2, м³', 15),
+    ('Т1, °C', None),
+    ('Т2, °C', None),
+    ('Температура горячей воды (ТГВ), °C', 17),
+    ('Разница между Т1 и Т2, °C', None),
+    ('Разница между Т2 и ТГВ, °C', None)
+    ]
+
+    for col_num, (header, width) in enumerate(headers, start=1):
+        cell = ws.cell(row=5, column=col_num, value=header)
+        cell.style = "ali_grey"
+        if width:
+            ws.column_dimensions[get_column_letter(col_num)].width = width
+    
+#Запрашиваем данные для отчета
+    is_abonent_level = re.compile(r'abonent')
+    is_object_level_2 = re.compile(r'level2')
+    
+    parent_name         = request.GET['obj_parent_title']
+    meters_name         = request.GET['obj_title']
+    electric_data_end   = request.GET['electric_data_end']            
+    obj_key             = request.GET['obj_key']
+    
+    data_table = []        
+    # dir - сортировка для ХВС и ГВС
+    dir = 'DESC'
+
+    if (bool(is_abonent_level.search(obj_key))): 
+        data_table = common_sql.get_data_table_vkt9_water_daily(meters_name, parent_name, electric_data_end, True, dir,'ВКТ9')
+    elif (bool(is_object_level_2.search(obj_key))):
+        data_table = common_sql.get_data_table_vkt9_water_daily(meters_name, parent_name, electric_data_end, False,dir,'ВКТ9')
+
+    #zamenyem None na N/D vezde
+    if len(data_table)>0: 
+        data_table=common_sql.ChangeNull(data_table, None)
+        
+# Заполняем отчет значениями
+    
+    column_mapping = {
+                'A': 1,  # Абонент
+                'B': 3,  # тип
+                'C': 4,  # счётчик
+                'D': 5,  # регистратор
+                'E': 6,  # показания
+                'F': 7,  # показания
+                'G': 8,  # показания
+                'H': 9,  # показания
+                'I': 10, # показания
+                'J': 11, # показания
+                'K': 12  # показания
+            }
+
+    for row in range(6, len(data_table) + 6):
+        current_style = "ali_green" if row % 2 == 0 else "ali_white"
+        for col_letter, data_idx in column_mapping.items():
+            cell = ws[f'{col_letter}{row}']
+            try:
+                cell.value = f'{data_table[row-6][data_idx]}'
+            except:
+                pass
+            cell.style = current_style
+    
+#------------
+    # Создаем файл
+    output_name = f'vkt9_heat_report_{translate(meters_name)}_{electric_data_end}.xlsx'
+
+    # Правильное создание HttpResponse
+    response = HttpResponse(
+        content=save_virtual_workbook(wb),
+        content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
+    response['Content-Disposition'] = f'attachment; filename="{output_name}"'
+
     return response
