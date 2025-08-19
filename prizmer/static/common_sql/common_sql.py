@@ -10911,7 +10911,7 @@ def get_water_abonents_by_obj_guid(obj_guid, name_res):
     data_table=[]  
  
     sQuery="""
-    Select name, guid, res_name
+    Select DISTINCT name, guid, res_name
 from
 (SELECT 
   abonents.name, 
@@ -10933,16 +10933,17 @@ WHERE
   params.guid_names_params = names_params.guid AND
   names_params.guid_resources = resources.guid AND
   (resources.name = '%s' or resources.name = '%s' or resources.name = '%s') 
+  and params.name not like '%%Тепло%%' 
+  AND params.name not like '%%тепло%%'
   and
   objects.guid = '%s'
   group by  abonents.name, 
   abonents.guid, 
   resources.name) z1
-  
-  group by name, guid, res_name
+
   order by name
     """ %( name_res[0], name_res[1], name_res[0], name_res[1], name_res[2], obj_guid)
-    #print sQuery
+    print(sQuery)
     cursor.execute(sQuery)  
     data_table = cursor.fetchall()
 
@@ -17307,7 +17308,7 @@ def get_data_table_iot_water_consumption(meters_name, parent_name, electric_data
     #print(data_table)
     return data_table
 
-def MakeSqlQuery_vkt9_water_consumption(meters_name, parent_name, electric_data_end, isAbon, dir, type_meter):
+def MakeSqlQuery_vkt9_water_daily(meters_name, parent_name, electric_data_end, isAbon, dir, type_meter):
     if isAbon:
         strWhere = """AND objects.name = '%s'
 	AND abonents.name = '%s'"""%(parent_name, meters_name)
@@ -17367,7 +17368,342 @@ order by z1.obj_name, z1.ab_name
 def get_data_table_vkt9_water_daily(meters_name, parent_name, electric_data_end, isAbon, dir, type_meter):
     cursor = connection.cursor()
     data_table=[]
-    cursor.execute(MakeSqlQuery_vkt9_water_consumption(meters_name, parent_name, electric_data_end, isAbon, dir, type_meter))
+    cursor.execute(MakeSqlQuery_vkt9_water_daily(meters_name, parent_name, electric_data_end, isAbon, dir, type_meter))
     data_table = cursor.fetchall()
     #print(data_table)
+    return data_table
+
+def make_sql_query_daily(abonent, obj_name,  data_end, is_abon, params, resource, type_val):
+    #значения передаются в курсор в вызывающей функции
+    if resource == 'Вода': #Вода подразумевается цифровая, чтобы сделать подставновку ХВС и ГВС
+        str_resource = "(resources.name = 'ХВС' or resources.name = 'ГВС')"
+    else:
+        str_resource = f"resources.name = '{resource}'"
+    if is_abon:
+        strWhere = f"""
+                      AND abonents.name = %s
+                      AND objects.name = %s	                  
+                    """
+    else:
+        strWhere = f"""
+                      AND objects.name = %s
+                      AND  parent_obj.obj_name = %s
+	                   """
+        
+    where_tuple = [abonent,obj_name]
+    sQuery = f"""
+        SELECT z1.parent_name, z1.obj_name, z1.ab_name, z1.address, z1.factory_number_manual 
+    """
+
+    for param in params:
+        sQuery += f"\n        , MAX(CASE WHEN z1.params_name = '{param}' THEN z1.value_{type_val} END) AS {param}"
+    
+    sQuery += f"""
+    , z1.attr1,
+        z1.attr2,
+        z1.attr3,
+        z1.attr4,
+        z1.account_1,
+        z1.account_2,
+        z1.resource_name
+    FROM
+      (WITH parent_obj AS (
+          SELECT 
+              guid AS obj_guid,
+              name AS obj_name,
+              level,
+              guid_parent AS parent1_guid
+          FROM objects
+      ) 
+      SELECT DISTINCT
+        parent_obj.obj_name as parent_name,
+        objects.name AS obj_name, 
+        abonents.name AS ab_name, 
+        taken_params.name AS taken_params_name, 
+        meters.name AS meter_name, 
+        meters.address,
+        meters.factory_number_manual, 
+        params.name AS param_type, 
+        names_params.name AS params_name, 
+        resources.name AS resource_name, 
+        {type_val}_values.date AS reading_date, 
+        {type_val}_values.value as value_{type_val},
+        meters.attr1,
+        meters.attr2,
+        meters.attr3,
+        meters.attr4,
+        abonents.account_1,
+        abonents.account_2
+      FROM 
+        public.objects
+      JOIN
+        parent_obj ON parent_obj.obj_guid = objects.guid_parent
+      JOIN 
+        public.abonents ON abonents.guid_objects = objects.guid
+      JOIN 
+        public.link_abonents_taken_params ON link_abonents_taken_params.guid_abonents = abonents.guid
+      JOIN 
+        public.taken_params ON taken_params.guid = link_abonents_taken_params.guid_taken_params
+      JOIN 
+        public.meters ON meters.guid = taken_params.guid_meters
+      JOIN 
+        public.params ON params.guid = taken_params.guid_params
+      JOIN 
+        public.names_params ON names_params.guid = params.guid_names_params
+      JOIN 
+        public.resources ON resources.guid = names_params.guid_resources
+      LEFT JOIN 
+        public.daily_values ON ({type_val}_values.id_taken_params = taken_params.id 
+                            AND {type_val}_values.date = %s)
+      WHERE 
+          {str_resource}
+          {strWhere}
+      ) as z1
+      GROUP BY z1.parent_name, z1.obj_name, z1.ab_name, z1.address, z1.factory_number_manual, z1.attr1,
+        z1.attr2,
+        z1.attr3,
+        z1.attr4,
+        z1.account_1,
+        z1.account_2,
+        z1.resource_name"""
+
+    return sQuery,  [data_end] + where_tuple
+
+def get_data_table_daily(abonent, obj_name, data_end, is_abon, params, resource, type_val:str = 'daily'):
+    # object, -объект OR родительский объект
+    # abonent, - абонент OR объект
+    # data_end, - дата
+    # isAbon, - уровень абонента или объекта
+    # params, - список запрашиваемых параметров - не ограничен
+    # resource, - тип ресурса: Тепло, Вода, Импульс, Электричество 
+    # type_val - может иметь значение daily(по умолчанию), monthly, current
+      
+    cursor = connection.cursor()
+    data_table=[]
+    sql, sql_params = make_sql_query_daily(abonent, obj_name, data_end, is_abon, params, resource, type_val)
+    #print(sql, sql_params)
+    cursor.execute(sql, sql_params)    
+    data_table = cursor.fetchall()
+    return data_table
+
+def make_sql_query_consumption(abonent, obj_name, data_start, data_end, is_abon, params, resource, type_val):
+    if resource == 'Вода': #Вода подразумевается цифровая, чтобы сделать подставновку ХВС и ГВС
+        str_resource = "(resources.name = 'ХВС' or resources.name = 'ГВС')"
+    else:
+        str_resource = f"resources.name = '{resource}'"
+    if is_abon:
+        strWhere = f"""
+                      AND abonents.name = %s
+                      AND objects.name = %s	                  
+                    """
+    else:
+        strWhere = f"""
+                      AND objects.name = %s
+                      AND  parent_obj.obj_name = %s
+	                   """        
+    where_tuple = [abonent,obj_name]
+
+    str_params = "" 
+    sql_select_diff_params = ""
+
+    sQuery = f"""--Показания на первую дату
+       WITH parent_obj AS (
+          SELECT 
+              guid AS obj_guid,
+              name AS obj_name,
+              level,
+              guid_parent AS parent1_guid
+          FROM objects
+          ),
+    first_date AS (
+    SELECT 
+        z1.parent_name, 
+        z1.obj_name, 
+        z1.ab_name, 
+        z1.address, 
+        z1.factory_number_manual
+    """
+    for param in params:
+      str_params += f"\n        , MAX(CASE WHEN z1.params_name = '{param}' THEN z1.value_{type_val} END) AS {param}"
+      sql_select_diff_params +=f""" , first_date.{param} 
+                                    , second_date.{param}
+                                    , round((second_date.{param} - first_date.{param})::numeric,5) as dif_{param}"""
+
+    sQuery +=str_params
+    sQuery += f"""
+    , z1.attr1,
+        z1.attr2,
+        z1.attr3,
+        z1.attr4,
+        z1.account_1,
+        z1.account_2,
+        z1.meter_guid,
+        z1.resource_name
+    FROM
+      (
+      SELECT DISTINCT
+        parent_obj.obj_name as parent_name,
+        objects.name AS obj_name, 
+        abonents.name AS ab_name, 
+        taken_params.name AS taken_params_name, 
+        meters.name AS meter_name, 
+        meters.address,
+        meters.factory_number_manual,
+        meters.guid as meter_guid, 
+        params.name AS param_type, 
+        names_params.name AS params_name, 
+        resources.name AS resource_name, 
+        {type_val}_values.date AS reading_date, 
+        {type_val}_values.value as value_{type_val},
+        meters.attr1,
+        meters.attr2,
+        meters.attr3,
+        meters.attr4,
+        abonents.account_1,
+        abonents.account_2
+      FROM 
+        public.objects
+      JOIN
+        parent_obj ON parent_obj.obj_guid = objects.guid_parent
+      JOIN 
+        public.abonents ON abonents.guid_objects = objects.guid
+      JOIN 
+        public.link_abonents_taken_params ON link_abonents_taken_params.guid_abonents = abonents.guid
+      JOIN 
+        public.taken_params ON taken_params.guid = link_abonents_taken_params.guid_taken_params
+      JOIN 
+        public.meters ON meters.guid = taken_params.guid_meters
+      JOIN 
+        public.params ON params.guid = taken_params.guid_params
+      JOIN 
+        public.names_params ON names_params.guid = params.guid_names_params
+      JOIN 
+        public.resources ON resources.guid = names_params.guid_resources
+      LEFT JOIN 
+        public.daily_values ON ({type_val}_values.id_taken_params = taken_params.id 
+                            AND {type_val}_values.date = %s)
+      WHERE 
+          {str_resource}
+          {strWhere}
+      ) as z1
+      GROUP BY z1.parent_name, z1.obj_name, z1.ab_name, z1.address, z1.factory_number_manual, z1.attr1,
+        z1.attr2,
+        z1.attr3,
+        z1.attr4,
+        z1.account_1,
+        z1.account_2,
+        z1.meter_guid,
+        z1.resource_name)
+          """
+    sQuery += """,
+    --Показания на вторую дату
+    second_date as ( SELECT 
+        z1.parent_name, 
+        z1.obj_name, 
+        z1.ab_name, 
+        z1.address, 
+        z1.factory_number_manual
+    """
+    sQuery +=str_params
+    sQuery += f"""
+    , z1.attr1,
+        z1.attr2,
+        z1.attr3,
+        z1.attr4,
+        z1.account_1,
+        z1.account_2,
+        z1.meter_guid,
+        z1.resource_name
+    FROM
+      (
+      SELECT DISTINCT
+        parent_obj.obj_name as parent_name,
+        objects.name AS obj_name, 
+        abonents.name AS ab_name, 
+        taken_params.name AS taken_params_name, 
+        meters.guid as meter_guid,
+        meters.name AS meter_name, 
+        meters.address,
+        meters.factory_number_manual, 
+        params.name AS param_type, 
+        names_params.name AS params_name, 
+        resources.name AS resource_name, 
+        {type_val}_values.date AS reading_date, 
+        {type_val}_values.value as value_{type_val},
+        meters.attr1,
+        meters.attr2,
+        meters.attr3,
+        meters.attr4,
+        abonents.account_1,
+        abonents.account_2
+      FROM 
+        public.objects
+      JOIN
+        parent_obj ON parent_obj.obj_guid = objects.guid_parent
+      JOIN 
+        public.abonents ON abonents.guid_objects = objects.guid
+      JOIN 
+        public.link_abonents_taken_params ON link_abonents_taken_params.guid_abonents = abonents.guid
+      JOIN 
+        public.taken_params ON taken_params.guid = link_abonents_taken_params.guid_taken_params
+      JOIN 
+        public.meters ON meters.guid = taken_params.guid_meters
+      JOIN 
+        public.params ON params.guid = taken_params.guid_params
+      JOIN 
+        public.names_params ON names_params.guid = params.guid_names_params
+      JOIN 
+        public.resources ON resources.guid = names_params.guid_resources
+      LEFT JOIN 
+        public.daily_values ON ({type_val}_values.id_taken_params = taken_params.id 
+                            AND {type_val}_values.date = %s)
+      WHERE 
+          {str_resource}
+          {strWhere}
+      ) as z1
+      GROUP BY z1.parent_name, z1.obj_name, z1.ab_name, z1.address, z1.factory_number_manual, z1.attr1,
+        z1.attr2,
+        z1.attr3,
+        z1.attr4,
+        z1.account_1,
+        z1.account_2,
+        z1.meter_guid,
+        z1.resource_name) 
+
+        -- Вывод полей и расчёт разницы
+      SELECT 
+    first_date.parent_name,
+    first_date.obj_name,
+    first_date.ab_name,
+    first_date.address,    	
+    first_date.factory_number_manual
+    {sql_select_diff_params}
+    ,first_date.attr1
+    ,first_date.attr2
+    ,first_date.attr3
+    ,first_date.attr4
+    ,first_date.account_1
+    ,first_date.account_2,
+    first_date.resource_name
+FROM   
+    first_date LEFT JOIN second_date ON first_date.meter_guid = second_date.meter_guid
+ORDER BY   first_date.obj_name ASC,  first_date.ab_name ASC
+          """
+    #print(sQuery)
+    return sQuery,  [data_start] + where_tuple + [data_end] + where_tuple
+
+def get_data_table_consumption(abonent, obj_name, data_start, data_end, is_abon, params, resource, type_val:str = 'daily'):
+    # object, -объект OR родительский объект
+    # abonent, - абонент OR объект
+    # data_end, - дата
+    # isAbon, - уровень абонента или объекта
+    # params, - список запрашиваемых параметров - не ограничен
+    # resource, - тип ресурса: Тепло, Вода, Импульс, Электричество 
+    # type_val - может иметь значение daily(по умолчанию), monthly, current
+      
+    cursor = connection.cursor()
+    data_table=[]
+    sql, sql_params = make_sql_query_consumption(abonent, obj_name, data_start, data_end, is_abon, params, resource, type_val)
+    cursor.execute(sql, sql_params)
+    data_table = cursor.fetchall()
     return data_table

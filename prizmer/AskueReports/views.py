@@ -75,6 +75,7 @@ ali_white_bold  = NamedStyle(name = "ali_white_bold", border=Border(left=Side(bo
 ali_blue   = NamedStyle(name = "ali_blue", fill=PatternFill(fill_type='solid', start_color='DCECFF'), border=Border(left=Side(border_style='thin',color='FF000000'), bottom=Side(border_style='thin',color='FF000000'), right=Side(border_style='thin',color='FF000000'), top=Side(border_style='thin',color='FF000000')), alignment = Alignment(horizontal='center', vertical='center', wrap_text=True, shrink_to_fit=True))
 ali_pink   = NamedStyle(name = "ali_pink", fill=PatternFill(fill_type='solid', start_color='FFDCE5'), border=Border(left=Side(border_style='thin',color='FF000000'), bottom=Side(border_style='thin',color='FF000000'), right=Side(border_style='thin',color='FF000000'), top=Side(border_style='thin',color='FF000000')), alignment = Alignment(horizontal='center', vertical='center', wrap_text=True, shrink_to_fit=True))
 ali_green   = NamedStyle(name = "ali_green", fill=PatternFill(fill_type='solid', start_color='E6F4EA'), border=Border(left=Side(border_style='thin',color='FF000000'), bottom=Side(border_style='thin',color='FF000000'), right=Side(border_style='thin',color='FF000000'), top=Side(border_style='thin',color='FF000000')), alignment = Alignment(horizontal='center', vertical='center', wrap_text=True, shrink_to_fit=True))
+ali_green_header   = NamedStyle(name = "ali_green_header", fill=PatternFill(fill_type='solid', start_color='135c23'), font = Font(color='FFFFFF', bold=True), border=Border(left=Side(border_style='thin',color='FF000000'), bottom=Side(border_style='thin',color='FF000000'), right=Side(border_style='thin',color='FF000000'), top=Side(border_style='thin',color='FF000000')), alignment = Alignment(horizontal='center', vertical='center', wrap_text=True, shrink_to_fit=True))
 ali_red    = NamedStyle(name = "ali_red", fill=PatternFill(fill_type='solid', start_color='FF3333'), border=Border(left=Side(border_style='thin',color='FF000000'), bottom=Side(border_style='thin',color='FF000000'), right=Side(border_style='thin',color='FF000000'), top=Side(border_style='thin',color='FF000000')), alignment = Alignment(horizontal='center', vertical='center', wrap_text=True, shrink_to_fit=True))
 
 ali_light_yellow = NamedStyle(name = "ali_light_yellow", fill=PatternFill(fill_type='solid', start_color='FFFFC5'), border=Border(left=Side(border_style='thin',color='FF000000'), bottom=Side(border_style='thin',color='FF000000'), right=Side(border_style='thin',color='FF000000'), top=Side(border_style='thin',color='FF000000')), alignment = Alignment(horizontal='center', vertical='center', wrap_text=True, shrink_to_fit=True))
@@ -24043,6 +24044,366 @@ def report_heat_vkt9_daily(request):
     response = HttpResponse(
         content=save_virtual_workbook(wb),
         content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
+    response['Content-Disposition'] = f'attachment; filename="{output_name}"'
+
+    return response
+
+
+
+
+# Универсальный отчёт
+def export_to_excel(data_table, headers, column_mapping, table_name, table_name_place, ws_title):
+    
+    # Создаёт Excel-файл с динамическими данными    
+    # :param data: Список кортежей с данными (результат cursor.fetchall())
+    # :param columns: Список заголовков столбцов
+    # :param output_path: Путь для сохранения файла
+
+    # Создаём книгу и лист
+    wb = Workbook()
+    ws = wb.active
+    ws.title = ws_title
+    # Стили
+    wb.add_named_style(ali_green_header)
+    wb.add_named_style(ali_white)
+    wb.add_named_style(ali_green)
+    wb.add_named_style(ali_light_yellow)
+    wb.add_named_style(ali_blue)
+    wb.add_named_style(ali_pink)
+
+
+    #Шапка
+    ws.merge_cells('A2:E2')
+    ws['A2'] = table_name #название отчёта
+    ws.merge_cells('A3:E3')
+    ws['A3'] = table_name_place #объект
+    
+    # Заголовки
+    for col_num, (header, width, style)  in enumerate(headers, start=1):
+        cell = ws.cell(row=5, column=col_num, value=header)
+        if style:
+            cell.style = style
+        else:
+             cell.style = ali_green_header
+        if width:
+            ws.column_dimensions[get_column_letter(col_num)].width = width
+        else:             
+            # Автоподбор ширины столбца
+            column_letter = get_column_letter(col_num)
+            ws.column_dimensions[column_letter].width = len(header) + 2
+    
+    # Данные
+    for row in range(6, len(data_table) + 6):
+        current_style = "ali_green" if row % 2 == 0 else "ali_white"
+        for col_letter, data_idx in column_mapping.items():
+            cell = ws[f'{col_letter}{row}']
+            try:
+                cell.value = f'{data_table[row-6][data_idx]}'
+                if data_table[row-6][data_idx] == 'ГВС':
+                    cell.style = "ali_pink"
+                elif data_table[row-6][data_idx] == 'ХВС':
+                    cell.style = "ali_blue"
+                else:
+                    cell.style = current_style
+            except:
+                pass
+            
+    
+    # Фиксируем шапку
+    ws.freeze_panes = 'A6'
+    
+    # Возвращаем файл
+    return wb
+
+def report_heat_ridan_daily(request):
+    response = io.StringIO()
+    
+#Запрашиваем данные для отчета
+    is_abonent_level = re.compile(r'abonent')
+    is_object_level_2 = re.compile(r'level2')
+    
+    parent_name         = request.GET['obj_parent_title']
+    meters_name         = request.GET['obj_title']
+    electric_data_end   = request.GET['electric_data_end']            
+    obj_key             = request.GET['obj_key']
+    
+    params = ['Энергия_тепло', 'Энергия_холод', 'Объем', 'Ti', 'To']
+
+    if (bool(is_abonent_level.search(obj_key))):
+        is_abon = True 
+        data_table = common_sql.get_data_table_daily(meters_name, parent_name, electric_data_end, is_abon, params, resource = 'Тепло')
+    elif (bool(is_object_level_2.search(obj_key))):
+        is_abon = False
+        data_table = common_sql.get_data_table_daily(meters_name, parent_name, electric_data_end, is_abon, params, resource = 'Тепло')
+
+    #zamenyem None na N/D vezde
+    if len(data_table)>0: 
+        data_table=common_sql.ChangeNull(data_table, None)
+        
+     #Шапка
+    table_name = 'Показания теплосчётчиков на ' + str(request.session["electric_data_end"])
+    table_name_place = f"{parent_name}, {meters_name}"
+    if len(data_table)>0 and is_abon:
+        table_name_place = f"{data_table[0][0]}, {data_table[0][1]}"
+    ws_title = "Показания теплосчётчиков"   
+
+    # Заголовки таблицы
+    headers = [
+    ('Абонент', 23, None),
+    ('Счётчик', 20, None),
+    ('Энергия-тепло, Гкал', None, None),
+    ('Энергия-холод, Гкал', None, None),
+    ('Объём, м³', None, None),
+    ('Твх, °C', None, None),
+    ('Твых, °C', None, None)
+    ]
+
+    # Соотвествие колонок в excel и колонок в запросе 
+    column_mapping = {
+                'A': 2,  # Абонент
+                'B': 4,  # счётчик
+                'C': 5,  # энергия-тепло
+                'D': 6,  # энергия холод
+                'E': 7,  # объём
+                'F': 8,  # показания
+                'G': 9,  # показания
+            }
+    
+    # имя файла
+    output_name = f'heat_report_{translate(meters_name)}_{electric_data_end}.xlsx'
+
+    wb = export_to_excel(data_table, headers, column_mapping, table_name, table_name_place, ws_title)
+
+    # Правильное создание HttpResponse
+    response = HttpResponse(
+        content = save_virtual_workbook(wb),
+        content_type = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
+    response['Content-Disposition'] = f'attachment; filename="{output_name}"'
+
+    return response
+
+
+def report_heat_ridan_consumption(request):
+    response = io.StringIO()
+    
+#Запрашиваем данные для отчета
+    is_abonent_level = re.compile(r'abonent')
+    is_object_level_2 = re.compile(r'level2')
+    
+    parent_name         = request.GET['obj_parent_title']
+    meters_name         = request.GET['obj_title']
+    electric_data_end   = request.GET['electric_data_end']
+    electric_data_start  = request.GET['electric_data_start']            
+    obj_key             = request.GET['obj_key']
+    
+    params = ['Энергия_тепло', 'Энергия_холод', 'Объем']
+
+    if (bool(is_abonent_level.search(obj_key))):
+        is_abon = True 
+        data_table = common_sql.get_data_table_consumption(meters_name, parent_name, electric_data_start, electric_data_end, is_abon, params, resource = 'Тепло')
+    elif (bool(is_object_level_2.search(obj_key))):
+        is_abon = False
+        data_table = common_sql.get_data_table_consumption(meters_name, parent_name, electric_data_start, electric_data_end, is_abon, params, resource = 'Тепло')
+
+    #zamenyem None na N/D vezde
+    if len(data_table)>0: 
+        data_table=common_sql.ChangeNull(data_table, None)
+        
+     #Шапка
+    table_name = f"Потребление теплосчётчиков с {electric_data_start} по {electric_data_end}" 
+    table_name_place = f"{parent_name}, {meters_name}"
+    if len(data_table)>0 and is_abon:
+        table_name_place = f"{data_table[0][0]}, {data_table[0][1]}"
+    ws_title = "Потребление теплосчётчиков"   
+
+    # Заголовки таблицы
+    # заголовок, ширина, имя стиля
+    headers = [
+    ('Абонент', 23, None),
+    ('Счётчик', 20, None),
+    (f"Энергия-тепло {electric_data_start}, Гкал", 20, "ali_light_yellow"),
+    (f"Энергия-тепло {electric_data_end}, Гкал", 20, "ali_light_yellow"),
+    (f"Энергия-тепло расход, Гкал", 20, "ali_light_yellow"),
+    (f"Энергия-холод {electric_data_start}, Гкал", 20, "ali_blue"),
+    (f"Энергия-холод {electric_data_end}, Гкал", 20, "ali_blue"),
+    (f"Энергия-холод расход, Гкал", 20, "ali_blue"),
+    (f"Объём {electric_data_start}, м³", 20, "ali_pink"),
+    (f"Объём {electric_data_end}, м³", 20, "ali_pink"),
+    (f"Объём расход, м³", 20, "ali_pink")    
+    ]
+
+    # Соотвествие колонок в excel и колонок в запросе 
+    column_mapping = {
+                'A': 2,  # Абонент
+                'B': 4,  # счётчик
+                'C': 5,  # энергия-тепло
+                'D': 6,  # энергия холод
+                'E': 7,  # объём
+                'F': 8,  # показания
+                'G': 9,  # показания
+                'H': 10,  # показания
+                'I': 11,  # показания
+                'J': 12,  # показания
+                'K': 13,  # показания
+            }
+    
+    # имя файла
+    output_name = f'heat_report_{translate(meters_name)}_{electric_data_start}-{electric_data_end}.xlsx'
+
+    wb = export_to_excel(data_table, headers, column_mapping, table_name, table_name_place, ws_title)
+
+    # Правильное создание HttpResponse
+    response = HttpResponse(
+        content = save_virtual_workbook(wb),
+        content_type = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
+    response['Content-Disposition'] = f'attachment; filename="{output_name}"'
+
+    return response
+
+
+
+def report_water_ridan_daily(request):
+    response = io.StringIO()
+    
+#Запрашиваем данные для отчета
+    is_abonent_level = re.compile(r'abonent')
+    is_object_level_2 = re.compile(r'level2')
+    
+    parent_name         = request.GET['obj_parent_title']
+    meters_name         = request.GET['obj_title']
+    electric_data_end   = request.GET['electric_data_end']            
+    obj_key             = request.GET['obj_key']
+    
+    params = ['Объем_входящий', 'Объем_выходящий', 'magnet_flag', 'magnet_time']
+
+    if (bool(is_abonent_level.search(obj_key))):
+        is_abon = True 
+        data_table = common_sql.get_data_table_daily(meters_name, parent_name, electric_data_end, is_abon, params, resource = 'Вода')
+    elif (bool(is_object_level_2.search(obj_key))):
+        is_abon = False
+        data_table = common_sql.get_data_table_daily(meters_name, parent_name, electric_data_end, is_abon, params, resource = 'Вода')
+
+    #zamenyem None na N/D vezde
+    if len(data_table)>0: 
+        data_table=common_sql.ChangeNull(data_table, None)
+        
+     #Шапка
+    table_name = 'Показания водосчётчиков на ' + str(request.session["electric_data_end"])
+    table_name_place = f"{parent_name}, {meters_name}"
+    if len(data_table)>0 and is_abon:
+        table_name_place = f"{data_table[0][0]}, {data_table[0][1]}"
+    ws_title = "Показания водосчётчиков"   
+
+    # Заголовки таблицы
+     # заголовок, ширина, имя стиля
+    headers = [
+    ('Абонент', 23, None),
+    ('Счётчик', 20, None),
+    ('Тип', 10, None),
+    ('Объём вх, м³', None, None),
+    ('Объём вых, м³', None, None),
+    ('Установлен магнит', 15, None),
+    ('Время воздействия магнита', 15, None)
+    ]
+
+    # Соотвествие колонок в excel и колонок в запросе 
+    column_mapping = {
+                'A': 2,  # Абонент
+                'B': 4,  # счётчик
+                'C': 15,  # энергия-тепло
+                'D': 5,  # энергия холод
+                'E': 6,  # объём
+                'F': 7,  # показания
+                'G': 8,  # показания
+            }
+    
+    # имя файла
+    output_name = f'water_report_{translate(meters_name)}_{electric_data_end}.xlsx'
+
+    wb = export_to_excel(data_table, headers, column_mapping, table_name, table_name_place, ws_title)
+
+    # Правильное создание HttpResponse
+    response = HttpResponse(
+        content = save_virtual_workbook(wb),
+        content_type = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
+    response['Content-Disposition'] = f'attachment; filename="{output_name}"'
+
+    return response
+
+
+def report_water_ridan_consumption(request):
+    response = io.StringIO()
+    
+#Запрашиваем данные для отчета
+    is_abonent_level = re.compile(r'abonent')
+    is_object_level_2 = re.compile(r'level2')
+    
+    parent_name         = request.GET['obj_parent_title']
+    meters_name         = request.GET['obj_title']
+    electric_data_end   = request.GET['electric_data_end']
+    electric_data_start  = request.GET['electric_data_start']            
+    obj_key             = request.GET['obj_key']
+    
+    params = ['Объем_входящий', 'Объем_выходящий']
+
+    if (bool(is_abonent_level.search(obj_key))):
+        is_abon = True 
+        data_table = common_sql.get_data_table_consumption(meters_name, parent_name, electric_data_start, electric_data_end, is_abon, params, resource = 'Вода')
+    elif (bool(is_object_level_2.search(obj_key))):
+        is_abon = False
+        data_table = common_sql.get_data_table_consumption(meters_name, parent_name, electric_data_start, electric_data_end, is_abon, params, resource = 'Вода')
+
+    #zamenyem None na N/D vezde
+    if len(data_table)>0: 
+        data_table=common_sql.ChangeNull(data_table, None)
+        
+     #Шапка
+    table_name = f"Потребление водосчётчиков с {electric_data_start} по {electric_data_end}" 
+    table_name_place = f"{parent_name}, {meters_name}"
+    if len(data_table)>0 and is_abon:
+        table_name_place = f"{data_table[0][0]}, {data_table[0][1]}"
+    ws_title = "Потребление водосчётчиков"   
+
+    # Заголовки таблицы
+    # заголовок, ширина, имя стиля
+    headers = [
+    ('Абонент', 23, None),
+    ('Счётчик', 20, None),
+    ('Тип', 10, None),
+    (f'Объём вх {electric_data_start}, м³', 20, "ali_light_yellow"),
+    (f'Объём вх {electric_data_end}, м³', 20, "ali_light_yellow"),
+    (f'Объём вх расход, м³', 20, "ali_light_yellow"),
+    (f'Объём вых {electric_data_start}, м³', 20, "ali_blue"),
+    (f'Объём вых {electric_data_end}, м³', 20, "ali_blue"),
+    (f'Объём вых расход, м³', 20, "ali_blue")
+    ]
+
+    # Соотвествие колонок в excel и колонок в запросе 
+    column_mapping = {
+                'A': 2,  # Абонент
+                'B': 4,  # счётчик
+                'C': 17,  # тип
+                'D': 5,  # показания
+                'E': 6,  # показания
+                'F': 7,  # показания
+                'G': 8,  # показания
+                'H': 9,  # показания
+                'I': 10,  # показания
+            }
+    
+    # имя файла
+    output_name = f'water_report_{translate(meters_name)}_{electric_data_start}-{electric_data_end}.xlsx'
+
+    wb = export_to_excel(data_table, headers, column_mapping, table_name, table_name_place, ws_title)
+
+    # Правильное создание HttpResponse
+    response = HttpResponse(
+        content = save_virtual_workbook(wb),
+        content_type = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
     )
     response['Content-Disposition'] = f'attachment; filename="{output_name}"'
 
