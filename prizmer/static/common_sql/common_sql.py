@@ -18,6 +18,7 @@ import re
 import datetime
 #---------
 import calendar
+from django.conf import settings
 
 
 def daterange(start, stop, step=datetime.timedelta(days=1), inclusive=True):
@@ -10907,9 +10908,14 @@ WHERE
     return data_table
 
 def get_water_abonents_by_obj_guid(obj_guid, name_res):
+    SHOW_HEAT_IN_WATER = getattr(settings, 'SHOW_HEAT_IN_WATER', 'False')
     cursor = connection.cursor()
     data_table=[]  
- 
+    if SHOW_HEAT_IN_WATER:
+        str_show_heat = "--"
+    else:
+        str_show_heat = ""
+    
     sQuery="""
     Select DISTINCT name, guid, res_name
 from
@@ -10933,8 +10939,8 @@ WHERE
   params.guid_names_params = names_params.guid AND
   names_params.guid_resources = resources.guid AND
   (resources.name = '%s' or resources.name = '%s' or resources.name = '%s') 
-  and params.name not like '%%Тепло%%' 
-  AND params.name not like '%%тепло%%'
+  %s and params.name not like '%%Тепло%%' 
+  %s AND params.name not like '%%тепло%%'
   and
   objects.guid = '%s'
   group by  abonents.name, 
@@ -10942,8 +10948,8 @@ WHERE
   resources.name) z1
 
   order by name
-    """ %( name_res[0], name_res[1], name_res[0], name_res[1], name_res[2], obj_guid)
-    print(sQuery)
+    """ %( name_res[0], name_res[1], name_res[0], name_res[1], name_res[2], str_show_heat, str_show_heat, obj_guid)
+    #print(sQuery)
     cursor.execute(sQuery)  
     data_table = cursor.fetchall()
 
