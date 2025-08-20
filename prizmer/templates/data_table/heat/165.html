@@ -1,0 +1,50 @@
+<html>
+<head>
+<script src="/static/libs/liHighLight.js" type=text/javascript></script>
+</head>
+<body>
+&#9202; &#127777<span>Потребление по теплосчётчикам за период с <strong>{{electric_data_start}}</strong> по <strong>{{electric_data_end}}</strong></span>
+<br>
+&#127968;<span>Абонент:  <strong>{{obj_parent_title}}  <img src="/static/images/right-ico20.png">  {{obj_title}}</strong></span>
+<br>
+{% if data_table %} 
+<table class="content" id="data-table" >
+<tr>
+<th>Абонент</th>
+<th>Счётчик</th>
+<th>Энергия-тепло на {{electric_data_start}}, Гкал</th>
+<th>Энергия-тепло на {{electric_data_end}}, Гкал</th>
+<th><b>Расход, Гкал</b></th>
+<th>Энергия-холод на {{electric_data_start}}, Гкал</th>
+<th>Энергия-холод на {{electric_data_end}}, Гкал</th>
+<th><b>Расход, Гкал</b></th>
+<th>Объём на {{electric_data_start}}, м3</th>
+<th>Объём на {{electric_data_end}}, м3</th>
+<th><b>Расход, м3</b></th>
+</tr>
+{% for value in data_table %}
+<tr>
+<td>{{value.2}}</td>
+<td>{{value.4}}</td>
+<td style = "background-color:#FFFACD;">{{value.5}}</td>
+<td style = "background-color:#FFFACD;">{{value.6}}</td>
+<td style = "background-color:#FFFACD;"><b>{{value.7}}</b></td>
+<td style = "background-color:#E0FFFF;">{{value.8}}</td>
+<td style = "background-color:#E0FFFF;">{{value.9}}</td>
+<td style = "background-color:#E0FFFF;"><b>{{value.10}}</b></td>
+<td style = "background-color:#98FB98;">{{value.11}}</td>
+<td style = "background-color:#98FB98;">{{value.12}}</td>
+<td style = "background-color:#98FB98;"><b>{{value.13}}</b></td>
+
+
+</tr>
+{% endfor %}
+</table>
+{% else %}
+<br>
+<br>
+<span><strong>Нет данных.</strong></span>
+<br>
+{% endif %}
+</body>
+</html>

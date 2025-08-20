@@ -204,4 +204,10 @@ urlpatterns = [
     url(r'^160/$', views.report_heat_iot_daily, name = '160'), #вода с приборов iot
 
     url(r'^162/$', views.report_heat_vkt9_daily, name = '162'), #вода с приборов vkt9
+
+    url(r'^164/$', views.report_heat_ridan_daily, name = '164'), #тепло - выгрузка по ресурсу, без привязки к приборам
+    url(r'^165/$', views.report_heat_ridan_consumption, name = '165'), #тепло - выгрузка по ресурсу, без привязки к приборам
+
+    url(r'^166/$', views.report_water_ridan_daily, name = '166'), #тепло - выгрузка по ресурсу, без привязки к приборам
+    url(r'^167/$', views.report_water_ridan_consumption, name = '167'), #тепло - выгрузка по ресурсу, без привязки к приборам
 ]

@@ -240,4 +240,10 @@ urlpatterns = [
     url(r'^160/$', views.heat_iot_daily, name = 'heat_iot_daily'), # тепло с приборов iot
 
     url(r'^162/$', views.heat_vkt9_daily, name = 'heat_vkt9_daily'), # тепло с приборов vkt9
+
+    url(r'^164/$', views.heat_ridan_daily, name = 'heat_ridan_daily'), # тепло с приборов ридан
+    url(r'^165/$', views.heat_ridan_consumption, name = 'heat_ridan_consumption'), # тепло с приборов ридан
+
+    url(r'^166/$', views.water_ridan_daily, name = 'heat_ridan_daily'), # вода с приборов ридан
+    url(r'^167/$', views.water_ridan_consumption, name = 'heat_ridan_consumption'), # вода с приборов ридан
 ]

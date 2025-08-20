@@ -12768,3 +12768,156 @@ def heat_vkt9_daily(request):
     args['obj_title'] = meters_name 
       
     return render(request, "data_table/heat/162.html", args)
+
+
+def heat_ridan_daily(request):
+    args= {}
+    is_abonent_level = re.compile(r'abonent')
+    is_object_level_2 = re.compile(r'level2')   
+    parent_name         = request.GET['obj_parent_title']
+    meters_name         = request.GET['obj_title']
+    electric_data_end   = request.GET['electric_data_end']            
+    obj_key             = request.GET['obj_key']
+    
+    data_table = []
+    if request.is_ajax():
+        if request.method == 'GET':
+            request.session["obj_parent_title"]    = parent_name         = request.GET['obj_parent_title']
+            request.session["obj_title"]           = meters_name         = request.GET['obj_title']
+            request.session["electric_data_end"]   = electric_data_end   = request.GET['electric_data_end']
+            request.session["obj_key"]             = obj_key             = request.GET['obj_key']
+
+    params = ['Энергия_тепло', 'Энергия_холод', 'Объем', 'Ti', 'To']
+
+    if (bool(is_abonent_level.search(obj_key))):
+        is_abon = True 
+        data_table = common_sql.get_data_table_daily(meters_name, parent_name, electric_data_end, is_abon, params, resource = 'Тепло')
+    elif (bool(is_object_level_2.search(obj_key))):
+        is_abon = False
+        data_table = common_sql.get_data_table_daily(meters_name, parent_name, electric_data_end, is_abon, params, resource = 'Тепло')
+
+    #zamenyem None na N/D vezde
+    if len(data_table)>0: 
+        data_table=common_sql.ChangeNull(data_table, None)
+    
+    args['data_table'] = data_table
+    args['obj_parent_title'] = parent_name
+    args['electric_data_end'] = electric_data_end
+    args['obj_title'] = meters_name 
+      
+    return render(request, "data_table/heat/164.html", args)
+
+def heat_ridan_consumption(request):
+    args= {}
+    is_abonent_level = re.compile(r'abonent')
+    is_object_level_2 = re.compile(r'level2')   
+    parent_name         = request.GET['obj_parent_title']
+    meters_name         = request.GET['obj_title']
+    electric_data_end   = request.GET['electric_data_end']            
+    obj_key             = request.GET['obj_key']
+    
+    data_table = []
+    if request.is_ajax():
+        if request.method == 'GET':
+            request.session["obj_parent_title"]    = parent_name         = request.GET['obj_parent_title']
+            request.session["obj_title"]           = meters_name         = request.GET['obj_title']
+            request.session["electric_data_end"]   = electric_data_end   = request.GET['electric_data_end']
+            request.session["electric_data_start"]   = electric_data_start   = request.GET['electric_data_start']
+            request.session["obj_key"]             = obj_key             = request.GET['obj_key']
+
+    params = ['Энергия_тепло', 'Энергия_холод', 'Объем']
+
+    if (bool(is_abonent_level.search(obj_key))):
+        is_abon = True 
+        data_table = common_sql.get_data_table_consumption(meters_name, parent_name, electric_data_start, electric_data_end, is_abon, params, resource = 'Тепло')
+    elif (bool(is_object_level_2.search(obj_key))):
+        is_abon = False
+        data_table = common_sql.get_data_table_consumption(meters_name, parent_name, electric_data_start, electric_data_end, is_abon, params, resource = 'Тепло')
+
+    #zamenyem None na N/D vezde
+    if len(data_table)>0: 
+        data_table=common_sql.ChangeNull(data_table, None)
+    
+    args['data_table'] = data_table
+    args['obj_parent_title'] = parent_name
+    args['electric_data_end'] = electric_data_end
+    args['electric_data_start'] = electric_data_start
+    args['obj_title'] = meters_name 
+      
+    return render(request, "data_table/heat/165.html", args)
+
+def water_ridan_daily(request):
+    args= {}
+    is_abonent_level = re.compile(r'abonent')
+    is_object_level_2 = re.compile(r'level2')   
+    parent_name         = request.GET['obj_parent_title']
+    meters_name         = request.GET['obj_title']
+    electric_data_end   = request.GET['electric_data_end']            
+    obj_key             = request.GET['obj_key']
+    
+    data_table = []
+    if request.is_ajax():
+        if request.method == 'GET':
+            request.session["obj_parent_title"]    = parent_name         = request.GET['obj_parent_title']
+            request.session["obj_title"]           = meters_name         = request.GET['obj_title']
+            request.session["electric_data_end"]   = electric_data_end   = request.GET['electric_data_end']
+            request.session["obj_key"]             = obj_key             = request.GET['obj_key']
+
+    params = ['Объем_входящий', 'Объем_выходящий', 'magnet_flag', 'magnet_time']
+
+    if (bool(is_abonent_level.search(obj_key))):
+        is_abon = True 
+        data_table = common_sql.get_data_table_daily(meters_name, parent_name, electric_data_end, is_abon, params, resource = 'Вода')
+    elif (bool(is_object_level_2.search(obj_key))):
+        is_abon = False
+        data_table = common_sql.get_data_table_daily(meters_name, parent_name, electric_data_end, is_abon, params, resource = 'Вода')
+
+    #zamenyem None na N/D vezde
+    if len(data_table)>0: 
+        data_table=common_sql.ChangeNull(data_table, None)
+    
+    args['data_table'] = data_table
+    args['obj_parent_title'] = parent_name
+    args['electric_data_end'] = electric_data_end
+    args['obj_title'] = meters_name 
+      
+    return render(request, "data_table/water/166.html", args)
+
+def water_ridan_consumption(request):
+    args= {}
+    is_abonent_level = re.compile(r'abonent')
+    is_object_level_2 = re.compile(r'level2')   
+    parent_name         = request.GET['obj_parent_title']
+    meters_name         = request.GET['obj_title']
+    electric_data_end   = request.GET['electric_data_end']            
+    obj_key             = request.GET['obj_key']
+    
+    data_table = []
+    if request.is_ajax():
+        if request.method == 'GET':
+            request.session["obj_parent_title"]    = parent_name         = request.GET['obj_parent_title']
+            request.session["obj_title"]           = meters_name         = request.GET['obj_title']
+            request.session["electric_data_end"]   = electric_data_end   = request.GET['electric_data_end']
+            request.session["electric_data_start"]   = electric_data_start   = request.GET['electric_data_start']
+            request.session["obj_key"]             = obj_key             = request.GET['obj_key']
+
+    params = ['Объем_входящий', 'Объем_выходящий']
+
+    if (bool(is_abonent_level.search(obj_key))):
+        is_abon = True 
+        data_table = common_sql.get_data_table_consumption(meters_name, parent_name, electric_data_start, electric_data_end, is_abon, params, resource = 'Вода')
+    elif (bool(is_object_level_2.search(obj_key))):
+        is_abon = False
+        data_table = common_sql.get_data_table_consumption(meters_name, parent_name, electric_data_start, electric_data_end, is_abon, params, resource = 'Вода')
+
+    #zamenyem None na N/D vezde
+    if len(data_table)>0: 
+        data_table=common_sql.ChangeNull(data_table, None)
+    
+    args['data_table'] = data_table
+    args['obj_parent_title'] = parent_name
+    args['electric_data_end'] = electric_data_end
+    args['electric_data_start'] = electric_data_start
+    args['obj_title'] = meters_name 
+      
+    return render(request, "data_table/water/167.html", args)
