@@ -770,10 +770,14 @@ def LoadElectricMeters(sPath, sSheet):
                 add_meter = Meters(name = str(type_meter) + ' ' + str(meter), address = str(adr), factory_number_manual = str(meter), attr1 = str(attr1), guid_types_meters = TypesMeters.objects.get(guid = "0a5753cf-debd-45cb-8dd0-3905f36293fc") )
                 add_meter.save()
                 writeToLog('Device added' + ' --->   ' + 'Водосчётчик Ридан СГВ-15')
-            elif str(type_meter) == 'Взлёт':
+            elif str(type_meter) == 'ВЗЛЕТ ТСР-М ТСРВ-043':
                 add_meter = Meters(name = str(type_meter) + ' ' + str(meter), address = str(adr), factory_number_manual = str(meter), attr1 = str(attr1), guid_types_meters = TypesMeters.objects.get(guid = "3a32cec9-d03a-4e46-a065-f81f92e5ead0") )
                 add_meter.save()
-                writeToLog('Device added' + ' --->   ' + 'Взлёт')
+                writeToLog('Device added' + ' --->   ' + 'ВЗЛЕТ ТСР-М ТСРВ-043')
+            elif str(type_meter) == 'ВЗЛЕТ ТСР-М ТСРВ-024М':
+                add_meter = Meters(name = str(type_meter) + ' ' + str(meter), address = str(adr), factory_number_manual = str(meter), attr1 = str(attr1), guid_types_meters = TypesMeters.objects.get(guid = "30936305-66a6-4459-b7d0-9c3ea8e2ba12") )
+                add_meter.save()
+                writeToLog('Device added' + ' --->   ' + 'ВЗЛЕТ ТСР-М ТСРВ-024М')
 
             else:
                 writeToLog('Не найдено совпадение с существующим типом прибора')
@@ -3289,8 +3293,8 @@ def add_taken_param_no_signals(instance, isR, isHalfs, is_ridan_impulse): # До
         add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "3fc2ea8f-237a-42ec-8f2f-d1b69e170ae4"))
         add_param.save()
 
-    elif instance.guid_types_meters.name == 'Взлёт':
-        #Добавляем параметры для счётчика Взлёт
+    elif instance.guid_types_meters.name == 'ВЗЛЕТ ТСР-М ТСРВ-043':
+        #Добавляем параметры для счётчика ВЗЛЕТ ТСР-М ТСРВ-043
     
         #-------------Суточные
         # ОбЪем 1 .
@@ -3341,6 +3345,16 @@ def add_taken_param_no_signals(instance, isR, isHalfs, is_ridan_impulse): # До
         # Температура 6 .
         add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "f54bb4f3-cae9-4d4e-af2f-769f13a1b200"))
         add_param.save()    
+
+    elif instance.guid_types_meters.name == 'ВЗЛЕТ ТСР-М ТСРВ-024М':
+        #Добавляем параметры для ВЗЛЕТ ТСР-М ТСРВ-024М.
+        #------------Суточные
+        # "Энергия Система 1", Гкал
+        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "ec6fc0ca-5f75-4ad7-96b2-e66aee490d7e"))
+        add_param.save() 
+        # Масса Система 1, тонна
+        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "cae77cb0-740f-4f0f-973b-4699f5a353b6"))
+        add_param.save() 
 
  
     else:
