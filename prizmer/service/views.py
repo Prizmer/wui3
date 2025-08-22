@@ -778,6 +778,10 @@ def LoadElectricMeters(sPath, sSheet):
                 add_meter = Meters(name = str(type_meter) + ' ' + str(meter), address = str(adr), factory_number_manual = str(meter), attr1 = str(attr1), guid_types_meters = TypesMeters.objects.get(guid = "30936305-66a6-4459-b7d0-9c3ea8e2ba12") )
                 add_meter.save()
                 writeToLog('Device added' + ' --->   ' + 'ВЗЛЕТ ТСР-М ТСРВ-024М')
+            elif str(type_meter) == 'ВЗЛЕТ МР УРСВ-311':
+                add_meter = Meters(name = str(type_meter) + ' ' + str(meter), address = str(adr), factory_number_manual = str(meter), attr1 = str(attr1), guid_types_meters = TypesMeters.objects.get(guid = "4d85e9a5-513e-419c-a02e-3e6ba79eafa7") )
+                add_meter.save()
+                writeToLog('Device added' + ' --->   ' + 'ВЗЛЕТ МР УРСВ-311')
 
             else:
                 writeToLog('Не найдено совпадение с существующим типом прибора')
@@ -3354,9 +3358,15 @@ def add_taken_param_no_signals(instance, isR, isHalfs, is_ridan_impulse): # До
         add_param.save() 
         # Масса Система 1, тонна
         add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "cae77cb0-740f-4f0f-973b-4699f5a353b6"))
-        add_param.save() 
+        add_param.save()
 
- 
+    elif instance.guid_types_meters.name == 'ВЗЛЕТ МР УРСВ-311':
+        #Добавляем параметры для ВЗЛЕТ МР УРСВ-311.
+        #------------Суточные
+        # "Объём входящий", м3
+        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "56aefad0-0058-4ee2-95fe-aaf02e54c4ca"))
+        add_param.save()
+
     else:
         pass
         #print('!!!!!!!!!!!!!!', instance.guid_types_meters.name)

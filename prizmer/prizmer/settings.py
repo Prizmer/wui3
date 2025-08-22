@@ -107,7 +107,7 @@ DATABASES = {
     'default': {
         'ENGINE':'django.db.backends.postgresql_psycopg2',
         #'NAME': 'prizmer',
-        'NAME': 'template',
+        'NAME': 'prizmer',
         'USER': 'postgres',
         'PASSWORD': '1',
         'HOST': 'localhost',
