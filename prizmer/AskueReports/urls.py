@@ -205,9 +205,15 @@ urlpatterns = [
 
     url(r'^162/$', views.report_heat_vkt9_daily, name = '162'), #вода с приборов vkt9
 
-    url(r'^164/$', views.report_heat_ridan_daily, name = '164'), #тепло - выгрузка по ресурсу, без привязки к приборам
-    url(r'^165/$', views.report_heat_ridan_consumption, name = '165'), #тепло - выгрузка по ресурсу, без привязки к приборам
+    url(r'^164/$', views.report_heat_ridan_daily, name = '164'), #тепло 
+    url(r'^165/$', views.report_heat_ridan_consumption, name = '165'), #тепло 
 
-    url(r'^166/$', views.report_water_ridan_daily, name = '166'), #тепло - выгрузка по ресурсу, без привязки к приборам
-    url(r'^167/$', views.report_water_ridan_consumption, name = '167'), #тепло - выгрузка по ресурсу, без привязки к приборам
+    url(r'^166/$', views.report_water_ridan_daily, name = '166'), #вода - выгрузка по ресурсу, без привязки к приборам
+    url(r'^167/$', views.report_water_ridan_consumption, name = '167'), #вода - выгрузка по ресурсу, без привязки к приборам
+
+    url(r'^168/$', views.report_heat_vzlet_daily, name = '168'), #тепло 
+    url(r'^169/$', views.report_heat_vzlet_consumption, name = '169'), #тепло 
+
+    url(r'^170/$', views.report_water_ridan_daily, name = '170'), #вода - выгрузка по ресурсу, без привязки к приборам
+    url(r'^171/$', views.report_water_ridan_consumption, name = '171'), #вода - выгрузка по ресурсу, без привязки к приборам
 ]
