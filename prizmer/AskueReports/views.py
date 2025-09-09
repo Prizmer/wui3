@@ -78,6 +78,8 @@ ali_green   = NamedStyle(name = "ali_green", fill=PatternFill(fill_type='solid',
 ali_green_header   = NamedStyle(name = "ali_green_header", fill=PatternFill(fill_type='solid', start_color='135c23'), font = Font(color='FFFFFF', bold=True), border=Border(left=Side(border_style='thin',color='FF000000'), bottom=Side(border_style='thin',color='FF000000'), right=Side(border_style='thin',color='FF000000'), top=Side(border_style='thin',color='FF000000')), alignment = Alignment(horizontal='center', vertical='center', wrap_text=True, shrink_to_fit=True))
 ali_red    = NamedStyle(name = "ali_red", fill=PatternFill(fill_type='solid', start_color='FF3333'), border=Border(left=Side(border_style='thin',color='FF000000'), bottom=Side(border_style='thin',color='FF000000'), right=Side(border_style='thin',color='FF000000'), top=Side(border_style='thin',color='FF000000')), alignment = Alignment(horizontal='center', vertical='center', wrap_text=True, shrink_to_fit=True))
 
+ali_green_title  = NamedStyle(name = "ali_green_title", font = Font(color='122b12', bold=True, size=16), alignment = Alignment(horizontal='left', vertical='center', wrap_text=False, shrink_to_fit=False))
+
 ali_light_yellow = NamedStyle(name = "ali_light_yellow", fill=PatternFill(fill_type='solid', start_color='FFFFC5'), border=Border(left=Side(border_style='thin',color='FF000000'), bottom=Side(border_style='thin',color='FF000000'), right=Side(border_style='thin',color='FF000000'), top=Side(border_style='thin',color='FF000000')), alignment = Alignment(horizontal='center', vertical='center', wrap_text=True, shrink_to_fit=True))
 
 ali_yellow = NamedStyle(name = "ali_yellow", fill=PatternFill(fill_type='solid', start_color='EEEE00'), border=Border(left=Side(border_style='thin',color='FF000000'), bottom=Side(border_style='thin',color='FF000000'), right=Side(border_style='thin',color='FF000000'), top=Side(border_style='thin',color='FF000000')), alignment = Alignment(horizontal='center', vertical='center', wrap_text=True, shrink_to_fit=True))
@@ -24071,13 +24073,15 @@ def export_to_excel(data_table, headers, column_mapping, table_name, table_name_
     wb.add_named_style(ali_light_yellow)
     wb.add_named_style(ali_blue)
     wb.add_named_style(ali_pink)
-
+    wb.add_named_style(ali_green_title)
 
     #Шапка
     ws.merge_cells('A2:E2')
     ws['A2'] = table_name #название отчёта
+    ws['A2'].style = "ali_green_title"
     ws.merge_cells('A3:E3')
     ws['A3'] = table_name_place #объект
+    ws['A3'].style = "ali_green_title"
     
     # Заголовки
     for col_num, (header, width, style)  in enumerate(headers, start=1):
@@ -24277,7 +24281,7 @@ def report_water_ridan_daily(request):
     electric_data_end   = request.GET['electric_data_end']            
     obj_key             = request.GET['obj_key']
     
-    params = ['Объем_входящий', 'Объем_выходящий', 'magnet_flag', 'magnet_time']
+    params = ['Объем', 'Объем_выходящий', 'magnet_flag', 'magnet_time']
 
     if (bool(is_abonent_level.search(obj_key))):
         is_abon = True 
@@ -24305,8 +24309,8 @@ def report_water_ridan_daily(request):
     ('Тип', 10, None),
     ('Объём вх, м³', None, None),
     ('Объём вых, м³', None, None),
-    ('Установлен магнит', 15, None),
-    ('Время воздействия магнита', 15, None)
+    ('Установлен магнит, ч', 15, None),
+    ('Время воздействия магнита, ч', 15, None)
     ]
 
     # Соотвествие колонок в excel и колонок в запросе 
@@ -24348,7 +24352,7 @@ def report_water_ridan_consumption(request):
     electric_data_start  = request.GET['electric_data_start']            
     obj_key             = request.GET['obj_key']
     
-    params = ['Объем_входящий', 'Объем_выходящий']
+    params = ['Объем', 'Объем_выходящий']
 
     if (bool(is_abonent_level.search(obj_key))):
         is_abon = True 
@@ -24393,6 +24397,277 @@ def report_water_ridan_consumption(request):
                 'G': 8,  # показания
                 'H': 9,  # показания
                 'I': 10,  # показания
+            }
+    
+    # имя файла
+    output_name = f'water_report_{translate(meters_name)}_{electric_data_start}-{electric_data_end}.xlsx'
+
+    wb = export_to_excel(data_table, headers, column_mapping, table_name, table_name_place, ws_title)
+
+    # Правильное создание HttpResponse
+    response = HttpResponse(
+        content = save_virtual_workbook(wb),
+        content_type = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
+    response['Content-Disposition'] = f'attachment; filename="{output_name}"'
+
+    return response
+
+
+
+def report_heat_vzlet_daily(request):
+    response = io.StringIO()
+    
+#Запрашиваем данные для отчета
+    is_abonent_level = re.compile(r'abonent')
+    is_object_level_2 = re.compile(r'level2')
+    
+    parent_name         = request.GET['obj_parent_title']
+    meters_name         = request.GET['obj_title']
+    electric_data_end   = request.GET['electric_data_end']            
+    obj_key             = request.GET['obj_key']
+    
+    params = ['Энергия_1', 'Масса_1']
+
+    if (bool(is_abonent_level.search(obj_key))):
+        is_abon = True 
+        data_table = common_sql.get_data_table_daily(meters_name, parent_name, electric_data_end, is_abon, params, resource = 'Тепло')
+    elif (bool(is_object_level_2.search(obj_key))):
+        is_abon = False
+        data_table = common_sql.get_data_table_daily(meters_name, parent_name, electric_data_end, is_abon, params, resource = 'Тепло')
+
+    #zamenyem None na N/D vezde
+    if len(data_table)>0: 
+        data_table=common_sql.ChangeNull(data_table, None)
+        
+     #Шапка
+    table_name = 'Показания теплосчётчиков на ' + str(request.session["electric_data_end"])
+    table_name_place = f"{parent_name}, {meters_name}"
+    if len(data_table)>0 and is_abon:
+        table_name_place = f"{data_table[0][0]}, {data_table[0][1]}"
+    ws_title = "Показания теплосчётчиков"   
+
+    # Заголовки таблицы - название, ширина, стиль
+    headers = [
+    ('Абонент', 23, None),
+    ('Счётчик', 20, None),
+    ('Энергия, Гкал', None, None),
+    ('Масса, т', 20, None) 
+    ]
+
+    # Соотвествие колонок в excel и колонок в запросе 
+    column_mapping = {
+                'A': 2,  # Абонент
+                'B': 4,  # счётчик
+                'C': 5,  # энергия-тепло
+                'D': 6,  # масса
+            }
+    
+    # имя файла
+    output_name = f'heat_report_{translate(meters_name)}_{electric_data_end}.xlsx'
+
+    wb = export_to_excel(data_table, headers, column_mapping, table_name, table_name_place, ws_title)
+
+    # Правильное создание HttpResponse
+    response = HttpResponse(
+        content = save_virtual_workbook(wb),
+        content_type = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
+    response['Content-Disposition'] = f'attachment; filename="{output_name}"'
+
+    return response
+
+
+def report_heat_vzlet_consumption(request):
+    response = io.StringIO()
+    
+#Запрашиваем данные для отчета
+    is_abonent_level = re.compile(r'abonent')
+    is_object_level_2 = re.compile(r'level2')
+    
+    parent_name         = request.GET['obj_parent_title']
+    meters_name         = request.GET['obj_title']
+    electric_data_end   = request.GET['electric_data_end']
+    electric_data_start  = request.GET['electric_data_start']            
+    obj_key             = request.GET['obj_key']
+    
+    params = ['Энергия_1', 'Масса_1']
+
+    if (bool(is_abonent_level.search(obj_key))):
+        is_abon = True 
+        data_table = common_sql.get_data_table_consumption(meters_name, parent_name, electric_data_start, electric_data_end, is_abon, params, resource = 'Тепло')
+    elif (bool(is_object_level_2.search(obj_key))):
+        is_abon = False
+        data_table = common_sql.get_data_table_consumption(meters_name, parent_name, electric_data_start, electric_data_end, is_abon, params, resource = 'Тепло')
+
+    #zamenyem None na N/D vezde
+    if len(data_table)>0: 
+        data_table=common_sql.ChangeNull(data_table, None)
+        
+     #Шапка
+    table_name = f"Потребление теплосчётчиков с {electric_data_start} по {electric_data_end}" 
+    table_name_place = f"{parent_name}, {meters_name}"
+    if len(data_table)>0 and is_abon:
+        table_name_place = f"{data_table[0][0]}, {data_table[0][1]}"
+    ws_title = "Потребление теплосчётчиков"   
+
+    # Заголовки таблицы
+    # заголовок, ширина, имя стиля
+    headers = [
+    ('Абонент', 23, None),
+    ('Счётчик', 20, None),
+    (f"Энергия {electric_data_start}, Гкал", 20, "ali_light_yellow"),
+    (f"Энергия {electric_data_end}, Гкал", 20, "ali_light_yellow"),
+    (f"Энергия расход, Гкал", 20, "ali_light_yellow"),
+    (f"Масса {electric_data_start}, м³", 20, "ali_pink"),
+    (f"Масса {electric_data_end}, м³", 20, "ali_pink"),
+    (f"Расход массы, м³", 20, "ali_pink")    
+    ]
+
+    # Соотвествие колонок в excel и колонок в запросе 
+    column_mapping = {
+                'A': 2,  # Абонент
+                'B': 4,  # счётчик
+                'C': 5,  # энергия-тепло
+                'D': 6,  # 
+                'E': 7,  # 
+                'F': 8,  # показания
+                'G': 9,  # показания
+                'H': 10,  # показания
+            }
+    
+    # имя файла
+    output_name = f'heat_report_{translate(meters_name)}_{electric_data_start}-{electric_data_end}.xlsx'
+
+    wb = export_to_excel(data_table, headers, column_mapping, table_name, table_name_place, ws_title)
+
+    # Правильное создание HttpResponse
+    response = HttpResponse(
+        content = save_virtual_workbook(wb),
+        content_type = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
+    response['Content-Disposition'] = f'attachment; filename="{output_name}"'
+
+    return response
+
+
+def report_water_vzlet_daily(request):
+    response = io.StringIO()
+    
+#Запрашиваем данные для отчета
+    is_abonent_level = re.compile(r'abonent')
+    is_object_level_2 = re.compile(r'level2')
+    
+    parent_name         = request.GET['obj_parent_title']
+    meters_name         = request.GET['obj_title']
+    electric_data_end   = request.GET['electric_data_end']            
+    obj_key             = request.GET['obj_key']
+    
+    params = ['Объем_входящий']
+
+    if (bool(is_abonent_level.search(obj_key))):
+        is_abon = True 
+        data_table = common_sql.get_data_table_daily(meters_name, parent_name, electric_data_end, is_abon, params, resource = 'Вода')
+    elif (bool(is_object_level_2.search(obj_key))):
+        is_abon = False
+        data_table = common_sql.get_data_table_daily(meters_name, parent_name, electric_data_end, is_abon, params, resource = 'Вода')
+
+    #zamenyem None na N/D vezde
+    if len(data_table)>0: 
+        data_table=common_sql.ChangeNull(data_table, None)
+        
+     #Шапка
+    table_name = 'Показания водосчётчиков на ' + str(request.session["electric_data_end"])
+    table_name_place = f"{parent_name}, {meters_name}"
+    if len(data_table)>0 and is_abon:
+        table_name_place = f"{data_table[0][0]}, {data_table[0][1]}"
+    ws_title = "Показания водосчётчиков"   
+
+    # Заголовки таблицы
+     # заголовок, ширина, имя стиля
+    headers = [
+    ('Абонент', 23, None),
+    ('Счётчик', 20, None),
+    ('Тип', 10, None),
+    ('Объём, м³', 20, None),
+    ]
+
+    # Соотвествие колонок в excel и колонок в запросе 
+    column_mapping = {
+                'A': 2,  # Абонент
+                'B': 4,  # счётчик
+                'C': 2,  # тип
+                'D': 5,  # объём          
+            }
+    
+    # имя файла
+    output_name = f'water_report_{translate(meters_name)}_{electric_data_end}.xlsx'
+
+    wb = export_to_excel(data_table, headers, column_mapping, table_name, table_name_place, ws_title)
+
+    # Правильное создание HttpResponse
+    response = HttpResponse(
+        content = save_virtual_workbook(wb),
+        content_type = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
+    response['Content-Disposition'] = f'attachment; filename="{output_name}"'
+
+    return response
+
+
+def report_water_vzlet_consumption(request):
+    response = io.StringIO()
+    
+#Запрашиваем данные для отчета
+    is_abonent_level = re.compile(r'abonent')
+    is_object_level_2 = re.compile(r'level2')
+    
+    parent_name         = request.GET['obj_parent_title']
+    meters_name         = request.GET['obj_title']
+    electric_data_end   = request.GET['electric_data_end']
+    electric_data_start  = request.GET['electric_data_start']            
+    obj_key             = request.GET['obj_key']
+    
+    params = ['Объем_входящий']
+
+    if (bool(is_abonent_level.search(obj_key))):
+        is_abon = True 
+        data_table = common_sql.get_data_table_consumption(meters_name, parent_name, electric_data_start, electric_data_end, is_abon, params, resource = 'Вода')
+    elif (bool(is_object_level_2.search(obj_key))):
+        is_abon = False
+        data_table = common_sql.get_data_table_consumption(meters_name, parent_name, electric_data_start, electric_data_end, is_abon, params, resource = 'Вода')
+
+    #zamenyem None na N/D vezde
+    if len(data_table)>0: 
+        data_table=common_sql.ChangeNull(data_table, None)
+        
+     #Шапка
+    table_name = f"Потребление водосчётчиков с {electric_data_start} по {electric_data_end}" 
+    table_name_place = f"{parent_name}, {meters_name}"
+    if len(data_table)>0 and is_abon:
+        table_name_place = f"{data_table[0][0]}, {data_table[0][1]}"
+    ws_title = "Потребление водосчётчиков"   
+
+    # Заголовки таблицы
+    # заголовок, ширина, имя стиля
+    headers = [
+    ('Абонент', 23, None),
+    ('Счётчик', 20, None),
+    ('Тип', 10, None),
+    (f'Объём на {electric_data_start}, м³', 20, None),
+    (f'Объём на {electric_data_end}, м³', 20, None),
+    (f'Объём расход, м³', 20, None),
+
+    ]
+
+    # Соотвествие колонок в excel и колонок в запросе 
+    column_mapping = {
+                'A': 2,  # Абонент
+                'B': 4,  # счётчик
+                'C': 17,  # тип
+                'D': 5,  # показания
+                'E': 6,  # показания
+                'F': 7,  # показания                
             }
     
     # имя файла

@@ -15,25 +15,20 @@
 <th>Счётчик</th>
 <th>Тип</th>
 <th>Объем входящий, м3</th>
-<th>Объем выходящий, м3</th>
-<th>Установлен магнит, ч</th>
-<th>Время воздействия магнита, ч</th>
+
 </tr>
 {% for value in data_table %}
 <tr>
 <td>{{value.2}}</td>
 <td>{{value.4}}</td>
-    {% if value.15 == 'ГВС' %}
-        <td class="th_gvs">{{ value.15 }}</td>
-    {% elif value.15 == 'ХВС' %}
-        <td class="th_hvs">{{ value.15 }}</td>
+    {% if value.2 == 'ГВС' %}
+        <td class="th_gvs">{{ value.2 }}</td>
+    {% elif value.2 == 'ХВС' %}
+        <td class="th_hvs">{{ value.2 }}</td>
     {% else %}
-        <td>{{value.15}}</td>
+        <td>{{value.2}}</td>
     {% endif %}
 <td>{{value.5}}</td>
-<td>{{value.6}}</td>
-<td>{{value.7}}</td>
-<td>{{value.8}}</td>
 
 </tr>
 {% endfor %}

@@ -246,4 +246,10 @@ urlpatterns = [
 
     url(r'^166/$', views.water_ridan_daily, name = 'heat_ridan_daily'), # вода с приборов ридан
     url(r'^167/$', views.water_ridan_consumption, name = 'heat_ridan_consumption'), # вода с приборов ридан
+
+    url(r'^168/$', views.heat_vzlet_daily, name = 'heat_vzlet_daily'), #тепо с приборов vzlet
+    url(r'^169/$', views.heat_vzlet_consumption, name = 'heat_vzlet_consumption'), # тепло с приборов vzlet
+
+    url(r'^170/$', views.water_vzlet_daily, name = 'water_vzlet_daily'), #waterс приборов vzlet
+    url(r'^171/$', views.water_vzlet_consumption, name = 'water_vzlet_consumption'), # water с приборов vzlet
 ]

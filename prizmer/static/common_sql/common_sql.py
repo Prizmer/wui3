@@ -9773,10 +9773,10 @@ round(z2.t_out::numeric,1), heat_abons.name
 from heat_abons
 left join
 (SELECT z1.daily_date, z1.name_objects, z1.name_abonents, z1.number_manual, 
-            sum(Case when z1.params_name = '%s' then z1.value_daily  end) as energy,
-            sum(Case when z1.params_name = '%s' then z1.value_daily  end) as vol,
-            sum(Case when z1.params_name = '%s' then z1.value_daily  end) as t_in,
-            sum(Case when z1.params_name = '%s' then z1.value_daily  end) as t_out, res
+            max(Case when z1.params_name like '%s%%' then z1.value_daily  end) as energy,
+            max(Case when z1.params_name = '%s' then z1.value_daily  end) as vol,
+            max(Case when z1.params_name = '%s' then z1.value_daily  end) as t_in,
+            max(Case when z1.params_name = '%s' then z1.value_daily  end) as t_out, res
             
                                     FROM
                                     (SELECT 
@@ -9843,10 +9843,10 @@ round(z2.t_out::numeric,1), heat_abons.name
 from heat_abons
 left join
 (SELECT z1.daily_date, z1.name_objects, z1.name_abonents, z1.number_manual, 
-            sum(Case when z1.params_name = '%s' then z1.value_daily  end) as energy,
-            sum(Case when z1.params_name = '%s' then z1.value_daily  end) as volume,
-            sum(Case when z1.params_name = '%s' then z1.value_daily  end) as t_in,
-            sum(Case when z1.params_name = '%s' then z1.value_daily  end) as t_out, res
+            max(Case when z1.params_name like '%%%s%%' then z1.value_daily  end) as energy,
+            max(Case when z1.params_name = '%s' then z1.value_daily  end) as volume,
+            max(Case when z1.params_name = '%s' then z1.value_daily  end) as t_in,
+            max(Case when z1.params_name = '%s' then z1.value_daily  end) as t_out, res
             
                                     FROM
                                     (SELECT 
@@ -17380,6 +17380,7 @@ def get_data_table_vkt9_water_daily(meters_name, parent_name, electric_data_end,
     return data_table
 
 def make_sql_query_daily(abonent, obj_name,  data_end, is_abon, params, resource, type_val):
+    ROUND_SIZE = getattr(settings, 'ROUND_SIZE', 3)
     #значения передаются в курсор в вызывающей функции
     if resource == 'Вода': #Вода подразумевается цифровая, чтобы сделать подставновку ХВС и ГВС
         str_resource = "(resources.name = 'ХВС' or resources.name = 'ГВС')"
@@ -17402,7 +17403,14 @@ def make_sql_query_daily(abonent, obj_name,  data_end, is_abon, params, resource
     """
 
     for param in params:
-        sQuery += f"\n        , MAX(CASE WHEN z1.params_name = '{param}' THEN z1.value_{type_val} END) AS {param}"
+        if resource == 'Вода': #Вода подразумевается цифровая, чтобы сделать подставновку ХВС и ГВС
+          # (z1.params_name = 'Объем ХВС' or z1.params_name = 'Объем ГВС')
+          if param == 'Объем':
+              sQuery += f"\n        , MAX(CASE WHEN z1.params_name = '{param} ХВС' or z1.params_name = '{param} ГВС' THEN round(z1.value_{type_val}::numeric, {ROUND_SIZE}) END) AS {param}"
+          else:
+              sQuery += f"\n        , MAX(CASE WHEN z1.params_name = '{param}_ХВС' or z1.params_name = '{param}_ГВС' THEN round(z1.value_{type_val}::numeric, {ROUND_SIZE}) END) AS {param}"
+        else:
+            sQuery += f"\n        , MAX(CASE WHEN z1.params_name = '{param}' THEN round(z1.value_{type_val}::numeric, {ROUND_SIZE}) END) AS {param}"
     
     sQuery += f"""
     , z1.attr1,
@@ -17487,12 +17495,13 @@ def get_data_table_daily(abonent, obj_name, data_end, is_abon, params, resource,
     cursor = connection.cursor()
     data_table=[]
     sql, sql_params = make_sql_query_daily(abonent, obj_name, data_end, is_abon, params, resource, type_val)
-    #print(sql, sql_params)
+    #print(sql,sql_params)
     cursor.execute(sql, sql_params)    
     data_table = cursor.fetchall()
     return data_table
 
 def make_sql_query_consumption(abonent, obj_name, data_start, data_end, is_abon, params, resource, type_val):
+    ROUND_SIZE = getattr(settings, 'ROUND_SIZE', 3)
     if resource == 'Вода': #Вода подразумевается цифровая, чтобы сделать подставновку ХВС и ГВС
         str_resource = "(resources.name = 'ХВС' or resources.name = 'ГВС')"
     else:
@@ -17530,10 +17539,23 @@ def make_sql_query_consumption(abonent, obj_name, data_start, data_end, is_abon,
         z1.factory_number_manual
     """
     for param in params:
-      str_params += f"\n        , MAX(CASE WHEN z1.params_name = '{param}' THEN z1.value_{type_val} END) AS {param}"
-      sql_select_diff_params +=f""" , first_date.{param} 
-                                    , second_date.{param}
+        if resource == 'Вода': #Вода подразумевается цифровая, чтобы сделать подставновку ХВС и ГВС
+            # (z1.params_name = 'Объем ХВС' or z1.params_name = 'Объем ГВС')
+            if param == 'Объем':
+                str_params +=  f"\n        , MAX(CASE WHEN z1.params_name = '{param} ХВС' or z1.params_name = '{param} ГВС' THEN round(z1.value_{type_val}::numeric, {ROUND_SIZE}) END) AS {param}"
+            else:
+                str_params += f"\n        , MAX(CASE WHEN z1.params_name = '{param}_ХВС' or z1.params_name = '{param}_ГВС' THEN round(z1.value_{type_val}::numeric, {ROUND_SIZE}) END) AS {param}"
+        else:
+            str_params +=  f"\n        , MAX(CASE WHEN z1.params_name = '{param}' THEN round(z1.value_{type_val}::numeric, {ROUND_SIZE}) END) AS {param}"
+        sql_select_diff_params +=f""" , round((first_date.{param})::numeric, {ROUND_SIZE})
+                                    , round((second_date.{param})::numeric, {ROUND_SIZE})
                                     , round((second_date.{param} - first_date.{param})::numeric,5) as dif_{param}"""
+
+    # for param in params:
+    #   str_params += f"\n        , MAX(CASE WHEN z1.params_name = '{param}' THEN round((z1.value_{type_val})::numeric, {ROUND_SIZE}) END) AS {param}"
+    #   sql_select_diff_params +=f""" , round((first_date.{param})::numeric, {ROUND_SIZE})
+    #                                 , round((second_date.{param})::numeric, {ROUND_SIZE})
+    #                                 , round((second_date.{param} - first_date.{param})::numeric,5) as dif_{param}"""
 
     sQuery +=str_params
     sQuery += f"""
@@ -17710,6 +17732,7 @@ def get_data_table_consumption(abonent, obj_name, data_start, data_end, is_abon,
     cursor = connection.cursor()
     data_table=[]
     sql, sql_params = make_sql_query_consumption(abonent, obj_name, data_start, data_end, is_abon, params, resource, type_val)
+    # print(sql, sql_params)
     cursor.execute(sql, sql_params)
     data_table = cursor.fetchall()
     return data_table
