@@ -766,10 +766,14 @@ def LoadElectricMeters(sPath, sSheet):
                 add_meter = Meters(name = str(type_meter) + ' ' + str(meter), address = str(adr), factory_number_manual = str(meter), attr1 = str(attr1), guid_types_meters = TypesMeters.objects.get(guid = "4d714a5e-3af5-40fe-ab72-199ed8760ac3") )
                 add_meter.save()
                 writeToLog('Device added' + ' --->   ' + 'Теплосчётчик Ридан РУТ-01')
-            elif str(type_meter) == 'Водосчётчик Ридан СГВ-15':
+            elif str(type_meter) == 'Водосчётчик Ридан СГВ-15 ГВС':
                 add_meter = Meters(name = str(type_meter) + ' ' + str(meter), address = str(adr), factory_number_manual = str(meter), attr1 = str(attr1), guid_types_meters = TypesMeters.objects.get(guid = "0a5753cf-debd-45cb-8dd0-3905f36293fc") )
                 add_meter.save()
-                writeToLog('Device added' + ' --->   ' + 'Водосчётчик Ридан СГВ-15')
+                writeToLog('Device added' + ' --->   ' + 'Водосчётчик Ридан СГВ-15 ГВС')
+            elif str(type_meter) == 'Водосчётчик Ридан СГВ-15 ХВС':
+                add_meter = Meters(name = str(type_meter) + ' ' + str(meter), address = str(adr), factory_number_manual = str(meter), attr1 = str(attr1), guid_types_meters = TypesMeters.objects.get(guid = "b060fcdd-f52d-4914-9dca-2fbcc2a205d5") )
+                add_meter.save()
+                writeToLog('Device added' + ' --->   ' + 'Водосчётчик Ридан СГВ-15 ХВС')
             elif str(type_meter) == 'ВЗЛЕТ ТСР-М ТСРВ-043':
                 add_meter = Meters(name = str(type_meter) + ' ' + str(meter), address = str(adr), factory_number_manual = str(meter), attr1 = str(attr1), guid_types_meters = TypesMeters.objects.get(guid = "3a32cec9-d03a-4e46-a065-f81f92e5ead0") )
                 add_meter.save()
@@ -778,10 +782,14 @@ def LoadElectricMeters(sPath, sSheet):
                 add_meter = Meters(name = str(type_meter) + ' ' + str(meter), address = str(adr), factory_number_manual = str(meter), attr1 = str(attr1), guid_types_meters = TypesMeters.objects.get(guid = "30936305-66a6-4459-b7d0-9c3ea8e2ba12") )
                 add_meter.save()
                 writeToLog('Device added' + ' --->   ' + 'ВЗЛЕТ ТСР-М ТСРВ-024М')
-            elif str(type_meter) == 'ВЗЛЕТ МР УРСВ-311':
+            elif str(type_meter) == 'ВЗЛЕТ МР УРСВ-311 ГВС':
                 add_meter = Meters(name = str(type_meter) + ' ' + str(meter), address = str(adr), factory_number_manual = str(meter), attr1 = str(attr1), guid_types_meters = TypesMeters.objects.get(guid = "4d85e9a5-513e-419c-a02e-3e6ba79eafa7") )
                 add_meter.save()
-                writeToLog('Device added' + ' --->   ' + 'ВЗЛЕТ МР УРСВ-311')
+                writeToLog('Device added' + ' --->   ' + 'ВЗЛЕТ МР УРСВ-311 ГВС')
+            elif str(type_meter) == 'ВЗЛЕТ МР УРСВ-311 ХВС':
+                add_meter = Meters(name = str(type_meter) + ' ' + str(meter), address = str(adr), factory_number_manual = str(meter), attr1 = str(attr1), guid_types_meters = TypesMeters.objects.get(guid = "af871462-2104-491d-9a83-e7dcd77364b1") )
+                add_meter.save()
+                writeToLog('Device added' + ' --->   ' + 'ВЗЛЕТ МР УРСВ-311 ХВС')
 
             else:
                 writeToLog('Не найдено совпадение с существующим типом прибора')
@@ -3281,7 +3289,7 @@ def add_taken_param_no_signals(instance, isR, isHalfs, is_ridan_impulse): # До
             add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "626464e3-25f7-46e2-9b7c-c7400858b783"))
             add_param.save()
 
-    elif instance.guid_types_meters.name == 'Водосчётчик Ридан СГВ-15':
+    elif instance.guid_types_meters.name == 'Водосчётчик Ридан СГВ-15 ГВС':
         #Добавляем параметры для водосчётчика Ридан СГВ-15.
         #------------Суточные
         # Объем_входящий, м3
@@ -3295,6 +3303,22 @@ def add_taken_param_no_signals(instance, isR, isHalfs, is_ridan_impulse): # До
         add_param.save() 
         # Флаг воздействия магнита на прибор, Флаг
         add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "3fc2ea8f-237a-42ec-8f2f-d1b69e170ae4"))
+        add_param.save()
+
+    elif instance.guid_types_meters.name == 'Водосчётчик Ридан СГВ-15 ХВС':
+        #Добавляем параметры для водосчётчика Ридан СГВ-15.
+        #------------Суточные
+        # Объем_входящий, м3
+        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "df15cfb8-8baa-4755-8f98-b0467efd18cf"))
+        add_param.save() 
+        # Объем_выходящий, м3
+        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "89070715-65ca-42f2-90df-347039eee95d"))
+        add_param.save() 
+        # Время воздействия магника на прибор, Часы
+        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "0918da1d-27b8-43bf-ad9e-8a78645d9440"))
+        add_param.save() 
+        # Флаг воздействия магнита на прибор, Флаг
+        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "0db11f70-373f-4bae-beb9-5d1e7afdda81"))
         add_param.save()
 
     elif instance.guid_types_meters.name == 'ВЗЛЕТ ТСР-М ТСРВ-043':
@@ -3360,11 +3384,19 @@ def add_taken_param_no_signals(instance, isR, isHalfs, is_ridan_impulse): # До
         add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "cae77cb0-740f-4f0f-973b-4699f5a353b6"))
         add_param.save()
 
-    elif instance.guid_types_meters.name == 'ВЗЛЕТ МР УРСВ-311':
+    elif instance.guid_types_meters.name == 'ВЗЛЕТ МР УРСВ-311 ГВС':
         #Добавляем параметры для ВЗЛЕТ МР УРСВ-311.
         #------------Суточные
         # "Объём входящий", м3
+        # print('!!!!!')
         add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "56aefad0-0058-4ee2-95fe-aaf02e54c4ca"))
+        add_param.save()
+
+    elif instance.guid_types_meters.name == 'ВЗЛЕТ МР УРСВ-311 ХВС':
+        #Добавляем параметры для ВЗЛЕТ МР УРСВ-311.
+        #------------Суточные
+        # "Объём входящий", м3
+        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "9e16351b-6725-4887-bbba-cb28418e25c0"))
         add_param.save()
 
     else:

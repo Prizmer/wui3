@@ -17495,7 +17495,7 @@ def get_data_table_daily(abonent, obj_name, data_end, is_abon, params, resource,
     cursor = connection.cursor()
     data_table=[]
     sql, sql_params = make_sql_query_daily(abonent, obj_name, data_end, is_abon, params, resource, type_val)
-    #print(sql,sql_params)
+    print(sql,sql_params)
     cursor.execute(sql, sql_params)    
     data_table = cursor.fetchall()
     return data_table
