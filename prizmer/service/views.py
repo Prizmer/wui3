@@ -1956,7 +1956,7 @@ else:
 
 
 
-def add_taken_param_no_signals(instance, isR, isHalfs, is_ridan_impulse): # Добавляем считываемые параметры при создании счётчика
+def add_taken_param_no_signals(instance, isR, isHalfs, is_ridan_impulse=False): # Добавляем считываемые параметры при создании счётчика
     #print(instance.guid_types_meters.name, isR, isHalfs)
     if instance.guid_types_meters.name == 'Меркурий 230':
         #Добавляем параметры для Меркурия 230

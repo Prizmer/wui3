@@ -252,4 +252,6 @@ urlpatterns = [
 
     url(r'^170/$', views.water_vzlet_daily, name = 'water_vzlet_daily'), #waterс приборов vzlet
     url(r'^171/$', views.water_vzlet_consumption, name = 'water_vzlet_consumption'), # water с приборов vzlet
+    
+    url(r'^172/$', views.electric_integral_from_template, name = 'electric_integral_from_template'), # water с приборов vzlet
 ]

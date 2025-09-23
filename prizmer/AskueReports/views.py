@@ -22351,45 +22351,62 @@ def pulsar_water_consumption_mosvodokanal_from_template(request):
         result+="Директория создана %s"
 
     files = os.listdir(directory) 
-    #print(files)
-    if len(files) > 1:
-        # result.append("%s"%(directory))
-        result+="В директории должен быть только один файл"
-    if len(files) == 1:
-        wb = load_workbook(directory+"\\"+files[0])
-        ws = wb.active
-        meter = ""
-        uzel_attr2 = ""
-        for row in ws.iter_rows(min_row=2):
-            meter = row[ord('E') - ord('A')].value 
-            uzel_attr2 = row[ord('D') - ord('A')].value
-             # Если значение не пустое, выполняем запрос в БД
-            if uzel_attr2:
-                try:
-                    round_num = 0
-                    val = common_sql.get_value_by_meter_by_date(uzel_attr2, electric_data_end, 'meters.attr2', round_num)  # Вызываем функцию для запроса в БД
-                    # Записываем результат в result_column
-                    #print(val)
-                    if len(val)>0:
-                        row[ord('J') - ord('A')].value = float(val[0][0])
-                except:
-                    next
-  
-        response.seek(0)
-        response = HttpResponse(save_virtual_workbook(wb),content_type="application/vnd.ms-excel")
-        
-        output_name = 'report_mosvodokanal_'+str(electric_data_end)
-        file_ext = 'xlsx'    
-        response['Content-Disposition'] = 'attachment;filename="%s.%s"' % (output_name.replace('"', '\"'), file_ext)   
+    
+    # Фильтруем только Excel файлы xlsx
+    excel_files = [f for f in files if f.lower().endswith(('.xlsx'))]
+    
+    if len(excel_files) > 1:
+        result += "В директории должен быть только один Excel файл"
+        response = HttpResponse(result, content_type="text/plain")
+        output_name = 'error'
+        file_ext = 'txt'    
+        response['Content-Disposition'] = 'attachment;filename="%s.%s"' % (output_name.replace('"', '\"'), file_ext)  
         return response
+    
+    if len(excel_files) == 1:
+        try:
+            wb = load_workbook(directory+"\\"+excel_files[0])
+            ws = wb.active
+            meter = ""
+            uzel_attr2 = ""
+            for row in ws.iter_rows(min_row=2):
+                meter = row[ord('E') - ord('A')].value 
+                uzel_attr2 = row[ord('D') - ord('A')].value
+                # Если значение не пустое, выполняем запрос в БД
+                if uzel_attr2:
+                    try:
+                        round_num = 0
+                        val = common_sql.get_value_by_meter_by_date(uzel_attr2, electric_data_end, 'meters.attr2', round_num)  # Вызываем функцию для запроса в БД
+                        # Записываем результат в result_column
+                        #print(val)
+                        if len(val)>0:
+                            row[ord('J') - ord('A')].value = float(val[0][0])
+                    except:
+                        continue
+    
+            
+            response = HttpResponse(save_virtual_workbook(wb),content_type="application/vnd.ms-excel")            
+            output_name = 'report_mosvodokanal_'+str(electric_data_end)
+            file_ext = 'xlsx'    
+            response['Content-Disposition'] = 'attachment;filename="%s.%s"' % (output_name.replace('"', '\"'), file_ext)   
+            return response
+        except Exception as e:
+            # Если файл не является корректным Excel файлом
+            result += f"Проверьте расширение файла. Ошибка при открытии файла: {str(e)}"
+            response = HttpResponse(result, content_type="text/plain")
+            output_name = 'error'
+            file_ext = 'txt'    
+            response['Content-Disposition'] = 'attachment;filename="%s.%s"' % (output_name.replace('"', '\"'), file_ext)  
+            return response
+        
     else:
-        response.seek(0)
+        result += "В директории нет Excel файлов (.xlsx)"
         response = HttpResponse(result, content_type="text/plain")
         output_name = 'empty'
         file_ext = 'txt'    
         response['Content-Disposition'] = 'attachment;filename="%s.%s"' % (output_name.replace('"', '\"'), file_ext)  
         return response
-        
+    
 def pulsar_consumption_moselectrika_from_template(request):
     response = io.StringIO()
 
@@ -22401,53 +22418,69 @@ def pulsar_consumption_moselectrika_from_template(request):
         result+="Директория создана %s"
 
     files = os.listdir(directory) 
-    #print(files)
-    if len(files) > 1:
-        # result.append("%s"%(directory))
-        result+="В директории должен быть только один файл"
-    if len(files) == 1:
-        wb = load_workbook(directory+"\\"+files[0])
-        ws = wb.active
-        meter = ""
-        uzel_attr2 = ""
-        for row in ws.iter_rows(min_row=2):
-            meter = row[ord('D') - ord('A')].value 
-            uzel_attr1 = row[ord('F') - ord('A')].value
-            tarif  = row[ord('G') - ord('A')].value
-             # Если значение не пустое, выполняем запрос в БД
-            if meter:
-                try:
-                    val = common_sql.get_value_by_meter_by_date_electrika(meter, electric_data_end)  # Вызываем функцию для запроса в БД
-                # Записываем результат в result_column
-                #print(val)
-                    if len(val)>0:
-                        t1 = float(val[0][2])
-                        t2 = float(val[0][3])
-                        t3 = float(val[0][4])
-                        
-                        if tarif == 'Трёхтарифный':
-                            row[ord('L') - ord('A')].value = '%s' % get_val_by_round(t1,1, '.') #t1
-                            row[ord('M') - ord('A')].value = '%s' % get_val_by_round(t2,1, '.') #t2
-                            row[ord('N') - ord('A')].value = '%s' % get_val_by_round(t3,1, '.') #t3
-                        elif tarif == 'Двухтарифный':
-                            #print(meter, tarif, t1, t2, t3)                            
-                            row[ord('L') - ord('A')].value = '%s' % get_val_by_round(float(t1 + t3),1, '.') #t1
-                            row[ord('M') - ord('A')].value = '%s' % get_val_by_round(t2,1, '.') #t2
-                        elif tarif == 'Однотарифный':
-                            #print(meter, tarif, t1, t2, t3)                                                        
-                            row[ord('L') - ord('A')].value = '%s' % get_val_by_round(float(t1 + t2 + t3),1, '.') #t1
-                except:
-                    next
-  
-        response.seek(0)
-        response = HttpResponse(save_virtual_workbook(wb),content_type="application/vnd.ms-excel")
-        
-        output_name = 'report_moselectrika_'+str(electric_data_end)
-        file_ext = 'xlsx'    
-        response['Content-Disposition'] = 'attachment;filename="%s.%s"' % (output_name.replace('"', '\"'), file_ext)   
+    # Фильтруем только Excel файлы xlsx
+    excel_files = [f for f in files if f.lower().endswith(('.xlsx'))]
+    
+    if len(excel_files) > 1:
+        result += "В директории должен быть только один Excel файл"
+        response = HttpResponse(result, content_type="text/plain")
+        output_name = 'error'
+        file_ext = 'txt'    
+        response['Content-Disposition'] = 'attachment;filename="%s.%s"' % (output_name.replace('"', '\"'), file_ext)  
         return response
+    
+    if len(excel_files) == 1:
+        try:
+            wb = load_workbook(directory+"\\"+excel_files[0])
+            ws = wb.active
+            meter = ""
+            uzel_attr2 = ""
+            for row in ws.iter_rows(min_row=2):
+                meter = row[ord('D') - ord('A')].value 
+                uzel_attr1 = row[ord('F') - ord('A')].value
+                tarif  = row[ord('G') - ord('A')].value
+                # Если значение не пустое, выполняем запрос в БД
+                if meter:
+                    try:
+                        val = common_sql.get_value_by_meter_by_date_electrika(meter, electric_data_end)  # Вызываем функцию для запроса в БД
+                    # Записываем результат в result_column
+                    #print(val)
+                        if len(val)>0:
+                            t1 = float(val[0][2])
+                            t2 = float(val[0][3])
+                            t3 = float(val[0][4])
+                            
+                            if tarif == 'Трёхтарифный':
+                                row[ord('L') - ord('A')].value = '%s' % get_val_by_round(t1,1, '.') #t1
+                                row[ord('M') - ord('A')].value = '%s' % get_val_by_round(t2,1, '.') #t2
+                                row[ord('N') - ord('A')].value = '%s' % get_val_by_round(t3,1, '.') #t3
+                            elif tarif == 'Двухтарифный':
+                                #print(meter, tarif, t1, t2, t3)                            
+                                row[ord('L') - ord('A')].value = '%s' % get_val_by_round(float(t1 + t3),1, '.') #t1
+                                row[ord('M') - ord('A')].value = '%s' % get_val_by_round(t2,1, '.') #t2
+                            elif tarif == 'Однотарифный':
+                                #print(meter, tarif, t1, t2, t3)                                                        
+                                row[ord('L') - ord('A')].value = '%s' % get_val_by_round(float(t1 + t2 + t3),1, '.') #t1
+                    except:
+                        continue
+                  
+            response = HttpResponse(save_virtual_workbook(wb),content_type="application/vnd.ms-excel")                
+            output_name = 'report_moselectrika_'+str(electric_data_end)
+            file_ext = 'xlsx'    
+            response['Content-Disposition'] = 'attachment;filename="%s.%s"' % (output_name.replace('"', '\"'), file_ext)   
+            return response
+            
+        except Exception as e:
+            # Если файл не является корректным Excel файлом
+            result += f"Проверьте расширение файла. Ошибка при открытии файла: {str(e)}"
+            response = HttpResponse(result, content_type="text/plain")
+            output_name = 'error'
+            file_ext = 'txt'    
+            response['Content-Disposition'] = 'attachment;filename="%s.%s"' % (output_name.replace('"', '\"'), file_ext)  
+            return response
+        
     else:
-        response.seek(0)
+        result += "В директории нет Excel файлов (.xlsx)"
         response = HttpResponse(result, content_type="text/plain")
         output_name = 'empty'
         file_ext = 'txt'    
@@ -22457,71 +22490,115 @@ def pulsar_consumption_moselectrika_from_template(request):
 def pulsar_heat_consumption_from_template(request):
     response = io.StringIO()
 
-    electric_data_end   = request.session["electric_data_end"]
-    result = "1"
-    directory = os.path.join(BASE_DIR,'static\\excel\\excel_template\\heat') 
-    if  not(os.path.exists(directory)):
+    electric_data_end = request.session["electric_data_end"]
+    result = ""
+    directory = os.path.join(BASE_DIR, 'static\\excel\\excel_template\\heat') 
+    
+    if not os.path.exists(directory):
         os.mkdir(directory)
-        result+="Директория создана %s"
+        result += "Директория создана %s"
 
     files = os.listdir(directory) 
-    #print(files)
-    if len(files) > 1:
-        # result.append("%s"%(directory))
-        result+="В директории должен быть только один файл"
-    if len(files) == 1:
-        wb = load_workbook(directory+"\\"+files[0])
-        ws = wb.active
-        meter = ""
-        type_meter = ""
-        for row in ws.iter_rows(min_row=6):
-            meter = row[ord('C') - ord('A')].value.strip() 
-            type_meter = row[ord('D') - ord('A')].value.strip()
-            #print(meter,type_meter)
-            # Проверяем, содержит ли строка "_" или "-"
-            if "_" in meter or "-" in meter:
-                # Удаляем первые 3 символа
-                meter = meter[3:]
-            if meter.startswith('0'):
-                print(meter)
-                meter = meter[1:]            
-             # Если значение не пустое, выполняем запрос в БД
-            if meter:
-                if type_meter == 'ТЭ ИПУ':
-                    try:
-                        val = common_sql.get_value_by_meter_by_date_heat(meter, electric_data_end)  # Вызываем функцию для запроса в БД
-                        # Записываем результат в result_column
-                        #print(val)
-                        if len(val)>0:
-                            row[ord('H') - ord('A')].value = float(val[0][2])                            
-                            row[ord('G') - ord('A')].value = electric_data_end
-                    except:
-                        next
-                else:# ГВС Индивидуальный
-                    try:
-                        round_num = 0
-                        val = common_sql.get_value_by_meter_by_date(meter, electric_data_end, 'meters.address', round_num)  # Вызываем функцию для запроса в БД
-                        #print(val)
-                        if len(val)>0:
-                            row[ord('G') - ord('A')].value = electric_data_end
-                            row[ord('H') - ord('A')].value = float('{:.4f}'.format(float(val[0][0]))) 
-                    except:
-                        next
-                try:
-                    dif = float(row[ord('H') - ord('A')].value) - float(row[ord('F') - ord('A')].value)
-                    row[ord('I') - ord('A')].value =  float('{:.4f}'.format(float(dif)))
-                except:
-                        next
-      
-        response.seek(0)
-        response = HttpResponse(save_virtual_workbook(wb),content_type="application/vnd.ms-excel")
-        
-        output_name = 'report_heat_'+str(electric_data_end)
-        file_ext = 'xlsx'    
-        response['Content-Disposition'] = 'attachment;filename="%s.%s"' % (output_name.replace('"', '\"'), file_ext)   
+    # Фильтруем только Excel файлы xlsx
+    excel_files = [f for f in files if f.lower().endswith(('.xlsx'))]
+    
+    if len(excel_files) > 1:
+        result += "В директории должен быть только один Excel файл"
+        response = HttpResponse(result, content_type="text/plain")
+        output_name = 'error'
+        file_ext = 'txt'    
+        response['Content-Disposition'] = 'attachment;filename="%s.%s"' % (output_name.replace('"', '\"'), file_ext)  
         return response
+    
+    if len(excel_files) == 1:
+        try:
+            # ОШИБКА: используем excel_files[0] вместо files[0]
+            wb = load_workbook(os.path.join(directory, excel_files[0]))  # ИСПРАВЛЕНО
+            ws = wb.active
+            meter = ""
+            type_meter = ""
+            
+            for row in ws.iter_rows(min_row=6):
+                # ДОБАВЛЯЕМ ПРОВЕРКИ НА None
+                meter_value = row[ord('C') - ord('A')].value
+                type_meter_value = row[ord('D') - ord('A')].value
+                prev_val_cell = row[ord('F') - ord('A')].value
+                
+                # Проверяем, что значения не None перед strip()
+                meter = meter_value.strip() if meter_value else ""
+                type_meter = type_meter_value.strip() if type_meter_value else ""
+                
+                # Получаем предыдущее значение с проверкой
+                try:
+                    prev_val = float(prev_val_cell) if prev_val_cell is not None else 0
+                except:
+                    prev_val = 0
+                
+                # Проверяем, содержит ли строка "_" или "-"
+                if meter and ("_" in meter or "-" in meter):
+                    meter = meter[3:]
+                
+                if meter and meter.startswith('0'):
+                    print(meter)
+                    meter = meter[1:]            
+                
+                # Если значение не пустое, выполняем запрос в БД
+                if meter:
+                    if type_meter == 'ТЭ ИПУ':
+                        try:
+                            val = common_sql.get_value_by_meter_by_date_heat(meter, electric_data_end)
+                            if len(val) > 0:
+                                cur_val = float(val[0][2])
+                                # ДОБАВЛЯЕМ ПРОВЕРКУ КАК В РАБОЧЕЙ ВЕРСИИ
+                                if prev_val > cur_val:
+                                    row[ord('H') - ord('A')].value = prev_val
+                                else:
+                                    row[ord('H') - ord('A')].value = cur_val
+                                row[ord('G') - ord('A')].value = electric_data_end
+                        except:
+                            continue
+                    else:  # ГВС Индивидуальный
+                        try:
+                            round_num = 0
+                            val = common_sql.get_value_by_meter_by_date(meter, electric_data_end, 'meters.address', round_num)
+                            if len(val) > 0:
+                                cur_val = float(val[0][0])
+                                # ДОБАВЛЯЕМ ПРОВЕРКУ КАК В РАБОЧЕЙ ВЕРСИИ
+                                row[ord('G') - ord('A')].value = electric_data_end
+                                if prev_val > cur_val:
+                                    row[ord('H') - ord('A')].value = float('{:.4f}'.format(prev_val))
+                                else:
+                                    row[ord('H') - ord('A')].value = float('{:.4f}'.format(cur_val))
+                        except:
+                            continue
+                    
+                    try:
+                        current_val_cell = row[ord('H') - ord('A')].value
+                        prev_val_cell = row[ord('F') - ord('A')].value
+                        
+                        if current_val_cell is not None and prev_val_cell is not None:
+                            dif = float(current_val_cell) - float(prev_val_cell)
+                            row[ord('I') - ord('A')].value = float('{:.4f}'.format(float(dif)))
+                    except:
+                        continue
+
+            # 
+            response = HttpResponse(save_virtual_workbook(wb), content_type="application/vnd.ms-excel")
+            output_name = 'report_heat_' + str(electric_data_end)
+            file_ext = 'xlsx'    
+            response['Content-Disposition'] = 'attachment;filename="%s.%s"' % (output_name.replace('"', '\"'), file_ext)   
+            return response
+            
+        except Exception as e:
+            result += f"Проверьте расширение файла. Ошибка при открытии файла: {str(e)}"
+            response = HttpResponse(result, content_type="text/plain")
+            output_name = 'error'
+            file_ext = 'txt'    
+            response['Content-Disposition'] = 'attachment;filename="%s.%s"' % (output_name.replace('"', '\"'), file_ext)  
+            return response
+            
     else:
-        response.seek(0)
+        result += "В директории нет Excel файлов (.xlsx)"
         response = HttpResponse(result, content_type="text/plain")
         output_name = 'empty'
         file_ext = 'txt'    
@@ -22660,8 +22737,6 @@ def pulsar_water_consumption_mosvodokanal_from_template_by_2_date(request):
 
     electric_data_end   = ""
     electric_data_start   = ""
-    print("1111111111111111111111111111111111111111111")
-    print(dict(request.session))
     electric_data_end     = request.session['electric_data_end']
     electric_data_start   = request.session['electric_data_start']
 
@@ -22672,49 +22747,66 @@ def pulsar_water_consumption_mosvodokanal_from_template_by_2_date(request):
         result+="Директория создана %s"
 
     files = os.listdir(directory) 
+    # Фильтруем только Excel файлы
+    excel_files = [f for f in files if f.lower().endswith(('.xlsx', '.xls'))]
     #print(files)
-    if len(files) > 1:
-        # result.append("%s"%(directory))
-        result+="В директории должен быть только один файл"
-    if len(files) == 1:
-        wb = load_workbook(directory+"\\"+files[0])
-        ws = wb.active
-        meter = ""
-        uzel_attr2 = ""
-        for row in ws.iter_rows(min_row=2):
-            meter = row[ord('E') - ord('A')].value 
-            uzel_attr2 = row[ord('D') - ord('A')].value
-            type_res = row[ord('C') - ord('A')].value#ХВ или ГВ
-            prev_val = row[ord('I') - ord('A')].value
-             # Если значение не пустое, выполняем запрос в БД
-            if uzel_attr2:
-                try:
-                    round_num = 0
-                    if type_res == 'ХВ':
-                        val = common_sql.get_value_by_meter_by_date(uzel_attr2, electric_data_end, 'meters.attr2', round_num)  # Вызываем функцию для запроса в БД
-                    else:
-                        val = common_sql.get_value_by_meter_by_date(uzel_attr2, electric_data_start, 'meters.attr2', round_num)  # Вызываем функцию для запроса в БД
-                    # Записываем результат в result_column
-                    #print(meter, uzel_attr2, val)
-
-                    if len(val)>0:
-                        #проверяем, чтобы значение было не больше предыдущего
-                        if float(val[0][0]) < float(prev_val):
-                            row[ord('J') - ord('A')].value = float(prev_val)
-                        else:
-                            row[ord('J') - ord('A')].value = float(val[0][0])
-                except:
-                    next
-  
-        response.seek(0)
-        response = HttpResponse(save_virtual_workbook(wb),content_type="application/vnd.ms-excel")
-        
-        output_name = 'report_mosvodokanal_'+str(electric_data_end)
-        file_ext = 'xlsx'    
-        response['Content-Disposition'] = 'attachment;filename="%s.%s"' % (output_name.replace('"', '\"'), file_ext)   
+    if len(excel_files) > 1:
+        result += "В директории должен быть только один Excel файл"
+        response = HttpResponse(result, content_type="text/plain")
+        output_name = 'error'
+        file_ext = 'txt'    
+        response['Content-Disposition'] = 'attachment;filename="%s.%s"' % (output_name.replace('"', '\"'), file_ext)  
         return response
+    
+    if len(excel_files) == 1:
+        try:
+            wb = load_workbook(directory+"\\"+files[0])
+            ws = wb.active
+            meter = ""
+            uzel_attr2 = ""
+            for row in ws.iter_rows(min_row=2):
+                meter = row[ord('E') - ord('A')].value 
+                uzel_attr2 = row[ord('D') - ord('A')].value
+                type_res = row[ord('C') - ord('A')].value#ХВ или ГВ
+                prev_val = row[ord('I') - ord('A')].value
+                # Если значение не пустое, выполняем запрос в БД
+                if uzel_attr2:
+                    try:
+                        round_num = 0
+                        if type_res == 'ХВ':
+                            val = common_sql.get_value_by_meter_by_date(uzel_attr2, electric_data_end, 'meters.attr2', round_num)  # Вызываем функцию для запроса в БД
+                        else:
+                            val = common_sql.get_value_by_meter_by_date(uzel_attr2, electric_data_start, 'meters.attr2', round_num)  # Вызываем функцию для запроса в БД
+                        # Записываем результат в result_column
+                        #print(meter, uzel_attr2, val)
+
+                        if len(val)>0:
+                            #проверяем, чтобы значение было не больше предыдущего
+                            if float(val[0][0]) < float(prev_val):
+                                row[ord('J') - ord('A')].value = float(prev_val)
+                            else:
+                                row[ord('J') - ord('A')].value = float(val[0][0])
+                    except:
+                        next
+    
+            response.seek(0)
+            response = HttpResponse(save_virtual_workbook(wb),content_type="application/vnd.ms-excel")
+            
+            output_name = 'report_mosvodokanal_'+str(electric_data_end)
+            file_ext = 'xlsx'    
+            response['Content-Disposition'] = 'attachment;filename="%s.%s"' % (output_name.replace('"', '\"'), file_ext)   
+            return response
+        except Exception as e:
+            # Если файл не является корректным Excel файлом
+            result += f"Ошибка при открытии файла: {str(e)}"
+            response = HttpResponse(result, content_type="text/plain")
+            output_name = 'error'
+            file_ext = 'txt'    
+            response['Content-Disposition'] = 'attachment;filename="%s.%s"' % (output_name.replace('"', '\"'), file_ext)  
+            return response
+            
     else:
-        response.seek(0)
+        result += "В директории нет Excel файлов (.xlsx, .xls)"
         response = HttpResponse(result, content_type="text/plain")
         output_name = 'empty'
         file_ext = 'txt'    
@@ -24683,3 +24775,81 @@ def report_water_vzlet_consumption(request):
     response['Content-Disposition'] = f'attachment; filename="{output_name}"'
 
     return response
+
+
+def report_electr_integral_from_template(request):
+    response = io.StringIO()
+
+    electric_data_end = request.session["electric_data_end"]
+    result = ""
+    directory = os.path.join(BASE_DIR, 'static\\excel\\excel_template\\electr_integral') 
+    
+    if not os.path.exists(directory):
+        os.mkdir(directory)
+        result += "Директория создана %s"
+
+    files = os.listdir(directory) 
+    # Фильтруем только Excel файлы xlsx
+    excel_files = [f for f in files if f.lower().endswith(('.xlsx'))]
+    
+    if len(excel_files) > 1:
+        result += "В директории должен быть только один Excel файл"
+        response = HttpResponse(result, content_type="text/plain")
+        output_name = 'error'
+        file_ext = 'txt'    
+        response['Content-Disposition'] = 'attachment;filename="%s.%s"' % (output_name.replace('"', '\"'), file_ext)  
+        return response
+    
+    if len(excel_files) == 1:
+        try:
+            wb = load_workbook(directory + "\\" + excel_files[0])
+            ws = wb.active
+            meter = ""
+            tarif = ""
+            
+            for row in ws.iter_rows(min_row=2):
+                meter = row[ord('D') - ord('A')].value 
+                tarif = row[ord('G') - ord('A')].value
+                
+                # Если значение не пустое, выполняем запрос в БД
+                if meter:
+                    try:
+                        val = common_sql.get_value_by_meter_by_date_electrika(meter, electric_data_end)
+                        
+                        if len(val) > 0:
+                            t1 = float(val[0][2])
+                            t2 = float(val[0][3])
+                            t3 = float(val[0][4])
+                            
+                            if tarif == 'Пик':
+                                row[ord('I') - ord('A')].value = '%s' % get_val_by_round(t1, 2, '.')  # t1
+                            elif tarif == 'Полупик':
+                                row[ord('I') - ord('A')].value = '%s' % get_val_by_round(t3, 2, '.')  # t3
+                            elif tarif == 'Ночь':                                                        
+                                row[ord('I') - ord('A')].value = '%s' % get_val_by_round(t2, 2, '.')  # t2
+                    except:
+                        continue
+
+            # 
+            response = HttpResponse(save_virtual_workbook(wb), content_type="application/vnd.ms-excel")
+            output_name = 'report_electr_integral_' + str(electric_data_end)
+            file_ext = 'xlsx'    
+            response['Content-Disposition'] = 'attachment;filename="%s.%s"' % (output_name.replace('"', '\"'), file_ext)   
+            return response
+            
+        except Exception as e:
+            # Если файл не является корректным Excel файлом
+            result += f"Проверьте расширение файла. Ошибка при открытии файла: {str(e)}"
+            response = HttpResponse(result, content_type="text/plain")
+            output_name = 'error'
+            file_ext = 'txt'    
+            response['Content-Disposition'] = 'attachment;filename="%s.%s"' % (output_name.replace('"', '\"'), file_ext)  
+            return response
+        
+    else:
+        result += "В директории нет Excel файлов (.xlsx)"
+        response = HttpResponse(result, content_type="text/plain")
+        output_name = 'empty'
+        file_ext = 'txt'    
+        response['Content-Disposition'] = 'attachment;filename="%s.%s"' % (output_name.replace('"', '\"'), file_ext)  
+        return response

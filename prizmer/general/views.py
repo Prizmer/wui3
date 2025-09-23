@@ -61,13 +61,8 @@ def simple_query(): # Пример запроса в БД на чистом SQL
     return simpleq
 #!!!!!!!!!!!!    
 
-
 #------------------------------------------------------------------------------------------------------------------------
-
-
-
-    
-
+   
 # Отчет по СПГ на начало суток
 def get_data_table_by_date_spg(obj_title, obj_parent_title, electric_data):
     data_table = []
@@ -13076,3 +13071,47 @@ def water_vzlet_consumption(request):
     args['obj_title'] = meters_name 
       
     return render(request, "data_table/water/171.html", args)
+
+def electric_integral_from_template(request):
+    args = {}
+    is_abonent_level = re.compile(r'abonent')
+    is_object_level_2 = re.compile(r'level2')
+    data_table = []
+    obj_title = 'Не выбран'
+    obj_key = 'Не выбран'
+    obj_parent_title = 'Не выбран'
+    electric_data_start = ''
+    electric_data_end = ''
+
+    if request.is_ajax():
+        if request.method == 'GET':
+            request.session["obj_title"]           = obj_title           = request.GET['obj_title']
+            request.session["obj_key"]             = obj_key             = request.GET['obj_key']
+            request.session["obj_parent_title"]    = obj_parent_title    = request.GET['obj_parent_title']
+            request.session["electric_data_end"]   = electric_data_end   = request.GET['electric_data_end']
+
+    # проверяем наличие шаблона и выводим его имя в отчёт
+    #в report уже анализируем файл и заполняем данными
+    result = []
+    directory = os.path.join(BASE_DIR,'static\\excel\\excel_template\\electr_integral') 
+    if  not(os.path.exists(directory)):
+        os.mkdir(directory)
+        result.append("Директория создана %s"%(directory))
+        result.append("Поместите в неё Ваш файл-шаблон")
+    files = os.listdir(directory) 
+    #print(files)
+    if len(files) > 1:
+        # result.append("%s"%(directory))
+        result.append("В директории должен быть только один файл, сейчас там: %s" %(files))
+    if len(files) == 1:
+        #result.append("%s"%(directory))
+        result.append("В директории один файл '%s', для загрузки в него показаний нажмите кнопку ЭКСПОРТ"%(files[0]))
+ 
+    args['directory'] = directory
+    args['result'] = result
+    args['obj_title'] = obj_title
+    args['obj_key'] = obj_key
+    args['obj_parent_title'] = obj_parent_title
+    args['electric_data_end'] = electric_data_end
+
+    return render(request, "data_table/172.html", args)
