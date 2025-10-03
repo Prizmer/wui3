@@ -12858,7 +12858,7 @@ def water_ridan_daily(request):
             request.session["electric_data_end"]   = electric_data_end   = request.GET['electric_data_end']
             request.session["obj_key"]             = obj_key             = request.GET['obj_key']
 
-    params = ['Объем', 'Объем_выходящий', 'magnet_flag', 'magnet_time'] #ХВС и ГВС подставятся к типа данных автоматом
+    params = ['Объем_входящий', 'Объем_выходящий', 'magnet_flag', 'magnet_time'] #ХВС и ГВС подставятся к типа данных автоматом
 
     if (bool(is_abonent_level.search(obj_key))):
         is_abon = True 
