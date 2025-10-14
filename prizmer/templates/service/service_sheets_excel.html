@@ -1,22 +1,15 @@
-
-{% load static %} <link href="{%static "main.css"%}" rel="stylesheet"/>
-{% load static %} <script src="{%static "libs/jquery.js" %}" type=text/javascript></script>
-{% load static %} <script src="{%static "libs/jquery-ui/ui/jquery-ui.js" %}" type=text/javascript></script>
-{% load static %} <script src="{%static "libs/jquery-ui/ui/i18n/jquery.ui.datepicker-ru.js" %}" type=text/javascript></script>
-
-{%if sheets%}
- <div class = "row align-items-center">
-	    <div class = "col-2"> <strong>Выберите лист </strong>	</div>
-		<div class = "col">
-		 <select name="choice_sheet" id="choice_sheet">
+{% load static %}
+{% if sheets %}
+ <div class="row align-items-center mt-2">
+	    <div class="col-auto">
+		    <label for="choice_sheet"><strong>Выберите лист</strong></label>
+        </div>
+		<div class="col">
+		 <select name="choice_sheet" id="choice_sheet" class="custom-select">
 			{% for sh in sheets %}
 			<option value='{{sh}}'>{{sh}}</option>
-			{% endfor %}           
+			{% endfor %}
 		 </select>
 		</div>
 	</div>
-{%endif%}    	
-   
-
-</form>
-
+{%endif%}

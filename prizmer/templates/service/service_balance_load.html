@@ -1,34 +1,23 @@
+{% load static %}
+<div class="tab-container">
+    <h3 class="form-card-title">Балансные группы</h3>
 
-{% load static %} <link href="{%static "main.css"%}" rel="stylesheet"/>
-{% load static %} <script src="{%static "libs/jquery.js" %}" type=text/javascript></script>
-{% load static %} <script src="{%static "libs/jquery-ui/ui/jquery-ui.js" %}" type=text/javascript></script>
-{% load static %} <script src="{%static "libs/jquery-ui/ui/i18n/jquery.ui.datepicker-ru.js" %}" type=text/javascript></script>
+    <!-- Действие по загрузке -->
+    <div class="action-row" style="justify-content: center; align-items: center; flex-direction: column;">
+        <div class="action-label">
+            <strong>Загрузка балансной группы</strong>
+        </div>
+        <div class="action-controls" style="display: block; text-align: center; margin-top: 10px;">
+            <button onclick="load_service('load_balance_group')" class="btn-action" id="balance-button" style="border: none; background-color: #28a745; color: white; padding: 12px 24px; font-size: 1.1rem;">Загрузить</button>
+            <div class="status-display" style="margin-top: 10px;">{{balance_status}}</div>
+        </div>
+    </div>
 
-<script src="/static/libs/liHighLight.js" type=text/javascript></script>
-<br><br>
-<div class = "container radius"  style="border-radius: 10px 40px">
-<div class = "row"  >
-	<div class = "col" id = "blue-style"><h5><strong>Балансные группы </strong> </h5></div>
+    <!-- Секция для скачивания образца -->
+    <div class="info-list" style="margin-top: 2rem;">
+        <a href="../../service/get_balance_template/">
+            <img src="{% static 'images/save-ico48.png' %}" alt="Образец">
+            <span><strong>Образец файла для создания балансной группы</strong></span>
+        </a>
+    </div>
 </div>
-<br>
-<div class = "row justify-content-start align-items-center" >
-	<div class = "col-4"> <strong>Загрузка балансной группы</strong> </div>
-	<div class = "col-1"> <span onclick="load_service('load_balance_group')" class="button" id="balance-button">Загрузить</span>  </div>
-	<div class = "col-7"> {{balance_status}}</div>
-</div>
-<br><br>
-</div>
-<br>
-<div class = "container radius"  style="border-radius: 10px 40px">
-<div class = "row"  >
-	<div class = "col" id = "blue-style"><h5><strong>Образцы</strong> </h5></div>
-</div>
-<br>
-<div class = "row justify-content-start align-items-center">
-	<div class = "col-5"><strong>Образец прогрузочного файла для создания балансной группы</strong> </div>
-	<div class = "col-1"><a href ="../../service/get_balance_template/"> <img  src="{%static "images/save-ico48.png" %}" data-toggle="tooltip" data-placement="top" title="Образец"></a></div>
-</div><br>
-</div>
-<br>
-<br>
-

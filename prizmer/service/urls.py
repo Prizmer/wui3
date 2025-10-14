@@ -17,6 +17,8 @@ urlpatterns = [
     url(r'^make_sheet/$', views.MakeSheet, name = 'make_sheet'), #возвращает список страниц в книге excel
     url(r'^load_electric_objects/$', views.load_electric_objects, name = 'load_electric_objects'), # загрузка объектов и абонентов
     url(r'^load_electric_counters/$', views.load_electric_counters, name = 'load_electric_counters'), # загрузка счётчиков
+    url(r'^load_digital_devices_sequentially/$', views.load_digital_devices_sequentially, name = 'load_digital_devices_sequentially'), # загрузка всего и сразу
+    url(r'^load_impulse_devices_sequentially/$', views.load_impulse_devices_sequentially, name = 'load_impulse_devices_sequentially'), # загрузка импульсных приборов последовательно
 #    url(r'^electric/$', views.electric),
     url(r'^service_water/$', views.service_water, name = 'service_water'), # электрика, загрузка нужных полей
     url(r'^load_water_objects/$', views.load_water_objects, name = 'load_water_objects'), # вода, загрузка нужных полей

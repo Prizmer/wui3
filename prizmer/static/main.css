@@ -213,12 +213,10 @@ overflow-y: scroll;
 }
 
 #data-block-service{
-`margin-top: 15px;
+margin-top: 15px;
 /*margin-left: 5%;*/
 min-height: 501px;
-`border-style: solid;
-`border-width: 1px;
-`border-top-color: black;
+margin-bottom: 30px;
 }
 
 table

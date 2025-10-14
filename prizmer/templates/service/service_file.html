@@ -1,28 +1,16 @@
-
-{% load static %} <link href="{%static "main.css"%}" rel="stylesheet"/>
-{% load static %} <script src="{%static "libs/jquery.js" %}" type=text/javascript></script>
-{% load static %} <script src="{%static "libs/jquery-ui/ui/jquery-ui.js" %}" type=text/javascript></script>
-{% load static %} <script src="{%static "libs/jquery-ui/ui/i18n/jquery.ui.datepicker-ru.js" %}" type=text/javascript></script>
-
-<script src="/static/libs/liHighLight.js" type=text/javascript></script>
-<br>
-<div class="meters_change_block">
-<span><strong> Загрузка файла на сервер </strong> </span>
-<br><br>
-<form enctype="multipart/form-data" method="post"  action="/service/service_file_loading/" id="form_load"> 
-<br>
- {% csrf_token %}
-<span> Прогрузочный файл: </span>  <input type="file" accept=".xls,.xlsx" id="id_path" name="path">
-<br>
-<br>
-<!-- <input id="id_title" name="title" type="text"> -->
-<input type="submit" id="file-load" name="file-load" value=Загрузить>
-<strong>{{status}}</strong>
-</form>
+{% load static %}
+<div class="form-card">
+    <div class="form-card-title">📂 Загрузка файла на сервер</div>
+    <form enctype="multipart/form-data" method="post" action="/service/service_file_loading/" id="form_load">
+        {% csrf_token %}
+        <div class="file-input-wrapper">
+            <input type="file" accept=".xls,.xlsx" id="id_path" name="path">
+            <div class="file-input-label">Выберите файл</div>
+            <div class="file-input-label-text">или перетащите его сюда</div>
+        </div>
+        <input type="submit" id="file-load" name="file-load" value="Загрузить" class="btn-submit">
+        <div class="status-message">
+            <strong></strong>
+        </div>
+    </form>
 </div>
-
-<br>
-
-<br>
-<br>
-<br>
