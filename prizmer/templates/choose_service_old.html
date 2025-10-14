@@ -1,0 +1,243 @@
+<html>
+    <head>
+	<meta charset="utf-8">
+
+{% load static %}	<script src="{%static "libs/calendar/moment.min.js" %}"> </script>
+{% load static %}	<script src="{%static "libs/calendar/jquery.min.js" %}"> </script>
+{% load static %} <link href="{%static "libs/calendar/fullcalendar.print.css"%}" rel="stylesheet" type="text/css">
+{% load static %}	<script src="{%static "libs/calendar/fullcalendar.min.js" %}"> </script>
+{% load static %} <link href="{%static "libs/calendar/fullcalendar.css"%}" rel="stylesheet" type="text/css">
+
+{% load static %} <link href="{%static "main.css"%}" rel="stylesheet"/>
+
+{% load static %} <script src="{%static "libs/jquery.js" %}" type=text/javascript></script>
+{% load static %} <script src="{%static "libs/jquery-ui/ui/jquery-ui.js" %}" type=text/javascript></script>
+{% load static %} <script src="{%static "libs/jquery-ui/ui/i18n/jquery.ui.datepicker-ru.js" %}" type=text/javascript></script>
+<!-- Alternate skin for datepicker-->
+{% load static %} <link href="{%static "libs/jquery-ui/themes/base/jquery-ui.css"%}" rel="stylesheet" type="text/css">
+{% load static %} <link href="{%static "libs/bootstrap-4.3.1-dist/css/bootstrap.css"%}" rel="stylesheet" type="text/css">
+
+    <title> ПАК ПРИЗМЕР| Сервисные настройки |</title>
+ <script type="text/javascript">
+ $("#electric-ico").click(function(){
+        load_service("service_electric");
+		});
+		
+ $("#download-ico").click(function(){
+        load_service("service_file");
+		});
+//$.datepicker.setDefaults( $.datepicker.regional[ "ru" ]);
+//$( "#datepickerDel" ).datepicker({dateFormat: 'dd.mm.yy', defaultDate:+0});
+	
+var date_del = $('#datepickerDel').datepicker().val(); 
+var isLoaded=0;
+var isFirst=1;
+var sPath="";
+var choice_file="";
+var choice_sheet="";
+var tcp_ip_status="";
+var object_status="";
+var counter_status="";
+var balance_status="";
+var old_meter="";
+var new_meter="";
+var meter1="";
+var meter2="";
+
+			
+var load_service = function(page){
+		//загружаем экселевские файлы из cfg
+		//console.log(page);
+		if (page == 'service_file'){
+			$('#excel-block').html('');
+			change_wb();			
+		}
+		else
+		{
+		$.ajax({
+			type: "GET",
+			url: "/service/make_excel",
+			//beforeSend: function(){show_loader();},
+			data:{},        
+		   })
+		   
+	   .done(function( msg ) {
+		//console.log('load excel-block');
+		//$( "#datepickerDel" ).datepicker({dateFormat: 'dd.mm.yy', defaultDate:+0});
+		$('#excel-block').html(msg); // Пишем в div ответ от страницы 
+		//hide_loader();
+		change_wb();
+		});			
+		}
+		
+		//загружаем страницу, на которую кликнули
+		choice_file=$("#choice_file").val();
+		choice_sheet=$("#choice_sheet").val();
+		old_meter=$("#old_meter").val();
+		new_meter=$("#new_meter").val();
+		meter1=$("#meter1").val();
+		meter2=$("#meter2").val();	
+        file30=$("#direct30").val();
+		date_del30 = $('#datepickerDel').datepicker().val();
+		num_del30 = $("#num_del30").val();
+		
+		$("span").css("pointer-events", "none");
+				
+        $.ajax({
+        type: "GET",
+        url: "/service/"+page,
+        beforeSend: function(){show_loader();},
+        data:{ choice_file:choice_file, choice_sheet:choice_sheet, tcp_ip_status:tcp_ip_status, object_status:object_status, counter_status:counter_status, old_meter:old_meter, new_meter:new_meter, meter1:meter1,meter2:meter2, balance_status:balance_status, file30:file30, num_del30:num_del30, date_del30:date_del30 },        
+       })
+	   
+	   .done(function( msg ) {	    
+        $('#data-table').html(msg);// Пишем в div ответ от страницы
+		if (document.getElementById("datepickerDel") != null)
+			{$( "#datepickerDel" ).datepicker({dateFormat: 'dd.mm.yy', defaultDate:+0});
+			//alert('datepickerDel as done');
+			}
+		//
+											
+		if (document.getElementById("file_name") != null) {
+		//console.log(document.getElementById("file_name").value);
+		//$("#file_name").show();
+		$("#choice_file").val(document.getElementById("file_name").value)
+		change_wb();
+		if (document.getElementById("sheet_name") != null){
+		$("#choice_sheet").val(document.getElementById("sheet_name").value)
+		};
+		};
+		
+        hide_loader();		
+		$("span").css("pointer-events", "auto");
+        });
+    };
+
+function change_wb(){
+     //console.log($("#choice_file").val());
+     choice_file=$("#choice_file").val();
+	 if (typeof choice_file != 'undefined') {
+	 $.ajax({
+        type: "GET",
+        url: "/service/make_sheet",
+        <!-- beforeSend: function(){show_loader();}, -->
+        data:{choice_file:choice_file},        
+       })
+	   
+	   .done(function( msg ) {
+        $('#sheets-block').html(msg); // Пишем в div ответ от страницы 
+        <!--   hide_loader(); -->
+        });
+		}
+	  else {
+	  $('#sheets-block').html('');
+	  }
+	 };
+	 
+var show_loader = function(){
+    $("#fadingBarsG_1").show();
+    $("#fadingBarsG_2").show();
+    $("#fadingBarsG_3").show();
+    };
+    
+var hide_loader = function(){
+    $("#fadingBarsG_1").hide();
+    $("#fadingBarsG_2").hide();
+    $("#fadingBarsG_3").hide();
+    };
+	
+//var make_date_picker = function(){
+//	$( "#datepickerDel" ).datepicker({DateFormat: 'dd.mm.yy', 
+//											defaultDate:+0});
+//};
+
+function upload(event) {
+event.preventDefault();
+var data = new FormData($('form').get(0));
+alert('form find');
+$.ajax({
+    url: $(this).attr('action'),
+    type: $(this).attr('method'),
+    data: data,
+    cache: false,
+    processData: false,
+    contentType: false,
+    success: function(data) {
+        alert('success');		
+    }
+
+});		
+return false;
+}
+
+$(function() {
+    hide_loader();
+    $('form').submit(upload);
+	var url      = window.location.href; 
+	if (~url.indexOf("/service_file_loading"))
+	    { setTimeout(function() {
+                 history.back();
+                 }, 2000);		
+		}
+});	
+
+
+</script>
+    </head>
+<body>
+<div id=layout class="container">
+	<div id="system-name-service" class = "row row justify-content-center">
+		<div class="col-10"><h2>Сервисные настройки</h2></div>
+	</div>
+	<div class = "row">
+		<div class = "col-4" > <h5> Выберите сервис</h5> </div>	
+		<div class = "col-3">
+			<div class="spinner-grow text-primary" style="width: 1rem; height: 1rem;"  role="status" id="fadingBarsG_1">
+			  <span class="sr-only">Выполняется...</span>
+			</div>
+			<div class="spinner-grow text-danger" style="width: 1rem; height: 1rem;"  role="status" id ="fadingBarsG_2">
+			  <span class="sr-only">Выполняется...</span>
+			</div>
+			<div class="spinner-grow text-warning" style="width: 1rem; height: 1rem;"  role="status" id="fadingBarsG_3">
+			  <span class="sr-only">Выполняется...</span>
+			</div>	
+		</div>
+	</div>
+	<br>
+	<div class = "row">
+		<div class = "col-1">{% load static %} <img onclick="load_service('service_file')" id="download-ico" src="{%static "images/download2-ico64.png" %}" title="Загрузить файл"> </div>
+		<div class = "col-1">{% load static %} <img onclick="load_service('service_electric')" id="electric-ico" src="{%static "images/digital5-ico64.png" %}" title="Цифровые приборы"> </div>
+		<div class = "col-1">{% load static %} <img  onclick="load_service('service_water')" id="water-ico" src="{%static "images/impulse5-ico64.png" %}" title="Импульсные приборы"> </div>
+		<div class = "col-1">{% load static %} <img  onclick="load_service('service_change_electric')" id="change-ico" src="{%static "images/change2-ico64.png" %}" title="Замена счётчиков ЦИФРОВЫХ(!)"> </div>
+		<div class = "col-1">{% load static %} <img  onclick="load_service('service_get_info')" id="change-ico" src="{%static "images/tech3-ico64.png" %}" title="Информация по объекту"> </div>
+		<div class = "col-1">{% load static %} <img  onclick="load_service('service_balance_load')" id="balance-ico" src="{%static "images/balance2-ico64.png" %}" title="Загрузка балансных групп"> </div>
+		<div class = "col-1">{% load static %} <img  onclick="load_service('service_load30_page')" id="load30-ico" src="{%static "images/to_db2-ico64.png" %}" title="Загрузка Профилей мощности"> </div>
+		<div class = "col-1">{% load static %} <img  onclick="load_service('service_user_account')" id="user-ico" src="{%static "images/users-ico64.png" %}" title="Добавление пользователей ЛК"> </div>
+		<div class = "col-1">{% load static %} <img  onclick="load_service('service_del_meters')" id="del-ico" src="{%static "images/del-ico64.png" %}" title="Удалёние приборов"> </div>
+	</div>
+	<br>
+	
+	<div id ="excel-block">	</div>	
+	<div id="sheets-block" > </div>
+	<div class = "row justify-content-center">
+		<div class = "col-12">
+		<div id="data-block-service">
+			<div id="data-table" ></div>
+			
+			<span id="QQQ"></span>        
+			</div>
+		</div>
+	</div>
+	
+	<div class = "row justify-content-end" id="myfooter">
+    <div  class = "col-4" id="vizitka">
+        <span><strong><a class="text-warning" href="http://www.prizmer.ru/">ООО "Правильные измерения"</a></strong></span>
+		<img src="{%static "images/new_ico/logo2-ico48.png" %}">
+    </div>
+	</div>		
+
+</div>
+	
+
+</body>
+</html>

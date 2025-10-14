@@ -1,26 +1,26 @@
-
-{% load static %} <link href="{%static "main.css"%}" rel="stylesheet"/>
-{% load static %} <script src="{%static "libs/jquery.js" %}" type=text/javascript></script>
-{% load static %} <script src="{%static "libs/jquery-ui/ui/jquery-ui.js" %}" type=text/javascript></script>
-{% load static %} <script src="{%static "libs/jquery-ui/ui/i18n/jquery.ui.datepicker-ru.js" %}" type=text/javascript></script>
-
-{% if filesFF %}
-<div class = "row align-items-center">
-	<div class = "col-2">
-		<strong>Выберите файл &nbsp;</strong>	</div>	
-	<div class = "col">
-		<select onchange="change_wb();" name="choice_file" id="choice_file">
-		<option value="0"><strong>Выберите файл...</strong></option>
-		{% for f in filesFF %}
-			{%if f == choice_file%}
-			<option selected value='{{f}}'>{{f}}</option>
-			{%else%}
-			<option value='{{f}}'>{{f}}</option>
-			{%endif%}
-		{% endfor %}           
-		</select>				
-	</div>
+{% load static %}
+<div class="row align-items-center">
+    {% if filesFF %}
+    <div class="col-auto">
+        <label for="choice_file"><strong>Выберите файл</strong></label>
+    </div>
+    <div class="col">
+        <select onchange="change_wb();" name="choice_file" id="choice_file" class="custom-select">
+        <option value="0">Выберите файл...</option>
+        {% for f in filesFF %}
+            {%if f == choice_file%}
+            <option selected value='{{f}}'>{{f}}</option>
+            {%else%}
+            <option value='{{f}}'>{{f}}</option>
+            {%endif%}
+        {% endfor %}
+        </select>
+    </div>
+    {% else %}
+    <div class="col">
+        <div class="alert alert-warning" role="alert">
+            <strong>Файлы для загрузки не найдены.</strong> Пожалуйста, загрузите файлы конфигурации в папку `service/static/cfg/`.
+        </div>
+    </div>
+    {% endif %}
 </div>
-{%endif%}
-
-

@@ -3,7 +3,7 @@
 
 from django.shortcuts import render
 from django.shortcuts import HttpResponse
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import redirect
 from django import forms
 from django.contrib.auth.decorators import login_required
@@ -81,25 +81,10 @@ def MakeSheet(request):
     args['sheets']=sheets
     return render(request,"service/service_sheets_excel.html", args)
 
-
-def writeToLog(msg):
-    ##################################
-    log_date=datetime.datetime.now().strftime("%d-%m-%Y %H:%M")
-    #print msg
-    logger.info('['+log_date+']: '+str(msg))
-
 @login_required(login_url='/auth/login/') 
 @user_passes_test(isAdmin, login_url='/auth/login/')
 def choose_service(request):
     args={}
-    # directory=os.path.join(BASE_DIR,'static\\cfg\\')
-    
-    # if  not(os.path.exists(directory)):
-    #     os.mkdir(directory)
-    # #print directory
-    # files = os.listdir(directory) 
-    # #print files
-    # args['filesFF']= files
     return render(request,"choose_service.html", args)
 
 def make_excel(request):
@@ -121,7 +106,7 @@ def service_electric(request):
 @csrf_exempt
 def service_file(request):
     args={}
-    #args.update(csrf(request))    
+   
     data_table=[]
     status='Файл не загружен'
     args['data_table'] = data_table
@@ -143,10 +128,6 @@ def service_file_loading(request):
     sPath=""
     if request.method == 'POST':        
         form = UploadFileForm(request.POST, request.FILES)
-        #print form.as_table()
-        #print form.is_valid()
-        
-        #print sPath
         if form.is_valid():
             sPath=os.path.join(BASE_DIR,'static/cfg/'+request.FILES['path'].name)
             handle_uploaded_file(request.FILES['path'])
@@ -191,7 +172,7 @@ def service_electric_load(request):
     files = os.listdir(directory)    
     args['filesFF']= files
     return render(request,"service/service_electric.html", args)
-    #return render(request,"service/service_electric_load.html", args)
+
 
 #@login_required(login_url='/auth/login/') 
 #@user_passes_test(isAdmin, login_url='/auth/login/')
@@ -273,13 +254,10 @@ def load_tcp_ip_or_com_ports_from_excel(sPath, sSheet):
     portType=sheet_ranges['L1'].value
     while (bool(sheet_ranges['G%s'%(row)].value)):
         if sheet_ranges['G%s'%(row)].value is not None:
-            #writeToLog(u'Обрабатываем строку ' + str(u'G%s '%(row)) + str(sheet_ranges[u'G%s'%(row)].value))
             ip_adr=sheet_ranges['K%s'%(row)].value
             ip_port=sheet_ranges['L%s'%(row)].value
             com_port=sheet_ranges['L%s'%(row)].value
-            #print ip_adr, ip_port
             if portType=='Com-port': #добавление com-порта
-                writeToLog(com_port)
                 if not com_port or com_port==None: 
                     result+="Отсутствует значение для com-порта в строке"+str(row)+". Заполните все ячейки excel таблицы."
                     break
@@ -300,20 +278,44 @@ def load_tcp_ip_or_com_ports_from_excel(sPath, sSheet):
                         add_port.save()
                         result ='Новый tcp/ip порт добавлен'
                         IsAdded=True
-    #                add_meter = Meters(name = unicode(sheet_ranges[u'F%s'%(row)].value) + u' ' + unicode(sheet_ranges[u'E%s'%(row)].value), address = unicode(sheet_ranges[u'E%s'%(row)].value),  factory_number_manual = unicode(sheet_ranges[u'E%s'%(row)].value), guid_types_meters = TypesMeters.objects.get(guid = u"7cd88751-d232-410c-a0ef-6354a79112f1") )
-    #                add_meter.save()
                     else: 
                         newRes = 'Порт '+str(ip_adr)+": "+str(ip_port)+" уже существует "
-                        # print result
-                        # print newRes
-                        # print result.find(newRes)
                         if bool(result.find(newRes) == -1):
                             result+= newRes
                             
-        writeToLog( result)
         row+=1
     return IsAdded
 
+def check_objects_and_abonents_structure(parent, obj, abon):
+    dt = []
+    cursor = connection.cursor()
+    sQuery = """
+    WITH parent_obj AS (
+          SELECT 
+              guid AS obj_guid,
+              name AS obj_name,
+              level,
+              guid_parent AS parent1_guid
+          FROM objects
+      ) 
+      SELECT DISTINCT
+        parent_obj.parent1_guid,
+        parent_obj.obj_name as parent_name,
+        objects.guid,
+        objects.name AS obj_name, 
+        abonents.guid,
+        abonents.name AS ab_name
+      FROM 
+        public.objects
+      JOIN        parent_obj ON parent_obj.obj_guid = objects.guid_parent
+      JOIN         public.abonents ON abonents.guid_objects = objects.guid
+      
+	  WHERE parent_obj.obj_name = '%s'
+	  AND objects.name = '%s'
+	  AND  abonents.name = '%s'"""%(parent, obj, abon)
+    cursor.execute(sQuery)
+    dt=cursor.fatchall()
+    return dt
 
 def SimpleCheckIfExist(table1,fieldName1, value1, table2, fieldName2, value2):
     dt=[]
@@ -435,85 +437,155 @@ def GetTableFromExcel(sPath,sSheet):
     return dt
 
 
+# def LoadObjectsAndAbons(sPath, sSheet):
+#     #Добавление объектов
+#     global cfg_excel_name
+#     cfg_excel_name=sPath
+#     global cfg_sheet_name
+#     cfg_sheet_name=sSheet
+#     result="Объекты не загружены"
+# 
+#     dtAll=GetTableFromExcel(sPath,sSheet) #получили из excel все строки до первой пустой строки (проверка по колонке А)
+#     
+#     for i in range(1,len(dtAll)):
+#         obj_l0=str(dtAll[i][0]).strip()
+#         obj_l1=str(dtAll[i][1]).strip()
+#         obj_l2=str(dtAll[i][2]).strip()
+#         abon=str(dtAll[i][3]).strip()
+#         account_1=str(dtAll[i][4])
+#         account_2=str(dtAll[i][5])
+#         
+#         isNewObj_l0=SimpleCheckIfExist('objects','name',obj_l0,"","","")
+#         
+#         # dt = check_objects_and_abonents_structure(obj_l1, obj_l2, abon)
+#         # print(dt)
+#         # isNewObj_l1 = True
+#         # if len(dt) > 0:
+#         #      isNewObj_l1 = False  
+#                   
+#         # dt = check_objects_and_abonents_structure(obj_l2, obj_l3, abon)
+#         # print(dt)
+#         # isNewObj_l2 = True
+#         # if len(dt) > 0:
+#         #      isNewObj_l2 = False       
+# 
+#         
+#         isNewObj_l1=SimpleCheckIfExist('objects','name',obj_l1,"","","")
+#         isNewObj_l2=SimpleCheckIfExist('objects','name',obj_l2,"","","")
+#         isNewAbon=SimpleCheckIfExist('objects','name', obj_l2,'abonents', 'name', abon)
+#         kv=0
+#         if not (isNewObj_l0):
+#             add_parent_object = Objects( name=obj_l0, level=0)
+#             add_parent_object.save()
+# 
+#             add_object1=Objects(name=obj_l1, level=1, guid_parent = add_parent_object)
+#             add_object1.save()
+#             add_object2=Objects(name=obj_l2, level=2, guid_parent = add_object1)
+#             add_object2.save()
+#             
+#             add_abonent = Abonents(name = abon, account_1 =str(account_1), account_2 =str(account_2), guid_objects =add_object2, guid_types_abonents = TypesAbonents.objects.get(guid= "e4d813ca-e264-4579-ae15-385cdbf5d28c"))
+#             add_abonent.save()
+#             result="Объекты созданы."
+#             continue
+#         if not (isNewObj_l1):
+#             dtParent=GetSimpleTable('objects','name',obj_l0)
+#             if dtParent: #родительский объект есть
+#                 guid_parent=dtParent[0][0]
+#                 add_object1=Objects(name=obj_l1, level=1, guid_parent = Objects.objects.get(guid=guid_parent))
+#                 add_object1.save()                
+#                 add_object2=Objects(name=obj_l2, level=2, guid_parent = add_object1)
+#                 add_object2.save()
+#                 add_abonent = Abonents(name = abon, account_1 =str(account_1), account_2 =str(account_2), guid_objects =add_object2, guid_types_abonents = TypesAbonents.objects.get(guid= "e4d813ca-e264-4579-ae15-385cdbf5d28c"))
+#                 add_abonent.save()
+#                 result="Объекты созданы."
+#                 continue
+#         if not (isNewObj_l2):
+#             dtParent=GetSimpleTable('objects','name',obj_l1)
+#             if dtParent: #родительский объект есть
+#                 guid_parent=dtParent[0][0]                
+#                 add_object = Objects(name=obj_l2, level=2, guid_parent = Objects.objects.get(guid=guid_parent))
+#                 add_object.save()
+#                 result="Объекты созданы"
+#         if not (isNewAbon):
+#             dtObj=GetSimpleTable('objects','name',obj_l2)
+#             if dtObj: #родительский объект есть
+#                 guid_object=dtObj[0][0]
+#                 add_abonent = Abonents(name = abon, account_1 =str(account_1), account_2 =str(account_2), guid_objects = Objects.objects.get(guid=guid_object), guid_types_abonents = TypesAbonents.objects.get(guid= "e4d813ca-e264-4579-ae15-385cdbf5d28c"))
+#                 add_abonent.save()
+#                 kv+=1
+# 
+#     result+=". Абоненты созданы."
+#     return result
+
+def get_or_create_object_with_parent(name, level, parent=None):
+    """
+    Получает или создает объект с учетом родителя.
+    """
+    if parent:
+        try:
+            obj = Objects.objects.get(name=name, guid_parent=parent)
+        except Objects.DoesNotExist:
+            obj = Objects(name=name, level=level, guid_parent=parent)
+            obj.save()
+    else:
+        try:
+            obj = Objects.objects.get(name=name, level=level)
+        except Objects.DoesNotExist:
+            obj = Objects(name=name, level=level)
+            obj.save()
+    return obj
+
 def LoadObjectsAndAbons(sPath, sSheet):
-    #Добавление объектов
-    global cfg_excel_name
-    cfg_excel_name=sPath
-    global cfg_sheet_name
-    cfg_sheet_name=sSheet
-    result="Объекты не загружены"
+    """
+    Загружает объекты и абонентов из Excel файла,
+    проверяя и создавая всю иерархию объектов.
+    """
+    global cfg_excel_name, cfg_sheet_name
+    cfg_excel_name = sPath
+    cfg_sheet_name = sSheet
+    result = "Объекты и абоненты не загружены."
+    created_objects_count = 0
+    created_abonents_count = 0
 
-    dtAll=GetTableFromExcel(sPath,sSheet) #получили из excel все строки до первой пустой строки (проверка по колонке А)
-    
-    for i in range(1,len(dtAll)):
-        #print  dtAll[i][2],dtAll[i][3]
-        # print u'Обрабатываем строку ' + unicode(dtAll[i][2])+' - ' + unicode(dtAll[i][3])
-        obj_l0=str(dtAll[i][0]).strip()
-        writeToLog( obj_l0)
-        obj_l1=str(dtAll[i][1]).strip()
-        writeToLog(obj_l1)
-        obj_l2=str(dtAll[i][2]).strip()
-        writeToLog(obj_l2)
-        abon=str(dtAll[i][3]).strip()
-        writeToLog(abon)
-        account_1=str(dtAll[i][4])
-        writeToLog(account_1)
-        account_2=str(dtAll[i][5])
-        writeToLog(account_2)
-        isNewObj_l0=SimpleCheckIfExist('objects','name',obj_l0,"","","")
-        isNewObj_l1=SimpleCheckIfExist('objects','name',obj_l1,"","","")
-        isNewObj_l2=SimpleCheckIfExist('objects','name',obj_l2,"","","")
-        isNewAbon=SimpleCheckIfExist('objects','name', obj_l2,'abonents', 'name', abon)
-        kv=0
-        if not (isNewObj_l0):
-            writeToLog('create object '+obj_l0)
-            add_parent_object = Objects( name=obj_l0, level=0)
-            add_parent_object.save()
-            writeToLog('create object '+obj_l1)
-            #print add_parent_object
-            add_object1=Objects(name=obj_l1, level=1, guid_parent = add_parent_object)
-            add_object1.save()
-            writeToLog('create object '+obj_l2)
-            add_object2=Objects(name=obj_l2, level=2, guid_parent = add_object1)
-            add_object2.save()
-            
-            writeToLog('create abonent '+abon)
-            add_abonent = Abonents(name = abon, account_1 =str(account_1), account_2 =str(account_2), guid_objects =add_object2, guid_types_abonents = TypesAbonents.objects.get(guid= "e4d813ca-e264-4579-ae15-385cdbf5d28c"))
-            add_abonent.save()
-            result="Объекты созданы"
-            continue
-        if not (isNewObj_l1):
-            writeToLog('create object '+obj_l1)
-            dtParent=GetSimpleTable('objects','name',obj_l0)
-            if dtParent: #родительский объект есть
-                guid_parent=dtParent[0][0]
-                add_object1=Objects(name=obj_l1, level=1, guid_parent = Objects.objects.get(guid=guid_parent))
-                add_object1.save()                
-                add_object2=Objects(name=obj_l2, level=2, guid_parent = add_object1)
-                add_object2.save()
-                writeToLog('create abonent '+abon)
-                add_abonent = Abonents(name = abon, account_1 =str(account_1), account_2 =str(account_2), guid_objects =add_object2, guid_types_abonents = TypesAbonents.objects.get(guid= "e4d813ca-e264-4579-ae15-385cdbf5d28c"))
-                add_abonent.save()
-                result="Объекты созданы"
-                continue
-        if not (isNewObj_l2):
-            writeToLog('create object '+obj_l2)
-            dtParent=GetSimpleTable('objects','name',obj_l1)
-            if dtParent: #родительский объект есть
-                guid_parent=dtParent[0][0]                
-                add_object = Objects(name=obj_l2, level=2, guid_parent = Objects.objects.get(guid=guid_parent))
-                add_object.save()
-                result="Объекты созданы"
-        if not (isNewAbon):
-            writeToLog('create abonent '+ abon)
-            dtObj=GetSimpleTable('objects','name',obj_l2)
-            if dtObj: #родительский объект есть
-                guid_object=dtObj[0][0]
-                add_abonent = Abonents(name = abon, account_1 =str(account_1), account_2 =str(account_2), guid_objects = Objects.objects.get(guid=guid_object), guid_types_abonents = TypesAbonents.objects.get(guid= "e4d813ca-e264-4579-ae15-385cdbf5d28c"))
-                add_abonent.save()
-                kv+=1
+    dtAll = GetTableFromExcel(sPath, sSheet)
 
-    result+=" Абоненты созданы"
+    for i in range(1, len(dtAll)):
+        obj_l0_name = str(dtAll[i][0]).strip()
+        obj_l1_name = str(dtAll[i][1]).strip()
+        obj_l2_name = str(dtAll[i][2]).strip()
+        abon_name = str(dtAll[i][3]).strip()
+        account_1 = str(dtAll[i][4])
+        account_2 = str(dtAll[i][5])
+
+        # Создание или получение объектов с учетом иерархии
+        obj_l0 = get_or_create_object_with_parent(obj_l0_name, 0)
+        obj_l1 = get_or_create_object_with_parent(obj_l1_name, 1, parent=obj_l0)
+        obj_l2 = get_or_create_object_with_parent(obj_l2_name, 2, parent=obj_l1)
+        
+        # Проверка и создание абонента
+        try:
+            Abonents.objects.get(name=abon_name, guid_objects=obj_l2)
+        except Abonents.DoesNotExist:
+            try:
+                type_abonent = TypesAbonents.objects.get(guid="e4d813ca-e264-4579-ae15-385cdbf5d28c")
+                abonent = Abonents(
+                    name=abon_name,
+                    account_1=account_1,
+                    account_2=account_2,
+                    guid_objects=obj_l2,
+                    guid_types_abonents=type_abonent
+                )
+                abonent.save()
+                created_abonents_count += 1
+            except TypesAbonents.DoesNotExist:
+                result = "Ошибка: Тип абонента с GUID e4d813ca-e264-4579-ae15-385cdbf5d28c не найден."
+                return result
+
+    if created_abonents_count > 0:
+        result = f"Создано {created_abonents_count} новых абонентов."
+    else:
+        result = "Новые абоненты не были созданы (возможно, уже существуют)."
+
     return result
 
 
@@ -524,7 +596,7 @@ def load_electric_objects(request):
     tcp_ip_status    = ""
     counter_status    = ""
     result="Не загружено"
-    #writeToLog('test1') 
+
     try:    
         if request.is_ajax():
             if request.method == 'GET':            
@@ -536,10 +608,9 @@ def load_electric_objects(request):
                 
                 directory=os.path.join(BASE_DIR,'static/cfg/')
                 sPath=directory+fileName
-                writeToLog(sPath)
                             
                 result=LoadObjectsAndAbons(sPath, sheet)
-    except: # catch *all* exceptions
+    except:
         e = sys.exc_info()[0]
         result = ( "Ошибка: %s" % e )
     
@@ -556,262 +627,153 @@ def LoadElectricMeters(sPath, sSheet):
     cfg_excel_name = sPath
     global cfg_sheet_name
     cfg_sheet_name = sSheet
-    result = u"Счётчики не загружены"
-    #print type(sPath), sPath, type(sSheet), sSheet
-    dtAll=GetTableFromExcel(sPath,sSheet) #получили из excel все строки до первой пустой строки (проверка по колонке А)
-    met=0
-    #print('load dt - ok')
-    #print('range(1,len(dtAll)) %s'%str(range(1,len(dtAll))))
-    for i in range(1,len(dtAll)):
-        #writeToLog(u'Обрабатываем строку ' + unicode(dtAll[i][3])+' - '+unicode(dtAll[i][6]))
-        #print((dtAll[i][3]), (dtAll[i][6]))
-        obj_l2=str(dtAll[i][2]).strip() #корпус
-        abon=str(dtAll[i][3]).strip()  #квартира
-        meter=str(dtAll[i][6]).strip()  #номер счётчика
-        adr=str(dtAll[i][7]).strip()  #номер в сети
-        type_meter=str(dtAll[i][8]).strip()  #тип счётчика
-        NumLic=str(dtAll[i][5]).strip()  #номер лицевого счёта, тут используется как пароль для м-230-ум
-        Group=str(dtAll[i][12]).strip() 
-        attr1=str(dtAll[i][13]).strip() 
-        attr2=str(dtAll[i][14]).strip()
-        attr3=str(dtAll[i][15]).strip() 
-        attr4=str(dtAll[i][16]).strip()
-        flag_impulse_ridan_col_o = str(dtAll[i][14]).strip()  
-        isNewMeter=SimpleCheckIfExist('meters','factory_number_manual',meter,"","","")
-        isNewAbon=SimpleCheckIfExist('objects','name', obj_l2,'abonents', 'name', abon)
-        isR = False
-        isHalfs = False
-        is_ridan_impulse = False
-        #print('attr1, attr2', meter, attr1, attr2)
-        if (attr1 == '+'):
-            isR = True    
-        if (attr2 == '+'):
-            isHalfs = True
-        if (flag_impulse_ridan_col_o == 'да'):
-            is_ridan_impulse = True
-        #print('attr1, attr2', meter, isR, isHalfs)
-        #writeToLog( u'счётчик существует ', isNewMeter)
-        if not (isNewAbon):
-            #print('Need create struct!')
-            return "Сначала создайте структуру объектов и абонентов"
-        if not (isNewMeter):
-            print(str(type_meter))
-            if str(type_meter) == 'М-200':
-                add_meter = Meters(name = str(type_meter) + ' ' + str(meter), address = str(adr), factory_number_manual = str(meter), guid_types_meters = TypesMeters.objects.get(guid = "6224d20b-1781-4c39-8799-b1446b60774d") )
-                add_meter.save()
-                writeToLog('Device added' + ' --->   ' + 'М-200')
-            elif str(type_meter) == 'М-230':
-                #print('m-230')
-                add_meter = Meters(name = str(type_meter) + ' ' + str(meter), address = str(adr), password = 111111 , factory_number_manual = str(meter), guid_types_meters = TypesMeters.objects.get(guid = "423b33a7-2d68-47b6-b4f6-5b470aedc4f4") )
-                add_meter.save()
-                #print('Device added' + ' --->   ' + 'М-230')
-                
-            elif str(type_meter) == 'М-230-УМ':
-                add_meter = Meters(name = str(type_meter) + ' ' + str(meter), address = str(adr), password = str(NumLic) , factory_number_manual = str(meter), guid_types_meters = TypesMeters.objects.get(guid = "20e4767a-49e5-4f84-890c-25e311339c28") )
-                add_meter.save()
-                writeToLog('Device added' + ' --->   ' + 'М-230-УМ')
-                
-            elif str(type_meter) == 'Эльф 1.08':
-                add_meter = Meters(name = str(type_meter) + ' ' + str(meter), address = str(adr), factory_number_manual = str(meter), guid_types_meters = TypesMeters.objects.get(guid = "1c5a8a80-1c51-4733-8332-4ed8d510a650"), attr1=str(attr1), attr2=str(attr2) )
-                add_meter.save()
-                writeToLog('Device added' + ' --->   ' + 'Эльф 1.08')
-            elif str(type_meter) == 'СПГ762-1':
-                add_meter = Meters(name = str(type_meter) + ' ' + str(meter), address = str(adr), factory_number_manual = str(meter), guid_types_meters = TypesMeters.objects.get(guid = "c3ec5c22-d184-41c5-b6bf-66fa30215a41") )
-                add_meter.save()
-                writeToLog('Device added' + ' --->   ' + 'СПГ762-1')                
-            elif str(type_meter) == 'СПГ762-2':
-                add_meter = Meters(name=str(type_meter) + ' ' + str(meter), address = str(adr), factory_number_manual = str(meter), guid_types_meters = TypesMeters.objects.get(guid = "5eb7dd59-faf9-4ead-8654-4f3de74de2b0") )
-                add_meter.save()
-                writeToLog('Device added' + ' --->   ' + 'СПГ762-2')
-            elif str(type_meter) == 'СПГ762-3':
-                add_meter = Meters(name = str(type_meter) + ' ' + str(meter), address = str(adr), factory_number_manual = str(meter), guid_types_meters = TypesMeters.objects.get(guid = "e4fb7950-a44f-41f0-a6ff-af5e30d9d562") )
-                add_meter.save()
-                writeToLog('Device added' + ' --->   ' + 'СПГ762-3')
-            elif str(type_meter) == 'Sayany':
-                add_meter = Meters(name = str(type_meter) + ' ' + str(meter), address = str(adr), factory_number_manual = str(meter), guid_types_meters = TypesMeters.objects.get(guid = "5429b439-233e-4944-b91b-4b521a10f77b") )
-                add_meter.save()
-                writeToLog('Device added' + ' --->   ' + 'Sayany')
-            elif str(type_meter) == 'Tekon_hvs':
-                add_meter = Meters(name = str(type_meter) + ' ' + str(meter), address = str(adr), factory_number_manual = str(meter), password = str(Group), guid_types_meters = TypesMeters.objects.get(guid = "8398e7d6-39f7-45d2-9c45-a1c48e751b61") )
-                add_meter.save()
-                writeToLog('Device added' + ' --->   ' + 'Tekon_gvs')
-            elif str(type_meter) == 'Tekon_hvs':
-                add_meter = Meters(name = str(type_meter) + ' ' + str(meter), address = str(adr), factory_number_manual = str(meter), password = str(Group), guid_types_meters = TypesMeters.objects.get(guid = "64f02a2c-41e1-48b2-bc72-7873ea9b6431") )
-                add_meter.save()
-                writeToLog('Device added' + ' --->   ' + 'Tekon_gvs')
-
-            elif str(type_meter) == 'Tekon_heat':
-                add_meter = Meters(name = str(type_meter) + ' ' + str(meter), address = str(adr), factory_number_manual = str(meter), password = str(Group), guid_types_meters = TypesMeters.objects.get(guid = "b53173f2-2307-4b70-b84c-61b634521e87") )
-                add_meter.save()
-                writeToLog('Device added' + ' --->   ' + 'Tekon_heat')
-            elif str(type_meter) == 'Пульсар ХВС':
-                add_meter = Meters(name = str(type_meter) + ' ' + str(meter), address = str(adr), factory_number_manual = str(meter), attr1 = str(attr1), guid_types_meters = TypesMeters.objects.get(guid = "f1789bb7-7fcd-4124-8432-40320559890f") )
-                add_meter.save()
-                writeToLog('Device added' + ' --->   ' + 'Пульсар ХВС')
-            
-            elif str(type_meter) == 'Пульсар ГВС':
-                add_meter = Meters(name = str(type_meter) + ' ' + str(meter), address = str(adr), factory_number_manual = str(meter), attr1 = str(attr1), guid_types_meters = TypesMeters.objects.get(guid = "a1a349ba-e070-4ec9-975d-9f39e61c34da") )
-                add_meter.save()
-                writeToLog('Device added' + ' --->   ' + 'Пульсар ГВС')
-
-            elif str(type_meter) == 'Пульс СТК ГВС':
-                add_meter = Meters(name = str(type_meter) + ' ' + str(meter), address = str(adr), factory_number_manual = str(meter), attr1 = str(attr1), guid_types_meters = TypesMeters.objects.get(guid = "12c9874c-1dc4-4cb0-95e7-4ff6ca7ab17f") )
-                add_meter.save()
-                writeToLog('Device added' + ' --->   ' + 'Пульс СТК ГВС')
-
-            elif str(type_meter) == 'Пульс СТК ХВС':
-                add_meter = Meters(name = str(type_meter) + ' ' + str(meter), address = str(adr), factory_number_manual = str(meter), attr1 = str(attr1), guid_types_meters = TypesMeters.objects.get(guid = "fbc9874c-1dc4-4cb0-95e7-4ff6ca7ab17f") )
-                add_meter.save()
-                writeToLog('Device added' + ' --->   ' + 'Пульс СТК ХВС')
-
-            elif str(type_meter) == 'Пульсар Теплосчётчик':
-
-                add_meter = Meters(name = str(type_meter) + ' ' + str(meter), address = str(adr), factory_number_manual = str(meter), attr1 = str(attr1), attr2 = str(attr2), attr3 = str(attr3), attr4 = str(attr4), guid_types_meters = TypesMeters.objects.get(guid = "82b96b1c-31cf-4753-9d64-d22e2f4d036e") )
-                add_meter.save()
-                writeToLog('Device added' + ' --->   ' + 'Пульсар Теплосчётчик')
-
-            elif str(type_meter) == 'Пульсар Холодосчётчик':
-                add_meter = Meters(name = str(type_meter) + ' ' + str(meter), address = str(adr), factory_number_manual = str(meter), guid_types_meters = TypesMeters.objects.get(guid = "c1ae0de6-f071-4e07-8452-09059eef187b") )
-                add_meter.save()
-                writeToLog('Device added' + ' --->   ' + 'Пульсар Холодосчётчик')
-
-            elif str(type_meter) == 'Пульсар 3Ф4Т':
-                add_meter = Meters(name = str(type_meter) + ' ' + str(meter), address = str(adr), factory_number_manual = str(meter), guid_types_meters = TypesMeters.objects.get(guid = "5f9e013c-378d-4947-a1a7-33e6ebdc1cef") )
-                add_meter.save()
-                writeToLog('Device added' + ' --->   ' + 'Пульсар 3Ф4Т')
-
-            elif str(type_meter) == 'Пульс СТК Теплосчётчик':
-                add_meter = Meters(name = str(type_meter) + ' ' + str(meter), address = str(adr), factory_number_manual = str(meter), guid_types_meters = TypesMeters.objects.get(guid = "bb111ede-e00b-4e1d-a8ba-1ef61dba1caa") )
-                add_meter.save()
-                writeToLog('Device added' + ' --->   ' + 'Пульс СТК Теплосчётчик')
-
-            elif str(type_meter) == 'Карат 307':
-                add_meter = Meters(name = str(type_meter) + ' ' + str(meter), address = str(adr), factory_number_manual = str(meter), guid_types_meters = TypesMeters.objects.get(guid = "84fb7a85-ab91-4e93-9154-76ddee35a316") )
-                add_meter.save()
-                writeToLog('Device added' + ' --->   ' + 'Карат 307')
-            elif str(type_meter) == 'Danfoss SonoSelect':
-                add_meter = Meters(name = str(type_meter) + ' ' + str(meter), address = str(adr), factory_number_manual = str(meter), guid_types_meters = TypesMeters.objects.get(guid = "aa491ede-e00b-4e1d-a8ba-1ef61dba1caa") )
-                add_meter.save()
-                writeToLog('Device added' + ' --->   ' + 'Danfoss SonoSelect')
-            elif str(type_meter) == 'СЭТ-4ТМ.03М':
-                add_meter = Meters(name = str(type_meter) + ' ' + str(meter), address = str(adr), factory_number_manual = str(meter), guid_types_meters = TypesMeters.objects.get(guid = "66b7ce6a-f280-4e54-8c8d-f69f34aabdf9") )
-                add_meter.save()
-                writeToLog('Device added' + ' --->   ' + 'СЭТ-4ТМ.03М')
-            elif str(type_meter) == 'СЕ301':
-                add_meter = Meters(name = str(type_meter) + ' ' + str(meter), address = str(adr), factory_number_manual = str(meter), guid_types_meters = TypesMeters.objects.get(guid = "17d88dbc-23b9-490a-9895-58ad24fe459d") )
-                add_meter.save()
-                writeToLog('Device added' + ' --->   ' + 'СЕ301')
-            elif str(type_meter) == 'Sanext':
-                add_meter = Meters(name = str(type_meter) + ' ' + str(meter), address = str(adr), factory_number_manual = str(meter), guid_types_meters = TypesMeters.objects.get(guid = "e8fa5e00-e1b9-4ef3-bc39-b8439a44b540") )
-                add_meter.save()
-                writeToLog('Device added' + ' --->   ' + 'Sanext')
-            elif str(type_meter) == 'Нартис СПОДЭС':
-                add_meter = Meters(name = str(type_meter) + ' ' + str(meter), address = str(adr), factory_number_manual = str(meter), guid_types_meters = TypesMeters.objects.get(guid = "8790eaeb-671b-4596-b80e-d6475d74382c") )
-                add_meter.save()
-                writeToLog('Device added' + ' --->   ' + 'Нартис СПОДЭС')
-            elif str(type_meter) == 'Пульс Эл. ГВС':
-                add_meter = Meters(name = str(type_meter) + ' ' + str(meter), address = str(adr), factory_number_manual = str(meter), attr1 = str(attr1), guid_types_meters = TypesMeters.objects.get(guid = "fbe5620f-726d-4b2d-9f70-6d835bd5e3c6") )
-                add_meter.save()
-                writeToLog('Device added' + ' --->   ' + 'Пульс Эл. ГВС')
-            elif str(type_meter) == 'Пульс Эл. ХВС':
-                add_meter = Meters(name = str(type_meter) + ' ' + str(meter), address = str(adr), factory_number_manual = str(meter), attr1 = str(attr1), guid_types_meters = TypesMeters.objects.get(guid = "c922dec6-f830-4ee1-bb6a-cd0a96c53c81") )
-                add_meter.save()
-                writeToLog('Device added' + ' --->   ' + 'Пульс Эл. ХВС')
-            elif str(type_meter) == 'ЭкоНом ГВС':
-                add_meter = Meters(name = str(type_meter) + ' ' + str(meter), address = str(adr), factory_number_manual = str(meter), attr1 = str(attr1), guid_types_meters = TypesMeters.objects.get(guid = "e2e6c4c5-636a-432a-bdbf-6a5ab4b1fdee") )
-                add_meter.save()
-                writeToLog('Device added' + ' --->   ' + 'ЭкоНом ГВС')
-            elif str(type_meter) == 'ЭкоНом ХВС':
-                add_meter = Meters(name = str(type_meter) + ' ' + str(meter), address = str(adr), factory_number_manual = str(meter), attr1 = str(attr1), guid_types_meters = TypesMeters.objects.get(guid = "50098019-7418-4661-baa9-b913de3596da") )
-                add_meter.save()
-                writeToLog('Device added' + ' --->   ' + 'ЭкоНом ХВС')
-            elif str(type_meter) == 'Декаст ГВС':
-                add_meter = Meters(name = str(type_meter) + ' ' + str(meter), address = str(adr), factory_number_manual = str(meter), attr1 = str(attr1), guid_types_meters = TypesMeters.objects.get(guid = "36b6ea95-beb1-490d-a39f-06163bfcaae5") )
-                add_meter.save()
-                writeToLog('Device added' + ' --->   ' + 'Декаст ГВС')
-            elif str(type_meter) == 'Декаст ХВС':
-                add_meter = Meters(name = str(type_meter) + ' ' + str(meter), address = str(adr), factory_number_manual = str(meter), attr1 = str(attr1), guid_types_meters = TypesMeters.objects.get(guid = "657d8ad0-bdba-4459-a07e-4d4eb72950d6") )
-                add_meter.save()
-                writeToLog('Device added' + ' --->   ' + 'Декаст ХВС')
-            elif str(type_meter) == 'ЭкоНом Теплосчётчик':
-                add_meter = Meters(name = str(type_meter) + ' ' + str(meter), address = str(adr), factory_number_manual = str(meter), attr1 = str(attr1), guid_types_meters = TypesMeters.objects.get(guid = "aefa5648-2240-42b4-88cf-04b093a60187") )
-                add_meter.save()
-                writeToLog('Device added' + ' --->   ' + 'ЭкоНом Теплосчётчик')
-
-            elif str(type_meter) == 'Декаст Теплосчётчик':
-                add_meter = Meters(name = str(type_meter) + ' ' + str(meter), address = str(adr), factory_number_manual = str(meter), attr1 = str(attr1), guid_types_meters = TypesMeters.objects.get(guid = "b95134db-af0c-4eea-bc8e-32b2bcfc7e1d") )
-                add_meter.save()
-                writeToLog('Device added' + ' --->   ' + 'Декаст Теплосчётчик')
-            elif str(type_meter) == 'Danfoss SonoMeter-500':
-                add_meter = Meters(name = str(type_meter) + ' ' + str(meter), address = str(adr), factory_number_manual = str(meter), attr1 = str(attr1), guid_types_meters = TypesMeters.objects.get(guid = "5e1dbf09-6c37-4982-aa1e-a693d2b4f079") )
-                add_meter.save()
-                writeToLog('Device added' + ' --->   ' + 'Danfoss SonoMeter-500')
-            elif str(type_meter) == 'Пульсар IoT ВС':
-                add_meter = Meters(name = str(type_meter) + ' ' + str(meter), address = str(adr), factory_number_manual = str(meter), attr1 = str(attr1), attr2 = str(attr2), guid_types_meters = TypesMeters.objects.get(guid = "bc61d16e-4059-4f9b-b7df-55915a7a844b") )
-                add_meter.save()
-                writeToLog('Device added' + ' --->   ' + 'Пульсар IoT ВС')
-            elif str(type_meter) == 'Пульсар IoT Тепло-объем':
-                add_meter = Meters(name = str(type_meter) + ' ' + str(meter), address = str(adr), factory_number_manual = str(meter), attr1 = str(attr1), guid_types_meters = TypesMeters.objects.get(guid = "84bf3b54-d51d-48d7-902d-4826cdef7101") )
-                add_meter.save()
-                writeToLog('Device added' + ' --->   ' + 'Пульсар IoT Тепло-объем')
-            elif str(type_meter) == 'Пульсар IoT Тепло-энергия':
-                add_meter = Meters(name = str(type_meter) + ' ' + str(meter), address = str(adr), factory_number_manual = str(meter), attr1 = str(attr1), guid_types_meters = TypesMeters.objects.get(guid = "a3aa2833-4104-4ac4-a0fb-c34e4402d1d6") )
-                add_meter.save()
-                writeToLog('Device added' + ' --->   ' + 'Пульсар IoT Тепло-энергия')
-            elif str(type_meter) == 'ВКТ9':
-                add_meter = Meters(name = str(type_meter) + ' ' + str(meter), address = str(adr), factory_number_manual = str(meter), attr1 = str(attr1), guid_types_meters = TypesMeters.objects.get(guid = "59963730-468e-441c-86d9-d08a3ed062fc") )
-                add_meter.save()
-                writeToLog('Device added' + ' --->   ' + 'ВКТ9')
-            elif str(type_meter) == 'Теплосчётчик Ридан РУТ-01':
-                add_meter = Meters(name = str(type_meter) + ' ' + str(meter), address = str(adr), factory_number_manual = str(meter), attr1 = str(attr1), guid_types_meters = TypesMeters.objects.get(guid = "4d714a5e-3af5-40fe-ab72-199ed8760ac3") )
-                add_meter.save()
-                writeToLog('Device added' + ' --->   ' + 'Теплосчётчик Ридан РУТ-01')
-            elif str(type_meter) == 'Водосчётчик Ридан СГВ-15 ГВС':
-                add_meter = Meters(name = str(type_meter) + ' ' + str(meter), address = str(adr), factory_number_manual = str(meter), attr1 = str(attr1), guid_types_meters = TypesMeters.objects.get(guid = "0a5753cf-debd-45cb-8dd0-3905f36293fc") )
-                add_meter.save()
-                writeToLog('Device added' + ' --->   ' + 'Водосчётчик Ридан СГВ-15 ГВС')
-            elif str(type_meter) == 'Водосчётчик Ридан СГВ-15 ХВС':
-                add_meter = Meters(name = str(type_meter) + ' ' + str(meter), address = str(adr), factory_number_manual = str(meter), attr1 = str(attr1), guid_types_meters = TypesMeters.objects.get(guid = "b060fcdd-f52d-4914-9dca-2fbcc2a205d5") )
-                add_meter.save()
-                writeToLog('Device added' + ' --->   ' + 'Водосчётчик Ридан СГВ-15 ХВС')
-            elif str(type_meter) == 'Водосчётчик Ридан СГВ-15 ХВС':
-                add_meter = Meters(name = str(type_meter) + ' ' + str(meter), address = str(adr), factory_number_manual = str(meter), attr1 = str(attr1), guid_types_meters = TypesMeters.objects.get(guid = "b060fcdd-f52d-4914-9dca-2fbcc2a205d5") )
-                add_meter.save()
-                writeToLog('Device added' + ' --->   ' + 'Водосчётчик Ридан СГВ-15 ХВС')
-            elif str(type_meter) == 'ВЗЛЕТ ТСР-М ТСРВ-043':
-                add_meter = Meters(name = str(type_meter) + ' ' + str(meter), address = str(adr), factory_number_manual = str(meter), attr1 = str(attr1), guid_types_meters = TypesMeters.objects.get(guid = "3a32cec9-d03a-4e46-a065-f81f92e5ead0") )
-                add_meter.save()
-                writeToLog('Device added' + ' --->   ' + 'ВЗЛЕТ ТСР-М ТСРВ-043')
-            elif str(type_meter) == 'ВЗЛЕТ ТСР-М ТСРВ-024М':
-                add_meter = Meters(name = str(type_meter) + ' ' + str(meter), address = str(adr), factory_number_manual = str(meter), attr1 = str(attr1), guid_types_meters = TypesMeters.objects.get(guid = "30936305-66a6-4459-b7d0-9c3ea8e2ba12") )
-                add_meter.save()
-                writeToLog('Device added' + ' --->   ' + 'ВЗЛЕТ ТСР-М ТСРВ-024М')
-            elif str(type_meter) == 'ВЗЛЕТ МР УРСВ-311 ГВС':
-                add_meter = Meters(name = str(type_meter) + ' ' + str(meter), address = str(adr), factory_number_manual = str(meter), attr1 = str(attr1), guid_types_meters = TypesMeters.objects.get(guid = "4d85e9a5-513e-419c-a02e-3e6ba79eafa7") )
-                add_meter.save()
-                writeToLog('Device added' + ' --->   ' + 'ВЗЛЕТ МР УРСВ-311 ГВС')
-            elif str(type_meter) == 'ВЗЛЕТ МР УРСВ-311 ХВС':
-                add_meter = Meters(name = str(type_meter) + ' ' + str(meter), address = str(adr), factory_number_manual = str(meter), attr1 = str(attr1), guid_types_meters = TypesMeters.objects.get(guid = "af871462-2104-491d-9a83-e7dcd77364b1") )
-                add_meter.save()
-                writeToLog('Device added' + ' --->   ' + 'ВЗЛЕТ МР УРСВ-311 ГВС')
-
-            else:
-                writeToLog('Не найдено совпадение с существующим типом прибора')
-                met-=1
-            
-            #Если экземпляр был создан, то добавляем считываемые параметры
-            try:
-                add_taken_param_no_signals(instance = add_meter, isR = isR, isHalfs = isHalfs, is_ridan_impulse = is_ridan_impulse)
-            except:
-                e = sys.exc_info()[0]
-                #print(e)
-                return( "Ошибка: %s" % e )
-            
-            met+=1
-            
-    result=" Загружено счётчиков "+str(met)
     
-    return result
+    errors = []
+    dtAll = GetTableFromExcel(sPath, sSheet)
+    met = 0
+
+    for i in range(1, len(dtAll)):
+        try:
+            obj_l1 = str(dtAll[i][1]).strip()
+            obj_l2 = str(dtAll[i][2]).strip()
+            abon = str(dtAll[i][3]).strip()
+            meter = str(dtAll[i][6]).strip()
+            adr = str(dtAll[i][7]).strip()
+            type_meter = str(dtAll[i][8]).strip()
+            NumLic = str(dtAll[i][5]).strip()
+            Group = str(dtAll[i][12]).strip()
+            attr1 = str(dtAll[i][13]).strip()
+            attr2 = str(dtAll[i][14]).strip()
+            attr3 = str(dtAll[i][15]).strip()
+            attr4 = str(dtAll[i][16]).strip()
+            flag_impulse_ridan_col_o = str(dtAll[i][14]).strip()
+
+            isNewMeter = SimpleCheckIfExist('meters', 'factory_number_manual', meter, "", "", "")
+            # isNewAbon = False
+            # if len(check_objects_and_abonents_structure(parent, obj, abon)) > 0:
+            #     isNewAbon = True
+            # isNewAbon = SimpleCheckIfExist('objects', 'name', obj_l2, 'abonents', 'name', abon)
+            
+            isR = (attr1 == '+')
+            isHalfs = (attr2 == '+')
+            is_ridan_impulse = (flag_impulse_ridan_col_o == 'да')
+
+            # if not isNewAbon:
+            #     errors.append(f"Абонент для счётчика '{meter}' (тип '{type_meter}') не найден. Сначала необходимо создать структуру объектов.")
+            #     continue
+
+            if not isNewMeter:
+                add_meter = None
+                
+                if str(type_meter) == 'М-200':
+                    add_meter = Meters(name = str(type_meter) + ' ' + str(meter), address = str(adr), factory_number_manual = str(meter), guid_types_meters = TypesMeters.objects.get(guid = "6224d20b-1781-4c39-8799-b1446b60774d") )
+                elif str(type_meter) == 'М-230':
+                    add_meter = Meters(name = str(type_meter) + ' ' + str(meter), address = str(adr), password = 111111 , factory_number_manual = str(meter), guid_types_meters = TypesMeters.objects.get(guid = "423b33a7-2d68-47b6-b4f6-5b470aedc4f4") )
+                elif str(type_meter) == 'М-230-УМ':
+                    add_meter = Meters(name = str(type_meter) + ' ' + str(meter), address = str(adr), password = str(NumLic) , factory_number_manual = str(meter), guid_types_meters = TypesMeters.objects.get(guid = "20e4767a-49e5-4f84-890c-25e311339c28") )
+                elif str(type_meter) == 'Эльф 1.08':
+                    add_meter = Meters(name = str(type_meter) + ' ' + str(meter), address = str(adr), factory_number_manual = str(meter), guid_types_meters = TypesMeters.objects.get(guid = "1c5a8a80-1c51-4733-8332-4ed8d510a650"), attr1=str(attr1), attr2=str(attr2) )
+                elif str(type_meter) == 'СПГ762-1':
+                    add_meter = Meters(name = str(type_meter) + ' ' + str(meter), address = str(adr), factory_number_manual = str(meter), guid_types_meters = TypesMeters.objects.get(guid = "c3ec5c22-d184-41c5-b6bf-66fa30215a41") )
+                elif str(type_meter) == 'СПГ762-2':
+                    add_meter = Meters(name=str(type_meter) + ' ' + str(meter), address = str(adr), factory_number_manual = str(meter), guid_types_meters = TypesMeters.objects.get(guid = "5eb7dd59-faf9-4ead-8654-4f3de74de2b0") )
+                elif str(type_meter) == 'СПГ762-3':
+                    add_meter = Meters(name = str(type_meter) + ' ' + str(meter), address = str(adr), factory_number_manual = str(meter), guid_types_meters = TypesMeters.objects.get(guid = "e4fb7950-a44f-41f0-a6ff-af5e30d9d562") )
+                elif str(type_meter) == 'Sayany':
+                    add_meter = Meters(name = str(type_meter) + ' ' + str(meter), address = str(adr), factory_number_manual = str(meter), guid_types_meters = TypesMeters.objects.get(guid = "5429b439-233e-4944-b91b-4b521a10f77b") )
+                elif str(type_meter) == 'Tekon_hvs':
+                    add_meter = Meters(name = str(type_meter) + ' ' + str(meter), address = str(adr), factory_number_manual = str(meter), password = str(Group), guid_types_meters = TypesMeters.objects.get(guid = "64f02a2c-41e1-48b2-bc72-7873ea9b6431") )
+                elif str(type_meter) == 'Tekon_heat':
+                    add_meter = Meters(name = str(type_meter) + ' ' + str(meter), address = str(adr), factory_number_manual = str(meter), password = str(Group), guid_types_meters = TypesMeters.objects.get(guid = "b53173f2-2307-4b70-b84c-61b634521e87") )
+                elif str(type_meter) == 'Пульсар ХВС':
+                    add_meter = Meters(name = str(type_meter) + ' ' + str(meter), address = str(adr), factory_number_manual = str(meter), attr1 = str(attr1), guid_types_meters = TypesMeters.objects.get(guid = "f1789bb7-7fcd-4124-8432-40320559890f") )
+                elif str(type_meter) == 'Пульсар ГВС':
+                    add_meter = Meters(name = str(type_meter) + ' ' + str(meter), address = str(adr), factory_number_manual = str(meter), attr1 = str(attr1), guid_types_meters = TypesMeters.objects.get(guid = "a1a349ba-e070-4ec9-975d-9f39e61c34da") )
+                elif str(type_meter) == 'Пульс СТК ГВС':
+                    add_meter = Meters(name = str(type_meter) + ' ' + str(meter), address = str(adr), factory_number_manual = str(meter), attr1 = str(attr1), guid_types_meters = TypesMeters.objects.get(guid = "12c9874c-1dc4-4cb0-95e7-4ff6ca7ab17f") )
+                elif str(type_meter) == 'Пульс СТК ХВС':
+                    add_meter = Meters(name = str(type_meter) + ' ' + str(meter), address = str(adr), factory_number_manual = str(meter), attr1 = str(attr1), guid_types_meters = TypesMeters.objects.get(guid = "fbc9874c-1dc4-4cb0-95e7-4ff6ca7ab17f") )
+                elif str(type_meter) == 'Пульсар Теплосчётчик':
+                    add_meter = Meters(name = str(type_meter) + ' ' + str(meter), address = str(adr), factory_number_manual = str(meter), attr1 = str(attr1), attr2 = str(attr2), attr3 = str(attr3), attr4 = str(attr4), guid_types_meters = TypesMeters.objects.get(guid = "82b96b1c-31cf-4753-9d64-d22e2f4d036e") )
+                elif str(type_meter) == 'Пульсар Холодосчётчик':
+                    add_meter = Meters(name = str(type_meter) + ' ' + str(meter), address = str(adr), factory_number_manual = str(meter), guid_types_meters = TypesMeters.objects.get(guid = "c1ae0de6-f071-4e07-8452-09059eef187b") )
+                elif str(type_meter) == 'Пульсар 3Ф4Т':
+                    add_meter = Meters(name = str(type_meter) + ' ' + str(meter), address = str(adr), factory_number_manual = str(meter), guid_types_meters = TypesMeters.objects.get(guid = "5f9e013c-378d-4947-a1a7-33e6ebdc1cef") )
+                elif str(type_meter) == 'Пульс СТК Теплосчётчик':
+                    add_meter = Meters(name = str(type_meter) + ' ' + str(meter), address = str(adr), factory_number_manual = str(meter), guid_types_meters = TypesMeters.objects.get(guid = "bb111ede-e00b-4e1d-a8ba-1ef61dba1caa") )
+                # elif str(type_meter) == 'Карат 307':
+                #     add_meter = Meters(name = str(type_meter) + ' ' + str(meter), address = str(adr), factory_number_manual = str(meter), guid_types_meters = TypesMeters.objects.get(guid = "84fb7a85-ab91-4e93-9154-76ddee35a316") )
+                elif str(type_meter) == 'Danfoss SonoSelect':
+                    add_meter = Meters(name = str(type_meter) + ' ' + str(meter), address = str(adr), factory_number_manual = str(meter), guid_types_meters = TypesMeters.objects.get(guid = "aa491ede-e00b-4e1d-a8ba-1ef61dba1caa") )
+                elif str(type_meter) == 'СЭТ-4ТМ.03М':
+                    add_meter = Meters(name = str(type_meter) + ' ' + str(meter), address = str(adr), factory_number_manual = str(meter), guid_types_meters = TypesMeters.objects.get(guid = "66b7ce6a-f280-4e54-8c8d-f69f34aabdf9") )
+                elif str(type_meter) == 'СЕ301':
+                    add_meter = Meters(name = str(type_meter) + ' ' + str(meter), address = str(adr), factory_number_manual = str(meter), guid_types_meters = TypesMeters.objects.get(guid = "17d88dbc-23b9-490a-9895-58ad24fe459d") )
+                elif str(type_meter) == 'Sanext':
+                    add_meter = Meters(name = str(type_meter) + ' ' + str(meter), address = str(adr), factory_number_manual = str(meter), guid_types_meters = TypesMeters.objects.get(guid = "e8fa5e00-e1b9-4ef3-bc39-b8439a44b540") )
+                elif str(type_meter) == 'Нартис СПОДЭС':
+                    add_meter = Meters(name = str(type_meter) + ' ' + str(meter), address = str(adr), factory_number_manual = str(meter), guid_types_meters = TypesMeters.objects.get(guid = "8790eaeb-671b-4596-b80e-d6475d74382c") )
+                elif str(type_meter) == 'Пульс Эл. ГВС':
+                    add_meter = Meters(name = str(type_meter) + ' ' + str(meter), address = str(adr), factory_number_manual = str(meter), attr1 = str(attr1), guid_types_meters = TypesMeters.objects.get(guid = "fbe5620f-726d-4b2d-9f70-6d835bd5e3c6") )
+                elif str(type_meter) == 'Пульс Эл. ХВС':
+                    add_meter = Meters(name = str(type_meter) + ' ' + str(meter), address = str(adr), factory_number_manual = str(meter), attr1 = str(attr1), guid_types_meters = TypesMeters.objects.get(guid = "c922dec6-f830-4ee1-bb6a-cd0a96c53c81") )
+                elif str(type_meter) == 'ЭкоНом ГВС':
+                    add_meter = Meters(name = str(type_meter) + ' ' + str(meter), address = str(adr), factory_number_manual = str(meter), attr1 = str(attr1), guid_types_meters = TypesMeters.objects.get(guid = "e2e6c4c5-636a-432a-bdbf-6a5ab4b1fdee") )
+                elif str(type_meter) == 'ЭкоНом ХВС':
+                    add_meter = Meters(name = str(type_meter) + ' ' + str(meter), address = str(adr), factory_number_manual = str(meter), attr1 = str(attr1), guid_types_meters = TypesMeters.objects.get(guid = "50098019-7418-4661-baa9-b913de3596da") )
+                elif str(type_meter) == 'Декаст ГВС':
+                    add_meter = Meters(name = str(type_meter) + ' ' + str(meter), address = str(adr), factory_number_manual = str(meter), attr1 = str(attr1), guid_types_meters = TypesMeters.objects.get(guid = "36b6ea95-beb1-490d-a39f-06163bfcaae5") )
+                elif str(type_meter) == 'Декаст ХВС':
+                    add_meter = Meters(name = str(type_meter) + ' ' + str(meter), address = str(adr), factory_number_manual = str(meter), attr1 = str(attr1), guid_types_meters = TypesMeters.objects.get(guid = "657d8ad0-bdba-4459-a07e-4d4eb72950d6") )
+                elif str(type_meter) == 'ЭкоНом Теплосчётчик':
+                    add_meter = Meters(name = str(type_meter) + ' ' + str(meter), address = str(adr), factory_number_manual = str(meter), attr1 = str(attr1), guid_types_meters = TypesMeters.objects.get(guid = "aefa5648-2240-42b4-88cf-04b093a60187") )
+                elif str(type_meter) == 'Декаст Теплосчётчик':
+                    add_meter = Meters(name = str(type_meter) + ' ' + str(meter), address = str(adr), factory_number_manual = str(meter), attr1 = str(attr1), guid_types_meters = TypesMeters.objects.get(guid = "b95134db-af0c-4eea-bc8e-32b2bcfc7e1d") )
+                elif str(type_meter) == 'Danfoss SonoMeter-500':
+                    add_meter = Meters(name = str(type_meter) + ' ' + str(meter), address = str(adr), factory_number_manual = str(meter), attr1 = str(attr1), guid_types_meters = TypesMeters.objects.get(guid = "5e1dbf09-6c37-4982-aa1e-a693d2b4f079") )
+                elif str(type_meter) == 'Пульсар IoT ВС':
+                    add_meter = Meters(name = str(type_meter) + ' ' + str(meter), address = str(adr), factory_number_manual = str(meter), attr1 = str(attr1), attr2 = str(attr2), guid_types_meters = TypesMeters.objects.get(guid = "bc61d16e-4059-4f9b-b7df-55915a7a844b") )
+                elif str(type_meter) == 'Пульсар IoT Тепло-объем':
+                    add_meter = Meters(name = str(type_meter) + ' ' + str(meter), address = str(adr), factory_number_manual = str(meter), attr1 = str(attr1), guid_types_meters = TypesMeters.objects.get(guid = "84bf3b54-d51d-48d7-902d-4826cdef7101") )
+                elif str(type_meter) == 'Пульсар IoT Тепло-энергия':
+                    add_meter = Meters(name = str(type_meter) + ' ' + str(meter), address = str(adr), factory_number_manual = str(meter), attr1 = str(attr1), guid_types_meters = TypesMeters.objects.get(guid = "a3aa2833-4104-4ac4-a0fb-c34e4402d1d6") )
+                elif str(type_meter) == 'ВКТ9':
+                    add_meter = Meters(name = str(type_meter) + ' ' + str(meter), address = str(adr), factory_number_manual = str(meter), attr1 = str(attr1), guid_types_meters = TypesMeters.objects.get(guid = "59963730-468e-441c-86d9-d08a3ed062fc") )
+                elif str(type_meter) == 'Теплосчётчик Ридан РУТ-01':
+                    add_meter = Meters(name = str(type_meter) + ' ' + str(meter), address = str(adr), factory_number_manual = str(meter), attr1 = str(attr1), guid_types_meters = TypesMeters.objects.get(guid = "4d714a5e-3af5-40fe-ab72-199ed8760ac3") )
+                elif str(type_meter) == 'Водосчётчик Ридан СГВ-15 ГВС':
+                    add_meter = Meters(name = str(type_meter) + ' ' + str(meter), address = str(adr), factory_number_manual = str(meter), attr1 = str(attr1), guid_types_meters = TypesMeters.objects.get(guid = "0a5753cf-debd-45cb-8dd0-3905f36293fc") )
+                elif str(type_meter) == 'Водосчётчик Ридан СГВ-15 ХВС':
+                    add_meter = Meters(name = str(type_meter) + ' ' + str(meter), address = str(adr), factory_number_manual = str(meter), attr1 = str(attr1), guid_types_meters = TypesMeters.objects.get(guid = "b060fcdd-f52d-4914-9dca-2fbcc2a205d5") )
+                elif str(type_meter) == 'ВЗЛЕТ ТСР-М ТСРВ-043':
+                    add_meter = Meters(name = str(type_meter) + ' ' + str(meter), address = str(adr), factory_number_manual = str(meter), attr1 = str(attr1), guid_types_meters = TypesMeters.objects.get(guid = "3a32cec9-d03a-4e46-a065-f81f92e5ead0") )
+                elif str(type_meter) == 'ВЗЛЕТ ТСР-М ТСРВ-024М':
+                    add_meter = Meters(name = str(type_meter) + ' ' + str(meter), address = str(adr), factory_number_manual = str(meter), attr1 = str(attr1), guid_types_meters = TypesMeters.objects.get(guid = "30936305-66a6-4459-b7d0-9c3ea8e2ba12") )
+                elif str(type_meter) == 'ВЗЛЕТ МР УРСВ-311 ГВС':
+                    add_meter = Meters(name = str(type_meter) + ' ' + str(meter), address = str(adr), factory_number_manual = str(meter), attr1 = str(attr1), guid_types_meters = TypesMeters.objects.get(guid = "4d85e9a5-513e-419c-a02e-3e6ba79eafa7") )
+                elif str(type_meter) == 'ВЗЛЕТ МР УРСВ-311 ХВС':
+                    add_meter = Meters(name = str(type_meter) + ' ' + str(meter), address = str(adr), factory_number_manual = str(meter), attr1 = str(attr1), guid_types_meters = TypesMeters.objects.get(guid = "af871462-2104-491d-9a83-e7dcd77364b1") )
+                else:
+                    errors.append(f"Тип счётчика '{type_meter}' (зав. номер '{meter}') не поддерживается для автоматической загрузки.")
+                    continue
+
+                if add_meter:
+                    add_meter.save()
+                    add_taken_param_no_signals(instance=add_meter, isR=isR, isHalfs=isHalfs, is_ridan_impulse=is_ridan_impulse)
+                    print(f"Device added: {type_meter} - {meter}")
+                    met += 1
+
+        except TypesMeters.DoesNotExist:
+            errors.append(f"Тип счётчика '{type_meter}' (зав. номер '{meter}') не найден в базе данных. Проверьте соответствие GUID в коде.")
+        except Exception as e:
+            errors.append(f"Неизвестная ошибка для счётчика '{meter}' (тип '{type_meter}'): {e}")
+
+    result_list = [f"Загружено новых счётчиков: {met}."]
+    if errors:
+        result_list.append("Обнаружены ошибки:")
+        result_list.extend(errors)
+    
+    return result_list
 
 
 def load_electric_counters(request):
@@ -855,18 +817,16 @@ def load_electric_counters(request):
 @csrf_exempt
 def service_water(request):
     args={}
+    args['choice_file'] = request.session.get("choice_file", "")
+    args['choice_sheet'] = request.session.get("choice_sheet", "")
     return render(request,"service/service_water.html", args)
 
 
 def add_link_meter(sender, instance, created, **kwargs):
-    #print u'Start add link port - meter'
     dtAll=GetTableFromExcel(cfg_excel_name,cfg_sheet_name) #получили из excel все строки до первой пустой строки (проверка по колонке А)
-    writeToLog( str(dtAll[1][1]))
     if (dtAll[1][1] == 'Объект'): #вода
-        #print(u'Add impulse connect')
         add_link_meter_port_from_excel_cfg_water_v2(sender, instance, created, **kwargs)
     else:# электрика
-        #print(u'Add digital connect')
         add_link_meter_port_from_excel_cfg_electric(sender, instance, created, **kwargs)
 
 
@@ -874,16 +834,9 @@ def add_link_meter_port_from_excel_cfg_water_v2(sender, instance, created, **kwa
     """Делаем привязку счётчика к порту по excel файлу ведомости"""
     dtAll=GetTableFromExcel(cfg_excel_name,cfg_sheet_name) #получили из excel все строки до первой пустой строки (проверка по колонке А)
     for i in range(2,len(dtAll)):
-        #print u'Обрабатываем строку ' + unicode(dtAll[i][6])+' - '+unicode(dtAll[i][7])
-        #print dtAll[i]
-        meter=dtAll[i][5] #счётчик
-        # print(meter)
-        #print(instance.factory_number_manual)
-        #print(dtAll[0][5], dtAll[0][4])
-        #print('строка', i)
+        meter=dtAll[i][5] #счётчик       
         ip_adr=str(dtAll[i][7]).strip()
         ip_port=str(dtAll[i][8]).strip()
-        #print(f'{ip_adr}: {ip_port}')
         if (instance.guid_types_meters.name == 'МЗТА'):
             meter = dtAll[i][3]
         # Привязка к tpc порту
@@ -897,14 +850,11 @@ def add_link_meter_port_from_excel_cfg_water_v2(sender, instance, created, **kwa
                         WHERE 
                         tcpip_settings.ip_address = '%s' AND 
                         tcpip_settings.ip_port = '%s';"""%(str(ip_adr), str(ip_port))
-    #print sQuery
+
                 guid_ip_port_from_excel.execute(sQuery)
                 guid_ip_port_from_excel = guid_ip_port_from_excel.fetchall()
-                #print(sQuery)
-                #print(guid_ip_port_from_excel)
                  
                 IsExistLink=SimpleCheckIfExist("Link_Meters_Tcpip_Settings","guid_meters",instance.guid,"","guid_tcpip_settings", guid_ip_port_from_excel)
-                #print IsExistLink
                 if IsExistLink:
                     print('Связь уже есть')
                     pass
@@ -923,18 +873,13 @@ def add_link_meter_port_from_excel_cfg_electric(sender, instance, created, **kwa
     dtAll=GetTableFromExcel(cfg_excel_name,cfg_sheet_name) #получили из excel все строки до первой пустой строки (проверка по колонке А)
     
     for i in range(1,len(dtAll)):
-        #print u'Обрабатываем строку ' + unicode(dtAll[i][6])+' - '+unicode(dtAll[i][7])
         meter=dtAll[i][6] #счётчик
-        #print dtAll[0][11], dtAll[0][12]
         PortType=str(dtAll[0][11]) # com или tcp-ip
-        #print 'i=',i,' len=', len(dtAll)
         ip_adr=str(dtAll[i][10]).strip()
         ip_port=str(dtAll[i][11]).strip()
-        # Привязка к tpc порту
         if meter is not None:
             if str(meter) == instance.factory_number_manual :
                 if PortType == 'Com-port':
-                    #print 'dtAll[i][12]', dtAll[i][12]
                     guid_com_port_from_excel = connection.cursor()
                     guid_com_port_from_excel.execute("""SELECT 
                                                       comport_settings.guid
@@ -943,7 +888,6 @@ def add_link_meter_port_from_excel_cfg_electric(sender, instance, created, **kwa
                                                     WHERE 
                                                       comport_settings.name = '%s';"""%(str(dtAll[i][11])))
                     guid_com_port_from_excel = guid_com_port_from_excel.fetchall()
-                    #print guid_com_port_from_excel
                     if (len(guid_com_port_from_excel)>0):
                         guid_com_port = ComportSettings.objects.get(guid=guid_com_port_from_excel[0][0])
                         add_com_port_link = LinkMetersComportSettings(guid_meters = instance, guid_comport_settings = guid_com_port)
@@ -958,11 +902,9 @@ def add_link_meter_port_from_excel_cfg_electric(sender, instance, created, **kwa
                                                     WHERE 
                                                       tcpip_settings.ip_address = '%s' AND 
                                                       tcpip_settings.ip_port = '%s';"""%(ip_adr, ip_port)
-                    #print sQuery
                     guid_ip_port_from_excel.execute(sQuery)
                     guid_ip_port_from_excel = guid_ip_port_from_excel.fetchall()
-            
-                    #print guid_ip_port_from_excel
+
                     if (len(guid_ip_port_from_excel)>0):
                         guid_ip_port = TcpipSettings.objects.get(guid=guid_ip_port_from_excel[0][0])
                         add_ip_port_link = LinkMetersTcpipSettings(guid_meters = instance, guid_tcpip_settings = guid_ip_port)            
@@ -973,7 +915,6 @@ def add_link_meter_port_from_excel_cfg_electric(sender, instance, created, **kwa
 
 
 def add_link_taken_params(sender, instance, created, **kwargs):
-    #print 'link taken params'
     dtAll=GetTableFromExcel(cfg_excel_name,cfg_sheet_name) #получили из excel все строки до первой пустой строки (проверка по колонке А)
     if (dtAll[1][1] == 'Объект'): #вода
         add_link_abonents_taken_params2(sender, instance, created, **kwargs)
@@ -1046,44 +987,6 @@ def add_taken_param(sender, instance, created, **kwargs): # Добавляем �
     elif instance.guid_types_meters.name == 'Меркурий 233':
         #Добавляем параметры для Меркурия 233
         pass
-    elif instance.guid_types_meters.name == 'Пульсар16':
-        #Добавляем параметры для Пульсар16
-    # Суточные
-      # Канал 1
-      # Канал 2
-      # Канал 3
-      # Канал 4
-      # Канал 5
-      # Канал 6
-      # Канал 7
-      # Канал 8
-      # Канал 9
-      # Канал 10
-      # Канал 11
-      # Канал 12
-      # Канал 13
-      # Канал 14
-      # Канал 15
-      # Канал 16
-   
-    # Текущие
-      # Канал 1
-      # Канал 2
-      # Канал 3
-      # Канал 4
-      # Канал 5
-      # Канал 6
-      # Канал 7
-      # Канал 8
-      # Канал 9
-      # Канал 10
-      # Канал 11
-      # Канал 12
-      # Канал 13
-      # Канал 14
-      # Канал 15
-      # Канал 16
-       pass
     elif instance.guid_types_meters.name == 'Пульсар10':
         #Добавляем параметры для Пульсар10
         pass
@@ -1824,31 +1727,30 @@ def add_taken_param(sender, instance, created, **kwargs): # Добавляем �
         add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "49f1197f-c6ae-4081-afbc-587ac614a3c3"))
         add_param.save()
 
-
-    elif instance.guid_types_meters.name == 'Карат 307':
-        #print u'Добавляем параметры для счётчика Карат 307'
-        #Суточные 
-        #Объём     
-        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "3024fd72-d1e8-4476-a876-4bc09553dde9"))
-        add_param.save()
-        #Тепло
-        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "46a63ef5-5761-4e16-a854-1979ddc9668f"))
-        add_param.save()
-        #Tout
-        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "6dd6ea63-20dc-46d0-b56e-6890a2b83f48"))
-        add_param.save()
-        #Tin
-        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "8a5f5921-5b70-410d-83de-8403ec2a4d87"))
-        add_param.save()
-        #Ton наработка в минутах
-        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "9c86e183-dd53-4c7f-b728-ffe75a55c633"))
-        add_param.save()
-        #Terr время работы в ошибке
-        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "abd41546-02f6-4e2c-8bd2-a60ab80ffe66"))
-        add_param.save()
-        #Масса 
-        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "eb617f04-14a3-403c-90e8-286412872232"))
-        add_param.save()
+    # elif instance.guid_types_meters.name == 'Карат 307':
+    #     #print u'Добавляем параметры для счётчика Карат 307'
+    #     #Суточные 
+    #     #Объём     
+    #     add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "3024fd72-d1e8-4476-a876-4bc09553dde9"))
+    #     add_param.save()
+    #     #Тепло
+    #     add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "46a63ef5-5761-4e16-a854-1979ddc9668f"))
+    #     add_param.save()
+    #     #Tout
+    #     add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "6dd6ea63-20dc-46d0-b56e-6890a2b83f48"))
+    #     add_param.save()
+    #     #Tin
+    #     add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "8a5f5921-5b70-410d-83de-8403ec2a4d87"))
+    #     add_param.save()
+    #     #Ton наработка в минутах
+    #     add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "9c86e183-dd53-4c7f-b728-ffe75a55c633"))
+    #     add_param.save()
+    #     #Terr время работы в ошибке
+    #     add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "abd41546-02f6-4e2c-8bd2-a60ab80ffe66"))
+    #     add_param.save()
+    #     #Масса 
+    #     add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "eb617f04-14a3-403c-90e8-286412872232"))
+    #     add_param.save()
     elif instance.guid_types_meters.name == 'Danfoss SonoSelect':
         #print u'Добавляем параметры для счётчика Danfoss SonoSelect'
         #Суточные 
@@ -3493,12 +3395,8 @@ def add_link_abonents_taken_params(sender, instance, created, **kwargs):
                     return None
             else:
                 pass
-    
-    writeToLog('--------')
-    writeToLog(instance.name)
-    writeToLog('==>', get_taken_param_by_abonent_from_excel_cfg(instance.name))
+
     if get_taken_param_by_abonent_from_excel_cfg(instance.name) is not None:
-        writeToLog('Совпадение')
         try:
             common_sql.InsertInLinkAbonentsTakenParams(name = Abonents.objects.get(name= get_taken_param_by_abonent_from_excel_cfg(instance.name)).name + " " + instance.guid_params.guid_names_params.name + " " + instance.guid_params.guid_types_params.name ,coefficient=1, coefficient_2 = 1,coefficient_3 = 1, guid_abonents = Abonents.objects.get(name= get_taken_param_by_abonent_from_excel_cfg(str(instance.name))) , guid_taken_params = instance )
             add_link_abonents_taken_param.save()
@@ -3509,11 +3407,8 @@ def add_link_abonents_taken_params(sender, instance, created, **kwargs):
     
 
 def add_link_abonents_taken_params2(sender, instance, created, **kwargs):
-    print(f'Зашли в функцию add_link_abonents_taken_params2')
-    writeToLog(instance.name)
     isExistTakenParam=SimpleCheckIfExist('taken_params','name',instance.name,"","","")
     if not isExistTakenParam:
-        print('ERR: Param not exist!')
         return None
     dtAll=GetTableFromExcel(cfg_excel_name,cfg_sheet_name) #получили из excel все строки до первой пустой строки (проверка по колонке А)
     for i in range(2,len(dtAll)):
@@ -3526,77 +3421,51 @@ def add_link_abonents_taken_params2(sender, instance, created, **kwargs):
         if (taken_param==instance.name):
             isExistAbonent=SimpleCheckIfExist('abonents','name',abon,'','','')
             if isExistAbonent:
-                #writeToLog('Совпадение')
-                #"ХВС, №47622 Канал 4 Суточный"
-                #guidAbon=GetSimpleTable('abonents','name',abon)[0][0]
+
                 t = Abonents.objects.filter(name = abon)
                 guidAbon = t[0].guid
                 print(guidAbon)
-                linkName=abon+' Канал '+channel+' Суточный'
-                writeToLog(linkName)
+                linkName=abon+' Канал '+channel+' Суточный'           
                 try:
                     common_sql.InsertInLinkAbonentsTakenParams(name = linkName,coefficient=1, coefficient_2 = 1,coefficient_3 = 1, guid_abonents = Abonents.objects.get(guid=guidAbon) , guid_taken_params = instance.guid )
-                    add_link_abonents_taken_param.save()
-                    writeToLog('Связь добавлена: '+abon+' -- '+taken_param)
+                    add_link_abonents_taken_param.save()                   
                 except:
-                    writeToLog('ошибка')
+                    pass
                 else:
                     pass
     
-#    
-#    
-#    dtAll=GetTableFromExcel(cfg_excel_name,cfg_sheet_name) #получили из excel все строки до первой пустой строки (проверка по колонке А)
-#    for i in range(2,len(dtAll)):
-#            #taken_param = u'Пульсар' + u' ' + unicode(dtAll[i][3])[17:20] + u' ' + unicode(dtAll[i][3])[2:8] + u' ' + u'Пульсар' + u' ' + unicode(dtAll[i][3])[17:20] + u' ' + u'Канал' + u' ' + unicode(dtAll[i][4])
-#            # "Пульсар 2M 062726 Пульсар 2M Канал 1 Суточный -- adress: 1  channel: 0"
-#            # "Пульсар 10M 203677 Пульсар 10M Канал 7 Суточный -- adress: 7  channel: 0"
-#        type_pulsar=unicode(dtAll[i][6])
-#        channel=unicode(dtAll[i][4])
-#        num_pulsar=unicode(dtAll[i][5])
-#        taken_param = type_pulsar+u' '+num_pulsar+u' '+type_pulsar+u' Канал '+channel+u' Суточный -- adress: '+channel+u'  channel: 0'
-#        print taken_param
-#    
-#    print u'--------'
-#    print instance.name
-#    print u'==>', get_taken_param_by_abonent_from_excel_cfg(instance.name)
-#    if get_taken_param_by_abonent_from_excel_cfg(instance.name) is not None:
-#        print u'Совпадение'
-#        try:
-#            common_sql.InsertInLinkAbonentsTakenParams(name = Abonents.objects.get(name= get_taken_param_by_abonent_from_excel_cfg(instance.name)).name + u" " + instance.guid_params.guid_names_params.name + u" " + instance.guid_params.guid_types_params.name ,coefficient=1, coefficient_2 = 1,coefficient_3 = 1, guid_abonents = Abonents.objects.get(name= get_taken_param_by_abonent_from_excel_cfg(unicode(instance.name))) , guid_taken_params = instance )
-#            add_link_abonents_taken_param.save()
-#        except:
-#            pass
-#    else:
-#        pass
+
 
 
 def add_link_abonent_taken_params_from_excel_cfg_electric(sender, instance, created, **kwargs):
-    dtAll=GetTableFromExcel(cfg_excel_name,cfg_sheet_name) #получили из excel все строки до первой пустой строки (проверка по колонке А)
-    #print dtAll[0][0]
+    dtAll=GetTableFromExcel(cfg_excel_name,cfg_sheet_name)
     for i in range(1,len(dtAll)):
         meter=dtAll[i][6]
         abon=str(dtAll[i][3])
-        obj=str(dtAll[i][2])
-        if meter is not None:
-            cursor = connection.cursor()
-            sQuery="""SELECT abonents.guid FROM public.objects, public.abonents
-                      WHERE objects.guid = abonents.guid_objects 
-                      AND abonents.name = '%s' 
-                      AND objects.name = '%s';"""%(abon,obj )
-            #print sQuery
-            cursor.execute(sQuery)
-            guid_abonent_by_excel = cursor.fetchall()
-            #print guid_abonent_by_excel
+        obj_l2_name=str(dtAll[i][2])
+        obj_l1_name=str(dtAll[i][1])
+        obj_l0_name=str(dtAll[i][0])
 
-            if str(meter) == instance.guid_meters.factory_number_manual:
-                writeToLog('Абонент найден' + ' ' + str(instance.name))
-                #print guid_abonent_by_excel 
-                dtAbon = GetSimpleCrossTable('objects', 'name', obj, 'abonents','name', abon)
-                #dtAbon=GetSimpleTable('abonents','name', abon)
-                guidAbon=dtAbon[0][4]
-                #print instance.name, instance.guid
-                common_sql.InsertInLinkAbonentsTakenParams(name = str(dtAll[i][3]) + ' - ' +  str(instance.guid_meters.name)  ,coefficient=str(dtAll[i][9]), coefficient_2 = 1, coefficient_3 = 1, guid_abonents = guidAbon, guid_taken_params = instance.guid)
-                #add_link_abonents_taken_param.save()
+        if meter is not None and str(meter) == instance.guid_meters.factory_number_manual:
+            cursor = connection.cursor()
+            sQuery="""
+            SELECT a.guid
+            FROM abonents a
+            JOIN objects obj2 ON a.guid_objects = obj2.guid
+            JOIN objects obj1 ON obj2.guid_parent = obj1.guid
+            JOIN objects obj0 ON obj1.guid_parent = obj0.guid
+            WHERE a.name = %s
+              AND obj2.name = %s
+              AND obj1.name = %s
+              AND obj0.name = %s
+            """
+            cursor.execute(sQuery, [abon, obj_l2_name, obj_l1_name, obj_l0_name])
+            guid_abonent_by_excel = cursor.fetchall()
+
+            if len(guid_abonent_by_excel) > 0:
+                guidAbon =  guid_abonent_by_excel[0][0]
+                print(f"{abon} - {instance.guid_meters.name}")
+                common_sql.InsertInLinkAbonentsTakenParams(name = f"{abon} - {instance.guid_meters.name}", coefficient=str(dtAll[i][9]), coefficient_2 = 1, coefficient_3 = 1, guid_abonents = guidAbon, guid_taken_params = instance.guid)
             else:
                 pass
     
@@ -3666,7 +3535,6 @@ def LoadObjectsAndAbons_water(sPath, sheet):
     result="Объекты не загружены"
     dtAll=GetTableFromExcel(sPath,sheet) #получили из excel все строки до первой пустой строки (проверка по колонке А)
     kv=0
-    #print 'len(dtAll)', str(len(dtAll))
     for i in range(2,len(dtAll)):
         obj_l0='Вода' # всегда будет Вода как объект-родитель
         obj_l1=dtAll[i][0] #корпус
@@ -3677,31 +3545,20 @@ def LoadObjectsAndAbons_water(sPath, sheet):
                 j-=1
                 obj_l2=dtAll[j][1]
         abon=dtAll[i][2] #абонент он же счётчик по воде
-#        chanel=dtAll[i][4] # канал пульсара
-#        numPulsar=dtAll[i][5] #номер пульсара
-#        typePulsar=dtAll[i][5] #тип пульсара
         isNewObj_l0=SimpleCheckIfExist('objects','name',obj_l0,"","","")#вода
         isNewObj_l1=SimpleCheckIfExist('objects','name',obj_l1,"","","")#корпус
         
         guid_obj2=CheckIfExistInObjects(obj_l1, obj_l2)#возвращает guid квартиры или None
         
         isNewAbon=SimpleCheckIfExist('objects','name', obj_l2,'abonents', 'name', abon)
-        
-        #print 'isNewObj_l0 ', not isNewObj_l0,'isNewObj_l1 ', not isNewObj_l1, 'guid_obj2 ', str(guid_obj2), ' IsNewAbon', not isNewAbon 
-        #print i, obj_l1, obj_l2, abon
+
         if not (isNewObj_l0):
-            writeToLog('Level 0 create object '+obj_l0)
             add_parent_object = Objects(name=obj_l0, level=0) 
             add_parent_object.save()
-            writeToLog( " Ok")
-            writeToLog('create object '+obj_l1)
-            #print add_parent_object
             add_object1=Objects(name=obj_l1, level=1, guid_parent = add_parent_object)
             add_object1.save()
-            writeToLog('create object '+obj_l2)
             add_object2=Objects(name=obj_l2, level=2, guid_parent = add_object1)
             add_object2.save()            
-            writeToLog('create abonent '+abon)
             add_abonent = Abonents(name = abon, guid_objects =add_object2, guid_types_abonents = TypesAbonents.objects.get(guid= "e4d813ca-e264-4579-ae15-385cdbf5d28c"))
             
             add_abonent.save()
@@ -3709,28 +3566,23 @@ def LoadObjectsAndAbons_water(sPath, sheet):
             result="Объекты созданы"
             continue
         if not (isNewObj_l1):#новый корпус
-            writeToLog('Level 1 create object '+obj_l1)
             dtParent=GetSimpleTable('objects','name',obj_l0)
             if dtParent: #родительский объект есть - корпус
                 guid_parent=dtParent[0][0]
                 add_object1=Objects(name=obj_l1, level=1, guid_parent = Objects.objects.get(guid=guid_parent))
                 add_object1.save()                
-                writeToLog('create object '+obj_l2)
                 add_object2=Objects(name=obj_l2, level=2, guid_parent = add_object1)
                 add_object2.save()
-                writeToLog('create abonent '+abon)
                 add_abonent = Abonents(name = abon, guid_objects =add_object2, guid_types_abonents = TypesAbonents.objects.get(guid= "e4d813ca-e264-4579-ae15-385cdbf5d28c"))
                 add_abonent.save()
                 kv+=1
                 result="Объекты созданы"
                 continue
             else: 
-                writeToLog('Не удалось создать объект '+obj_l1)
                 continue
             
         if bool(not guid_obj2): #новая квартира
             #переделать добавление на добавление по гуиду
-            writeToLog('Level 2 create object '+obj_l2)
             dtParent=GetSimpleTable('objects','name',obj_l1)
             if dtParent: #родительский объект есть
                 guid_parent=dtParent[0][0]
@@ -3741,13 +3593,10 @@ def LoadObjectsAndAbons_water(sPath, sheet):
                 add_abonent.save()
                 kv+=1
         if not (isNewAbon):
-            writeToLog('Just create abonent '+ abon)
             if bool(guid_obj2): #родительский объект есть
                 add_abonent = Abonents(name = abon, guid_objects = Objects.objects.get(guid=guid_obj2), guid_types_abonents = TypesAbonents.objects.get(guid= "e4d813ca-e264-4579-ae15-385cdbf5d28c"))
                 add_abonent.save()
                 kv+=1            
-#            else: 
-#                print u'Не удалось создать объект '+abon
                 continue
 
     result+=" Структура счётчиков создана "
@@ -3884,55 +3733,29 @@ def LoadWaterPulsar(sPath, sSheet):
         abonent_name=str(dtAll[i][2])        
         taken_param = pulsarName + ' ' + str(dtAll[i][5]) + ' '+ pulsarName + ' ' + 'Канал ' + chanel+ ' Суточный -- adress: ' +chanel+'  channel: 0'
         if str(typePulsar) == 'МЗТА':
-            #МЗТА 15-4001 МЗТА Канал 20 Суточный -- adress: 20 channel: 0
             taken_param = str(str(typePulsar) + ' ' + str(num_meter_mzta)) + ' ' + str(typePulsar)  + ' ' + 'Канал ' + chanel+ ' Суточный -- adress: ' +chanel+'  channel: 0'
-            #taken_param = pulsarName + ' ' + str(dtAll[i][5]) + ' '+ str(str(typePulsar) + ' ' + str(num_meter_mzta)) + ' ' + 'Канал ' + chanel+ ' Суточный -- adress: ' +chanel+'  channel: 0'
-        #print "chanel ", chanel
-        #print(taken_param)
-        #Sravnenie(taken_param)
+
         dtTakenParam=GetSimpleTable('taken_params','name',taken_param)
-        #writeToLog(bool(dtTakenParam))
-        #print(dtTakenParam)
+        
         if dtTakenParam:                
-            #print(u'taken param найден')
             guid_taken_param=dtTakenParam[0][2]
             dtLink=GetSimpleTable('link_abonents_taken_params','guid_taken_params',guid_taken_param)
-            #print dtLink
             if (dtLink):
-                #print 'link is exist '+ chanel + '  '+pulsarName
                 result+="\n Привязка канала "+chanel+" Пульсара "+pulsarName+" уже существует. Перезапись НЕ произведена для счётчика "+abonent_name
                 continue
             else:
-                #dtAbon= GetSimpleTable('abonents','name', abonent_name)
                 t = Abonents.objects.filter(name = abonent_name)
                 guidAbon = t[0].guid     #dtAbon[0][0]
-                #print(abonent_name, 'guidAbon', guidAbon)
-                #"миномес ГВС, №68208 Канал 5 Суточный"
-                #print abonent_name, guidAbon, guid_taken_param
                 common_sql.InsertInLinkAbonentsTakenParams(name = abonent_name+' Канал '+chanel+' Суточный',coefficient=1, coefficient_2 = 1,coefficient_3 = 1, guid_abonents = guidAbon, guid_taken_params = guid_taken_param)
-                #add_link_abonents_taken_param.save()
-                print (u'Abonent connected with taken param')
                 con+=1
     result+='Прогружено новых пульсаров '+str(met)
     if con>0:
         result+='Созданы новые связи '
-    #print('1111111111')
     signals.post_save.connect(add_link_taken_params, sender=TakenParams)  
     return result
 
-#def Sravnenie(takenParam):
-#    str_bd='Пульсар 2М 062726 Пульсар 2M Канал 1 Суточный -- adress: 1 channel: 0'
-#    i=0
-#    print str_bd
-#    while i!=len(takenParam):
-#        if ord(takenParam[i])!=ord(str_bd[i]):
-#            print i, takenParam[i]
-#        i+=1
-
-
 def load_water_port(request):
     args={}
-
     fileName=""
     sheet    = ""
     result=""
@@ -3945,7 +3768,6 @@ def load_water_port(request):
                 
                 directory=os.path.join(BASE_DIR,'static/cfg/')
                 sPath=directory+fileName
-                #print sPath, sheet
                 result=load_tcp_ip_water_ports_from_excel(sPath, sheet)
                 if result:
                     result="Порт/ы был успешно добавлен"
@@ -3959,8 +3781,6 @@ def load_water_port(request):
     if  not(os.path.exists(directory)):
         os.mkdir(directory)    
     files = os.listdir(directory)
-    # print(files) 
-    # print(fileName)   
     args['filesFF']= files
     args["choice_file"]    = fileName
     args["choice_sheet"]    = sheet
@@ -3994,7 +3814,6 @@ def UpdateTable(table,whereFieled, whereValue,field1,value1,field2,value2,field3
      WHERE %s='%s'
      RETURNING * 
    """%(table, field1, value1,field2,value2,field3,value3,whereFieled, whereValue)
-    #print sQuery
     cursor.execute(sQuery)
     dt = cursor.fetchall()
     if len(dt):
@@ -4010,14 +3829,10 @@ def load_tcp_ip_water_ports_from_excel(sPath, sheet):
     row = 3
     IsAdded=False
     result=""
-    writeToLog('Load port')
-    writeToLog('Загрузка портов')
     while (bool(sheet_ranges['H%s'%(row)].value)):
         if sheet_ranges['H%s'%(row)].value is not None:
             ip_adr=str(sheet_ranges['H%s'%(row)].value)
             ip_port=str(sheet_ranges['I%s'%(row)].value)
-            #print ip_adr, ip_port
-            writeToLog('Обрабатываем адрес ' +ip_adr +' '+ ip_port)
             
             # проверка есть ли уже такой порт, запрос в БД с адресом и портом, если ответ пустой-добавляем, в противном случае continue
             if not ip_adr or not ip_port or ip_adr==None or ip_port==None: 
@@ -4031,28 +3846,19 @@ def load_tcp_ip_water_ports_from_excel(sPath, sheet):
                     IsAdded=True
                 else: 
                         newRes = 'Порт '+str(ip_adr)+": "+str(ip_port)+" уже существует "
-                        # print result
-                        # print newRes
-                        # print result.find(newRes)
                         if bool(result.find(newRes) == -1):
                             result+= newRes
-        writeToLog( result)
         row+=1
     return IsAdded
 
 
 def makeLinkabonentTakenParamName(abName,typeMeter,new_meter):
-    #"Квартира 0103 - М-230 21949676"   
-#LinkAbonentsTakenParams (name = Abonents.objects.get(name= get_taken_param_by_abonent_from_excel_cfg(instance.name)).name + u" " + instance.guid_params.guid_names_params.name + u" " + instance.guid_params.guid_types_params.name 
     newLinkAbonentTakenParamName=abName+ ' - '+ typeMeter +' ' + str(new_meter)
     return newLinkAbonentTakenParamName
 
 
 def makeNewTakenParamName(nameParam1, old_meter, new_meter, typeMeter):
     newName=''
-
-        # "М-230 22633939 Меркурий 230 T0 A+ Суточный -- adress: 0  channel: 0"
-        #"Саяны Комбик 4443 Саяны Комбик Q Система1 Суточный -- adress: 0  channel: 1"
     n=nameParam1.find(old_meter)
     s=nameParam1[n+len(old_meter):]
     newName= typeMeter + ' ' + str(new_meter) + s
@@ -4096,8 +3902,7 @@ def get_electric_progruz_com(request):
     ws['L1'].style = "ali_grey"
 
 #Запрашиваем данные для отчета
-    data_table = common_sql.get_electric_register_com()        
-   
+    data_table = common_sql.get_electric_register_com()           
         
 # Заполняем отчет значениями
     for row in range(2, len(data_table)+2):
@@ -4170,14 +3975,6 @@ def get_electric_progruz_com(request):
         except:
             ws.cell('j%s'%(row)).style = ali_white
             next
-
-        # try:
-        #     ws.cell('k%s'%(row)).value = '%s' % (data_table[row-2][10])  
-        #     ws.cell('k%s'%(row)).style = ali_white
-        # except:
-        #     ws.cell('k%s'%(row)).style = ali_white
-        #     next
-
         try:
             ws.cell('l%s'%(row)).value = '%s' % (data_table[row-2][10])  
             ws.cell('l%s'%(row)).style = ali_white
@@ -4185,7 +3982,6 @@ def get_electric_progruz_com(request):
             ws.cell('l%s'%(row)).style = ali_white
             next
 
-    #ws.row_dimensions[5].height = 41
     ws.column_dimensions['A'].width = 15 
     ws.column_dimensions['B'].width = 30 
     ws.column_dimensions['C'].width = 20
@@ -4199,7 +3995,6 @@ def get_electric_progruz_com(request):
     response = HttpResponse(save_virtual_workbook(wb),content_type="application/vnd.ms-excel") 
     now = datetime.datetime.now()
     electric_data_end = now.strftime("%d-%m-%Y %H:%M")
-    #response = HttpResponse(response.read(), content_type="application/vnd.ms-excel")    
     output_name = 'electric_register-'+electric_data_end + '_com'
     file_ext = 'xlsx'    
     response['Content-Disposition'] = 'attachment;filename="%s.%s"' % (output_name.replace('"', '\"'), file_ext)   
@@ -4346,8 +4141,7 @@ def get_electric_progruz(request):
     response.seek(0)
     response = HttpResponse(save_virtual_workbook(wb),content_type="application/vnd.ms-excel") 
     now = datetime.datetime.now()
-    electric_data_end = now.strftime("%d-%m-%Y %H:%M")
-    #response = HttpResponse(response.read(), content_type="application/vnd.ms-excel")    
+    electric_data_end = now.strftime("%d-%m-%Y %H:%M") 
     output_name = 'electric_register-'+electric_data_end
     file_ext = 'xlsx'    
     response['Content-Disposition'] = 'attachment;filename="%s.%s"' % (output_name.replace('"', '\"'), file_ext)   
@@ -4495,7 +4289,6 @@ def get_water_progruz(request):
     response = HttpResponse(save_virtual_workbook(wb),content_type="application/vnd.ms-excel") 
     now = datetime.datetime.now()
     electric_data_end = now.strftime("%d-%m-%Y %H:%M")
-    #response = HttpResponse(response.read(), content_type="application/vnd.ms-excel")    
     output_name = 'water_register-'+electric_data_end
     file_ext = 'xlsx'    
     response['Content-Disposition'] = 'attachment;filename="%s.%s"' % (output_name.replace('"', '\"'), file_ext)   
@@ -4603,8 +4396,6 @@ def get_water_impulse_progruz(request):
             ws.cell('i%s'%(row)).style = ali_white
             next
 
-
-    #ws.row_dimensions[5].height = 41
     ws.column_dimensions['A'].width = 30 
     ws.column_dimensions['B'].width = 30 
     ws.column_dimensions['C'].width = 20
@@ -4618,7 +4409,6 @@ def get_water_impulse_progruz(request):
     response = HttpResponse(save_virtual_workbook(wb),content_type="application/vnd.ms-excel") 
     now = datetime.datetime.now()
     electric_data_end = now.strftime("%d-%m-%Y %H:%M")
-    #response = HttpResponse(response.read(), content_type="application/vnd.ms-excel")    
     output_name = 'water_impulse_register-'+electric_data_end
     file_ext = 'xlsx'    
     response['Content-Disposition'] = 'attachment;filename="%s.%s"' % (output_name.replace('"', '\"'), file_ext)   
@@ -4662,8 +4452,7 @@ def get_heat_progruz(request):
     ws['L1'].style = "ali_grey"
 
 #Запрашиваем данные для отчета
-    data_table = common_sql.get_heat_register()        
-   
+    data_table = common_sql.get_heat_register()           
         
 # Заполняем отчет значениями
     for row in range(2, len(data_table)+2):
@@ -4751,7 +4540,6 @@ def get_heat_progruz(request):
             ws.cell('l%s'%(row)).style = ali_white
             next
 
-    #ws.row_dimensions[5].height = 41
     ws.column_dimensions['A'].width = 15 
     ws.column_dimensions['B'].width = 30 
     ws.column_dimensions['C'].width = 20
@@ -4766,7 +4554,6 @@ def get_heat_progruz(request):
     response = HttpResponse(save_virtual_workbook(wb),content_type="application/vnd.ms-excel") 
     now = datetime.datetime.now()
     electric_data_end = now.strftime("%d-%m-%Y %H:%M")
-    #response = HttpResponse(response.read(), content_type="application/vnd.ms-excel")    
     output_name = 'heat_register-'+electric_data_end
     file_ext = 'xlsx'    
     response['Content-Disposition'] = 'attachment;filename="%s.%s"' % (output_name.replace('"', '\"'), file_ext)   
@@ -4795,7 +4582,6 @@ def load_balance_group(request):
     
     balance_status=result
 
-    #print fileName
     args["choice_file"]    = fileName
     args["choice_sheet"]    = sheet
     args["balance_status"]=balance_status
@@ -4848,10 +4634,8 @@ WHERE
   %s.guid_%s = %s.guid AND
   %s.%s = '%s' AND 
   %s.%s = '%s'"""%(table1, table1, table2,  table1, table2,    table2,table1,field1,val1,table2,field2,val2)
-    #print sQuery
     cursor.execute(sQuery)
     dt = cursor.fetchall()
-    #print sQuery
     return dt
    
 
@@ -4879,21 +4663,15 @@ def LoadImpulseWaterBalance(dtAll):
         znak=str(dtAll[i][1])        
         meter=str(dtAll[i][4])
         type_abonent=str(dtAll[i][5])
-        #print balance_group, znak, meter, type_abonent
         isNewBalanceGroup=not SimpleCheckIfExist('balance_groups','name',balance_group,"","","")
         isNewMeter=not SimpleCheckIfExist('meters','factory_number_manual',meter,"","","")
         isNewTypeAbonent=not SimpleCheckIfExist('types_abonents','name',type_abonent,"","","")
-        #print u'isNewBalanceGroup: ', isNewBalanceGroup
-        #print u'isNewTypeAbonent: ', isNewTypeAbonent
-        #print u'isNewMeter: ', isNewMeter
         if isNewBalanceGroup: #если балансной группы ещё не существует, то создаём её
             balance_group_guid=uuid.uuid4()
             result += InsertIntoBalanceGroup(balance_group_guid, balance_group)
-            #print u'Создана балансная группа '+balance_group
         if isNewTypeAbonent: #если такого типа абонента не существует, то создаём
             types_abonents_guid=uuid.uuid4()
-            result += InsertIntoTypesAbonents(types_abonents_guid, type_abonent)
-            #print u'Создан тип абонента ' + type_abonent       
+            result += InsertIntoTypesAbonents(types_abonents_guid, type_abonent)    
         if isNewMeter:#ничего не создаём, добавляем сообщение, что абонента надо создать
            result += 'Счётчика '+meter+' (в таблице строка '+str(i+1)+') не существует. В балансную группу не добавлен!'
            continue
@@ -4912,7 +4690,6 @@ def LoadImpulseWaterBalance(dtAll):
                 result+= 'Счётчик ' + meter + ' уже принадлежит балансной группе ' + balance_group
                 break
         if isNewLink:
-            #print balance_group, meter
             cursor = connection.cursor()
             isZnak=True        
             if znak=='0' or znak == 0:
@@ -4948,21 +4725,17 @@ def LoadBalance(sPath, sheet):
             abonent_name=str(dtAll[i][3])
             meter=str(dtAll[i][4])
             type_abonent=str(dtAll[i][5])
-            #print balance_group, znak, abonent_name,meter, type_abonent
             isNewBalanceGroup=not SimpleCheckIfExist('balance_groups','name',balance_group,"","","")
             isNewMeter=not SimpleCheckIfExist('meters','factory_number_manual',meter,"","","")
             isNewTypeAbonent=not SimpleCheckIfExist('types_abonents','name',type_abonent,"","","")
-            #print u'isNewBalanceGroup: ', isNewBalanceGroup
-            #print u'isNewTypeAbonent: ', isNewTypeAbonent
-            #print u'isNewMeter: ', isNewMeter
+
             if isNewBalanceGroup: #если балансной группы ещё не существует, то создаём её
                 balance_group_guid=uuid.uuid4()
                 result += InsertIntoBalanceGroup(balance_group_guid, balance_group)
-                #print u'Создана балансная группа '+balance_group
             if isNewTypeAbonent: #если такого типа абонента не существует, то создаём
                 types_abonents_guid=uuid.uuid4()
                 result += InsertIntoTypesAbonents(types_abonents_guid, type_abonent)
-                #print u'Создан тип абонента ' + type_abonent       
+   
             if isNewMeter:#ничего не создаём, добавляем сообщение, что абонента надо создать
                result += 'Счётчика '+meter+' (в таблице должен принадлежать абоненту '+abonent_name+') не существует. В балансную группу не добавлен!'
                continue
@@ -4970,7 +4743,6 @@ def LoadBalance(sPath, sheet):
             types_abonents_guid=GetSimpleTable('types_abonents','name',type_abonent)[0][0]
             guid_abonent=GetGuidFromFirstTableCrossWithSecondTable('abonents','objects','name',abonent_name,'name',object_name)[0][0]
             isOk=UpdateSimpleTable('abonents', guid_abonent,'guid_types_abonents',types_abonents_guid)
-            #print u'type of abonents changed: ', isOk 
             
             guid_meters=GetSimpleTable('meters','factory_number_manual',meter)[0][0]        
             if not isNewBalanceGroup:
@@ -4986,7 +4758,6 @@ def LoadBalance(sPath, sheet):
                     result+= 'Счётчик ' + meter + ' уже принадлежит балансной группе ' + balance_group
                     break
             if isNewLink:
-                #print balance_group, meter
                 cursor = connection.cursor()
                 isZnak=True        
                 if znak=='0' or znak == 0:
@@ -5018,12 +4789,9 @@ def add_current_taken_params_pulsar16m(request):
     dt_pulsar16m=common_sql.get_meters_by_type( 'Пульсар 16M')
     count16m=0
     for puls in dt_pulsar16m:
-        #print u'счётчик', puls[1]
         guid_meter = puls[0]
         dt_current_count = common_sql.get_count_current_params_by_meters_guid(guid_meter)
         if len(dt_current_count)>0: continue
-        # if dt_current_count[0][1] == 'Пульсар 16M':
-        #     if dt_current_count[0][0] >=16: continue
         
     # Текущие
       #Канал 1
@@ -5032,8 +4800,6 @@ def add_current_taken_params_pulsar16m(request):
         dt_abonent = common_sql.get_abonent_by_meter_and_pulsar_chanel(guid_meter, 1)
         if len(dt_abonent)>0:
             common_sql.InsertInLinkAbonentsTakenParams(name = dt_abonent[0][1] + " Канал 1 Текущий", coefficient=1, coefficient_2 = 1,coefficient_3 = 1, guid_abonents = dt_abonent[0][0], guid_taken_params = add_param.guid )               
-        #common_sql.InsertInLinkAbonentsTakenParams(  ,coefficient=1, coefficient_2 = 1,coefficient_3 = 1,guid_abonents = dt_abonent[0][0] , guid_taken_params = add_param.guid )
-        #add_link_abonents_taken_param.save()
 
       #Канал 2
         add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = Meters.objects.get(guid=puls[0]), guid_params = Params.objects.get(guid = "5a6b0338-c15d-4224-a04f-a10fc73c5fc7"))
@@ -5147,7 +4913,6 @@ def add_current_taken_params_pulsar16m(request):
     count10m=0
     for puls in dt_pulsar10m:        
         #Добавляем параметры для Пульсар10 
-        #print u'счётчик', puls[1]
         guid_meter = puls[0]
         dt_current_count = common_sql.get_count_current_params_by_meters_guid(guid_meter)
         if len(dt_current_count)>0: continue
@@ -5244,9 +5009,7 @@ def change_meters_v2(request):
             if (not old_meter or old_meter==None or new_meter==None or not new_meter):
                 change_meter_status="Заполните обе ячейки"
             else:
-                change_meter_status=ChangeMeters_v2(old_meter, new_meter)
-                
-    #print 'old_meter, new_meter', old_meter, new_meter
+                change_meter_status=ChangeMeters_v2(old_meter, new_meter)                
     if old_meter is None or new_meter is None or change_meter_status.find('Счётчик заменён')>-1:
         old_meter=' '
         new_meter=' '
@@ -5265,13 +5028,11 @@ def isInt(s):
         return False
 
 def rename_taken_params_by_guid(guid_meter, old_met, new_met):
-    #print 'rename taken params'
     try:  
         common_sql.update_table_with_replace('taken_params', 'name', 'guid_meters', guid_meter, old_met, new_met)
     except Meters.DoesNotExist:
         return False
     try:
-    #переименовываем link_abonents_taken_params
         for row in TakenParams.objects.filter(guid_meters=guid_meter):
             guid_taken_params= row.guid
             common_sql.update_table_with_replace('link_abonents_taken_params', 'name', 'guid_taken_params', guid_taken_params, old_met, new_met)
@@ -5291,23 +5052,16 @@ def ChangeMeters_v2(old_meter, new_meter):
     
     if not(isInt(old_meter)) or not(isInt(new_meter)):
         return 'Замена невозможна. Номера счётчиков должны быть числами'
-    #print 'old_meter, new_meter', old_meter, new_meter
     old_met_obj=Meters.objects.filter(factory_number_manual=old_meter)    
     #Просто меняем meters 
     new_name = str(old_met_obj[0].name).replace(str(old_meter), str(new_meter))
     new_num = str(old_met_obj[0].factory_number_manual).replace(str(old_meter), str(new_meter))
     #делаем проверку,если сетевой равен заводскому, то меняем, иначе не трогаем
     new_address = old_met_obj[0].address
-    #print new_address, 'new_address'
-    #print old_met_obj[0].address, 'old_met_obj[0].address'
-    #print old_met_obj[0].factory_number_manual, 'old_met_obj[0].factory_number_manual'
+
     if str(old_met_obj[0].address) == str(old_met_obj[0].factory_number_manual):
                 
         new_address = str(old_met_obj[0].address).replace(str(old_meter), str(new_meter))
-        #print new_address, 'new_address'     
-    
-    #print old_met_obj.values()
-    #print 'old_met_obj.guid', old_met_obj[0].guid
     
     rename_taken_params_by_guid(old_met_obj[0].guid, old_meter, new_meter)
     old_met_obj.update(name=new_name, factory_number_manual = new_num, address = new_address)
@@ -5384,11 +5138,8 @@ def ReplaceMeters_v2(meter1, meter2):
     guid_abonent2 = dt_link2[0][0]
     
     for row in dt_link1:
-        #print 'row[2], meter1, meter2', row[2], meter1, meter2
         common_sql.update_table_with_replace('link_abonents_taken_params', 'name', 'guid', row[2], meter2, meter1)
-        #print row[2], guid_abonent1, guid_abonent2
         common_sql.update_table_with_replace_guid('link_abonents_taken_params', 'guid_abonents', 'guid', row[2], guid_abonent1, guid_abonent2)
-        #print 'taken_params', 'name', 'guid', row[6], meter1, meter2
         common_sql.update_table_with_replace('taken_params', 'name', 'guid', row[6], meter2, meter1)
        
     for row in dt_link2:
@@ -5413,11 +5164,9 @@ def get_file(name_file):
         with open(result_url, 'rb') as f:
             response = HttpResponse(f.read(), content_type="application/vnd.ms-excel")
             output_name = name_file
-            #file_ext = u'xlsx'    
             response['Content-Disposition'] = 'attachment;filename="%s"' % (output_name.replace('"', '\"'))
             return response
         f.close() 
-
 
 def get_electric_template(request):
     return get_file('electric_template_for_load.xlsx')
@@ -5470,9 +5219,6 @@ class NumberParser(HTMLParser):
             zavod_start_pos = data.rfind('-') + 2
             zavod_end_pos = data.rfind(')') 
             zavod = str(data[zavod_start_pos:zavod_end_pos])
-            #print u'setevoy: '+setev
-            #print u'zavodskoy: '+zavod
-            #print data
 
     def handle_endtag(self, tag):
         self.in_h2 = False
@@ -5491,16 +5237,12 @@ class TableParser(HTMLParser):
             global col
             global row
             global dt
-            #
-            # print unicode(row),unicode(col)
             if row > 1487 : return
             dt[row][col]=data
             if col==9:
                 col = 0
                 row+=1
             else:  col+=1
-            
-            #print data
      
     def handle_endtag(self, tag):
         self.in_td = False
@@ -5512,7 +5254,7 @@ def Insert(id_var, date,time, param,param_id):
             id, date, "time", value, status, id_taken_params)
     VALUES (%s, '%s', '%s', %s, %s, %s);
         """%(id_var, date, time, param, True ,param_id)
-    #print sQueryInsert
+
     curs.execute(sQueryInsert)
     con.commit()
 
@@ -5526,7 +5268,6 @@ def checkIsExist(date,time, taken_param,taken_param_id):
   AND  time = '%s'
   AND id_taken_params = '%s'
 """%(date, time, taken_param_id)
-    #print sQuery
     curs.execute(sQuery)
     temp =  curs.fetchall()
     if len(temp)>0:
@@ -5575,7 +5316,6 @@ def load_30_in_db(f_path,file_list):
     result = ""
     for f_name in file_list:
         path = f_path+'\\'+f_name
-        #print path
         with io.open(path, "r",  encoding="cp1251") as profil_file:
             data = profil_file.read().replace('\n', '')
         
@@ -5618,7 +5358,6 @@ def load_30_in_db(f_path,file_list):
         curs.execute(sQuery)
         dt_var = curs.fetchall()
         curs.close()
-        #print sQuery
         if dt_var == []:
             id_var=0
         else:
@@ -5660,7 +5399,6 @@ def service_load30(request):
     if request.is_ajax():
         if request.method == 'GET':            
             request.session["file30"]    = file30    = request.GET['file30']
-            #print file30
             file_list=[]            
             isExistDir = os.path.exists(file30)
             if isExistDir:
@@ -5689,18 +5427,27 @@ def load_user_account(request):
     result = ""
     try:    
         if request.is_ajax():
-            if request.method == 'GET':            
-                request.session["choice_file"]    = fileName    = request.GET['choice_file']
-                request.session["choice_sheet"]    = sheet    = request.GET['choice_sheet']
-                
-                directory=os.path.join(BASE_DIR,'static/cfg/')
-                sPath=directory+fileName
-                result = "Не загружено"
-                result = load_users_account(sPath, sheet)
-    except: # catch *all* exceptions
-        e = sys.exc_info()[0]
-        result = ( "Ошибка: %s" % e )
-    args["result"]    = result
+            if request.method == 'GET':
+                fileName = request.GET.get('choice_file')
+                sheet = request.GET.get('choice_sheet')
+
+                if not fileName or not sheet:
+                    result = "Ошибка: Не выбран файл или лист для загрузки."
+                else:
+                    request.session["choice_file"] = fileName
+                    request.session["choice_sheet"] = sheet
+                    directory=os.path.join(BASE_DIR,'static/cfg/')
+                    sPath=directory+fileName
+                    try:
+                        result = load_users_account(sPath, sheet)
+                    except FileNotFoundError:
+                        result = f"Ошибка: Файл '{fileName}' не найден на сервере."
+                    except Exception as e:
+                        result = f"Произошла непредвиденная ошибка: {e}"
+    except Exception as e:
+        result = f"Общая ошибка: {e}"
+
+    args["result"] = result
     return render(request,"service/service_users_account.html", args)
 
 def create_user(login, u_pass, u_mail, u_last_name, u_name):
@@ -5731,21 +5478,17 @@ def create_link_user_abonent(user, obj, abon):
     is_new_link = False
     try:
         #проверяем существует ли такой абонент
-        #print 'check abonent', obj, abon
         dt=[]
         dt = GetSimpleCrossTable('objects', 'name', obj, 'abonents', 'name', abon)
-        #print 'dt', dt, type(dt)
         if len(dt) > 0:
             #абонент существует
             #первые 4 поля (0,1,2,3) - это поля objects, далее по порядку идут поля abonents
             guid_abon = dt[0][4]
             id_user = user.id
             name = str(user.last_name) + ' - ' +str(abon)
-            #print name, guid_abon, id_user
             #проверяем есть ли уже такая привязка:    
             dt_check_link = []        
             dt_check_link = LinkAbonentsAuthUser.objects.filter(guid_abonents = guid_abon).filter(guid_auth_user = id_user)
-            #print dt_check_link, 'dt_check_link'
             if len(dt_check_link) < 1:
                 link = LinkAbonentsAuthUser(name = name, guid_abonents = Abonents.objects.get(guid= guid_abon), guid_auth_user = user)
                 link.save()
@@ -5818,23 +5561,27 @@ def load_80020_group(request):
     fileName=""
     sheet    = ""
     result = []
-    #writeToLog('test1') 
-    try:    
+    try:
         if request.is_ajax():
-            if request.method == 'GET':            
-                request.session["choice_file"]    = fileName    = request.GET['choice_file']
-                request.session["choice_sheet"]    = sheet    = request.GET['choice_sheet']
+            if request.method == 'GET':
+                fileName = request.GET.get('choice_file')
+                sheet = request.GET.get('choice_sheet')
 
-                directory=os.path.join(BASE_DIR,'static/cfg/')
-                sPath=directory+fileName
-                writeToLog(sPath)
-                            
-                result = make_80020_report(sPath, sheet)
-    except: # catch *all* exceptions
-        e = sys.exc_info()[0]
-        result.append( "Ошибка: %s" % e )
+                if not fileName or not sheet:
+                    result.append("Ошибка: Не выбран файл или лист для загрузки.")
+                else:
+                    request.session["choice_file"] = fileName
+                    request.session["choice_sheet"] = sheet
+                    directory=os.path.join(BASE_DIR,'static/cfg/')
+                    sPath=directory+fileName
+                    try:
+                        result = make_80020_report(sPath, sheet)
+                    except FileNotFoundError:
+                        result.append(f"Ошибка: Файл '{fileName}' не найден на сервере.")
 
-    #print(result)
+    except Exception as e:
+        result.append(f"Произошла непредвиденная ошибка: {e}")
+
     args["choice_file"]  = fileName
     args["choice_sheet"] = sheet
     args["80020_status"] = result
@@ -5904,21 +5651,28 @@ def del_meters(request):
     fileName=""
     sheet    = ""
     result = []
-    #writeToLog('test1') 
-    try:    
+    try:
         if request.is_ajax():
-            if request.method == 'GET':            
-                request.session["choice_file"]     = fileName    = request.GET['choice_file']
-                request.session["choice_sheet"]    = sheet    = request.GET['choice_sheet']
+            if request.method == 'GET':
+                fileName = request.GET.get('choice_file')
+                sheet = request.GET.get('choice_sheet')
+                if not fileName or not sheet:
+                    result.append("Ошибка: Не выбран файл или лист для удаления.")
+                else:
+                    request.session["choice_file"] = fileName
+                    request.session["choice_sheet"] = sheet
+                    directory=os.path.join(BASE_DIR,'static/cfg/')
+                    sPath=directory+fileName
+                    try:
+                        result = delete_meters_by_excel(sPath, sheet)
+                    except FileNotFoundError:
+                        result.append(f"Ошибка: Файл '{fileName}' не найден на сервере.")
+                    except Exception as e:
+                        result.append(f"Произошла непредвиденная ошибка при обработке файла: {e}")
 
-                directory=os.path.join(BASE_DIR,'static/cfg/')
-                sPath=directory+fileName
-                result = delete_meters_by_excel(sPath, sheet)
-    except: # catch *all* exceptions
-        e = sys.exc_info()[0]
-        result.append( "Ошибка: %s" % e )
+    except Exception as e:
+        result.append(f"Общая ошибка: {e}")
 
-    #print(result)
     args["choice_file"]  = fileName
     args["choice_sheet"] = sheet
     args["del_status"] = result
@@ -5958,8 +5712,6 @@ def delete_meters_by_excel(sPath, sheet):
                 meter =  str(row[3])[0:ind]
             else:
                 meter =  str(row[3])
-            #print(meter)
-        #print(meter, type(meter))
         try:
             del_meter = Meters.objects.get(factory_number_manual = str(meter))
             del_meter.delete()
@@ -5968,9 +5720,6 @@ def delete_meters_by_excel(sPath, sheet):
         except ObjectDoesNotExist:
             result.append('НЕ найден: {}'.format(meter))
         i+=1
-        #в цикле 
-        #если существует счётчик, то удаляем каскадно
-        #если прибора нет, то доабвляем запись об этом у result
     return result
 
 def del_various30(request):
@@ -6002,6 +5751,135 @@ def del_various30(request):
         e = sys.exc_info()[0]
         result.append( "Ошибка: %s" % e )
 
-    #print(result)    
     args["del30_status"] = result[0]
     return render(request,"service/service_30.html", args)
+
+def load_digital_devices_sequentially(request):
+    args={}
+    fileName=""
+    sheet    = ""
+    sequential_results = []
+
+    try:
+        if request.is_ajax() and request.method == 'GET':
+            fileName    = request.GET.get('choice_file')
+            sheet       = request.GET.get('choice_sheet')
+            
+            if not fileName or not sheet:
+                sequential_results.append("<li>Ошибка: Не выбран файл или лист.</li>")
+            else:
+                directory = os.path.join(BASE_DIR,'static/cfg/')
+                sPath = directory + fileName
+
+                # Step 1: Load Ports
+                try:
+                    ports_loaded = load_tcp_ip_or_com_ports_from_excel(sPath, sheet)
+                    if ports_loaded:
+                        sequential_results.append("<li>Шаг 1: Порты успешно загружены/проверены.</li>")
+                    else:
+                        sequential_results.append("<li>Шаг 1: Порты уже существуют в БД или не найдены в файле.</li>")
+                except Exception as e:
+                    sequential_results.append(f"<li>Шаг 1: Ошибка загрузки портов: {e}</li>")
+
+                # Step 2: Load Objects and Abonents
+                try:
+                    object_status = LoadObjectsAndAbons(sPath, sheet)
+                    sequential_results.append(f"<li>Шаг 2: {object_status}</li>")
+                except Exception as e:
+                    sequential_results.append(f"<li>Шаг 2: Ошибка загрузки объектов/абонентов: {e}</li>")
+
+                # Step 3: Load Meters
+                try:
+                    global isService
+                    isService=True
+                    OnOffSignals()
+                    counter_status = LoadElectricMeters(sPath, sheet)
+                    
+                    # Format the result from LoadElectricMeters
+                    if isinstance(counter_status, list) and counter_status:
+                        # Main message for step 3
+                        step3_result_html = f"<li>Шаг 3: {counter_status[0]}"
+                        # Check for nested errors
+                        if len(counter_status) > 1:
+                            step3_result_html += "<ul class='nested-result'>"
+                            for item in counter_status[1:]:
+                                step3_result_html += f"<li>{item}</li>"
+                            step3_result_html += "</ul>"
+                        step3_result_html += "</li>"
+                        sequential_results.append(step3_result_html)
+                    else:
+                        sequential_results.append(f"<li>Шаг 3: {counter_status}</li>")
+
+                    isService=False
+                    OnOffSignals()
+                except Exception as e:
+                    sequential_results.append(f"<li>Шаг 3: Ошибка загрузки счётчиков: {e}</li>")
+
+    except Exception as e:
+        # General error
+        sequential_results.append(f"<li>Общая ошибка: {e}</li>")
+
+    args["choice_file"]    = fileName
+    args["choice_sheet"]    = sheet
+    args["sequential_results"] = sequential_results
+    args["tcp_ip_status"] = ""
+    args["object_status"] = ""
+    args["counter_status"] = ""
+    
+    return render(request,"service/service_electric.html", args)
+
+@csrf_exempt
+def load_impulse_devices_sequentially(request):
+    args={}
+    fileName=""
+    sheet    = ""
+    sequential_results = []
+
+    try:
+        if request.is_ajax() and request.method == 'GET':
+            fileName    = request.GET.get('choice_file')
+            sheet       = request.GET.get('choice_sheet')
+            
+            if not fileName or not sheet:
+                sequential_results.append("<li>Ошибка: Не выбран файл или лист.</li>")
+            else:
+                directory = os.path.join(BASE_DIR,'static/cfg/')
+                sPath = os.path.join(directory, fileName)
+
+                # Step 1: Load Ports
+                try:
+                    ports_loaded = load_tcp_ip_water_ports_from_excel(sPath, sheet)
+                    if ports_loaded:
+                        sequential_results.append("<li>Шаг 1: Порты успешно загружены/проверены.</li>")
+                    else:
+                        sequential_results.append("<li>Шаг 1: Порты уже существуют в БД или не найдены в файле.</li>")
+                except Exception as e:
+                    sequential_results.append(f"<li>Шаг 1: Ошибка загрузки портов: {e}</li>")
+
+                # Step 2: Load Objects and Abonents
+                try:
+                    object_status = LoadObjectsAndAbons_water(sPath, sheet)
+                    sequential_results.append(f"<li>Шаг 2: {object_status}</li>")
+                except Exception as e:
+                    sequential_results.append(f"<li>Шаг 2: Ошибка загрузки объектов/абонентов: {e}</li>")
+
+                # Step 3: Load Pulsar Devices
+                try:
+                    global isService
+                    isService = True
+                    OnOffSignals()
+                    pulsar_status = LoadWaterPulsar(sPath, sheet)
+                    sequential_results.append(f"<li>Шаг 3: {pulsar_status}</li>")
+                    isService = False
+                    OnOffSignals()
+                except Exception as e:
+                    sequential_results.append(f"<li>Шаг 3: Ошибка загрузки счётчиков Пульсар: {e}</li>")
+
+    except Exception as e:
+        sequential_results.append(f"<li>Общая ошибка: {e}</li>")
+
+    args["choice_file"]    = fileName
+    args["choice_sheet"]    = sheet
+    args["sequential_results"] = sequential_results
+    
+    return render(request,"service/service_water.html", args)

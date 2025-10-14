@@ -1,42 +1,26 @@
-
-{% load static %} <link href="{%static "main.css"%}" rel="stylesheet"/>
-{% load static %} <script src="{%static "libs/jquery.js" %}" type=text/javascript></script>
-{% load static %} <script src="{%static "libs/jquery-ui/ui/jquery-ui.js" %}" type=text/javascript></script>
-{% load static %} <script src="{%static "libs/jquery-ui/ui/i18n/jquery.ui.datepicker-ru.js" %}" type=text/javascript></script>
-
-<script src="/static/libs/liHighLight.js" type=text/javascript></script>
-
-<br><br>
-<div class = "container radius"  style="border-radius: 10px 40px">
-<div class = "row"  >
-	<div class = "col" id = "blue-style"><h5><strong> Информация по приборам в БД </strong> </h5></div>
+{% load static %}
+<div class="tab-container">
+    <h3 class="form-card-title">Информация по приборам в БД</h3>
+    <div class="info-list">
+        <a href="../../service/get_electric_progruz/">
+            <img src="{% static 'images/save-ico48.png' %}" alt="Электрика">
+            <span><strong>Электрика</strong></span>
+        </a>
+        <a href="../../service/get_electric_progruz_com/">
+            <img src="{% static 'images/save-ico48.png' %}" alt="Электрика по COM-порту">
+            <span><strong>Электрика по COM-порту</strong></span>
+        </a>
+        <a href="../../service/get_water_progruz/">
+            <img src="{% static 'images/save-ico48.png' %}" alt="Вода цифровые ПУ">
+            <span><strong>Вода цифровые ПУ</strong></span>
+        </a>
+        <a href="../../service/get_water_impulse_progruz/">
+            <img src="{% static 'images/save-ico48.png' %}" alt="Вода импульсные ПУ">
+            <span><strong>Вода импульсные ПУ</strong></span>
+        </a>
+        <a href="../../service/get_heat_progruz/">
+            <img src="{% static 'images/save-ico48.png' %}" alt="Тепло">
+            <span><strong>Тепло</strong></span>
+        </a>
+    </div>
 </div>
-<br>
-<div class = "row justify-content-start align-items-center" > 
-	<div class="col">Выберите ресурс: </div>
-</div>
-<br>
-<div class = "row justify-content-start align-items-center">
-	<div class = "col-3 offset-1"><strong>Электрика</strong> </div>
-	<div class = "col-1"><a href ="../../service/get_electric_progruz/"> <img  src="{%static "images/save-ico48.png" %}" data-toggle="tooltip" data-placement="top" title="Электрика"></a></div>
-</div><br>
-<div class = "row justify-content-start align-items-center">
-	<div class = "col-3  offset-1""><strong>Электрика по COM-порту</strong> </div>
-	<div class = "col-1"><a href ="../../service/get_electric_progruz_com/"> <img  src="{%static "images/save-ico48.png" %}" data-toggle="tooltip" data-placement="top" title="Электрика"></a></div>
-</div><br>
-<div class = "row justify-content-start align-items-center">
-	<div class = "col-3  offset-1""><strong>Вода цифровые ПУ</strong> </div>
-	<div class = "col-1"><a href ="../../service/get_water_progruz/"> <img  src="{%static "images/save-ico48.png" %}" data-toggle="tooltip" data-placement="top" title="Вода"></a></div>
-</div><br>
-<div class = "row justify-content-start align-items-center">
-	<div class = "col-3  offset-1""><strong>Вода импульсные ПУ</strong> </div>
-	<div class = "col-1"><a href ="../../service/get_water_impulse_progruz/"> <img  src="{%static "images/save-ico48.png" %}" data-toggle="tooltip" data-placement="top" title="Вода"></a></div>
-</div><br>
-<div class = "row justify-content-start align-items-center">
-	<div class = "col-3  offset-1""><strong>Тепло</strong> </div>
-	<div class = "col-1"><a href ="../../service/get_heat_progruz/"> <img  src="{%static "images/save-ico48.png" %}" data-toggle="tooltip" data-placement="top" title="Тепло"></a></div>
-</div><br>
-</div>
-
-<br><br>
-

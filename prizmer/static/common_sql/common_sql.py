@@ -6951,10 +6951,10 @@ left join
 from
 (
 Select z1.date,z1.name,z1.guid, 
-sum(Case when  z1.type_meter='%s'  then z1.factory_number_manual::bigint  end) as hvs_1_num,
-sum(Case when  z1.type_meter='%s'  then z1.value else 0 end) as hvs_1,
-sum(Case when z1.type_meter='%s'  then z1.factory_number_manual::bigint  end) as gvs_1_num,
-sum(Case when  z1.type_meter='%s'  then z1.value else 0 end) as gvs_1
+max(Case when  z1.type_meter='%s'  then z1.factory_number_manualend) as hvs_1_num,
+max(Case when  z1.type_meter='%s'  then z1.value else 0 end) as hvs_1,
+max(Case when z1.type_meter='%s'  then z1.factory_number_manual  end) as gvs_1_num,
+max(Case when  z1.type_meter='%s'  then z1.value else 0 end) as gvs_1
 
 from
 (
@@ -7000,10 +7000,10 @@ left join
 from
 (
 Select z1.date,z1.name,z1.guid, 
-sum(Case when  z1.type_meter='%s'  then z1.factory_number_manual::bigint  end) as hvs_1_num,
-sum(Case when  z1.type_meter='%s'  then z1.value else 0 end) as hvs_1,
-sum(Case when z1.type_meter='%s'  then z1.factory_number_manual::bigint  end) as gvs_1_num,
-sum(Case when  z1.type_meter='%s'  then z1.value else 0 end) as gvs_1
+max(Case when  z1.type_meter='%s'  then z1.factory_number_manual end) as hvs_1_num,
+max(Case when  z1.type_meter='%s'  then z1.value else 0 end) as hvs_1,
+max(Case when z1.type_meter='%s'  then z1.factory_number_manual end) as gvs_1_num,
+max(Case when  z1.type_meter='%s'  then z1.value else 0 end) as gvs_1
 
 from
 (
@@ -7060,10 +7060,10 @@ left join
 from
 (
 Select z1.date,z1.name,z1.guid, 
-sum(Case when  z1.type_meter='%s'  then z1.factory_number_manual::bigint  end) as hvs_1_num,
-sum(Case when  z1.type_meter='%s'  then z1.value else 0 end) as hvs_1,
-sum(Case when z1.type_meter='%s'  then z1.factory_number_manual::bigint  end) as gvs_1_num,
-sum(Case when  z1.type_meter='%s'  then z1.value else 0 end) as gvs_1
+max(Case when  z1.type_meter='%s'  then z1.factory_number_manual end) as hvs_1_num,
+max(Case when  z1.type_meter='%s'  then z1.value else 0 end) as hvs_1,
+max(Case when z1.type_meter='%s'  then z1.factory_number_manual end) as gvs_1_num,
+max(Case when  z1.type_meter='%s'  then z1.value else 0 end) as gvs_1
 
 from
 (
@@ -7108,10 +7108,10 @@ left join
 from
 (
 Select z1.date,z1.name,z1.guid, 
-sum(Case when  z1.type_meter='%s'  then z1.factory_number_manual::bigint  end) as hvs_1_num,
-sum(Case when  z1.type_meter='%s'  then z1.value else 0 end) as hvs_1,
-sum(Case when z1.type_meter='%s'  then z1.factory_number_manual::bigint  end) as gvs_1_num,
-sum(Case when  z1.type_meter='%s'  then z1.value else 0 end) as gvs_1
+max(Case when  z1.type_meter='%s'  then z1.factory_number_manual end) as hvs_1_num,
+max(Case when  z1.type_meter='%s'  then z1.value else 0 end) as hvs_1,
+max(Case when z1.type_meter='%s'  then z1.factory_number_manual end) as gvs_1_num,
+max(Case when  z1.type_meter='%s'  then z1.value else 0 end) as gvs_1
 
 from
 (
@@ -7177,18 +7177,18 @@ round((z2.gvs_1+z2.gvs_2+z2.gvs_3)::numeric,3) as sum_gvs
 from 
 (
 Select z1.date_end, z1.name,
-sum(Case when z1.attr1 = '%s' and z1.type_meter='%s'  then z1.factory_number_manual::bigint  end) as hvs_1_num,
-sum(Case when z1.attr1 = '%s' and z1.type_meter='%s'  then z1.value else 0 end) as hvs_1,
-sum(Case when z1.attr1 = '%s' and z1.type_meter='%s'  then z1.factory_number_manual::bigint  end) as gvs_1_num,
-sum(Case when z1.attr1 = '%s' and z1.type_meter='%s'  then z1.value else 0 end) as gvs_1,
-sum(Case when z1.attr1 = '%s' and z1.type_meter='%s'  then z1.factory_number_manual::bigint end) as hvs_2_num,
-sum(Case when z1.attr1 = '%s' and z1.type_meter='%s'  then z1.value else 0  end) as hvs_2,
-sum(Case when z1.attr1 = '%s' and z1.type_meter='%s'  then z1.factory_number_manual::bigint end) as gvs_2_num,
-sum(Case when z1.attr1 = '%s' and z1.type_meter='%s'  then z1.value else 0  end) as gvs_2,
-sum(Case when z1.attr1 = '%s' and z1.type_meter='%s'  then z1.factory_number_manual::bigint  end) as hvs_3_num,
-sum(Case when z1.attr1 = '%s' and z1.type_meter='%s'  then z1.value else 0  end) as hvs_3,
-sum(Case when z1.attr1 = '%s' and z1.type_meter='%s'  then z1.factory_number_manual::bigint  end) as gvs_3_num,
-sum(Case when z1.attr1 = '%s' and z1.type_meter='%s'  then z1.value else 0  end) as gvs_3
+max(Case when z1.attr1 = '%s' and z1.type_meter='%s'  then z1.factory_number_manual end) as hvs_1_num,
+max(Case when z1.attr1 = '%s' and z1.type_meter='%s'  then z1.value else 0 end) as hvs_1,
+max(Case when z1.attr1 = '%s' and z1.type_meter='%s'  then z1.factory_number_manual end) as gvs_1_num,
+max(Case when z1.attr1 = '%s' and z1.type_meter='%s'  then z1.value else 0 end) as gvs_1,
+max(Case when z1.attr1 = '%s' and z1.type_meter='%s'  then z1.factory_number_manualend) as hvs_2_num,
+max(Case when z1.attr1 = '%s' and z1.type_meter='%s'  then z1.value else 0  end) as hvs_2,
+max(Case when z1.attr1 = '%s' and z1.type_meter='%s'  then z1.factory_number_manualend) as gvs_2_num,
+max(Case when z1.attr1 = '%s' and z1.type_meter='%s'  then z1.value else 0  end) as gvs_2,
+max(Case when z1.attr1 = '%s' and z1.type_meter='%s'  then z1.factory_number_manual end) as hvs_3_num,
+max(Case when z1.attr1 = '%s' and z1.type_meter='%s'  then z1.value else 0  end) as hvs_3,
+max(Case when z1.attr1 = '%s' and z1.type_meter='%s'  then z1.factory_number_manual end) as gvs_3_num,
+max(Case when z1.attr1 = '%s' and z1.type_meter='%s'  then z1.value else 0  end) as gvs_3
 from
 (
 Select '%s'::date as date_end,water_pulsar_abons.ab_name as name, water_pulsar_abons.type_meter, water_pulsar_abons.attr1, water_pulsar_abons.factory_number_manual, z0.value
@@ -7246,18 +7246,18 @@ round((z2.gvs_1+z2.gvs_2+z2.gvs_3)::numeric,3) as sum_gvs
 from 
 (
 Select z1.date_end, z1.name,
-sum(Case when z1.attr1 = '%s' and z1.type_meter='%s'  then z1.factory_number_manual::bigint  end) as hvs_1_num,
-sum(Case when z1.attr1 = '%s' and z1.type_meter='%s'  then z1.value else 0 end) as hvs_1,
-sum(Case when z1.attr1 = '%s' and z1.type_meter='%s'  then z1.factory_number_manual::bigint  end) as gvs_1_num,
-sum(Case when z1.attr1 = '%s' and z1.type_meter='%s'  then z1.value else 0 end) as gvs_1,
-sum(Case when z1.attr1 = '%s' and z1.type_meter='%s'  then z1.factory_number_manual::bigint end) as hvs_2_num,
-sum(Case when z1.attr1 = '%s' and z1.type_meter='%s'  then z1.value else 0  end) as hvs_2,
-sum(Case when z1.attr1 = '%s' and z1.type_meter='%s'  then z1.factory_number_manual::bigint end) as gvs_2_num,
-sum(Case when z1.attr1 = '%s' and z1.type_meter='%s'  then z1.value else 0  end) as gvs_2,
-sum(Case when z1.attr1 = '%s' and z1.type_meter='%s'  then z1.factory_number_manual::bigint  end) as hvs_3_num,
-sum(Case when z1.attr1 = '%s' and z1.type_meter='%s'  then z1.value else 0  end) as hvs_3,
-sum(Case when z1.attr1 = '%s' and z1.type_meter='%s'  then z1.factory_number_manual::bigint  end) as gvs_3_num,
-sum(Case when z1.attr1 = '%s' and z1.type_meter='%s'  then z1.value else 0  end) as gvs_3
+max(Case when z1.attr1 = '%s' and z1.type_meter='%s'  then z1.factory_number_manual end) as hvs_1_num,
+max(Case when z1.attr1 = '%s' and z1.type_meter='%s'  then z1.value else 0 end) as hvs_1,
+max(Case when z1.attr1 = '%s' and z1.type_meter='%s'  then z1.factory_number_manual  end) as gvs_1_num,
+max(Case when z1.attr1 = '%s' and z1.type_meter='%s'  then z1.value else 0 end) as gvs_1,
+max(Case when z1.attr1 = '%s' and z1.type_meter='%s'  then z1.factory_number_manual end) as hvs_2_num,
+max(Case when z1.attr1 = '%s' and z1.type_meter='%s'  then z1.value else 0  end) as hvs_2,
+max(Case when z1.attr1 = '%s' and z1.type_meter='%s'  then z1.factory_number_manual end) as gvs_2_num,
+max(Case when z1.attr1 = '%s' and z1.type_meter='%s'  then z1.value else 0  end) as gvs_2,
+max(Case when z1.attr1 = '%s' and z1.type_meter='%s'  then z1.factory_number_manual end) as hvs_3_num,
+max(Case when z1.attr1 = '%s' and z1.type_meter='%s'  then z1.value else 0  end) as hvs_3,
+max(Case when z1.attr1 = '%s' and z1.type_meter='%s'  then z1.factory_number_manual  end) as gvs_3_num,
+max(Case when z1.attr1 = '%s' and z1.type_meter='%s'  then z1.value else 0  end) as gvs_3
 from
 (
 Select '%s'::date as date_end,water_pulsar_abons.ab_name as name, water_pulsar_abons.type_meter, water_pulsar_abons.attr1, water_pulsar_abons.factory_number_manual, z0.value

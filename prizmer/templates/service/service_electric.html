@@ -1,82 +1,99 @@
-
-{% load static %} <link href="{%static "main.css"%}" rel="stylesheet"/>
-{% load static %} <script src="{%static "libs/jquery.js" %}" type=text/javascript></script>
-{% load static %} <script src="{%static "libs/jquery-ui/ui/jquery-ui.js" %}" type=text/javascript></script>
-{% load static %} <script src="{%static "libs/jquery-ui/ui/i18n/jquery.ui.datepicker-ru.js" %}" type=text/javascript></script>
-
+{% load static %}
 <form>
-<input type=hidden id="file_name" value={{choice_file}}>
-<input type=hidden id="sheet_name" value={{choice_sheet}}>
+<input type=hidden id="file_name" value={{choice_file}} class="pretend-visible-input">
+<input type=hidden id="sheet_name" value={{choice_sheet}} class="pretend-visible-input">
 </form>
-<br>
-<div class = "container radius"  style="border-radius: 10px 40px">
-<div class = "row"  >
-	<div class = "col" id = "blue-style"><h5><strong> Цифровые приборы | Прогрузка</strong> </h5></div>
-</div>
-<br><br>
-<div class = "row justify-content-start align-items-center" >
-	<div class = "col-4"> <strong>Загрузка портов</strong> </div>
-	<div class = "col-1"> <span onclick="load_service('load_tcp_ip')" class="button" id="tcp-ip-port-button">Загрузить</span> </div>
-	<div class = "col-7"> {{tcp_ip_status}}</div>
-</div>
-<br><br>
-<div class = "row justify-content-start align-items-center" >
-	<div class = "col-4"> <strong>Загрузка Объектов и Абонентов</strong> </div>
-	<div class = "col-1"> <span onclick="load_service('load_electric_objects')" class="button" id="object_load_button">Загрузить</span> </div>
-	<div class = "col-7"> {{object_status}}</div>
-</div>
-<br>
-<div class = "row">
-<div class = "col"><img src="{%static "images/question2-ico20.png" %}" title ="Для электрических ПУ: Если необходимо получение из прибора Получасовых профилей мощности и/или Реактивной энергии, сделайте отметки в прогрузочной ведомости. Для квартир рекомендуем НЕ выбирать данные параметры, т.к. это будет увеличивать размеры БД и снижать скорость работы." ></div></div>
-<div class = "row justify-content-start align-items-center" >
-	<div class = "col-4"> <strong>Загрузка  счётчиков </strong> </div>
-	<div class = "col-1"> <span onclick="load_service('load_electric_counters')" class="button" id="counter_load_button">Загрузить</span> </div>
-	<div class = "col-7"> {{counter_status}}</div>
-	<br>
-</div>
-<br><br>
-</div>
-<br>
-<div class = "container radius"  style="border-radius: 10px 40px">
-<br>
-<div class = "row">
-	<div class = "col-5"><strong>Загрузка данных для отчёта по форме 80020</strong></div>
-	<div class = "col-1"> <span onclick="load_service('load_80020_group')" class="button" id="counter_load_button">Загрузить</span>  </div>
-</div>
-<div class = "row">
-	<div class = "col-11">
-		{% for value in 80020_status %}
-            <br> {{value}} 
-        {% endfor %}	
-	</div>
-</div>
-<br>
-</div>
-<br>
-<div class = "container radius"  style="border-radius: 10px 40px">
-<div class = "row"  >
-	<div class = "col" id = "blue-style"><h5><strong> Образцы</strong> </h5></div>
-</div>
-<br>
-<div class = "row justify-content-start align-items-center">
-	<div class = "col-5"><strong>Образец прогрузочного файла по электрике</strong> </div>
-	<div class = "col-1"><a href ="../../service/get_electric_template/"> <img  src="{%static "images/save-ico48.png" %}" data-toggle="tooltip" data-placement="top" title="Образец прогрузочного файла по электрике"></a></div>
-</div><br>
-<div class = "row justify-content-start align-items-center">
-	<div class = "col-5"><strong>Образец прогрузочного файла по теплу</strong></div>
-	<div class = "col-1"><a href ="../../service/get_heat_template/"> <img src="{%static "images/save-ico48.png" %}" data-toggle="tooltip" data-placement="top" title="Образец прогрузочного файла по теплу"></a></div>
-</div><br>
-<div class = "row  justify-content-start align-items-center">
-	<div class = "col-5"><strong>Образец прогрузочного файла по воде</strong></div>
-	<div class = "col-1"><a href ="../../service/get_water_digital_template/"> <img src="{%static "images/save-ico48.png" %}" data-toggle="tooltip" data-placement="top" title="Образец прогрузочного файла по воде"></a></div>
-</div><br>
-<div class = "row  justify-content-start align-items-center">
-	<div class = "col-5"><strong>Образец прогрузочного файла для отчёта по форме 80020</strong></div>
-	<div class = "col-1"><a href ="../../service/get_80020_template/"> <img src="{%static "images/save-ico48.png" %}" data-toggle="tooltip" data-placement="top" title="Образец прогрузочного файла для отчёта по форме 80020"></a></div>
-</div><br>
+
+<div class="tab-container">
+    <div class="tab-nav">
+        <button class="tab-link active" data-tab="tab-1">Загрузка приборов и отчёты</button>
+        <button class="tab-link" data-tab="tab-3">Образцы файлов</button>
+    </div>
+
+    <div class="tab-content">
+        <div id="tab-1" class="tab-pane active">
+            <div class="form-card" style="margin:0; border:none; box-shadow:none; padding:0;">
+                <div class="action-row">
+                    <div class="action-label" style="flex-grow: 1; text-align: center;">
+                        <strong>Цифровые приборы</strong>
+                    </div>
+                </div>
+                <div class="action-row main-action-row">
+                    <div class="action-label" style="flex-grow: 1; text-align: center;">
+                        <button onclick="load_service('load_digital_devices_sequentially')" class="btn-action btn-submit" id="load-digital-devices-btn">Загрузить цифровые приборы из файла</button>
+                    </div>
+                </div>
+
+                {% if sequential_results %}
+                <div class="sequential-results">
+                    <strong>Результаты загрузки:</strong>
+                    <ul>
+                    {% for result in sequential_results %}
+                        <li>{{ result|safe }}</li>
+                    {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
+
+                <hr style="margin: 2rem 0;">
+
+                <div class="action-row">
+                    <div class="action-label" style="flex-grow: 1; text-align: center;"><strong>Отчёт по форме 80020</strong></div>
+                </div>
+                <div class="action-row">
+                    <div class="action-label" style="flex-grow: 1; text-align: center;">
+                        <button onclick="load_80020_with_check()" class="btn-action btn-submit" style="border: none; background-color: #28a745; color: white; padding: 12px 24px; font-size: 1.1rem;">Загрузить данные для отчёта</button>
+                    </div>
+                </div>
+                {% if 80020_status %}
+                <div class="sequential-results">
+                    <strong>Результаты загрузки отчёта 80020:</strong>
+                    <ul>
+                    {% for value in 80020_status %}
+                        <li>{{ value|safe }}</li>
+                    {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <div id="tab-3" class="tab-pane">
+            <div class="form-card" style="margin:0; border:none; box-shadow:none; padding:0;">
+                <div class="info-list">
+                    <a href="../../service/get_electric_template/">
+                        <img src="{%static "images/save-ico48.png" %}">
+                        <span><strong>Образец прогрузочного файла по электрике</strong></span>
+                    </a>
+                    <a href="../../service/get_heat_template/">
+                        <img src="{%static "images/save-ico48.png" %}">
+                        <span><strong>Образец прогрузочного файла по теплу</strong></span>
+                    </a>
+                    <a href="../../service/get_water_digital_template/">
+                        <img src="{%static "images/save-ico48.png" %}">
+                        <span><strong>Образец прогрузочного файла по воде</strong></span>
+                    </a>
+                    <a href="../../service/get_80020_template/">
+                        <img src="{%static "images/save-ico48.png" %}">
+                        <span><strong>Образец прогрузочного файла для отчёта по форме 80020</strong></span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
-
-
-<br>
- 	
+<script>
+function load_80020_with_check() {
+    var fileName = document.getElementById('file_name').value;
+    var sheetName = document.getElementById('sheet_name').value;
+    if (!fileName || !sheetName) {
+        var statusDiv = document.querySelector('#tab-1 .status-display');
+        if (statusDiv) {
+            statusDiv.innerHTML = '<span style="color: red;">Ошибка: Не выбран файл или лист для загрузки.</span>';
+        }
+        return;
+    }
+    load_service('load_80020_group');
+}
+</script>
