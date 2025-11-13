@@ -1,3 +1,5 @@
+console.log("common.js loaded and executing."); // Added for debugging
+
 // Variables     
 var is_electric_monthly = 0;
 var is_electric_daily = 1;
@@ -9,10 +11,28 @@ var is_electric_period = 0;
 // Variables End     
      
 $(document).ready(function(){
-heat_dm_block.style.display = 'none';  
+var heat_dm_block_el = document.getElementById('heat_dm_block');
+if (heat_dm_block_el) {
+    heat_dm_block_el.style.display = 'none';
+}  
     
 // Loader 
 hide_loader();
+// Highlight active resource icon based on URL
+    var path = window.location.pathname;
+    if (path.includes("/askue/electric")) {
+        var $el = $("#electric-ico").closest("a");
+        $el.addClass("active-resource-icon");
+    } else if (path.includes("/askue/water")) {
+        var $el = $("#water-ico").closest("a");
+        $el.addClass("active-resource-icon");
+    } else if (path.includes("/askue/heat")) {
+        var $el = $("#heat-ico").closest("a");
+        $el.addClass("active-resource-icon");
+    } else if (path.includes("/askue/economic")) {
+        var $el = $("#economic-ico").closest("a");
+        $el.addClass("active-resource-icon");
+    }
 // Loader End
 $("#datepickerEnd").datepicker("setDate", new Date());
 $("#tree").click(function clickTree(){
@@ -44,28 +64,29 @@ $("#choice_report").selectmenu({
 	
 	if ($(this).val()==56 || $(this).val()==59)
     {
-		heat_dm_block.style.display = 'block';  
+        var heat_dm_block_el = document.getElementById('heat_dm_block');
+        if (heat_dm_block_el) {
+		    heat_dm_block_el.style.display = 'block';
+        }
 	}
 	else
 	{
-		heat_dm_block.style.display = 'none';  
+        var heat_dm_block_el = document.getElementById('heat_dm_block');
+        if (heat_dm_block_el) {
+    		heat_dm_block_el.style.display = 'none';
+        }
 	}
     if ($(this).val()%2==0)
-    { //для чётного отображаем 1 календаря
-        $("#datepickerEnd").show();
-        $("#datepickerStart").hide();
-        $("#title-date-start").hide();
-		
-		<!-- $("#export_report").html('<a class="button" href ='+'"../../report/'+$(this).val()+'?electric_data_end='+$('#datepickerEnd').datepicker().val()+'&electric_data_start='+$('#datepickerStart').datepicker().val()+'"'+'>Экспорт</a>') -->
-        <!-- $("#export_report").html('<a class="button" href ='+'"../../report/'+$(this).val()+'?electric_data_end='+electric_data_end+'"'+'>Экспорт</a>') -->
-		$("#export_report").html('<a class="button" href ='+'"../../report/'+$(this).val()+'?electric_data_end='+electric_data_end_1+'&electric_data_start='+electric_data_start_1+'&obj_key='+obj_key+'&is_electric_monthly='+is_electric_monthly+'&is_electric_daily='+is_electric_daily+'&is_electric_current='+is_electric_current+'&is_electric_delta='+is_electric_delta+'&is_electric_period='+is_electric_period+'&obj_parent_title='+obj_parent_title+'&obj_title='+obj_title+'"'+'>Экспорт</a>')
-		<!-- $("#export_report_archive").html('<a class="button" href ='+'"../../report/'+$(this).val()+'_arch"'+'>Экспорт в Архив</a>') -->
+    {
+        $("#datepickerEnd").css('visibility', 'visible');
+        $("#datepickerStart").css('visibility', 'hidden');
+        		$("#export_report").html('<button type="button" class="btn btn-primary" onclick="window.location.href=\'../../report/'+$(this).val()+'?electric_data_end='+electric_data_end_1+'&electric_data_start='+electric_data_start_1+'&obj_key='+obj_key+'&is_electric_monthly='+is_electric_monthly+'&is_electric_daily='+is_electric_daily+'&is_electric_current='+is_electric_current+'&is_electric_delta='+is_electric_delta+'&is_electric_period='+is_electric_period+'&obj_parent_title='+obj_parent_title+'&obj_title='+obj_title+'\'">Экспорт</button>')		<!-- $("#export_report_archive").html('<a class="button" href ='+'"../../report/'+$(this).val()+'_arch"'+'>Экспорт в Архив</a>') -->
         refresh_data_table($(this).val());
     }
     else
     { //для нечётного отображаем 2 календарь
-        $("#datepickerEnd").show();
-        $("#datepickerStart").show();
+        $("#datepickerEnd").css('visibility', 'visible');
+        $("#datepickerStart").css('visibility', 'visible');
         $("#title-date-start").show();
 		
 		
@@ -74,19 +95,16 @@ $("#choice_report").selectmenu({
         <!-- $("#export_report").html('<a class="button" href ='+'"../../report/'+$(this).val()+'?electric_data_end='+$('#datepickerEnd').datepicker().val()+'&electric_data_start='+$('#datepickerStart').datepicker().val()+'&test=Test'+'"'+'>Экспорт</a>') -->
 <!-- 	$("#export_report").html('<a class="button" href ='+'"../../report/'+$(this).val()+'?electric_data_end='+electric_data_end+'&electric_data_start='+electric_data_start+'&test=Test'+'"'+'>Экспорт</a>') -->
 		<!-- $("#export_report").html('<a class="button" href ='+'"../../report/'+$(this).val()+'?electric_data_end='+electric_data_end+'"'+'>Экспорт</a>') -->
-		$("#export_report").html('<a class="button" href ='+'"../../report/'+$(this).val()+'?electric_data_end='+electric_data_end_1+'&electric_data_start='+electric_data_start_1+'&obj_key='+obj_key+'&is_electric_monthly='+is_electric_monthly+'&is_electric_daily='+is_electric_daily+'&is_electric_current='+is_electric_current+'&is_electric_delta='+is_electric_delta+'&is_electric_period='+is_electric_period+'&obj_parent_title='+obj_parent_title+'&obj_title='+obj_title+'"'+'>Экспорт</a>')
+		$("#export_report").html('<button type="button" class="btn btn-primary" onclick="window.location.href=\'../../report/'+$(this).val()+'?electric_data_end='+electric_data_end_1+'&electric_data_start='+electric_data_start_1+'&obj_key='+obj_key+'&is_electric_monthly='+is_electric_monthly+'&is_electric_daily='+is_electric_daily+'&is_electric_current='+is_electric_current+'&is_electric_delta='+is_electric_delta+'&is_electric_period='+is_electric_period+'&obj_parent_title='+obj_parent_title+'&obj_title='+obj_title+'\'">Экспорт</button>')
 		<!-- $("#export_report_archive").html('<a class="button" href ='+'"../../report/'+$(this).val()+'_arch"'+'>Экспорт в Архив</a>') -->
         refresh_data_table($(this).val());
     }
         }   
     });
 // конец Меню выбора отчета
-// Подкрашиваем зеленым "На начало суток"
-$("#electric-daily-button").css("background-color", "#E6F7F2");
-$("#electric-daily-button").css("border", "3px solid rgba(132,159,187,1)");
-$("#electric-monthly-button").css("border", "2px solid rgba(132,159,187,1)");
-$("#electric-monthly-button").css("background-color", "#D8E2EC");
-$("#electric-monthly-button").css("color", "grey");
+// Set initial active state for toggle buttons
+$("#electric-daily-button").addClass("active");
+$("#electric-monthly-button").removeClass("active");
 
 //замена спецсимволов
 function escapeHtml(text) {
@@ -120,7 +138,7 @@ $( "#tree" ).mouseleave(function() {
         var electric_data_start_1 = $('#datepickerStart').datepicker().val();
         var electric_data_end_1 = $('#datepickerEnd').datepicker().val();  	
         <!-- $("#export_report").html('<a class="button" href ='+'"../../report/'+$(this).val()+'?electric_data_end='+electric_data_end+'"'+'>Экспорт</a>') -->
-		$("#export_report").html('<a class="button" href ='+'"../../report/'+menuItem_1+'?electric_data_end='+electric_data_end_1+'&electric_data_start='+electric_data_start_1+'&obj_key='+obj_key+'&is_electric_monthly='+is_electric_monthly+'&is_electric_daily='+is_electric_daily+'&is_electric_current='+is_electric_current+'&is_electric_delta='+is_electric_delta+'&is_electric_period='+is_electric_period+'&obj_parent_title='+obj_parent_title+'&obj_title='+obj_title+'"'+'>Экспорт</a>')
+		$("#export_report").html('<button type="button" class="btn btn-primary" onclick="window.location.href=\'../../report/'+menuItem_1+'?electric_data_end='+electric_data_end_1+'&electric_data_start='+electric_data_start_1+'&obj_key='+obj_key+'&is_electric_monthly='+is_electric_monthly+'&is_electric_daily='+is_electric_daily+'&is_electric_current='+is_electric_current+'&is_electric_delta='+is_electric_delta+'&is_electric_period='+is_electric_period+'&obj_parent_title='+obj_parent_title+'&obj_title='+obj_title+'\'">Экспорт</button>')
 });
 $( "#datepickerStart" ).mouseleave(function() {
          var obj_parent_title="";
@@ -139,7 +157,7 @@ $( "#datepickerStart" ).mouseleave(function() {
         var electric_data_start_1 = $('#datepickerStart').datepicker().val();
         var electric_data_end_1 = $('#datepickerEnd').datepicker().val();  	
         <!-- $("#export_report").html('<a class="button" href ='+'"../../report/'+$(this).val()+'?electric_data_end='+electric_data_end+'"'+'>Экспорт</a>') -->
-		$("#export_report").html('<a class="button" href ='+'"../../report/'+menuItem_1+'?electric_data_end='+electric_data_end_1+'&electric_data_start='+electric_data_start_1+'&obj_key='+obj_key+'&is_electric_monthly='+is_electric_monthly+'&is_electric_daily='+is_electric_daily+'&is_electric_current='+is_electric_current+'&is_electric_delta='+is_electric_delta+'&is_electric_period='+is_electric_period+'&obj_parent_title='+obj_parent_title+'&obj_title='+obj_title+'"'+'>Экспорт</a>')
+		$("#export_report").html('<button type="button" class="btn btn-primary" onclick="window.location.href=\'../../report/'+menuItem_1+'?electric_data_end='+electric_data_end_1+'&electric_data_start='+electric_data_start_1+'&obj_key='+obj_key+'&is_electric_monthly='+is_electric_monthly+'&is_electric_daily='+is_electric_daily+'&is_electric_current='+is_electric_current+'&is_electric_delta='+is_electric_delta+'&is_electric_period='+is_electric_period+'&obj_parent_title='+obj_parent_title+'&obj_title='+obj_title+'\'">Экспорт</button>')
 });
 $( "#datepickerEnd" ).mouseleave(function() {
          var obj_parent_title="";
@@ -156,14 +174,13 @@ $( "#datepickerEnd" ).mouseleave(function() {
                      obj_key = "Не выбран";
                      obj_parent_title = "Не выбран";}
        <!-- $("#export_report").html('<a class="button" href ='+'"../../report/'+$(this).val()+'?electric_data_end='+electric_data_end+'"'+'>Экспорт</a>') -->
-		$("#export_report").html('<a class="button" href ='+'"../../report/'+menuItem_1+'?electric_data_end='+electric_data_end_1+'&electric_data_start='+electric_data_start_1+'&obj_key='+obj_key+'&is_electric_monthly='+is_electric_monthly+'&is_electric_daily='+is_electric_daily+'&is_electric_current='+is_electric_current+'&is_electric_delta='+is_electric_delta+'&is_electric_period='+is_electric_period+'&obj_parent_title='+obj_parent_title+'&obj_title='+obj_title+'"'+'>Экспорт</a>')
+		$("#export_report").html('<button type="button" class="btn btn-primary" onclick="window.location.href=\'../../report/'+menuItem_1+'?electric_data_end='+electric_data_end_1+'&electric_data_start='+electric_data_start_1+'&obj_key='+obj_key+'&is_electric_monthly='+is_electric_monthly+'&is_electric_daily='+is_electric_daily+'&is_electric_current='+is_electric_current+'&is_electric_delta='+is_electric_delta+'&is_electric_period='+is_electric_period+'&obj_parent_title='+obj_parent_title+'&obj_title='+obj_title+'\'">Экспорт</button>')
 		
 });
 
 
-// Убираем календари при загрузке страницы
-$("#datepickerStart").hide();
-$("#datepickerEnd").hide();
+$("#datepickerStart").css('visibility', 'hidden');
+$("#datepickerEnd").css('visibility', 'hidden');
 
 $("#datepickerStart").datepicker({onSelect:function(){refresh_data_table($("#choice_report").val())}}) 
 $("#datepickerEnd").datepicker({onSelect:function(){refresh_data_table($("#choice_report").val())}})           
@@ -173,15 +190,9 @@ $("#datepickerEnd").datepicker({onSelect:function(){refresh_data_table($("#choic
         is_electric_current = 0;
         is_electric_delta = 0;
         refresh_all();
-       /*  $("#datepickerStart").hide();
-        $("#title-date-start").hide(); */
-        $("#electric-monthly-button").css("background-color", "#E6F7F2");
-		$("#electric-monthly-button").css("border", "3px solid rgba(132,159,187,1)");
-		$("#electric-daily-button").css("border", "2px solid rgba(132,159,187,1)");
-		$("#electric-daily-button").css("background-color", "#D8E2EC");
-		$("#electric-daily-button").css("color", "grey");
-		
-		
+        $("#electric-monthly-button").addClass("active");
+        $("#electric-daily-button").removeClass("active");
+        // The following lines are for other buttons, keep them for now if they are still relevant
         $("#electric-current-button").css( "color", "black" );
         $("#electric-delta").css( "color", "black" );      
         });
@@ -192,16 +203,9 @@ $("#datepickerEnd").datepicker({onSelect:function(){refresh_data_table($("#choic
         is_electric_current = 0;
         is_electric_delta = 0;
         refresh_all();
-        /* $("#datepickerStart").hide();
-        $("#title-date-start").hide(); */
-		$("#electric-daily-button").css("background-color", "#E6F7F2");
-		$("#electric-daily-button").css("border", "3px solid rgba(132,159,187,1)");
-		$("#electric-monthly-button").css("border", "2px solid rgba(132,159,187,1)");
-		$("#electric-monthly-button").css("background-color", "#D8E2EC");
-		$("#electric-monthly-button").css("color", "grey");
-		
-		
-       
+        $("#electric-daily-button").addClass("active");
+        $("#electric-monthly-button").removeClass("active");
+        // The following lines are for other buttons, keep them for now if they are still relevant
         $("#electric-current-button").css( "color", "black" );
         $("#electric-delta").css( "color", "black" );
         });
@@ -212,7 +216,7 @@ $("#datepickerEnd").datepicker({onSelect:function(){refresh_data_table($("#choic
         is_electric_current = 1;
         is_electric_delta = 0;
         refresh_all();
-       /*  $("#datepickerStart").hide();
+       /*  ${"$"}(#"datepickerStart")'.css('visibility', 'hidden');
         $("#title-date-start").hide(); */
         $("#electric-monthly-button").css( "color", "black" );
         $("#electric-daily-button").css( "color", "black" );
@@ -226,7 +230,7 @@ $("#datepickerEnd").datepicker({onSelect:function(){refresh_data_table($("#choic
         is_electric_current = 0;
         is_electric_delta = 1;
         refresh_all();
-        $("#datepickerStart").show();
+        $("#datepickerStart").css('visibility', 'visible');
         $("#title-date-start").show();
         $("#electric-monthly-button").css( "color", "black" );
         $("#electric-daily-button").css( "color", "black" );
@@ -238,9 +242,9 @@ $("#datepickerEnd").datepicker({onSelect:function(){refresh_data_table($("#choic
         is_electric_period = $( "input:checked" ).val();
         
         if (is_electric_period == 0){ 
-            $("#datepickerStart").hide();
+            $("#datepickerStart").css('visibility', 'hidden');
             $("#title-date-start").hide(); }      
-        else { $("#datepickerStart").show();
+        else {                $("#datepickerStart").css('visibility', 'visible');
                $("#title-date-start").show(); }
         refresh_all();
         });
@@ -252,11 +256,11 @@ $("#datepickerEnd").datepicker({onSelect:function(){refresh_data_table($("#choic
  });
  
     
-    function logEvent(event, data, msg){
-       var args = $.isArray(args) ? args.join(", ") :
-    msg = msg ? ": " + msg : "";
-    $.ui.fancytree.info("Event('" + event.type + "', node=" + data.node + ")" + msg);
-  }
+function logEvent(event, data, msg){
+   var args = $.isArray(args) ? args.join(", ") :
+msg = msg ? ": " + msg : "";
+// $.ui.fancytree.info("Event('" + event.type + "', node=" + data.node + ")" + msg); // Disabled Fancytree logging
+}
     
 	
     $(function(){ 
@@ -368,20 +372,58 @@ var refresh_data_table = function(xyz){
 		 my_url = "/askue/"+xyz;}
 		
 
-	 $.ajax({
-		type: "GET",
-		url:  my_url,
-		beforeSend: function(){show_loader();},
-		data: {obj_parent_title:obj_parent_title, obj_key: obj_key, obj_title: obj_title, is_electric_monthly: is_electric_monthly, is_electric_daily: is_electric_daily, is_electric_current: is_electric_current,  is_electric_delta: is_electric_delta, is_electric_period:is_electric_period, electric_data_start: electric_data_start, electric_data_end: electric_data_end},
-	   })
-	 
-     
+	 	 $.ajax({
+		
 
-	 
-     .done(function( msg ) {
-        $('#data-table').html(msg); // Пишем в div ответ от страницы /askue/?номер отчёта
-            hide_loader();
-        });
+	 		type: "GET",
+		
+
+	 		url:  my_url,
+		
+
+	 		beforeSend: function(){
+		
+
+
+		
+
+
+		
+
+	             show_loader();
+		
+
+	         },
+		
+
+	 		data: {obj_parent_title:obj_parent_title, obj_key: obj_key, obj_title: obj_title, is_electric_monthly: is_electric_monthly, is_electric_daily: is_electric_daily, is_electric_current: is_electric_current,  is_electric_delta: is_electric_delta, is_electric_period:is_electric_period, electric_data_start: electric_data_start, electric_data_end: electric_data_end},
+		
+
+	 	   })
+		
+
+	      .done(function( msg ) {
+		
+
+	         $('#data-table').html(msg); // Пишем в div ответ от страницы /askue/?номер отчёта
+		
+
+	             hide_loader();
+		
+
+	         })
+		
+
+	      .fail(function(jqXHR, textStatus, errorThrown) {
+		
+
+	         console.error("AJAX Request Failed:", textStatus, errorThrown);
+		
+
+	         hide_loader();
+		
+
+	      });
   });
 };
 //--------------------------------------------------
@@ -594,3 +636,15 @@ var guid_comment=$(this).attr('id');
 	});	
 	     
 };
+
+
+
+
+
+
+
+
+
+
+
+

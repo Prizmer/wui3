@@ -1,81 +1,31 @@
 {% extends "base.html" %}
 
 {% block control-block %}
+<div class="control-block-wrapper">
+    <div class="control-main-panel">
+        <div class="control-header">
+            <div class="control-icon"> {% load static %} <img  src="{%static "images/new_ico/water-ico96.png" %}" alt="Водоучёт"></div>
+            <div class="control-title"> <h3> Учёт водопотребления</h3> </div>
+            <div class="loading-spinners">
+                <div class="spinner-grow text-primary" style="width: 1rem; height: 1rem;"  role="status" id="fadingBarsG_1"><span class="sr-only">Выполняется...</span></div>
+                <div class="spinner-grow text-danger" style="width: 1rem; height: 1rem;"  role="status" id ="fadingBarsG_2"><span class="sr-only">Выполняется...</span></div>
+                <div class="spinner-grow text-warning" style="width: 1rem; height: 1rem;"  role="status" id="fadingBarsG_3"><span class="sr-only">Выполняется...</span></div>
+            </div>
+        </div>
 
-	<div class = "col-6">	
-		<div class = "row align-items-center">
-			<div class = "col-2 " > {% load static %} <img  src="{%static "images/new_ico/water-ico96.png" %}" alt="Водоучёт"></div>
-			<div class = "col-6 " > <h3> Учёт водопотребления</h3> </div>	
-
-			<div class = "col-3">
-			<div class="spinner-grow text-primary" style="width: 1rem; height: 1rem;"  role="status" id="fadingBarsG_1">
-			  <span class="sr-only">Выполняется...</span>
-			</div>
-			<div class="spinner-grow text-danger" style="width: 1rem; height: 1rem;"  role="status" id ="fadingBarsG_2">
-			  <span class="sr-only">Выполняется...</span>
-			</div>
-			<div class="spinner-grow text-warning" style="width: 1rem; height: 1rem;"  role="status" id="fadingBarsG_3">
-			  <span class="sr-only">Выполняется...</span>
-			</div>			
-			
-		</div> 
-		</div>
-		<br>
-		<div class = "row" id = "heat_dm_block">
-			<div class = "col">
-				<span><strong>Показания &nbsp;</strong></span>
-				<span class="button" data-toggle="tooltip" data-placement="top" title="Месячные показания" id="electric-monthly-button">На начало месяца</span>
-				<span class="button" data-toggle="tooltip" data-placement="top" title="Суточные показания" id="electric-daily-button">На начало суток</span>
-			</div>
-		</div>
-		<br>
-		<br>
-		<div class = "row justify-content-start align-self-center item">
-			<div class = "col-7">
-				<select id="choice_report" style = "width:500;">
+        <div class="report-selector">
+			<div class="report-dropdown">
+				<select id="choice_report" style="width:100%;">
 					<option value="0"><strong>Выберите отчёт...</strong></option>
-				<!-- <option value="1">Потребление за период.</option> -->
-					<!-- <option value="2">Показания на дату.</option> -->
-					<!-- <option value="3">Показания за период.</option> -->
-					<!-- <option value="4">30-мин. срез мощности.</option> -->
-					<!-- <option value="6">Часовые приращения энергии</option> -->
-					<!-- <option value="7">Удельный расход электроэнергии</option> -->
-					<!-- <option value="10">10. Показания по воде</option> -->
-					<!-- <option value="11">11. Потребление за период по воде</option> -->
-					<!-- <option value="12">12. Показания по воде с идентификаторами</option> -->
-					<!-- <option value="24">!!!Прогрузка балансных групп из Excel</option> 
-					<option value="28">28. Показания по ХВС и ГВС (с теплосчётчика Эльф)</option>
-					<option value="26">26. Последние считанные показания по ХВС и ГВС (с теплосчётчика Эльф)</option>
-					<option value="34">34. Показания ХВС Текон</option>
-					<option value="35">35. Потребление за период ХВС Текон</option>
-					<option value="36">36. Показания ГВС Текон</option>
-					<option value="37">37. Потребление за период ГВС Текон</option>-->
- 					<option value="38">38. Показания по воде на дату с регистратора импульсов</option>
+					<option value="38">38. Показания по воде на дату с регистратора импульсов</option>
 					<option value="39">39. Потребление по воде за период с регистратора импульсов</option>
-					<!-- <option value="52">52. Показания по воде ХВС(с теплосчётчика Эльф) </option>
-					<option value="53">53. Потребление по воде ХВС за период(с теплосчётчика Эльф) </option>
-					<option value="54">54. Показания по воде ГВС(с теплосчётчика Эльф) </option>
-					<option value="55">55. Потребление по воде ГВС за период(с теплосчётчика Эльф) </option> -->
-					<!-- <option value="57">57. Потребление по воде за период(с водосчётчика Пульсар) </option> -->
-					 
 					<option value="58">58. Показания по воде на дату (с водосчётчика Пульсар) ГВС-ХВС </option>
                     <option value="60">60. Показания в строку по воде на дату (с водосчётчика Пульсар) </option> 
 					<option value="67">67. Потребление в строку ХВС, ГВС (с водосчётчика Пульсар) </option>
 					<option value="73">73. Потребление по воде за период(с водосчётчика Пульсар) ГВС-ХВС</option> 
-					<!-- <option value="132">132. Показания в строку по воде на дату (с регистратора импульсов) </option> -->
 					<option value="133">133. Потребление за период (с теплосчётчика в качестве регистратора импульсов) </option>
 					<option value="134">134. Показания на дату (с теплосчётчика в качестве регистратора импульсов) </option>
-					<!-- <option value="136">136. Показания в строку по воде на дату (c теплосчётчиков) </option> -->
-					<!-- <option value="79">79. Потребление по воде за период с регистратора импульсов </option> -->
-					<!-- <option value="83">83. Потребление по воде по месяцам с теплосчётчиков Эльф</option> -->
-					<!-- <option value="84">84. Показания по воде на дату с теплосчётчиков Эльф</option> -->
-					<!-- <option value="85">85. Потребление по воде за период с теплосчётчиков Эльф</option> -->
-					<!-- <option value="87">87. Баланс за период с регистратора импульсов </option> -->
-					<!-- <option value="96">96. Текущие показания по воде с регистратора импульсов</option> -->
-					<!-- <option value="101">101. Потребление по воде с регистратора импульсов для бухгалтерии</option> -->
-					<!-- <option value="137">137. Потребление по воде за период(с водосчётчика Пульсар) ХВС-ГВС</option> -->
-					<!-- <option value="138">138. Показания по воде на дату(с водосчётчика Пульсар) ХВС-ГВС</option> -->
-					<option value="140">140. Напряжение батарейки прибора(с водосчётчика Пульсар)</option>
+					<option value="140">140. Напряжение батареек прибора(с водосчётчика Пульсар)</option>
 					<option value="141">141. Потребление по воде за период(с водосчётчика ЭноНом) </option>
 					<option value="142">142. Показания по воде на дату (с водосчётчика ЭноНом) ГВС-ХВС </option>
 					<option value="147">147. Анализ потребления воды по-квартирно</option>
@@ -88,21 +38,22 @@
 					<option value="167">167. Потребление по Ридан-водосчётчикам</option>
 					<option value="170">170. Показания по ВЗЛЕТ-водосчётчикам</option>
 					<option value="171">171. Потребление по ВЗЛЕТ-водосчётчикам</option>
-					
 				</select>
 			</div>			
-			<div class = "col-2" id ="export_report"></div>	
+			<div class="report-export" id ="export_report"></div>	
 		</div>
-		
-			</div>		
-	
-	<div class = "col-5 offset-1">
-		<div class = "row">
-			<div class = "col-3 offset-2"> <div id="datepickerStart"><strong>Начальная дата:</strong></div> </div>
-			<div class = "col-3 offset-2"> <div id="datepickerEnd"><span id="title-date-start"><strong>Конечная дата:</strong></span></div>	</div>
-		</div>
-	</div>
-
+    </div>
+    <div class="control-side-panel">
+        <div class="date-picker-row">
+            <div class="date-picker-item" id="datepickerStart">
+                <span class="datepicker-content"><strong>Начальная дата:</strong></span>
+            </div>
+            <div class="date-picker-item" id="datepickerEnd">
+                <span class="datepicker-content"><span id="title-date-start"><strong>Конечная дата:</strong></span></span>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}
 
 

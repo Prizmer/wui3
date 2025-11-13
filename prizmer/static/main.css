@@ -1,14 +1,19 @@
-#layout { 
-width: 1800px;
-min-width: 600px;
-min-height: 300px;
-margin: 0 auto;
-padding: 0 15px 0px;
-border: 0px;
-position: relative;
+html, body {
+    height: 100%;
+    width: 100%;
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
 
-`font-family: sans-serif;
-background-color: ghostwhite;
+#layout { 
+    min-height: 100%;
+    max-width: 1320px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    font-family: sans-serif;
+    background-color: ghostwhite;
 }
 
 .modal {
@@ -61,6 +66,10 @@ min-height: 260px;
 background-color: ghostwhite;
 }
 
+#logo-text-container {
+  text-align: center;
+}
+
 #logo {
 margin-top: 0px;
 margin-bottom: 0;
@@ -101,20 +110,14 @@ color: #004C79;
 }
 
 #system-name {
-/* padding-top: 5px; 
-padding-bottom: 10px; */
 color: #004C79;
-/* margin:0 auto;
-margin-left: 21%; 
-height: 15%;*/
-text-align: center;
-background-color:#D8E2EC;
-border-style: solid;
-border-width: 2px;
-border-color: #fff;
+background-color: #f5f5f5; /* Paler background */
 border-radius: 5px;
-position: inherit;
-top: 5px;
+padding: 10px 20px; /* Added more horizontal padding */
+margin-bottom: 10px; /* Reduced margin */
+display: flex;
+justify-content: space-between;
+align-items: center;
 }
 
 #system-name-service {
@@ -133,16 +136,14 @@ border-radius: 5px;
 position: inherit;
 }
 
-#control-block{
-/* margin-top: 10px;
-margin-left: 21%; */
-min-height: 170px;
-border-style: solid;
-border-width: 1px;
-border-color: white;
-border-radius: 5px;
-position: relative; 
-
+.control-block-container {
+    padding: 7px 20px; /* Reduced top/bottom padding to 10px, kept left/right at 20px */
+    margin-bottom: 0px;
+    background-color: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 4px;
+    display: flex;
+    flex-wrap: wrap;
 }
 
 #title-subsystem{
@@ -187,17 +188,12 @@ margin-left: 1em;
 }
 
 #datepickerStart{
-/* position: absolute; 
-top: 1px; 
-right: 230px; */ 
 font-size : 8pt;
-
 }
 
+
+
 #datepickerEnd{
-/* position: absolute; 
-top: 1px; 
-right: 1px; */
 font-size : 8pt;
 }
 
@@ -213,10 +209,12 @@ overflow-y: scroll;
 }
 
 #data-block-service{
-margin-top: 15px;
+`margin-top: 15px;
 /*margin-left: 5%;*/
 min-height: 501px;
-margin-bottom: 30px;
+`border-style: solid;
+`border-width: 1px;
+`border-top-color: black;
 }
 
 table
@@ -368,48 +366,25 @@ color: #8D8173;
 
 
 #tree {
-width: 100%;
-height: 480px;
+    width: 100%;
+    flex-grow: 1;
 }
 
 #myfooter{
-min-height: 35px;
-/*min-width: 100%;*/
-background: green;
-/* position: relative; */
+    padding: 15px 0; /* Reduced height */
+    background-color: #6c757d; /* New background color */
+    border-top: 1px solid #dee2e6;
+    width: 100%; /* Revert to full width */
+    display: flex; /* Make it a flex container */
+    justify-content: space-between; /* Spread content horizontally */
+    align-items: center; /* Center content vertically */
+    overflow: hidden; /* Hide overflowing content */
+    flex-wrap: wrap; /* Allow children to wrap if they exceed available width */
+    border-bottom-left-radius: 8px;
+    border-bottom-right-radius: 8px;
 }
 
-a.button, span.button {
-  padding:  3px 5px;
-  position: relative;
-  display: inline-block;
-  height: 2em;
-  line-height: 1.3em;
-  vertical-align: middle;
-  text-align: center;
-  text-decoration: none;
-  color: #000;
-  outline: #324451;
-  border-radius: 5px;
-  border:1px solid rgba(132,159,187,1);
-  box-shadow: 0 0 0 1px #ddd inset, 0 1px 1px #fff; 
-  -moz-user-select: none;
-  -khtml-user-select: none;
-  -webkit-user-select: none;
-  user-select: none;
-}
-a.button:hover, a:hover img, span.button:hover {
-  background: #dcdcdc linear-gradient(#fff, #dcdcdc);
-  box-shadow: 0 0 0 1px #aaa inset, 0 1px 1px #aaa;
-}
 
-a.button:active, span.button:active {
-  background: none;
-  /* box-shadow: 0 0 0 1px #bbb inset, 0 1px 3px rgba(0,0,0,.5) inset, 0 1px 2px #fff; */
-  -webkit-box-shadow: 0px 0px 10px 3px rgba(132,159,187,1);
-  -moz-box-shadow: 0px 0px 10px 3px rgba(132,159,187,1);
-  box-shadow: 0px 0px 10px 3px rgba(132,159,187,1);
-}
 
 
 /* LOGIN FORM */
@@ -688,15 +663,7 @@ font-size: 0.7em;
  margin-right: 1em; */
 }
 
-#choice_report-button{
-font-size: 0.8em;
-/*margin-left: 0.4em;*/
-float: left;
-margin-right: 1em;
-box-shadow: 0px 0px 1px 1px rgba(132,159,187,1);
-/*   -moz-box-shadow: 0px 0px 10px 3px rgba(132,159,187,1);
-  box-shadow: 0px 0px 10px 3px rgba(132,159,187,1); */
-  top: 9px;
+
 
 }
 
@@ -707,29 +674,26 @@ font-size: 0.7em;
  margin-right: 1em; */
 }
 
-#choice_file-button{
-font-size: 0.8em;
-/*margin-left: 0.4em;*/
-float: left;
-margin-right: 1em;
-box-shadow: 0px 0px 1px 1px rgba(132,159,187,1);
-/*   -moz-box-shadow: 0px 0px 10px 3px rgba(132,159,187,1);
-  box-shadow: 0px 0px 10px 3px rgba(132,159,187,1); */
-  top: 9px;
-
-}
-
 #export_report{
-align: center;
-font-weight:bold;
-font-size: 1em;
 /*margin-top: 0.05em;*/
-color: #004C79;
-text-align: center;
-top:9px;
+display: inline-block;
+vertical-align: middle;
 /* border-radius: 5px;
 border: 1px rgba(132,159,187,1) solid; */
-}
+} 
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 #extended-info{
 	width: 1000px; 
@@ -821,17 +785,395 @@ color: #004C79;
 
 
 .container-my {
-    max-width: 1600px;
+    /* max-width: 1600px; */ /* Removed to let content-wrapper control width */
     position: relative;
-    margin-left: auto;
-    margin-right: auto;
-    padding-right: 10px;
-    padding-left: 10px;
+    /* margin-left: auto; */ /* Removed to let content-wrapper control centering */
+    /* margin-right: auto; */ /* Removed to let content-wrapper control centering */
+    /* padding-right: 10px; */ /* Removed to avoid interference */
+    /* padding-left: 10px; */ /* Removed to avoid interference */
+    border-radius: 10px; /* Added for rounded corners */
+}
+
+.resource-icon-bar {
+    display: flex;
+    justify-content: space-between; /* Distribute items with space between them */
+    align-items: center;
+    /* flex-wrap: wrap; */ /* Removed to force icons onto a single line */
+    margin-bottom: 15px; /* Add some space below the bar */
 }
 
 .ico-title {
-	flex: 0 0 23%;
-	max-width: 23%;
+	/* flex: 0 0 23%; */ /* Removed as we are using flex on parent */
+	/* max-width: 23%; */ /* Removed as we are using flex on parent */
+    margin: 0; /* Remove negative margin to prevent overflow */
+}
+
+.ico-title a {
+    display: block; /* Make the whole link clickable and block-level for padding */
+    padding: 5px; /* Reduced padding around the icon */
+    border-radius: 8px; /* Rounded corners for the clickable area */
+    transition: box-shadow 0.3s ease-in-out; /* Smooth transition for shadow */
+}
+
+.ico-title a:hover {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Nice shadow on hover */
+    text-decoration: none; /* Remove underline from link */
+}
+
+.resource-icon-bar .ico-title a.active-resource-icon {
+    background-color: #e0e0e0 !important; /* Light grey background for active state */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15) !important; /* Subtle shadow for active state */
+    border: 1px solid #a0a0a0 !important; /* A border to make it stand out */
 }
 
 
+
+
+.main-card {
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    padding: 20px;
+    flex-grow: 1;
+}
+
+.header-controls {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    height: 100%;
+}
+
+.theme-toggle-btn, .exit-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    margin-left: 10px;
+    border-radius: 50%;
+    border: 1px solid #ddd;
+    background-color: #fff;
+    transition: box-shadow 0.2s;
+    cursor: pointer;
+    text-decoration: none;
+}
+
+.theme-toggle-btn:hover, .exit-link:hover {
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    text-decoration: none;
+}
+
+.theme-toggle-btn .sun-icon, .theme-toggle-btn .moon-icon {
+    font-size: 18px;
+}
+
+.exit-link img {
+    display: block;
+    width: 18px;
+    height: 18px;
+}
+
+#system-name h3 {
+    flex-grow: 1;
+    text-align: center;
+    margin: 0;
+    padding-right: 20px;
+    white-space: nowrap;
+    font-size: 1.65em; /* Increased font size */
+    color: #0056b3; /* Brighter blue */
+    font-weight: normal; /* Removed boldness */
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+/* Final Correct Layout B for control.html */
+.control-block-wrapper {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.control-main-panel {
+    flex: 0 1 65%;
+}
+
+.control-side-panel {
+    flex: 0 1 30%;
+    padding-left: 60px; /* Move content even more to the right */
+}
+
+.date-picker-item {
+    margin-bottom: 15px;
+}
+
+.control-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.control-title {
+    margin-left: 30px;
+    max-width: 220px; /* Wrap title to 2 lines */
+}
+
+.control-title h3 {
+    color: #2c3e50;
+    font-weight: normal;
+    margin: 0;
+    line-height: 1.2;
+    white-space: normal; /* Allow wrapping */
+    text-align: left; /* Align wrapped text to the left */
+}
+
+.loading-spinners {
+    margin-left: auto;
+}
+
+.readings-section {
+    margin-bottom: 20px;
+}
+
+.report-selector {
+    display: flex;
+    align-items: center;
+}
+
+.report-dropdown {
+    flex-grow: 1;
+    margin-right: 15px;
+}
+
+
+.report-export {
+    flex-shrink: 0;
+}
+
+.date-picker-row {
+    display: flex;
+    justify-content: space-between;
+}
+
+.date-picker-item {
+    flex: 0 0 48%;
+}
+
+.date-picker-item strong {
+    white-space: nowrap;
+}
+
+/* New styles for tree title and tree block */
+.tree-title {
+    font-size: 1em; /* Make the label much smaller */
+    color: #343a40; /* Darker, more modern text color */
+    margin-bottom: 10px;
+    text-align: center;
+}
+
+#tree {
+    background-color: #ffffff; /* White background */
+    border: 1px solid #e9ecef; /* Light border */
+    border-radius: 8px; /* Rounded corners */
+    padding: 1px; /* Internal spacing */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05); /* Subtle shadow */
+    height: auto; /* Allow height to adjust to content */
+    min-height: 480px; /* Maintain a minimum height */
+    overflow: auto; /* Add scrollbars if content overflows */
+    width: 100%; /* Ensure it takes full width of its column */
+}
+
+/* Custom layout for main content area */
+.main-layout-row {
+    display: flex;
+    flex-wrap: nowrap; /* Prevent wrapping of panels */
+    flex: 1; /* Allow main content to grow and push footer down */
+    flex-grow: 1; /* Explicitly make it grow to push footer down */
+}
+
+.left-panel {
+    flex: 0 0 19%; /* Fixed width of 25% */
+    max-width: 19%; /* Ensure it doesn't grow beyond 25% */
+    padding-right: 10px; /* Spacing between panels */
+    padding-left: 10px; /* Add left padding for internal spacing */
+    display: flex;
+    flex-direction: column;
+}
+
+.right-panel {
+    flex: 1; /* Take up remaining space */
+    max-width: 81%; /* Ensure it doesn't grow beyond 75% */
+    display: flex;
+    flex-direction: column;
+}
+
+/* New styles for tree title and tree block */
+.tree-title {
+    font-size: 1em; /* Make the label much smaller */
+    color: #343a40; /* Darker, more modern text color */
+    margin-bottom: 10px;
+    text-align: center;
+}
+
+.tree-container-row {
+    margin-top: auto;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.tree-container-row .col-12 {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+
+/* Remove dotted border from Fancytree elements */
+.fancytree-focused, .fancytree-active {
+    outline: none !important;
+    border: none !important;
+}
+
+.content-wrapper {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+.footer-left-content {
+    display: flex;
+    gap: 10px; /* Space between icons */
+    align-items: center;
+    flex-shrink: 0; /* Prevent shrinking */
+    max-width: 100%; /* Ensure it doesn't exceed parent's width */
+    padding-left: 3.5%;
+}
+
+.footer-right-content {
+    display: flex;
+    gap: 10px; /* Space between elements */
+    align-items: center;
+    flex-shrink: 0; /* Prevent shrinking */
+    max-width: 100%; /* Ensure it doesn't exceed parent's width */
+    padding-right: 3.5%;
+}
+
+/* Modernizing jQuery UI Datepicker */
+.ui-datepicker {
+    font-family: sans-serif;
+    font-size: 0.8em; /* Smaller font size */
+    background: #fff;
+    border: 1px solid #ced4da;
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+    padding: 10px; /* Smaller padding */
+    width: 100%; /* Responsive width */
+}
+
+.ui-datepicker .ui-datepicker-header {
+    background: #f8f9fa;
+    border: none;
+    border-bottom: 1px solid #dee2e6;
+    padding: 8px 0; /* Smaller padding */
+    margin-bottom: 8px; /* Smaller margin */
+    border-radius: 8px 8px 0 0;
+    position: relative;
+}
+
+.ui-datepicker .ui-datepicker-prev,
+.ui-datepicker .ui-datepicker-next {
+    top: 8px; /* Adjust position */
+    cursor: pointer;
+    color: #007bff;
+    font-weight: bold;
+    padding: 4px; /* Smaller padding */
+    border-radius: 4px;
+    transition: background-color 0.2s;
+}
+
+.ui-datepicker .ui-datepicker-prev:hover,
+.ui-datepicker .ui-datepicker-next:hover {
+    background-color: #e9ecef;
+}
+
+.ui-datepicker .ui-datepicker-title {
+    margin: 0;
+    line-height: 1.6em; /* Adjust line height */
+    text-align: center;
+    color: #343a40;
+    font-weight: bold;
+}
+
+.ui-datepicker .ui-datepicker-calendar {
+    width: 100%;
+    margin: 0;
+}
+
+.ui-datepicker .ui-datepicker-calendar th {
+    padding: 5px; /* Smaller padding */
+    color: #6c757d;
+    font-size: 0.8em; /* Smaller font size */
+    text-align: center;
+    border: none;
+}
+
+.ui-datepicker .ui-datepicker-calendar td {
+    padding: 0;
+    border: none;
+}
+
+.ui-datepicker .ui-datepicker-calendar td span,
+.ui-datepicker .ui-datepicker-calendar td a {
+    display: block;
+    padding: 5px; /* Smaller padding */
+    text-align: center;
+    text-decoration: none;
+    color: #343a40;
+    border-radius: 4px;
+    transition: background-color 0.2s, color 0.2s;
+}
+
+.ui-datepicker .ui-datepicker-calendar td a:hover {
+    background-color: #e9ecef;
+    color: #0056b3;
+}
+
+.ui-datepicker .ui-datepicker-calendar td .ui-state-highlight {
+    background-color: #007bff;
+    color: #fff;
+    font-weight: bold;
+}
+
+.ui-datepicker .ui-datepicker-calendar td .ui-state-active {
+    background-color: #0056b3;
+    color: #fff;
+    font-weight: bold;
+}
+
+.ui-datepicker .ui-state-disabled span,
+.ui-datepicker .ui-state-disabled a {
+    color: #adb5bd;
+    opacity: 0.6;
+    cursor: default;
+}
+
+.ui-datepicker .ui-state-disabled span:hover,
+.ui-datepicker .ui-state-disabled a:hover {
+    background-color: transparent;
+    color: #adb5bd;
+}
+
+
+.footer-right-content a {
+    color: #004C79;
+}
+
+.footer-right-content span {
+    color: white;
+}
+
+ul.fancytree-container {
+    border: none;
+}

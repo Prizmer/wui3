@@ -1,98 +1,64 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block control-block %}
+<div class="control-block-wrapper">
+    <div class="control-main-panel">
+        <div class="control-header">
+			<div class="control-icon"> {% load static %} <img  src="{%static "images/new_ico/lamp2-ico96.png" %}" alt="Электроучёт"></div>
+			<div class="control-title"> <h3> Учёт электроэнергии</h3> </div>
+            <div class="loading-spinners">
+			    <div class="spinner-grow text-primary" style="width: 1rem; height: 1rem;"  role="status" id="fadingBarsG_1"><span class="sr-only">Выполняется...</span></div>
+			    <div class="spinner-grow text-danger" style="width: 1rem; height: 1rem;"  role="status" id ="fadingBarsG_2"><span class="sr-only">Выполняется...</span></div>
+			    <div class="spinner-grow text-warning" style="width: 1rem; height: 1rem;"  role="status" id="fadingBarsG_3"><span class="sr-only">Выполняется...</span></div>
+		    </div>
+		</div>
 
-	<div class = "col-6">
-	
-		<div class = "row align-items-center">
-			<div class = "col-2" > {% load static %} <img  src="{%static "images/new_ico/lamp2-ico96.png" %}" alt="Электроучёт"></div>
-			<div class = "col-6" > <h3> Учёт электроэнергии</h3> </div>	
+		<div class="readings-section">
+            <span><strong>Показания &nbsp;</strong></span>
+            <div class="btn-group" role="group" aria-label="Basic example">
+                <button type="button" class="btn btn-outline-secondary" data-toggle="tooltip" data-placement="top" title="Месячные показания" id="electric-monthly-button">На начало месяца</button>
+                <button type="button" class="btn btn-outline-secondary" data-toggle="tooltip" data-placement="top" title="Суточные показания" id="electric-daily-button">На начало суток</button>
+            </div>
+		</div>
 
-			<div class = "col-3">
-			<div class="spinner-grow text-primary" style="width: 1rem; height: 1rem;"  role="status" id="fadingBarsG_1">
-			  <span class="sr-only">Выполняется...</span>
-			</div>
-			<div class="spinner-grow text-danger" style="width: 1rem; height: 1rem;"  role="status" id ="fadingBarsG_2">
-			  <span class="sr-only">Выполняется...</span>
-			</div>
-			<div class="spinner-grow text-warning" style="width: 1rem; height: 1rem;"  role="status" id="fadingBarsG_3">
-			  <span class="sr-only">Выполняется...</span>
-			</div>			
-			
-		</div> 
+		<div class="readings-section" id="heat_dm_block"> <!-- Kept original ID -->
+            <span><strong>Показания &nbsp;</strong></span>
+            <div class="btn-group" role="group" aria-label="Basic example">
+                <button type="button" class="btn btn-outline-secondary" data-toggle="tooltip" data-placement="top" title="Месячные показания" id="electric-monthly-button-2">На начало месяца</button>
+                <button type="button" class="btn btn-outline-secondary" data-toggle="tooltip" data-placement="top" title="Суточные показания" id="electric-daily-button-2">На начало суток</button>
+            </div>
 		</div>
-		<br>
-		<div class = "row">
-			<div class = "col">
-				<span><strong>Показания &nbsp;</strong></span>
-				<span class="button" data-toggle="tooltip" data-placement="top" title="Месячные показания" id="electric-monthly-button">На начало месяца</span>
-				<span class="button" data-toggle="tooltip" data-placement="top" title="Суточные показания" id="electric-daily-button">На начало суток</span>
-			<!--<span class="button" id="electric-current-button">Текущие</span> -->
-			</div>
-		</div>
-		<div class = "row" id = "heat_dm_block">
-			<div class = "col">
-				<span><strong>Показания &nbsp;</strong></span>
-				<span class="button" data-toggle="tooltip" data-placement="top" title="Месячные показания" id="electric-monthly-button">На начало месяца</span>
-				<span class="button" data-toggle="tooltip" data-placement="top" title="Суточные показания" id="electric-daily-button">На начало суток</span>
-			</div>
-		</div>
-		<br>	
-		<div class = "row justify-content-start align-self-center item">
-			<div class = "col-7">
-				<select id="choice_report" style = "width:500;">
+
+		<div class="report-selector">
+			<div class="report-dropdown">
+				<select id="choice_report" style="width:100%;">
 					<option value="0"><strong>Выберите отчёт...</strong></option>
-
-				<!-- 	<option value="1">Потребление за период.</option>
-					<option value="2">Показания на дату.</option>
-					<option value="25">Профиль показаний за период</option>
-					<option value="27">Профиль показаний за период по 2 тарифам</option> 
-					<option value="29">29. Профиль показаний за период по 3 тарифам</option>			
-					<option value="4">30-мин. срез мощности.</option>
-					<option value="6">Часовые приращения энергии</option> 
-					<option value="8">8. Режимный день</option> 
-					<option value="14">Показания на дату. 2 Тарифа</option>
-					<option value="16">16. Показания на дату. 3 Тарифа</option>
-					<option value="15">Потребление за период. 2 Тарифа</option>			   
-					<option value="31">Потребление за период. 2 Тарифа</option> 
-					<option value="17">17. Потребление за период. 3 Тарифа</option> -->
-					
 					<option value="40">40. Проверка соотвествия зав.номеров</option>
 					<option value="41">41. Отчёт по форме 80020</option>
-					<!-- <option value="71">71. Отчёт по форме 80040</option> -->
-					<!-- <option value="68">68. Режимный день</option>   -->
 					<option value="69">69. Профиль показаний за период.3 Тарифа.График</option>
-<!-- 					<option value="91">91. Потребление за период. 3 Тарифа</option>
- -->					<option value="72">72. Показания на дату с комментариями. 3 Тарифа</option>
+					<option value="72">72. Показания на дату с комментариями. 3 Тарифа</option>
 					<option value="98">98. Восстановленый суточный срез A+ и R+</option>
 					<option value="99">99. Получасовой профиль показаний A+ и R+</option>
-<!-- 					<option value="77">77. Баланс за период по балансной группе</option>
-					<option value="95">95. Профиль показаний за период по A+ и R+ график</option>
-					
-					<option value="102">102. Показания на дату. 3 Тарифа</option>
-					<option value="104">104. Показания на дату. 2 Тарифа</option>
-					<option value="106">106. Показания на дату. Сумма Тарифов</option>
-					<option value="103">103. Потребление за период. 2 Тарифа</option>
-					<option value="105">105. Потребление за период. Сумма Тарифов</option>
-					<option value="108">108. Показания на дату для квартир. Подольск</option>
-					<option value="107">107. Потребление за период для квартир. Подольск</option> -->
 					<option value="113">113. Потребление за период. 3 Тарифа.</option>
 					<option value="114">114. Показания на дату. 3 Тарифа</option>
 					<option value="126">126. Почасовые показания за месяц. Интервальный акт</option>
 					<option value="128">128. Показаний ПУ за месяц. Интегральный акт </option>
 				</select>
-			</div>			
-			<div class = "col-2" id ="export_report"></div>	
-		</div>
-		
 			</div>
-			
-	
-	<div class = "col-5 offset-1">
-		<div class = "row">
-			<div class = "col-3 offset-2"> <div id="datepickerStart"><strong>Начальная дата:</strong></div> </div>
-			<div class = "col-3 offset-2"> <div id="datepickerEnd"><span id="title-date-start"><strong>Конечная дата:</strong></span></div>	</div>
+			<div class="report-export" id ="export_report"></div>
 		</div>
-	</div>
-	
+    </div>
+
+    <div class="control-side-panel">
+        <div class="date-picker-row">
+            <div class="date-picker-item" id="datepickerStart">
+                <span class="datepicker-content"><strong>Начальная дата:</strong></span>
+            </div>
+            <div class="date-picker-item" id="datepickerEnd">
+                <span class="datepicker-content"><span id="title-date-start"><strong>Конечная дата:</strong></span></span>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}

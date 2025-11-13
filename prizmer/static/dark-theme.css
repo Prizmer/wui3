@@ -1,0 +1,152 @@
+/* Dark Theme Styles */
+body.dark-theme {
+    background-color: #212529;
+    color: #e0e0e0;
+}
+
+.dark-theme #layout {
+    background-color: #2c3034;
+}
+
+.dark-theme .left-panel {
+    background-color: #343a40;
+}
+
+.dark-theme .right-panel {
+    background-color: #2c3034;
+}
+
+.dark-theme .main-card {
+    background-color: #343a40;
+    border-color: #444;
+}
+
+.dark-theme #system-name {
+    background-color: #495057;
+    color: #e0e0e0;
+    border-color: #444;
+}
+
+.dark-theme .control-block-container {
+    background-color: #343a40;
+    border-color: #444;
+}
+
+.dark-theme #myfooter {
+    background-color: #343a40;
+    border-top-color: #444;
+}
+
+.dark-theme .footer-right-content a {
+    color: #8ab4f8; /* A lighter blue for dark theme */
+}
+
+.dark-theme .footer-right-content span {
+    color: #e0e0e0;
+}
+
+.dark-theme .ui-datepicker {
+    background: #343a40;
+    border-color: #444;
+}
+
+.dark-theme .ui-datepicker .ui-datepicker-header {
+    background: #495057;
+    border-bottom-color: #444;
+}
+
+.dark-theme .ui-datepicker .ui-datepicker-title {
+    color: #e0e0e0;
+}
+
+.dark-theme .ui-datepicker .ui-datepicker-calendar th {
+    color: #aaa;
+}
+
+.dark-theme .ui-datepicker .ui-datepicker-calendar td span,
+.dark-theme .ui-datepicker .ui-datepicker-calendar td a {
+    color: #343a40;
+}
+
+.dark-theme .ui-datepicker .ui-datepicker-calendar td a:hover {
+    background-color: #444;
+    color: #fff;
+}
+
+.dark-theme .ui-datepicker .ui-datepicker-calendar td .ui-state-highlight {
+    background-color: #8ab4f8;
+    color: #121212;
+}
+
+.dark-theme .ui-datepicker .ui-datepicker-calendar td .ui-state-active {
+    background-color: #0056b3;
+    color: #fff;
+}
+
+.dark-theme .ui-datepicker .ui-state-disabled span,
+.dark-theme .ui-datepicker .ui-state-disabled a {
+    color: #666;
+}
+
+.dark-theme #blue-style,
+.dark-theme #system-name,
+.dark-theme #system-name-service,
+.dark-theme #comment-title,
+.dark-theme #system-name h3,
+.dark-theme .control-title h3,
+.dark-theme .tree-title,
+.dark-theme .footer-right-content a {
+    color: #e0e0e0;
+}
+
+.dark-theme .th_calendar,
+.dark-theme #error {
+    color: #ff8a80; /* A lighter red for dark theme */
+}
+
+.dark-theme .td_calendar {
+    color: #aaa;
+}
+
+.dark-theme .login .form-row label {
+    color: #e0e0e0;
+}
+
+.dark-theme .highlight {
+    color: #121212;
+}
+
+.dark-theme .highlight_30 {
+    color: #121212;
+}
+
+.dark-theme .ui-datepicker .ui-datepicker-calendar td a:hover {
+    color: #fff;
+}
+
+.dark-theme .ui-datepicker .ui-datepicker-calendar td .ui-state-highlight {
+    color: #121212;
+}
+
+.dark-theme .ui-datepicker .ui-datepicker-calendar td .ui-state-active {
+    color: #fff;
+}
+
+.dark-theme .ui-datepicker .ui-state-disabled span,
+.dark-theme .ui-datepicker .ui-state-disabled a {
+    color: #666;
+}
+
+.dark-theme ul.fancytree-container {
+    background-color: #adb5bd;
+}
+
+.dark-theme .theme-toggle-btn,
+.dark-theme .exit-link {
+    background-color: #495057; /* Darker background */
+    border: 1px solid #6c757d; /* Darker border */
+}
+
+.dark-theme .exit-link img {
+    filter: invert(1) hue-rotate(180deg);
+}
