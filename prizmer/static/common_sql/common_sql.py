@@ -188,10 +188,10 @@ Left Join
   abonents.name as ab_name,  
   daily_values.date as date_start,    
   resources.name,
-  sum(Case when names_params.name = '%s' then daily_values.value else null end) as energy_start,
-                          sum(Case when names_params.name = '%s' then daily_values.value else null end) as volume_start,
-                          sum(Case when names_params.name = '%s' then daily_values.value else null end) as ton_start,
-                          sum(Case when names_params.name = '%s' then daily_values.value else null end) as terr_start   
+  MAX(Case when names_params.name = '%s' then daily_values.value else null end) as energy_start,
+                          MAX(Case when names_params.name = '%s' then daily_values.value else null end) as volume_start,
+                          MAX(Case when names_params.name = '%s' then daily_values.value else null end) as ton_start,
+                          MAX(Case when names_params.name = '%s' then daily_values.value else null end) as terr_start   
 FROM 
   public.abonents, 
   public.daily_values, 
@@ -229,10 +229,10 @@ Left Join
   abonents.name as ab_name,  
   daily_values.date as date_start,    
   resources.name,
-  sum(Case when names_params.name = '%s' then daily_values.value else null end) as energy_end,
-                          sum(Case when names_params.name = '%s' then daily_values.value else null end) as volume_end,
-                          sum(Case when names_params.name = '%s' then daily_values.value else null end) as ton_end,
-                          sum(Case when names_params.name = '%s' then daily_values.value else null end) as terr_end   
+  MAX(Case when names_params.name = '%s' then daily_values.value else null end) as energy_end,
+                          MAX(Case when names_params.name = '%s' then daily_values.value else null end) as volume_end,
+                          MAX(Case when names_params.name = '%s' then daily_values.value else null end) as ton_end,
+                          MAX(Case when names_params.name = '%s' then daily_values.value else null end) as terr_end   
 FROM 
   public.abonents, 
   public.daily_values, 
@@ -278,9 +278,9 @@ def makeSqlQuery_heat_by_date_daily_for_abon(obj_title, obj_parent_title, electr
     sQuery="""SELECT abonents.name,
                           abonents.name as ab_name, 
                           meters.factory_number_manual,                          
-                          sum(Case when names_params.name = '%s' then daily_values.value/100 else null end) as energy,
-                          sum(Case when names_params.name = '%s' then daily_values.value else null end) as volume,
-                          sum(Case when names_params.name = '%s' then daily_values.value else null end) as elfTon                                
+                          MAX(Case when names_params.name = '%s' then daily_values.value/100 else null end) as energy,
+                          MAX(Case when names_params.name = '%s' then daily_values.value else null end) as volume,
+                          MAX(Case when names_params.name = '%s' then daily_values.value else null end) as elfTon                                
 FROM 
   public.link_abonents_taken_params, 
   public.meters, 
@@ -316,9 +316,9 @@ left join
 (SELECT 
                           abonents.name as ab_name, 
                           meters.factory_number_manual,                           
-                          sum(Case when names_params.name = '%s' then daily_values.value/100 else null end) as energy,
-                          sum(Case when names_params.name = '%s' then daily_values.value else null end) as volume,
-                          sum(Case when names_params.name = '%s' then daily_values.value else null end) as elfTon                                
+                          MAX(Case when names_params.name = '%s' then daily_values.value/100 else null end) as energy,
+                          MAX(Case when names_params.name = '%s' then daily_values.value else null end) as volume,
+                          MAX(Case when names_params.name = '%s' then daily_values.value else null end) as elfTon                                
 FROM 
   public.link_abonents_taken_params, 
   public.meters, 
@@ -376,10 +376,10 @@ Left Join
   abonents.name as ab_name,  
   daily_values.date as date_start,    
   resources.name,
-  sum(Case when names_params.name = '%s' then daily_values.value else null end) as energy_start,
-                          sum(Case when names_params.name = '%s' then daily_values.value else null end) as volume_start,
-                          sum(Case when names_params.name = '%s' then daily_values.value else null end) as ton_start,
-                          sum(Case when names_params.name = '%s' then daily_values.value else null end) as terr_start   
+  MAX(Case when names_params.name = '%s' then daily_values.value else null end) as energy_start,
+                          MAX(Case when names_params.name = '%s' then daily_values.value else null end) as volume_start,
+                          MAX(Case when names_params.name = '%s' then daily_values.value else null end) as ton_start,
+                          MAX(Case when names_params.name = '%s' then daily_values.value else null end) as terr_start   
 FROM 
   public.abonents, 
   public.daily_values, 
@@ -416,10 +416,10 @@ Left Join
   abonents.name as ab_name,  
   daily_values.date as date_start,    
   resources.name,
-  sum(Case when names_params.name = '%s' then daily_values.value else null end) as energy_end,
-                          sum(Case when names_params.name = '%s' then daily_values.value else null end) as volume_end,
-                          sum(Case when names_params.name = '%s' then daily_values.value else null end) as ton_end,
-                          sum(Case when names_params.name = '%s' then daily_values.value else null end) as terr_end   
+  MAX(Case when names_params.name = '%s' then daily_values.value else null end) as energy_end,
+                          MAX(Case when names_params.name = '%s' then daily_values.value else null end) as volume_end,
+                          MAX(Case when names_params.name = '%s' then daily_values.value else null end) as ton_end,
+                          MAX(Case when names_params.name = '%s' then daily_values.value else null end) as terr_end   
 FROM 
   public.abonents, 
   public.daily_values, 
@@ -639,12 +639,12 @@ current_values.date,
                           objects.name, 
                           abonents.name as ab_name, 
                           meters.factory_number_manual,                           
-                          sum(Case when names_params.name = '%s' then current_values.value else null end) as energy,
-                          sum(Case when names_params.name = '%s' then current_values.value else null end) as volume,
-                          sum(Case when names_params.name = '%s' then current_values.value else null end) as elfTon,
-                          sum(Case when names_params.name = '%s' then current_values.value else null end) as ti,
-                          sum(Case when names_params.name = '%s' then current_values.value else null end) as t0,
-                          sum(Case when names_params.name = '%s' then current_values.value else null end) as elfErr
+                          MAX(Case when names_params.name = '%s' then current_values.value else null end) as energy,
+                          MAX(Case when names_params.name = '%s' then current_values.value else null end) as volume,
+                          MAX(Case when names_params.name = '%s' then current_values.value else null end) as elfTon,
+                          MAX(Case when names_params.name = '%s' then current_values.value else null end) as ti,
+                          MAX(Case when names_params.name = '%s' then current_values.value else null end) as t0,
+                          MAX(Case when names_params.name = '%s' then current_values.value else null end) as elfErr
 FROM 
   public.link_abonents_taken_params, 
   public.meters, 
@@ -738,12 +738,12 @@ current_values.date,
                           objects.name, 
                           abonents.name as ab_name, 
                           meters.factory_number_manual,                           
-                          sum(Case when names_params.name = '%s' then current_values.value else null end) as energy,
-                          sum(Case when names_params.name = '%s' then current_values.value else null end) as volume,
-                          sum(Case when names_params.name = '%s' then current_values.value else null end) as elfTon,
-                          sum(Case when names_params.name = '%s' then current_values.value else null end) as ti,
-                          sum(Case when names_params.name = '%s' then current_values.value else null end) as t0,
-                          sum(Case when names_params.name = '%s' then current_values.value else null end) as elfErr
+                          MAX(Case when names_params.name = '%s' then current_values.value else null end) as energy,
+                          MAX(Case when names_params.name = '%s' then current_values.value else null end) as volume,
+                          MAX(Case when names_params.name = '%s' then current_values.value else null end) as elfTon,
+                          MAX(Case when names_params.name = '%s' then current_values.value else null end) as ti,
+                          MAX(Case when names_params.name = '%s' then current_values.value else null end) as t0,
+                          MAX(Case when names_params.name = '%s' then current_values.value else null end) as elfErr
 FROM 
   public.link_abonents_taken_params, 
   public.meters, 
@@ -901,10 +901,10 @@ WHERE
   GROUP BY abonents.name, link_balance_groups_meters.type) z3
 Left join
 (SELECT z1.guid,z1.monthly_date, z1.name_group, z1.name_abonents, z1.number_manual, 
-sum(Case when z1.params_name = '%s' then z1.value_monthly  end) as t0,
-sum(Case when z1.params_name = '%s' then z1.value_monthly  end) as t1,
-sum(Case when z1.params_name = '%s' then z1.value_monthly  end) as t2,
-sum(Case when z1.params_name = '%s' then z1.value_monthly  end) as t3
+MAX(Case when z1.params_name = '%s' then z1.value_monthly  end) as t0,
+MAX(Case when z1.params_name = '%s' then z1.value_monthly  end) as t1,
+MAX(Case when z1.params_name = '%s' then z1.value_monthly  end) as t2,
+MAX(Case when z1.params_name = '%s' then z1.value_monthly  end) as t3
 FROM
                         (SELECT 
                         balance_groups.guid,
@@ -963,8 +963,8 @@ SELECT
   daily_values.date,
   abonents.name, 
   meters.factory_number_manual,  
-   sum(Case when names_params.name = '%s' then daily_values.value else null end) as hvs,
-   sum(Case when names_params.name = '%s' then daily_values.value else null end) as gvs,
+   MAX(Case when names_params.name = '%s' then daily_values.value else null end) as hvs,
+   MAX(Case when names_params.name = '%s' then daily_values.value else null end) as gvs,
   objects.name
 FROM 
   public.abonents, 
@@ -1012,8 +1012,8 @@ left join
   objects.name as obj_name, 
   abonents.name as ab_name, 
   meters.factory_number_manual,  
-   sum(Case when names_params.name = '%s' then current_values.value else null end) as hvs,
-   sum(Case when names_params.name = '%s' then current_values.value else null end) as gvs,
+   MAX(Case when names_params.name = '%s' then current_values.value else null end) as hvs,
+   MAX(Case when names_params.name = '%s' then current_values.value else null end) as gvs,
    current_values.date
 FROM 
   public.abonents, 
@@ -1063,8 +1063,8 @@ def makeSqlQuery_water_for_abon_gvs_hvs_current(obj_title, obj_parent_title, ele
    current_values.time,
   abonents.name, 
   meters.factory_number_manual,  
-   sum(Case when names_params.name = '%s' then current_values.value else null end) as hvs,
-   sum(Case when names_params.name = '%s' then current_values.value else null end) as gvs,    
+   MAX(Case when names_params.name = '%s' then current_values.value else null end) as hvs,
+   MAX(Case when names_params.name = '%s' then current_values.value else null end) as gvs,    
   objects.name 
 FROM 
   public.abonents, 
@@ -1111,8 +1111,8 @@ left join
   objects.name as obj_name, 
   abonents.name as ab_name, 
   meters.factory_number_manual,  
-   sum(Case when names_params.name = '%s' then current_values.value else null end) as hvs,
-   sum(Case when names_params.name = '%s' then current_values.value else null end) as gvs,
+   MAX(Case when names_params.name = '%s' then current_values.value else null end) as hvs,
+   MAX(Case when names_params.name = '%s' then current_values.value else null end) as gvs,
    current_values.date,
    current_values.time
 FROM 
@@ -1520,10 +1520,10 @@ def makeSqlQuery_electric_by_daily_or_monthly_for_object_v3(obj_title, electric_
 from electric_abons_2
 LEFT JOIN 
 (SELECT z1.monthly_date, z1.name_objects, z1.name_abonents, z1.number_manual, 
-sum(Case when z1.params_name = '%s' then z1.value_monthly  end) as t0,
-sum(Case when z1.params_name = '%s' then z1.value_monthly  end) as t1,
-sum(Case when z1.params_name = '%s' then z1.value_monthly  end) as t2,
-sum(Case when z1.params_name = '%s' then z1.value_monthly  end) as t3,
+MAX(Case when z1.params_name = '%s' then z1.value_monthly  end) as t0,
+MAX(Case when z1.params_name = '%s' then z1.value_monthly  end) as t1,
+MAX(Case when z1.params_name = '%s' then z1.value_monthly  end) as t2,
+MAX(Case when z1.params_name = '%s' then z1.value_monthly  end) as t3,
 z1.ktt,z1.ktn,z1.a
 
                         FROM
@@ -1607,10 +1607,10 @@ left join
 from electric_abons
 LEFT JOIN 
 (SELECT z1.daily_date, z1.name_objects, z1.name_abonents, z1.number_manual, 
-sum(Case when z1.params_name = '%s' then z1.value_daily  end) as t0,
-sum(Case when z1.params_name = '%s' then z1.value_daily  end) as t1,
-sum(Case when z1.params_name = '%s' then z1.value_daily  end) as t2,
-sum(Case when z1.params_name = '%s' then z1.value_daily  end) as t3,
+MAX(Case when z1.params_name = '%s' then z1.value_daily  end) as t0,
+MAX(Case when z1.params_name = '%s' then z1.value_daily  end) as t1,
+MAX(Case when z1.params_name = '%s' then z1.value_daily  end) as t2,
+MAX(Case when z1.params_name = '%s' then z1.value_daily  end) as t3,
 z1.ktn, z1.ktt, z1.a 
                         FROM
                         (SELECT daily_values.date as daily_date, 
@@ -1690,8 +1690,8 @@ left join
 from electric_abons
 LEFT JOIN 
 (SELECT z1.daily_date, z1.name_objects, z1.name_abonents, z1.number_manual, 
-sum(Case when z1.params_name = '%s' then z1.value_daily  end) as t0,
-sum(Case when z1.params_name = '%s' then z1.value_daily  end) as tr0,
+MAX(Case when z1.params_name = '%s' then z1.value_daily  end) as t0,
+MAX(Case when z1.params_name = '%s' then z1.value_daily  end) as tr0,
 
 z1.ktn, z1.ktt, z1.a 
                         FROM
@@ -1771,10 +1771,10 @@ generate_series('%s'::timestamp without time zone, '%s'::timestamp without time 
 left join
 (
 SELECT z1.daily_date, z1.name_objects as obj_name,  
-sum(Case when z1.params_name = '%s' then z1.value_daily  end) as t0,
-sum(Case when z1.params_name = '%s' then z1.value_daily  end) as t1,
-sum(Case when z1.params_name = '%s' then z1.value_daily  end) as t2,
-sum(Case when z1.params_name = '%s' then z1.value_daily  end) as t3
+MAX(Case when z1.params_name = '%s' then z1.value_daily  end) as t0,
+MAX(Case when z1.params_name = '%s' then z1.value_daily  end) as t1,
+MAX(Case when z1.params_name = '%s' then z1.value_daily  end) as t2,
+MAX(Case when z1.params_name = '%s' then z1.value_daily  end) as t3
 
                         FROM
                         (SELECT daily_values.date as daily_date,
@@ -1851,10 +1851,10 @@ def makeSqlQuery_electric_by_daily_or_monthly_v3(obj_title, obj_parent_title, el
 from electric_abons
 LEFT JOIN 
 (SELECT z1.daily_date, z1.name_objects, z1.name_abonents, z1.number_manual, 
-sum(Case when z1.params_name = '%s' then z1.value_daily  end) as t0,
-sum(Case when z1.params_name = '%s' then z1.value_daily  end) as t1,
-sum(Case when z1.params_name = '%s' then z1.value_daily  end) as t2,
-sum(Case when z1.params_name = '%s' then z1.value_daily  end) as t3,
+MAX(Case when z1.params_name = '%s' then z1.value_daily  end) as t0,
+MAX(Case when z1.params_name = '%s' then z1.value_daily  end) as t1,
+MAX(Case when z1.params_name = '%s' then z1.value_daily  end) as t2,
+MAX(Case when z1.params_name = '%s' then z1.value_daily  end) as t3,
 z1.ktn, z1.ktt, z1.a 
                         FROM
                         (SELECT daily_values.date as daily_date, 
@@ -1936,12 +1936,12 @@ from
 from electric_abons_2
 Left join
 (SELECT z1.ktt, z1.ktn,z1.a,z1.date, z1.name_objects, z1.name as name_abonent, z1.num_manual, z1.name_res,
-sum(Case when z1.params_name = '%s' then z1.value else null end) as t0,
-sum(Case when z1.params_name = '%s' then z1.value else null end) as t1,
-sum(Case when z1.params_name = '%s' then z1.value else null end) as t2,
-sum(Case when z1.params_name = '%s' then z1.value else null end) as t3,
-sum(Case when z1.params_name = '%s' then z1.value else null end) as t4,
-sum(Case when z1.params_name = '%s' then z1.value else null end) as t0R
+MAX(Case when z1.params_name = '%s' then z1.value else null end) as t0,
+MAX(Case when z1.params_name = '%s' then z1.value else null end) as t1,
+MAX(Case when z1.params_name = '%s' then z1.value else null end) as t2,
+MAX(Case when z1.params_name = '%s' then z1.value else null end) as t3,
+MAX(Case when z1.params_name = '%s' then z1.value else null end) as t4,
+MAX(Case when z1.params_name = '%s' then z1.value else null end) as t0R
                         FROM
                         (
                                 SELECT 
@@ -2001,12 +2001,12 @@ where electric_abons_2.obj_name='%s') z4,
 from electric_abons_2
 Left join
 (SELECT z1.date, z1.name_objects, z1.name as name_abonent, z1.num_manual, z1.name_res,
-sum(Case when z1.params_name = '%s' then z1.value else null end) as t0,
-sum(Case when z1.params_name = '%s' then z1.value else null end) as t1,
-sum(Case when z1.params_name = '%s' then z1.value else null end) as t2,
-sum(Case when z1.params_name = '%s' then z1.value else null end) as t3,
-sum(Case when z1.params_name = '%s' then z1.value else null end) as t4,
-sum(Case when z1.params_name = '%s' then z1.value else null end) as t0R
+MAX(Case when z1.params_name = '%s' then z1.value else null end) as t0,
+MAX(Case when z1.params_name = '%s' then z1.value else null end) as t1,
+MAX(Case when z1.params_name = '%s' then z1.value else null end) as t2,
+MAX(Case when z1.params_name = '%s' then z1.value else null end) as t3,
+MAX(Case when z1.params_name = '%s' then z1.value else null end) as t4,
+MAX(Case when z1.params_name = '%s' then z1.value else null end) as t0R
 
                         FROM
                         (
@@ -2092,12 +2092,12 @@ from
 from electric_abons_2
 Left join
 (SELECT z1.ktt, z1.ktn, z1.a,z1.date, z1.name_objects, z1.name as name_abonent, z1.num_manual, z1.name_res,
-sum(Case when z1.params_name = '%s' then z1.value else null end) as t0,
-sum(Case when z1.params_name = '%s' then z1.value else null end) as t1,
-sum(Case when z1.params_name = '%s' then z1.value else null end) as t2,
-sum(Case when z1.params_name = '%s' then z1.value else null end) as t3,
-sum(Case when z1.params_name = '%s' then z1.value else null end) as t4,
-sum(Case when z1.params_name = '%s' then z1.value else null end) as t0R
+MAX(Case when z1.params_name = '%s' then z1.value else null end) as t0,
+MAX(Case when z1.params_name = '%s' then z1.value else null end) as t1,
+MAX(Case when z1.params_name = '%s' then z1.value else null end) as t2,
+MAX(Case when z1.params_name = '%s' then z1.value else null end) as t3,
+MAX(Case when z1.params_name = '%s' then z1.value else null end) as t4,
+MAX(Case when z1.params_name = '%s' then z1.value else null end) as t0R
 
                         FROM
                         (
@@ -2158,12 +2158,12 @@ where electric_abons_2.obj_name='%s') z4,
 from electric_abons_2
 Left join
 (SELECT z1.date, z1.name_objects, z1.name as name_abonent, z1.num_manual, z1.name_res,
-sum(Case when z1.params_name = '%s' then z1.value else null end) as t0,
-sum(Case when z1.params_name = '%s' then z1.value else null end) as t1,
-sum(Case when z1.params_name = '%s' then z1.value else null end) as t2,
-sum(Case when z1.params_name = '%s' then z1.value else null end) as t3,
-sum(Case when z1.params_name = '%s' then z1.value else null end) as t4,
-sum(Case when z1.params_name = '%s' then z1.value else null end) as t0R
+MAX(Case when z1.params_name = '%s' then z1.value else null end) as t0,
+MAX(Case when z1.params_name = '%s' then z1.value else null end) as t1,
+MAX(Case when z1.params_name = '%s' then z1.value else null end) as t2,
+MAX(Case when z1.params_name = '%s' then z1.value else null end) as t3,
+MAX(Case when z1.params_name = '%s' then z1.value else null end) as t4,
+MAX(Case when z1.params_name = '%s' then z1.value else null end) as t0R
 
                         FROM
                         (
@@ -2256,12 +2256,12 @@ from
 from electric_groups
 Left join
 (SELECT z1.group_name,z1.ktt, z1.ktn, z1.date, z1.name_objects, z1.name as name_abonent, z1.num_manual, z1.name_res, z1.ab_guid,
-sum(Case when z1.params_name = '%s' then z1.value else null end) as t0,
-sum(Case when z1.params_name = '%s' then z1.value else null end) as t1,
-sum(Case when z1.params_name = '%s' then z1.value else null end) as t2,
-sum(Case when z1.params_name = '%s' then z1.value else null end) as t3,
-sum(Case when z1.params_name = '%s' then z1.value else null end) as t4,
-sum(Case when z1.params_name = '%s' then z1.value else null end) as t0R
+MAX(Case when z1.params_name = '%s' then z1.value else null end) as t0,
+MAX(Case when z1.params_name = '%s' then z1.value else null end) as t1,
+MAX(Case when z1.params_name = '%s' then z1.value else null end) as t2,
+MAX(Case when z1.params_name = '%s' then z1.value else null end) as t3,
+MAX(Case when z1.params_name = '%s' then z1.value else null end) as t4,
+MAX(Case when z1.params_name = '%s' then z1.value else null end) as t0R
 
                         FROM
                         (
@@ -2329,12 +2329,12 @@ where z2.group_name= '%s' ) z4,
 from electric_groups
 Left join
 (SELECT z1.group_name,z1.ktt, z1.ktn, z1.date, z1.name_objects, z1.name as name_abonent, z1.num_manual, z1.name_res, z1.ab_guid,
-sum(Case when z1.params_name = '%s' then z1.value else null end) as t0,
-sum(Case when z1.params_name = '%s' then z1.value else null end) as t1,
-sum(Case when z1.params_name = '%s' then z1.value else null end) as t2,
-sum(Case when z1.params_name = '%s' then z1.value else null end) as t3,
-sum(Case when z1.params_name = '%s' then z1.value else null end) as t4,
-sum(Case when z1.params_name = '%s' then z1.value else null end) as t0R
+MAX(Case when z1.params_name = '%s' then z1.value else null end) as t0,
+MAX(Case when z1.params_name = '%s' then z1.value else null end) as t1,
+MAX(Case when z1.params_name = '%s' then z1.value else null end) as t2,
+MAX(Case when z1.params_name = '%s' then z1.value else null end) as t3,
+MAX(Case when z1.params_name = '%s' then z1.value else null end) as t4,
+MAX(Case when z1.params_name = '%s' then z1.value else null end) as t0R
 
                         FROM
                         (
@@ -2679,6 +2679,30 @@ def change_none_to_zero(data_table):
     return data_table
 
 
+def safe_change_null(data_table, default_value='Н/Д'):
+    """Безопасная замена None на указанное значение во всех элементах"""
+    if not data_table:
+        return []
+    
+    result = []
+    for row in data_table:
+        # Преобразуем строку в список
+        if isinstance(row, tuple):
+            row_list = list(row)
+        else:
+            row_list = list(row)
+        
+        # Заменяем None во ВСЕХ элементах
+        for j in range(len(row_list)):
+            if row_list[j] is None or row_list[j] == "None":
+                row_list[j] = default_value
+        
+        result.append(tuple(row_list))
+    
+    return result
+
+
+
 def ChangeNull(data_table, electric_data):
     #обойти в цикле все строки и добавить "Н/Д" в ячейки, где null
     if data_table == None: return []
@@ -2873,10 +2897,10 @@ WHERE
   GROUP BY abonents.name, link_balance_groups_meters.type) z3
 Left join
 (SELECT z1.guid,z1.monthly_date, z1.name_group, z1.name_abonents, z1.number_manual, 
-sum(Case when z1.params_name = '%s' then z1.value_monthly  end) as t0,
-sum(Case when z1.params_name = '%s' then z1.value_monthly  end) as t1,
-sum(Case when z1.params_name = '%s' then z1.value_monthly  end) as t2,
-sum(Case when z1.params_name = '%s' then z1.value_monthly  end) as t3
+MAX(Case when z1.params_name = '%s' then z1.value_monthly  end) as t0,
+MAX(Case when z1.params_name = '%s' then z1.value_monthly  end) as t1,
+MAX(Case when z1.params_name = '%s' then z1.value_monthly  end) as t2,
+MAX(Case when z1.params_name = '%s' then z1.value_monthly  end) as t3
 FROM
                         (SELECT 
                         balance_groups.guid,
@@ -2933,10 +2957,10 @@ def makeSqlQuery_electric_by_daily_or_monthly(obj_title, obj_parent_title, elect
 from electric_abons
 LEFT JOIN 
 (SELECT z1.daily_date, z1.name_objects, z1.name_abonents, z1.number_manual, 
-sum(Case when z1.params_name = '%s' then z1.value_daily  end) as t0,
-sum(Case when z1.params_name = '%s' then z1.value_daily  end) as t1,
-sum(Case when z1.params_name = '%s' then z1.value_daily  end) as t2,
-sum(Case when z1.params_name = '%s' then z1.value_daily  end) as t3,
+MAX(Case when z1.params_name = '%s' then z1.value_daily  end) as t0,
+MAX(Case when z1.params_name = '%s' then z1.value_daily  end) as t1,
+MAX(Case when z1.params_name = '%s' then z1.value_daily  end) as t2,
+MAX(Case when z1.params_name = '%s' then z1.value_daily  end) as t3,
 z1.ktn, z1.ktt, z1.a 
                         FROM
                         (SELECT daily_values.date as daily_date, 
@@ -3002,10 +3026,10 @@ def makeSqlQuery_electric_by_daily_or_monthly_for_object(obj_title, electric_dat
 from electric_abons
 LEFT JOIN 
 (SELECT z1.monthly_date, z1.name_objects, z1.name_abonents, z1.number_manual, 
-sum(Case when z1.params_name = '%s' then z1.value_monthly  end) as t0,
-sum(Case when z1.params_name = '%s' then z1.value_monthly  end) as t1,
-sum(Case when z1.params_name = '%s' then z1.value_monthly  end) as t2,
-sum(Case when z1.params_name = '%s' then z1.value_monthly  end) as t3,
+MAX(Case when z1.params_name = '%s' then z1.value_monthly  end) as t0,
+MAX(Case when z1.params_name = '%s' then z1.value_monthly  end) as t1,
+MAX(Case when z1.params_name = '%s' then z1.value_monthly  end) as t2,
+MAX(Case when z1.params_name = '%s' then z1.value_monthly  end) as t3,
 z1.ktt,z1.ktn,z1.a
                         FROM
                         (SELECT monthly_values.date as monthly_date, 
@@ -3479,10 +3503,10 @@ def delta_sum_r_plus(electric_data_end): # Возвращаем потребле
     else:
         return 'Н/Д'
         
-def product_sum(date):
+def product_MAX(date):
     simpleq = connection.cursor()
     simpleq.execute(""" SELECT 
-          sum(product_info_kilns.product_weight)
+          MAX(product_info_kilns.product_weight)
         FROM 
           public.product_info_kilns
         WHERE 
@@ -3525,10 +3549,10 @@ def makeSqlQuery_heat_sayany_by_date_for_abon(obj_title, obj_parent_title , elec
    
   abonents.name,   
   meters.factory_number_manual, 
-sum(Case when names_params.name = '%s' then daily_values.value  end) as q1,
-sum(Case when names_params.name = '%s' then daily_values.value  end) as m1,
-sum(Case when names_params.name = '%s' then daily_values.value  end) as t1,
-sum(Case when names_params.name = '%s' then daily_values.value  end) as t2
+MAX(Case when names_params.name = '%s' then daily_values.value  end) as q1,
+MAX(Case when names_params.name = '%s' then daily_values.value  end) as m1,
+MAX(Case when names_params.name = '%s' then daily_values.value  end) as t1,
+MAX(Case when names_params.name = '%s' then daily_values.value  end) as t2
 FROM 
   public.abonents, 
   public.objects, 
@@ -3570,10 +3594,10 @@ SELECT
   daily_values.date,    
   abonents.name as ab_name,   
   meters.factory_number_manual, 
-sum(Case when names_params.name = '%s' then daily_values.value  end) as q1,
-sum(Case when names_params.name = '%s' then daily_values.value  end) as m1,
-sum(Case when names_params.name = '%s' then daily_values.value  end) as t1,
-sum(Case when names_params.name = '%s' then daily_values.value  end) as t2
+MAX(Case when names_params.name = '%s' then daily_values.value  end) as q1,
+MAX(Case when names_params.name = '%s' then daily_values.value  end) as m1,
+MAX(Case when names_params.name = '%s' then daily_values.value  end) as t1,
+MAX(Case when names_params.name = '%s' then daily_values.value  end) as t2
 FROM 
   public.abonents, 
   public.objects, 
@@ -3618,10 +3642,10 @@ def makeSqlQuery_heat_sayany_last_read_for_abon(obj_title, obj_parent_title, my_
   daily_values.date, 
   abonents.name,   
   meters.factory_number_manual, 
-sum(Case when names_params.name = '%s' then daily_values.value  end) as q1,
-sum(Case when names_params.name = '%s' then daily_values.value  end) as m1,
-sum(Case when names_params.name = '%s' then daily_values.value  end) as t1,
-sum(Case when names_params.name = '%s' then daily_values.value  end) as t2
+MAX(Case when names_params.name = '%s' then daily_values.value  end) as q1,
+MAX(Case when names_params.name = '%s' then daily_values.value  end) as m1,
+MAX(Case when names_params.name = '%s' then daily_values.value  end) as t1,
+MAX(Case when names_params.name = '%s' then daily_values.value  end) as t2
 FROM 
   public.abonents, 
   public.objects, 
@@ -3740,10 +3764,10 @@ From
   objects.name as obj_name, 
   abonents.name as ab_name,   
   meters.factory_number_manual as zav_num, 
-sum(Case when names_params.name = '%s' then daily_values.value  end) as q1,
-sum(Case when names_params.name = '%s' then daily_values.value  end) as m1,
-sum(Case when names_params.name = '%s' then daily_values.value  end) as t1,
-sum(Case when names_params.name = '%s' then daily_values.value  end) as t2
+MAX(Case when names_params.name = '%s' then daily_values.value  end) as q1,
+MAX(Case when names_params.name = '%s' then daily_values.value  end) as m1,
+MAX(Case when names_params.name = '%s' then daily_values.value  end) as t1,
+MAX(Case when names_params.name = '%s' then daily_values.value  end) as t2
 FROM 
   public.abonents, 
   public.objects, 
@@ -3778,10 +3802,10 @@ WHERE
   objects.name as obj_name, 
   abonents.name as ab_name,   
   meters.factory_number_manual as zav_num, 
-sum(Case when names_params.name = '%s' then daily_values.value  end) as q1,
-sum(Case when names_params.name = '%s' then daily_values.value  end) as m1,
-sum(Case when names_params.name = '%s' then daily_values.value  end) as t1,
-sum(Case when names_params.name = '%s' then daily_values.value  end) as t2
+MAX(Case when names_params.name = '%s' then daily_values.value  end) as q1,
+MAX(Case when names_params.name = '%s' then daily_values.value  end) as m1,
+MAX(Case when names_params.name = '%s' then daily_values.value  end) as t1,
+MAX(Case when names_params.name = '%s' then daily_values.value  end) as t2
 FROM 
   public.abonents, 
   public.objects, 
@@ -3829,10 +3853,10 @@ From
   objects.name as obj_name, 
   abonents.name as ab_name,   
   meters.factory_number_manual as zav_num, 
-sum(Case when names_params.name = '%s' then daily_values.value  end) as q1,
-sum(Case when names_params.name = '%s' then daily_values.value  end) as m1,
-sum(Case when names_params.name = '%s' then daily_values.value  end) as t1,
-sum(Case when names_params.name = '%s' then daily_values.value  end) as t2
+MAX(Case when names_params.name = '%s' then daily_values.value  end) as q1,
+MAX(Case when names_params.name = '%s' then daily_values.value  end) as m1,
+MAX(Case when names_params.name = '%s' then daily_values.value  end) as t1,
+MAX(Case when names_params.name = '%s' then daily_values.value  end) as t2
 FROM 
   public.abonents, 
   public.objects, 
@@ -3866,10 +3890,10 @@ WHERE
   objects.name as obj_name, 
   abonents.name as ab_name,   
   meters.factory_number_manual as zav_num, 
-sum(Case when names_params.name = '%s' then daily_values.value  end) as q1,
-sum(Case when names_params.name = '%s' then daily_values.value  end) as m1,
-sum(Case when names_params.name = '%s' then daily_values.value  end) as t1,
-sum(Case when names_params.name = '%s' then daily_values.value  end) as t2
+MAX(Case when names_params.name = '%s' then daily_values.value  end) as q1,
+MAX(Case when names_params.name = '%s' then daily_values.value  end) as m1,
+MAX(Case when names_params.name = '%s' then daily_values.value  end) as t1,
+MAX(Case when names_params.name = '%s' then daily_values.value  end) as t2
 FROM 
   public.abonents, 
   public.objects, 
@@ -5061,7 +5085,9 @@ Select z2.date, obj_name as ab_name,
 water_abons_report.ab_name as meter_name,  
 water_abons_report.meter_name,
 water_abons_report.channel, 
-round(z2.value::numeric,2)
+round(z2.value::numeric,2),
+water_abons_report.type_meter
+
 from water_abons_report
 
 LEFT JOIN (
@@ -5124,7 +5150,8 @@ def MakeSqlQuery_water_by_date_for_abon(meters_name, parent_name, electric_data_
   abonents.name as meters,
   meters.name as meter_name,  
   names_params.name as name_params,
-  round(daily_values.value::numeric,2),    
+  round(daily_values.value::numeric,2),  
+  water_abons_report.type_meter,  
   abonents.guid,
   water_abons_report.name,
   resources.name
@@ -5905,7 +5932,7 @@ def get_count_of_30_profil_by_meter_number(date, meters_number, names_params):
 def get_sum_of_30_profil_by_meter_number(date, meters_number, names_params):
     simpleq = connection.cursor()
     simpleq.execute("""SELECT 
-                          sum(various_values.value)
+                          MAX(various_values.value)
                         FROM 
                           public.various_values, 
                           public.meters, 
@@ -5990,10 +6017,10 @@ heat_abons.attr4
 from heat_abons
 left join
 (SELECT z1.daily_date, z1.name_objects, z1.name_abonents, z1.number_manual, 
-            sum(Case when z1.params_name = '%s' then z1.value_daily  end) as energy,
-            sum(Case when z1.params_name = '%s' then z1.value_daily  end) as volume,
-            sum(Case when z1.params_name = '%s' then z1.value_daily  end) as t_in,
-            sum(Case when z1.params_name = '%s' then z1.value_daily  end) as t_out
+            MAX(Case when z1.params_name = '%s' then z1.value_daily  end) as energy,
+            MAX(Case when z1.params_name = '%s' then z1.value_daily  end) as volume,
+            MAX(Case when z1.params_name = '%s' then z1.value_daily  end) as t_in,
+            MAX(Case when z1.params_name = '%s' then z1.value_daily  end) as t_out
             
                                     FROM
                                     (SELECT 
@@ -6060,10 +6087,10 @@ round((z2.energy::numeric*0.0008604206500956)::numeric,3) as energy_gkal,
 from heat_abons
 left join
 (SELECT z1.daily_date, z1.name_objects, z1.name_abonents, z1.number_manual, 
-            sum(Case when z1.params_name = '%s' then z1.value_daily  end) as energy,
-            sum(Case when z1.params_name = '%s' then z1.value_daily  end) as volume,
-            sum(Case when z1.params_name = '%s' then z1.value_daily  end) as t_in,
-            sum(Case when z1.params_name = '%s' then z1.value_daily  end) as t_out
+            MAX(Case when z1.params_name = '%s' then z1.value_daily  end) as energy,
+            MAX(Case when z1.params_name = '%s' then z1.value_daily  end) as volume,
+            MAX(Case when z1.params_name = '%s' then z1.value_daily  end) as t_in,
+            MAX(Case when z1.params_name = '%s' then z1.value_daily  end) as t_out
             
                                     FROM
                                     (SELECT 
@@ -6176,10 +6203,10 @@ from
 from heat_abons
 left join
 (SELECT z1.daily_date, z1.name_objects, z1.name_abonents, z1.number_manual, 
-            sum(Case when z1.params_name = '%s' then z1.value_daily  end) as energy,
-            sum(Case when z1.params_name = '%s' then z1.value_daily  end) as volume,
-            sum(Case when z1.params_name = '%s' then z1.value_daily  end) as t_in,
-            sum(Case when z1.params_name = '%s' then z1.value_daily  end) as t_out
+            MAX(Case when z1.params_name = '%s' then z1.value_daily  end) as energy,
+            MAX(Case when z1.params_name = '%s' then z1.value_daily  end) as volume,
+            MAX(Case when z1.params_name = '%s' then z1.value_daily  end) as t_in,
+            MAX(Case when z1.params_name = '%s' then z1.value_daily  end) as t_out
             
                                     FROM
                                     (SELECT 
@@ -6230,10 +6257,10 @@ where heat_abons.obj_name='%s' and heat_abons.ab_name = '%s' and heat_abons.type
 from heat_abons
 left join
 (SELECT z1.daily_date, z1.name_objects, z1.name_abonents, z1.number_manual, 
-            sum(Case when z1.params_name = '%s' then z1.value_daily  end) as energy,
-            sum(Case when z1.params_name = '%s' then z1.value_daily  end) as volume,
-            sum(Case when z1.params_name = '%s' then z1.value_daily  end) as t_in,
-            sum(Case when z1.params_name = '%s' then z1.value_daily  end) as t_out
+            MAX(Case when z1.params_name = '%s' then z1.value_daily  end) as energy,
+            MAX(Case when z1.params_name = '%s' then z1.value_daily  end) as volume,
+            MAX(Case when z1.params_name = '%s' then z1.value_daily  end) as t_in,
+            MAX(Case when z1.params_name = '%s' then z1.value_daily  end) as t_out
             
                                     FROM
                                     (SELECT 
@@ -6310,10 +6337,10 @@ from
 from heat_abons
 left join
 (SELECT z1.daily_date, z1.name_objects, z1.name_abonents, z1.number_manual, 
-            sum(Case when z1.params_name = '%s' then z1.value_daily  end) as energy,
-            sum(Case when z1.params_name = '%s' then z1.value_daily  end) as volume,
-            sum(Case when z1.params_name = '%s' then z1.value_daily  end) as t_in,
-            sum(Case when z1.params_name = '%s' then z1.value_daily  end) as t_out
+            MAX(Case when z1.params_name = '%s' then z1.value_daily  end) as energy,
+            MAX(Case when z1.params_name = '%s' then z1.value_daily  end) as volume,
+            MAX(Case when z1.params_name = '%s' then z1.value_daily  end) as t_in,
+            MAX(Case when z1.params_name = '%s' then z1.value_daily  end) as t_out
             
                                     FROM
                                     (SELECT 
@@ -6363,10 +6390,10 @@ where heat_abons.obj_name='%s' and heat_abons.type_meter  like '%%%s%%') as z3,
 from heat_abons
 left join
 (SELECT z1.daily_date, z1.name_objects, z1.name_abonents, z1.number_manual, 
-            sum(Case when z1.params_name = '%s' then z1.value_daily  end) as energy,
-            sum(Case when z1.params_name = '%s' then z1.value_daily  end) as volume,
-            sum(Case when z1.params_name = '%s' then z1.value_daily  end) as t_in,
-            sum(Case when z1.params_name = '%s' then z1.value_daily  end) as t_out
+            MAX(Case when z1.params_name = '%s' then z1.value_daily  end) as energy,
+            MAX(Case when z1.params_name = '%s' then z1.value_daily  end) as volume,
+            MAX(Case when z1.params_name = '%s' then z1.value_daily  end) as t_in,
+            MAX(Case when z1.params_name = '%s' then z1.value_daily  end) as t_out
             
                                     FROM
                                     (SELECT 
@@ -6941,7 +6968,10 @@ def get_data_table_pulsar_water_for_period(obj_parent_title, obj_title, electric
     
 def MakeSqlQuery_water_pulsar_period_for_abonent_Skladochnaya(obj_parent_title, obj_title,electric_data_start, electric_data_end, my_params):
     sQuery="""
-    select z_start.ab_name,  z_start.gvs_1_num, round(z_start.gvs_1::numeric,3), z_start.date_start, round(z_end.gvs_1::numeric,3), z_end.date_end,round((z_end.gvs_1-z_start.gvs_1)::numeric,3) , z_end.hvs_1_num, round(z_start.hvs_1::numeric,3), z_start.date_start, round(z_end.hvs_1::numeric,3),  z_end.date_end,round((z_end.hvs_1-z_start.hvs_1)::numeric,3)
+    select z_start.ab_name,  z_start.gvs_1_num, round(z_start.gvs_1::numeric,3), 
+    z_start.date_start, round(z_end.gvs_1::numeric,3), z_end.date_end,round((z_end.gvs_1-z_start.gvs_1)::numeric,3) , 
+    z_end.hvs_1_num, round(z_start.hvs_1::numeric,3), z_start.date_start, round(z_end.hvs_1::numeric,3),  
+    z_end.date_end,round((z_end.hvs_1-z_start.hvs_1)::numeric,3)
 from
 
 (select water_pulsar_abons.ab_name,water_pulsar_abons.ab_guid, z3.gvs_1_num, z3.gvs_1, z3.date, z3.hvs_1_num, z3.hvs_1,   z3.date as date_start
@@ -7332,8 +7362,8 @@ daily_values.date,
                           objects.name, 
                           abonents.name as ab_name, 
                           meters.factory_number_manual,                           
-                          sum(Case when names_params.name = '%s' then daily_values.value else null end) as energy_end,
-                          sum(Case when names_params.name = '%s' then daily_values.value else null end) as volume_end
+                          MAX(Case when names_params.name = '%s' then daily_values.value else null end) as energy_end,
+                          MAX(Case when names_params.name = '%s' then daily_values.value else null end) as volume_end
 
 FROM 
   public.link_abonents_taken_params, 
@@ -7371,8 +7401,8 @@ daily_values.date,
                           objects.name, 
                           abonents.name as ab_name, 
                           meters.factory_number_manual,                           
-                          sum(Case when names_params.name = '%s' then daily_values.value else null end) as energy_start,
-                          sum(Case when names_params.name = '%s' then daily_values.value else null end) as volume_start
+                          MAX(Case when names_params.name = '%s' then daily_values.value else null end) as energy_start,
+                          MAX(Case when names_params.name = '%s' then daily_values.value else null end) as volume_start
 
 FROM 
   public.link_abonents_taken_params, 
@@ -7422,8 +7452,8 @@ daily_values.date,
                           objects.name, 
                           abonents.name as ab_name, 
                           meters.factory_number_manual,                           
-                          sum(Case when names_params.name = '%s' then daily_values.value else null end) as energy,
-                          sum(Case when names_params.name = '%s' then daily_values.value else null end) as volume
+                          MAX(Case when names_params.name = '%s' then daily_values.value else null end) as energy,
+                          MAX(Case when names_params.name = '%s' then daily_values.value else null end) as volume
 
 FROM 
   public.link_abonents_taken_params, 
@@ -7454,8 +7484,8 @@ daily_values.date,
                           objects.name, 
                           abonents.name as ab_name, 
                           meters.factory_number_manual,                           
-                          sum(Case when names_params.name = '%s' then daily_values.value else null end) as energy,
-                          sum(Case when names_params.name = '%s' then daily_values.value else null end) as volume
+                          MAX(Case when names_params.name = '%s' then daily_values.value else null end) as energy,
+                          MAX(Case when names_params.name = '%s' then daily_values.value else null end) as volume
 
 FROM 
   public.link_abonents_taken_params, 
@@ -7509,8 +7539,8 @@ SELECT
 
                           abonents.name as ab_name, 
                           meters.factory_number_manual,                           
-                          sum(Case when names_params.name = '%s' then daily_values.value/100 else null end) as energy,
-                          sum(Case when names_params.name = '%s' then daily_values.value else null end) as volume
+                          MAX(Case when names_params.name = '%s' then daily_values.value/100 else null end) as energy,
+                          MAX(Case when names_params.name = '%s' then daily_values.value else null end) as volume
 
 FROM 
   public.link_abonents_taken_params, 
@@ -7551,8 +7581,8 @@ daily_values.date,
                           objects.name, 
                           abonents.name as ab_name, 
                           meters.factory_number_manual,                           
-                          sum(Case when names_params.name = '%s' then daily_values.value else null end) as energy,
-                          sum(Case when names_params.name = '%s' then daily_values.value else null end) as volume
+                          MAX(Case when names_params.name = '%s' then daily_values.value else null end) as energy,
+                          MAX(Case when names_params.name = '%s' then daily_values.value else null end) as volume
 
 FROM 
   public.link_abonents_taken_params, 
@@ -7595,7 +7625,7 @@ daily_values.date,
                           objects.name, 
                           abonents.name as ab_name, 
                           meters.factory_number_manual,                           
-                          sum(Case when names_params.name = '%s' then daily_values.value else null end) as error_code
+                          MAX(Case when names_params.name = '%s' then daily_values.value else null end) as error_code
 
 FROM 
   public.link_abonents_taken_params, 
@@ -7652,8 +7682,8 @@ daily_values.date,
                           objects.name, 
                           abonents.name as ab_name, 
                           meters.factory_number_manual,                           
-                          sum(Case when names_params.name = '%s' then daily_values.value else null end) as energy,
-                          sum(Case when names_params.name = '%s' then daily_values.value else null end) as volume
+                          MAX(Case when names_params.name = '%s' then daily_values.value else null end) as energy,
+                          MAX(Case when names_params.name = '%s' then daily_values.value else null end) as volume
 
 FROM 
   public.link_abonents_taken_params, 
@@ -7777,8 +7807,8 @@ daily_values.date,
                           objects.name, 
                           abonents.name as ab_name, 
                           meters.factory_number_manual,                           
-                          sum(Case when names_params.name = '%s' then daily_values.value else null end) as energy,
-                          sum(Case when names_params.name = '%s' then daily_values.value else null end) as volume
+                          MAX(Case when names_params.name = '%s' then daily_values.value else null end) as energy,
+                          MAX(Case when names_params.name = '%s' then daily_values.value else null end) as volume
 
 FROM 
   public.link_abonents_taken_params, 
@@ -7945,30 +7975,30 @@ SELECT
   objects.name, 
   abonents.name,   
   names_params.name,  
-  sum(Case when (various_values."time">='00:00:00' and various_values."time"<='00:30:00') then various_values.value end)/2 as t0,
-  sum(Case when (various_values."time">='01:00' and various_values."time"<='01:30') then various_values.value end)/2 + date_st.value as t1,
-  sum(Case when (various_values."time">='02:00' and various_values."time"<='02:30') then various_values.value end)/2 + date_st.value as t2,
-  sum(Case when (various_values."time">='03:00' and various_values."time"<='03:30') then various_values.value end)/2 + date_st.value as t3,
-  sum(Case when (various_values."time">='04:00' and various_values."time"<='04:30') then various_values.value end)/2 + date_st.value  as t4,
-  sum(Case when (various_values."time">='05:00' and various_values."time"<='05:30') then various_values.value end)/2 + date_st.value  as t5,
-  sum(Case when (various_values."time">='06:00' and various_values."time"<='06:30') then various_values.value end)/2 + date_st.value  as t6,
-  sum(Case when (various_values."time">='07:00' and various_values."time"<='07:30') then various_values.value end)/2 + date_st.value  as t7,
-  sum(Case when (various_values."time">='08:00' and various_values."time"<='08:30') then various_values.value end)/2 + date_st.value  as t8,
-  sum(Case when (various_values."time">='09:00' and various_values."time"<='09:30') then various_values.value end)/2 + date_st.value  as t9,
-  sum(Case when (various_values."time">='10:00' and various_values."time"<='10:30') then various_values.value end)/2 + date_st.value  as t10,
-  sum(Case when (various_values."time">='11:00' and various_values."time"<='11:30') then various_values.value end)/2 + date_st.value  as t11,
-  sum(Case when (various_values."time">='12:00' and various_values."time"<='12:30') then various_values.value end)/2 + date_st.value  as t12,
-    sum(Case when (various_values."time">='13:00' and various_values."time"<='13:30') then various_values.value end)/2 + date_st.value  as t13,
-  sum(Case when (various_values."time">='14:00' and various_values."time"<='14:30') then various_values.value end)/2 + date_st.value  as t14,
-  sum(Case when (various_values."time">='15:00' and various_values."time"<='15:30') then various_values.value end)/2 + date_st.value  as t15,
-  sum(Case when (various_values."time">='16:00' and various_values."time"<='16:30') then various_values.value end)/2 + date_st.value  as t16,
-  sum(Case when (various_values."time">='17:00' and various_values."time"<='17:30') then various_values.value end)/2 + date_st.value  as t17,
-  sum(Case when (various_values."time">='18:00' and various_values."time"<='18:30') then various_values.value end)/2 + date_st.value  as t18,
-  sum(Case when (various_values."time">='19:00' and various_values."time"<='19:30') then various_values.value end)/2 + date_st.value  as t19,
-  sum(Case when (various_values."time">='20:00' and various_values."time"<='20:30') then various_values.value end)/2 + date_st.value  as t20,
-  sum(Case when (various_values."time">='21:00' and various_values."time"<='21:30') then various_values.value end)/2 + date_st.value  as t21,
-  sum(Case when (various_values."time">='22:00' and various_values."time"<='22:30') then various_values.value end)/2 + date_st.value  as t22,
-  sum(Case when (various_values."time">='23:00' and various_values."time"<='23:30') then various_values.value end)/2 + date_st.value  as t23
+  MAX(Case when (various_values."time">='00:00:00' and various_values."time"<='00:30:00') then various_values.value end)/2 as t0,
+  MAX(Case when (various_values."time">='01:00' and various_values."time"<='01:30') then various_values.value end)/2 + date_st.value as t1,
+  MAX(Case when (various_values."time">='02:00' and various_values."time"<='02:30') then various_values.value end)/2 + date_st.value as t2,
+  MAX(Case when (various_values."time">='03:00' and various_values."time"<='03:30') then various_values.value end)/2 + date_st.value as t3,
+  MAX(Case when (various_values."time">='04:00' and various_values."time"<='04:30') then various_values.value end)/2 + date_st.value  as t4,
+  MAX(Case when (various_values."time">='05:00' and various_values."time"<='05:30') then various_values.value end)/2 + date_st.value  as t5,
+  MAX(Case when (various_values."time">='06:00' and various_values."time"<='06:30') then various_values.value end)/2 + date_st.value  as t6,
+  MAX(Case when (various_values."time">='07:00' and various_values."time"<='07:30') then various_values.value end)/2 + date_st.value  as t7,
+  MAX(Case when (various_values."time">='08:00' and various_values."time"<='08:30') then various_values.value end)/2 + date_st.value  as t8,
+  MAX(Case when (various_values."time">='09:00' and various_values."time"<='09:30') then various_values.value end)/2 + date_st.value  as t9,
+  MAX(Case when (various_values."time">='10:00' and various_values."time"<='10:30') then various_values.value end)/2 + date_st.value  as t10,
+  MAX(Case when (various_values."time">='11:00' and various_values."time"<='11:30') then various_values.value end)/2 + date_st.value  as t11,
+  MAX(Case when (various_values."time">='12:00' and various_values."time"<='12:30') then various_values.value end)/2 + date_st.value  as t12,
+    MAX(Case when (various_values."time">='13:00' and various_values."time"<='13:30') then various_values.value end)/2 + date_st.value  as t13,
+  MAX(Case when (various_values."time">='14:00' and various_values."time"<='14:30') then various_values.value end)/2 + date_st.value  as t14,
+  MAX(Case when (various_values."time">='15:00' and various_values."time"<='15:30') then various_values.value end)/2 + date_st.value  as t15,
+  MAX(Case when (various_values."time">='16:00' and various_values."time"<='16:30') then various_values.value end)/2 + date_st.value  as t16,
+  MAX(Case when (various_values."time">='17:00' and various_values."time"<='17:30') then various_values.value end)/2 + date_st.value  as t17,
+  MAX(Case when (various_values."time">='18:00' and various_values."time"<='18:30') then various_values.value end)/2 + date_st.value  as t18,
+  MAX(Case when (various_values."time">='19:00' and various_values."time"<='19:30') then various_values.value end)/2 + date_st.value  as t19,
+  MAX(Case when (various_values."time">='20:00' and various_values."time"<='20:30') then various_values.value end)/2 + date_st.value  as t20,
+  MAX(Case when (various_values."time">='21:00' and various_values."time"<='21:30') then various_values.value end)/2 + date_st.value  as t21,
+  MAX(Case when (various_values."time">='22:00' and various_values."time"<='22:30') then various_values.value end)/2 + date_st.value  as t22,
+  MAX(Case when (various_values."time">='23:00' and various_values."time"<='23:30') then various_values.value end)/2 + date_st.value  as t23
 FROM 
   public.abonents, 
   public.objects, 
@@ -8025,8 +8055,8 @@ SELECT
   objects.name as obj_name, 
   abonents.name as ab_name,   
   daily_values.date, 
-  sum(Case when resources.name= 'ГВС' then daily_values.value  end) as gvs,
-  sum(Case when resources.name= 'ХВС' then daily_values.value  end) as hvs
+  MAX(Case when resources.name= 'ГВС' then daily_values.value  end) as gvs,
+  MAX(Case when resources.name= 'ХВС' then daily_values.value  end) as hvs
 FROM 
   public.abonents, 
   public.objects, 
@@ -8078,8 +8108,8 @@ left join
 SELECT 
   objects.name as obj_name,   
   daily_values.date, 
-  sum(Case when resources.name= 'ГВС' then daily_values.value  end) as gvs,
-  sum(Case when resources.name= 'ХВС' then daily_values.value  end) as hvs
+  MAX(Case when resources.name= 'ГВС' then daily_values.value  end) as gvs,
+  MAX(Case when resources.name= 'ХВС' then daily_values.value  end) as hvs
 FROM 
   public.abonents, 
   public.objects, 
@@ -8163,12 +8193,12 @@ daily_values.date,
   objects.name, 
   abonents.name,  
   meters.factory_number_manual, 
-  sum(Case when names_params.name = 'Q Система1' then daily_values.value  end) as Q,
-  sum(Case when names_params.name = 'M Система1' then daily_values.value  end) as M,
-sum(Case when names_params.name = 'Ti' then daily_values.value  end) as ti,
-sum(Case when names_params.name = 'To' then daily_values.value  end) as to,
-sum(Case when names_params.name = 'Ton' then daily_values.value  end) as ton,
-sum(Case when names_params.name = 'Terr' then daily_values.value  end) as terr,
+  MAX(Case when names_params.name = 'Q Система1' then daily_values.value  end) as Q,
+  MAX(Case when names_params.name = 'M Система1' then daily_values.value  end) as M,
+MAX(Case when names_params.name = 'Ti' then daily_values.value  end) as ti,
+MAX(Case when names_params.name = 'To' then daily_values.value  end) as to,
+MAX(Case when names_params.name = 'Ton' then daily_values.value  end) as ton,
+MAX(Case when names_params.name = 'Terr' then daily_values.value  end) as terr,
 abonents.guid
 FROM 
   public.objects, 
@@ -8222,12 +8252,12 @@ daily_values.date,
   objects.name, 
   abonents.name,  
   meters.factory_number_manual, 
-  sum(Case when names_params.name = 'Q Система1' then daily_values.value  end) as Q,
-  sum(Case when names_params.name = 'M Система1' then daily_values.value  end) as M,
-sum(Case when names_params.name = 'Ti' then daily_values.value  end) as ti,
-sum(Case when names_params.name = 'To' then daily_values.value  end) as to,
-sum(Case when names_params.name = 'Ton' then daily_values.value  end) as ton,
-sum(Case when names_params.name = 'Terr' then daily_values.value  end) as terr,
+  MAX(Case when names_params.name = 'Q Система1' then daily_values.value  end) as Q,
+  MAX(Case when names_params.name = 'M Система1' then daily_values.value  end) as M,
+MAX(Case when names_params.name = 'Ti' then daily_values.value  end) as ti,
+MAX(Case when names_params.name = 'To' then daily_values.value  end) as to,
+MAX(Case when names_params.name = 'Ton' then daily_values.value  end) as ton,
+MAX(Case when names_params.name = 'Terr' then daily_values.value  end) as terr,
 abonents.guid
 FROM 
   public.objects, 
@@ -8295,12 +8325,12 @@ daily_values.date,
   objects.name, 
   abonents.name,  
   meters.factory_number_manual, 
-  sum(Case when names_params.name = 'Q Система1' then daily_values.value  end) as Q,
-  sum(Case when names_params.name = 'M Система1' then daily_values.value  end) as M,
-sum(Case when names_params.name = 'Ti' then daily_values.value  end) as ti,
-sum(Case when names_params.name = 'To' then daily_values.value  end) as to,
-sum(Case when names_params.name = 'Ton' then daily_values.value  end) as ton,
-sum(Case when names_params.name = 'Terr' then daily_values.value  end) as terr,
+  MAX(Case when names_params.name = 'Q Система1' then daily_values.value  end) as Q,
+  MAX(Case when names_params.name = 'M Система1' then daily_values.value  end) as M,
+MAX(Case when names_params.name = 'Ti' then daily_values.value  end) as ti,
+MAX(Case when names_params.name = 'To' then daily_values.value  end) as to,
+MAX(Case when names_params.name = 'Ton' then daily_values.value  end) as ton,
+MAX(Case when names_params.name = 'Terr' then daily_values.value  end) as terr,
 abonents.guid
 FROM 
   public.objects, 
@@ -8349,12 +8379,12 @@ daily_values.date,
   objects.name, 
   abonents.name,  
   meters.factory_number_manual, 
-  sum(Case when names_params.name = 'Q Система1' then daily_values.value  end) as Q,
-  sum(Case when names_params.name = 'M Система1' then daily_values.value  end) as M,
-sum(Case when names_params.name = 'Ti' then daily_values.value  end) as ti,
-sum(Case when names_params.name = 'To' then daily_values.value  end) as to,
-sum(Case when names_params.name = 'Ton' then daily_values.value  end) as ton,
-sum(Case when names_params.name = 'Terr' then daily_values.value  end) as terr,
+  MAX(Case when names_params.name = 'Q Система1' then daily_values.value  end) as Q,
+  MAX(Case when names_params.name = 'M Система1' then daily_values.value  end) as M,
+MAX(Case when names_params.name = 'Ti' then daily_values.value  end) as ti,
+MAX(Case when names_params.name = 'To' then daily_values.value  end) as to,
+MAX(Case when names_params.name = 'Ton' then daily_values.value  end) as ton,
+MAX(Case when names_params.name = 'Terr' then daily_values.value  end) as terr,
 abonents.guid
 FROM 
   public.objects, 
@@ -8412,12 +8442,12 @@ daily_values.date,
   objects.name, 
   abonents.name,  
   meters.factory_number_manual, 
-  sum(Case when names_params.name = 'Q Система1' then daily_values.value  end) as Q,
-  sum(Case when names_params.name = 'M Система1' then daily_values.value  end) as M,
-sum(Case when names_params.name = 'Ti' then daily_values.value  end) as ti,
-sum(Case when names_params.name = 'To' then daily_values.value  end) as to,
-sum(Case when names_params.name = 'Ton' then daily_values.value  end) as ton,
-sum(Case when names_params.name = 'Terr' then daily_values.value  end) as terr,
+  MAX(Case when names_params.name = 'Q Система1' then daily_values.value  end) as Q,
+  MAX(Case when names_params.name = 'M Система1' then daily_values.value  end) as M,
+MAX(Case when names_params.name = 'Ti' then daily_values.value  end) as ti,
+MAX(Case when names_params.name = 'To' then daily_values.value  end) as to,
+MAX(Case when names_params.name = 'Ton' then daily_values.value  end) as ton,
+MAX(Case when names_params.name = 'Terr' then daily_values.value  end) as terr,
 abonents.guid
 FROM 
   public.objects, 
@@ -8465,12 +8495,12 @@ daily_values.date,
   objects.name, 
   abonents.name,  
   meters.factory_number_manual, 
-  sum(Case when names_params.name = 'Q Система1' then daily_values.value  end) as Q,
-  sum(Case when names_params.name = 'M Система1' then daily_values.value  end) as M,
-sum(Case when names_params.name = 'Ti' then daily_values.value  end) as ti,
-sum(Case when names_params.name = 'To' then daily_values.value  end) as to,
-sum(Case when names_params.name = 'Ton' then daily_values.value  end) as ton,
-sum(Case when names_params.name = 'Terr' then daily_values.value  end) as terr,
+  MAX(Case when names_params.name = 'Q Система1' then daily_values.value  end) as Q,
+  MAX(Case when names_params.name = 'M Система1' then daily_values.value  end) as M,
+MAX(Case when names_params.name = 'Ti' then daily_values.value  end) as ti,
+MAX(Case when names_params.name = 'To' then daily_values.value  end) as to,
+MAX(Case when names_params.name = 'Ton' then daily_values.value  end) as ton,
+MAX(Case when names_params.name = 'Terr' then daily_values.value  end) as terr,
 abonents.guid
 FROM 
   public.objects, 
@@ -8532,7 +8562,7 @@ def MakeSqlQuery_balance_electric(obj_parent_title, obj_title, electric_data_end
   balance_groups.name, 
   link_balance_groups_meters.type, 
   types_abonents.name, 
-  sum(daily_values.value * link_abonents_taken_params.coefficient), 
+  MAX(daily_values.value * link_abonents_taken_params.coefficient), 
   names_params.name, 
   resources.name
 FROM 
@@ -8638,7 +8668,7 @@ SELECT
   balance_groups.name as balance_name,
   link_balance_groups_meters.type,
   types_abonents.name as type_abon,
-  sum(daily_values.value * link_abonents_taken_params.coefficient * link_abonents_taken_params.coefficient_2) as sumT,
+  MAX(daily_values.value * link_abonents_taken_params.coefficient * link_abonents_taken_params.coefficient_2) as sumT,
   count(daily_values.value) as countAbon,
   names_params.name as param_name,
   resources.name AS res_name,
@@ -8704,7 +8734,7 @@ from
   balance_groups.name as balance_name, 
   link_balance_groups_meters.type, 
  
-  sum(daily_values.value * link_abonents_taken_params.coefficient) as sumT, 
+  MAX(daily_values.value * link_abonents_taken_params.coefficient) as sumT, 
   count(daily_values.value) as countAbon,
   names_params.name as param_name, 
   resources.name AS res_name, 
@@ -8925,8 +8955,8 @@ SELECT
   obj_name as ab_name,  
   water_abons_report.name as obj_name,
   resources.name as res_name,
-  sum(Case when abonents.name like '%s' then daily_values.value  end) as gvs,
-  sum(Case when abonents.name not like '%s' then daily_values.value  end) as hvs
+  MAX(Case when abonents.name like '%s' then daily_values.value  end) as gvs,
+  MAX(Case when abonents.name not like '%s' then daily_values.value  end) as hvs
 FROM
   public.meters,
   public.taken_params,
@@ -8977,8 +9007,8 @@ SELECT
   daily_values.date, 
   water_abons_report.name as obj_name,
   resources.name as res_name,
-  sum(Case when abonents.name like '%s' then daily_values.value  end) as gvs,
-  sum(Case when abonents.name not like '%s' then daily_values.value  end) as hvs
+  MAX(Case when abonents.name like '%s' then daily_values.value  end) as gvs,
+  MAX(Case when abonents.name not like '%s' then daily_values.value  end) as hvs
 FROM
   public.meters,
   public.taken_params,
@@ -9038,10 +9068,10 @@ from
 generate_series('%s'::timestamp without time zone, '%s'::timestamp without time zone, interval '1 day') as c_date) z_date
 left join
 (SELECT z1.daily_date, z1.name_objects, z1.name_abonents, z1.number_manual, 
-            sum(Case when z1.params_name = '%s' then z1.value_daily  end) as energy,
-            sum(Case when z1.params_name = '%s' then z1.value_daily  end) as volume,
-            sum(Case when z1.params_name = '%s' then z1.value_daily  end) as t_in,
-            sum(Case when z1.params_name = '%s' then z1.value_daily  end) as t_out
+            MAX(Case when z1.params_name = '%s' then z1.value_daily  end) as energy,
+            MAX(Case when z1.params_name = '%s' then z1.value_daily  end) as volume,
+            MAX(Case when z1.params_name = '%s' then z1.value_daily  end) as t_in,
+            MAX(Case when z1.params_name = '%s' then z1.value_daily  end) as t_out
             
                                     FROM
                                     (SELECT 
@@ -9098,10 +9128,10 @@ from
 generate_series('%s'::timestamp without time zone, '%s'::timestamp without time zone, interval '1 day') as c_date) z_date
 left join
 (SELECT z1.daily_date, z1.name_objects,  
-            sum(Case when z1.params_name = '%s' then z1.value_daily  end) as energy,
-            sum(Case when z1.params_name = '%s' then z1.value_daily  end) as volume,
-            sum(Case when z1.params_name = '%s' then z1.value_daily  end) as t_in,
-            sum(Case when z1.params_name = '%s' then z1.value_daily  end) as t_out
+            MAX(Case when z1.params_name = '%s' then z1.value_daily  end) as energy,
+            MAX(Case when z1.params_name = '%s' then z1.value_daily  end) as volume,
+            MAX(Case when z1.params_name = '%s' then z1.value_daily  end) as t_in,
+            MAX(Case when z1.params_name = '%s' then z1.value_daily  end) as t_out
             
                                     FROM
                                     (SELECT 
@@ -9620,10 +9650,10 @@ def MakeSqlQuery_electric_no_data( obj_title,  electric_data_end, my_params):
 from electric_abons
 LEFT JOIN 
 (SELECT z1.daily_date, z1.name_objects, z1.name_abonents, z1.number_manual, 
-sum(Case when z1.params_name = '%s' then z1.value_daily  end) as t0,
-sum(Case when z1.params_name = '%s' then z1.value_daily  end) as t1,
-sum(Case when z1.params_name = '%s' then z1.value_daily  end) as t2,
-sum(Case when z1.params_name = '%s' then z1.value_daily  end) as t3
+MAX(Case when z1.params_name = '%s' then z1.value_daily  end) as t0,
+MAX(Case when z1.params_name = '%s' then z1.value_daily  end) as t1,
+MAX(Case when z1.params_name = '%s' then z1.value_daily  end) as t2,
+MAX(Case when z1.params_name = '%s' then z1.value_daily  end) as t3
                         FROM
                         (SELECT daily_values.date as daily_date, 
                         objects.name as name_objects, 
@@ -9691,10 +9721,10 @@ Select  z2.daily_date,
 from electric_abons
 LEFT JOIN 
 (SELECT z1.daily_date, z1.name_objects, z1.name_abonents, z1.number_manual, 
-sum(Case when z1.params_name = '%s' then z1.value_daily  end) as t0,
-sum(Case when z1.params_name = '%s' then z1.value_daily  end) as t1,
-sum(Case when z1.params_name = '%s' then z1.value_daily  end) as t2,
-sum(Case when z1.params_name = '%s' then z1.value_daily  end) as t3,
+MAX(Case when z1.params_name = '%s' then z1.value_daily  end) as t0,
+MAX(Case when z1.params_name = '%s' then z1.value_daily  end) as t1,
+MAX(Case when z1.params_name = '%s' then z1.value_daily  end) as t2,
+MAX(Case when z1.params_name = '%s' then z1.value_daily  end) as t3,
 z1.ktn, z1.ktt, z1.a 
                         FROM
                         (SELECT daily_values.date as daily_date, 
@@ -10049,8 +10079,8 @@ SELECT
   daily_values.date, 
     resources.name as res_name,
     balance_groups.name as bal_name,
-  sum(Case when  link_balance_groups_meters.type=False then daily_values.value end) as water_minus,
-  sum(Case when  link_balance_groups_meters.type=True then daily_values.value end) as water_plus,
+  MAX(Case when  link_balance_groups_meters.type=False then daily_values.value end) as water_minus,
+  MAX(Case when  link_balance_groups_meters.type=True then daily_values.value end) as water_plus,
   count(water_abons_report.name) as answer
 FROM
   public.meters,
@@ -10382,14 +10412,14 @@ group by z_start.name_sender,
                           z_end.value ) z_info
 left join
 (Select 
-sum(z.summa) as sum_30 ,
+MAX(z.summa) as sum_30 ,
 z.factory_number_manual,
 round( (
         100 -((((SELECT count(dd)
           FROM generate_series
         ( '%s'::timestamp 
         , '%s'::timestamp
-        , '1 day'::interval) dd) *48)-sum(z.count_48))/((SELECT count(dd)
+        , '1 day'::interval) dd) *48)-MAX(z.count_48))/((SELECT count(dd)
           FROM generate_series
         ( '%s'::timestamp 
         , '%s'::timestamp
@@ -10982,8 +11012,8 @@ def get_restored_activ_reactiv(obj_title, obj_parent_title, date_st,activ,reacti
     data_table=[]   
     sQuery="""
 Select '%s','%s', z.obj_name, z.ab_name, z.factory_number_manual,
-%s+sum(z.sum_30_t0) as sum_t0,
-%s+sum(z.sum_30_tr0) as sum_tr0
+%s+MAX(z.sum_30_t0) as sum_t0,
+%s+MAX(z.sum_30_tr0) as sum_tr0
 from 
 
 (SELECT 
@@ -10991,8 +11021,8 @@ from
   abonents.name as ab_name, 
   various_values.date, 
  meters.factory_number_manual,
-  sum(Case when names_params.name = 'A+ Профиль' then various_values.value  end) as sum_30_t0,
-  sum(Case when names_params.name = 'R+ Профиль' then various_values.value end) as sum_30_tr0
+  MAX(Case when names_params.name = 'A+ Профиль' then various_values.value  end) as sum_30_t0,
+  MAX(Case when names_params.name = 'R+ Профиль' then various_values.value end) as sum_30_tr0
 FROM 
   public.abonents, 
   public.objects, 
@@ -11033,8 +11063,8 @@ def get_dt_monthly_activ_reactiv(obj_title, obj_parent_title, date_end):
     data_table=[]   
     sQuery="""
 SELECT z1.monthly_date, z1.name_objects, z1.name_abonents, z1.number_manual, 
-sum(Case when z1.params_name = 'T0 A+' then z1.value_monthly  end) as t0,
-sum(Case when z1.params_name = 'T0 R+' then z1.value_monthly  end) as tr0,
+MAX(Case when z1.params_name = 'T0 A+' then z1.value_monthly  end) as t0,
+MAX(Case when z1.params_name = 'T0 R+' then z1.value_monthly  end) as tr0,
 
 z1.ktn, z1.ktt, z1.a 
                         FROM
@@ -11310,10 +11340,10 @@ SELECT
   auth_user.last_name, 
   meters.name as meters_name, 
   daily_values.date, 
-sum(Case when names_params.name = 'T0 A+' then value  end) as t0,
-sum(Case when names_params.name = 'T1 A+' then value  end) as t1,
-sum(Case when names_params.name = 'T2 A+' then value end) as t2,
-sum(Case when names_params.name = 'T3 A+' then value  end) as t3
+MAX(Case when names_params.name = 'T0 A+' then value  end) as t0,
+MAX(Case when names_params.name = 'T1 A+' then value  end) as t1,
+MAX(Case when names_params.name = 'T2 A+' then value end) as t2,
+MAX(Case when names_params.name = 'T3 A+' then value  end) as t3
 FROM 
   public.abonents, 
   public.link_abonents_auth_user, 
@@ -11406,10 +11436,10 @@ SELECT
   meters.name as meters_name, 
   daily_values.date, 
 
- sum(Case when names_params.name = '%s' then value  end) as energy,
-            sum(Case when names_params.name = '%s' then value  end) as volume,
-            sum(Case when names_params.name = '%s' then value  end) as t_in,
-            sum(Case when names_params.name = '%s' then value  end) as t_out
+ MAX(Case when names_params.name = '%s' then value  end) as energy,
+            MAX(Case when names_params.name = '%s' then value  end) as volume,
+            MAX(Case when names_params.name = '%s' then value  end) as t_in,
+            MAX(Case when names_params.name = '%s' then value  end) as t_out
 FROM 
   public.abonents, 
   public.link_abonents_auth_user, 
@@ -11842,10 +11872,10 @@ abonents.name,
   resources.name,   
    
   meters.factory_number_manual, 
-  sum(Case when names_params.name = '%s' then value  end) as energy,
-            sum(Case when names_params.name = '%s' then value  end) as volume,
-            sum(Case when names_params.name = '%s' then value  end) as t_in,
-            sum(Case when names_params.name = '%s' then value  end) as t_out
+  MAX(Case when names_params.name = '%s' then value  end) as energy,
+            MAX(Case when names_params.name = '%s' then value  end) as volume,
+            MAX(Case when names_params.name = '%s' then value  end) as t_in,
+            MAX(Case when names_params.name = '%s' then value  end) as t_out
 FROM 
   public.abonents, 
   public.objects, 
@@ -11895,10 +11925,10 @@ abonents.name,
   resources.name,   
    
   meters.factory_number_manual, 
-  sum(Case when names_params.name = '%s' then value  end) as energy,
-            sum(Case when names_params.name = '%s' then value  end) as volume,
-            sum(Case when names_params.name = '%s' then value  end) as t_in,
-            sum(Case when names_params.name = '%s' then value  end) as t_out
+  MAX(Case when names_params.name = '%s' then value  end) as energy,
+            MAX(Case when names_params.name = '%s' then value  end) as volume,
+            MAX(Case when names_params.name = '%s' then value  end) as t_in,
+            MAX(Case when names_params.name = '%s' then value  end) as t_out
 FROM 
   public.abonents, 
   public.objects, 
@@ -11964,10 +11994,10 @@ abonents.name,
   resources.name,   
    
   meters.factory_number_manual, 
-  sum(Case when names_params.name = '%s' then value  end) as energy,
-            sum(Case when names_params.name = '%s' then value  end) as volume,
-            sum(Case when names_params.name = '%s' then value  end) as t_in,
-            sum(Case when names_params.name = '%s' then value  end) as t_out
+  MAX(Case when names_params.name = '%s' then value  end) as energy,
+            MAX(Case when names_params.name = '%s' then value  end) as volume,
+            MAX(Case when names_params.name = '%s' then value  end) as t_in,
+            MAX(Case when names_params.name = '%s' then value  end) as t_out
 FROM 
   public.abonents, 
   public.objects, 
@@ -12008,10 +12038,10 @@ abonents.name,
   resources.name,   
    
   meters.factory_number_manual, 
-  sum(Case when names_params.name = '%s' then value  end) as energy,
-            sum(Case when names_params.name = '%s' then value  end) as volume,
-            sum(Case when names_params.name = '%s' then value  end) as t_in,
-            sum(Case when names_params.name = '%s' then value  end) as t_out
+  MAX(Case when names_params.name = '%s' then value  end) as energy,
+            MAX(Case when names_params.name = '%s' then value  end) as volume,
+            MAX(Case when names_params.name = '%s' then value  end) as t_in,
+            MAX(Case when names_params.name = '%s' then value  end) as t_out
 FROM 
   public.abonents, 
   public.objects, 
@@ -12065,10 +12095,10 @@ abonents.name,
   resources.name,   
    
   meters.factory_number_manual, 
-  sum(Case when names_params.name = '%s' then value  end) as energy,
-            sum(Case when names_params.name = '%s' then value  end) as volume,
-            sum(Case when names_params.name = '%s' then value  end) as t_in,
-            sum(Case when names_params.name = '%s' then value  end) as t_out
+  MAX(Case when names_params.name = '%s' then value  end) as energy,
+            MAX(Case when names_params.name = '%s' then value  end) as volume,
+            MAX(Case when names_params.name = '%s' then value  end) as t_in,
+            MAX(Case when names_params.name = '%s' then value  end) as t_out
 FROM 
   public.abonents, 
   public.objects, 
@@ -12108,10 +12138,10 @@ abonents.name,
   resources.name,   
    
   meters.factory_number_manual, 
-  sum(Case when names_params.name = '%s' then value  end) as energy,
-            sum(Case when names_params.name = '%s' then value  end) as volume,
-            sum(Case when names_params.name = '%s' then value  end) as t_in,
-            sum(Case when names_params.name = '%s' then value  end) as t_out
+  MAX(Case when names_params.name = '%s' then value  end) as energy,
+            MAX(Case when names_params.name = '%s' then value  end) as volume,
+            MAX(Case when names_params.name = '%s' then value  end) as t_in,
+            MAX(Case when names_params.name = '%s' then value  end) as t_out
 FROM 
   public.abonents, 
   public.objects, 
@@ -12749,10 +12779,10 @@ def makeSqlQuery_electric_by_date(obj_parent_title, obj_title, electric_data, pa
 from electric_abons_2
 LEFT JOIN 
 (SELECT z1.monthly_date, z1.name_objects, z1.name_abonents, z1.number_manual, 
-sum(Case when z1.params_name = '%s' then z1.value_monthly  end) as t0,
-sum(Case when z1.params_name = '%s' then z1.value_monthly  end) as t1,
-sum(Case when z1.params_name = '%s' then z1.value_monthly  end) as t2,
-sum(Case when z1.params_name = '%s' then z1.value_monthly  end) as t3,
+MAX(Case when z1.params_name = '%s' then z1.value_monthly  end) as t0,
+MAX(Case when z1.params_name = '%s' then z1.value_monthly  end) as t1,
+MAX(Case when z1.params_name = '%s' then z1.value_monthly  end) as t2,
+MAX(Case when z1.params_name = '%s' then z1.value_monthly  end) as t3,
 z1.ktt,z1.ktn,z1.a
 
                         FROM
@@ -12853,10 +12883,10 @@ def makeSqlQuery_electric_by_date_level2(obj_parent_title, obj_title, electric_d
 from electric_abons_2
 LEFT JOIN
 (SELECT z1.daily_date, z1.name_objects, z1.name_abonents, z1.number_manual,
-sum(Case when z1.params_name = 'T0 A+' then z1.value_daily  end) as t0,
-sum(Case when z1.params_name = 'T1 A+' then z1.value_daily  end) as t1,
-sum(Case when z1.params_name = 'T2 A+' then z1.value_daily  end) as t2,
-sum(Case when z1.params_name = 'T3 A+' then z1.value_daily  end) as t3,
+MAX(Case when z1.params_name = 'T0 A+' then z1.value_daily  end) as t0,
+MAX(Case when z1.params_name = 'T1 A+' then z1.value_daily  end) as t1,
+MAX(Case when z1.params_name = 'T2 A+' then z1.value_daily  end) as t2,
+MAX(Case when z1.params_name = 'T3 A+' then z1.value_daily  end) as t3,
 z1.ktt,z1.ktn,z1.a
 
                         FROM
@@ -12949,10 +12979,10 @@ from electric_groups
 LEFT JOIN
 
 (SELECT z1.date, z1.balance_guid, z1.meters_name, z1.ab_guid,z1.factory_number_manual, 
-sum(Case when z1.params_name = '%s' then z1.value  end) as t0,
-sum(Case when z1.params_name = '%s' then z1.value end) as t1,
-sum(Case when z1.params_name = '%s' then z1.value  end) as t2,
-sum(Case when z1.params_name = '%s' then z1.value  end) as t3
+MAX(Case when z1.params_name = '%s' then z1.value  end) as t0,
+MAX(Case when z1.params_name = '%s' then z1.value end) as t1,
+MAX(Case when z1.params_name = '%s' then z1.value  end) as t2,
+MAX(Case when z1.params_name = '%s' then z1.value  end) as t3
 from
 (SELECT 
   link_balance_groups_meters.guid_balance_groups as balance_guid, 
@@ -13062,10 +13092,10 @@ def makeSqlQuery_electric_by_date_podolsk(obj_parent_title, obj_title, electric_
 from electric_abons_2
 LEFT JOIN 
 (SELECT z1.monthly_date, z1.name_objects, z1.name_abonents, z1.number_manual, 
-sum(Case when z1.params_name = '%s' then z1.value_monthly  end) as t0,
-sum(Case when z1.params_name = '%s' then z1.value_monthly  end) as t1,
-sum(Case when z1.params_name = '%s' then z1.value_monthly  end) as t2,
-sum(Case when z1.params_name = '%s' then z1.value_monthly  end) as t3,
+MAX(Case when z1.params_name = '%s' then z1.value_monthly  end) as t0,
+MAX(Case when z1.params_name = '%s' then z1.value_monthly  end) as t1,
+MAX(Case when z1.params_name = '%s' then z1.value_monthly  end) as t2,
+MAX(Case when z1.params_name = '%s' then z1.value_monthly  end) as t3,
 z1.ktt,z1.ktn,z1.a
                         FROM
                         (SELECT monthly_values.date as monthly_date, 
@@ -13186,12 +13216,12 @@ from
 from electric_abons_2
 Left join
 (SELECT z1.ktt, z1.ktn, z1.a,z1.date, z1.name_objects, z1.name as name_abonent, z1.num_manual, z1.name_res,
-sum(Case when z1.params_name = '%s' then z1.value else null end) as t0,
-sum(Case when z1.params_name = '%s' then z1.value else null end) as t1,
-sum(Case when z1.params_name = '%s' then z1.value else null end) as t2,
-sum(Case when z1.params_name = '%s' then z1.value else null end) as t3,
-sum(Case when z1.params_name = '%s' then z1.value else null end) as t4,
-sum(Case when z1.params_name = '%s' then z1.value else null end) as t0R
+MAX(Case when z1.params_name = '%s' then z1.value else null end) as t0,
+MAX(Case when z1.params_name = '%s' then z1.value else null end) as t1,
+MAX(Case when z1.params_name = '%s' then z1.value else null end) as t2,
+MAX(Case when z1.params_name = '%s' then z1.value else null end) as t3,
+MAX(Case when z1.params_name = '%s' then z1.value else null end) as t4,
+MAX(Case when z1.params_name = '%s' then z1.value else null end) as t0R
 
                         FROM
                         (
@@ -13252,12 +13282,12 @@ where electric_abons_2.obj_name='%s') z4,
 from electric_abons_2
 Left join
 (SELECT z1.date, z1.name_objects, z1.name as name_abonent, z1.num_manual, z1.name_res,
-sum(Case when z1.params_name = '%s' then z1.value else null end) as t0,
-sum(Case when z1.params_name = '%s' then z1.value else null end) as t1,
-sum(Case when z1.params_name = '%s' then z1.value else null end) as t2,
-sum(Case when z1.params_name = '%s' then z1.value else null end) as t3,
-sum(Case when z1.params_name = '%s' then z1.value else null end) as t4,
-sum(Case when z1.params_name = '%s' then z1.value else null end) as t0R
+MAX(Case when z1.params_name = '%s' then z1.value else null end) as t0,
+MAX(Case when z1.params_name = '%s' then z1.value else null end) as t1,
+MAX(Case when z1.params_name = '%s' then z1.value else null end) as t2,
+MAX(Case when z1.params_name = '%s' then z1.value else null end) as t3,
+MAX(Case when z1.params_name = '%s' then z1.value else null end) as t4,
+MAX(Case when z1.params_name = '%s' then z1.value else null end) as t0R
 
                         FROM
                         (
@@ -13363,12 +13393,12 @@ from
 from electric_abons_2
 Left join
 (SELECT z1.ktt, z1.ktn,z1.a,z1.date, z1.name_objects, z1.name as name_abonent, z1.num_manual, z1.name_res,
-sum(Case when z1.params_name = '%s' then z1.value else null end) as t0,
-sum(Case when z1.params_name = '%s' then z1.value else null end) as t1,
-sum(Case when z1.params_name = '%s' then z1.value else null end) as t2,
-sum(Case when z1.params_name = '%s' then z1.value else null end) as t3,
-sum(Case when z1.params_name = '%s' then z1.value else null end) as t4,
-sum(Case when z1.params_name = '%s' then z1.value else null end) as t0R
+MAX(Case when z1.params_name = '%s' then z1.value else null end) as t0,
+MAX(Case when z1.params_name = '%s' then z1.value else null end) as t1,
+MAX(Case when z1.params_name = '%s' then z1.value else null end) as t2,
+MAX(Case when z1.params_name = '%s' then z1.value else null end) as t3,
+MAX(Case when z1.params_name = '%s' then z1.value else null end) as t4,
+MAX(Case when z1.params_name = '%s' then z1.value else null end) as t0R
                         FROM
                         (
                                 SELECT 
@@ -13428,12 +13458,12 @@ where electric_abons_2.obj_name='%s') z4,
 from electric_abons_2
 Left join
 (SELECT z1.date, z1.name_objects, z1.name as name_abonent, z1.num_manual, z1.name_res,
-sum(Case when z1.params_name = '%s' then z1.value else null end) as t0,
-sum(Case when z1.params_name = '%s' then z1.value else null end) as t1,
-sum(Case when z1.params_name = '%s' then z1.value else null end) as t2,
-sum(Case when z1.params_name = '%s' then z1.value else null end) as t3,
-sum(Case when z1.params_name = '%s' then z1.value else null end) as t4,
-sum(Case when z1.params_name = '%s' then z1.value else null end) as t0R
+MAX(Case when z1.params_name = '%s' then z1.value else null end) as t0,
+MAX(Case when z1.params_name = '%s' then z1.value else null end) as t1,
+MAX(Case when z1.params_name = '%s' then z1.value else null end) as t2,
+MAX(Case when z1.params_name = '%s' then z1.value else null end) as t3,
+MAX(Case when z1.params_name = '%s' then z1.value else null end) as t4,
+MAX(Case when z1.params_name = '%s' then z1.value else null end) as t0R
 
                         FROM
                         (
@@ -13648,20 +13678,20 @@ LEFT JOIN
   meters.address, 
   daily_values.date, 
   resources.name as res_name,
-  sum(Case when params.name = 'ТЭМ-104 P_in Система1 Суточный -- adress: 46  channel: 0' then daily_values.value  end) as p_in1,
-  sum(Case when params.name = 'ТЭМ-104 P_in Система2 Суточный -- adress: 49  channel: 0' then daily_values.value  end) as p_in2,
-  sum(Case when params.name = 'ТЭМ-104 P_out Система1 Суточный -- adress: 47  channel: 0' then daily_values.value  end) as p_out1,
-  sum(Case when params.name = 'ТЭМ-104 P_out Система2 Суточный -- adress: 50  channel: 0' then daily_values.value  end) as p_out2,
-  sum(Case when params.name = 'ТЭМ-104 Q Система1 Суточный -- adress: 9  channel: 0' then daily_values.value  end) as q1,
-  sum(Case when params.name = 'ТЭМ-104 Q Система2 Суточный -- adress: 10  channel: 0' then daily_values.value  end) as q2,
-  sum(Case when params.name = 'ТЭМ-104 Ti Система1 Суточный -- adress: 34  channel: 0' then daily_values.value  end) as t_in1,
-  sum(Case when params.name = 'ТЭМ-104 Ti Система2 Суточный -- adress: 37  channel: 0' then daily_values.value  end) as t_in2,
-  sum(Case when params.name = 'ТЭМ-104 Tnar Система2 Суточный -- adress: 15  channel: 0' then daily_values.value  end) as t_nar2,
-  sum(Case when params.name = 'ТЭМ-104 Tnar Система1 Суточный -- adress: 14  channel: 0' then daily_values.value  end) as t_nar1,
-  sum(Case when params.name = 'ТЭМ-104 To Система2 Суточный -- adress: 38  channel: 0' then daily_values.value  end) as t_out2,
-  sum(Case when params.name = 'ТЭМ-104 To Система1 Суточный -- adress: 35  channel: 0' then daily_values.value  end) as t_out1,
-  sum(Case when params.name = 'ТЭМ-104 Объем Система1 Суточный -- adress: 1  channel: 0' then daily_values.value  end) as v_1,
-  sum(Case when params.name = 'ТЭМ-104 Объем Система2 Суточный -- adress: 2  channel: 0' then daily_values.value  end) as v_2
+  MAX(Case when params.name = 'ТЭМ-104 P_in Система1 Суточный -- adress: 46  channel: 0' then daily_values.value  end) as p_in1,
+  MAX(Case when params.name = 'ТЭМ-104 P_in Система2 Суточный -- adress: 49  channel: 0' then daily_values.value  end) as p_in2,
+  MAX(Case when params.name = 'ТЭМ-104 P_out Система1 Суточный -- adress: 47  channel: 0' then daily_values.value  end) as p_out1,
+  MAX(Case when params.name = 'ТЭМ-104 P_out Система2 Суточный -- adress: 50  channel: 0' then daily_values.value  end) as p_out2,
+  MAX(Case when params.name = 'ТЭМ-104 Q Система1 Суточный -- adress: 9  channel: 0' then daily_values.value  end) as q1,
+  MAX(Case when params.name = 'ТЭМ-104 Q Система2 Суточный -- adress: 10  channel: 0' then daily_values.value  end) as q2,
+  MAX(Case when params.name = 'ТЭМ-104 Ti Система1 Суточный -- adress: 34  channel: 0' then daily_values.value  end) as t_in1,
+  MAX(Case when params.name = 'ТЭМ-104 Ti Система2 Суточный -- adress: 37  channel: 0' then daily_values.value  end) as t_in2,
+  MAX(Case when params.name = 'ТЭМ-104 Tnar Система2 Суточный -- adress: 15  channel: 0' then daily_values.value  end) as t_nar2,
+  MAX(Case when params.name = 'ТЭМ-104 Tnar Система1 Суточный -- adress: 14  channel: 0' then daily_values.value  end) as t_nar1,
+  MAX(Case when params.name = 'ТЭМ-104 To Система2 Суточный -- adress: 38  channel: 0' then daily_values.value  end) as t_out2,
+  MAX(Case when params.name = 'ТЭМ-104 To Система1 Суточный -- adress: 35  channel: 0' then daily_values.value  end) as t_out1,
+  MAX(Case when params.name = 'ТЭМ-104 Объем Система1 Суточный -- adress: 1  channel: 0' then daily_values.value  end) as v_1,
+  MAX(Case when params.name = 'ТЭМ-104 Объем Система2 Суточный -- adress: 2  channel: 0' then daily_values.value  end) as v_2
 FROM 
   public.objects, 
   public.abonents, 
@@ -13764,20 +13794,20 @@ LEFT JOIN
   meters.address,
   daily_values.date,
   resources.name as res_name,
-  sum(Case when params.name = 'ТЭМ-104 P_in Система1 Суточный -- adress: 46  channel: 0' then daily_values.value  end) as p_in1,
-  sum(Case when params.name = 'ТЭМ-104 P_in Система2 Суточный -- adress: 49  channel: 0' then daily_values.value  end) as p_in2,
-  sum(Case when params.name = 'ТЭМ-104 P_out Система1 Суточный -- adress: 47  channel: 0' then daily_values.value  end) as p_out1,
-  sum(Case when params.name = 'ТЭМ-104 P_out Система2 Суточный -- adress: 50  channel: 0' then daily_values.value  end) as p_out2,
-  sum(Case when params.name = 'ТЭМ-104 Q Система1 Суточный -- adress: 9  channel: 0' then daily_values.value  end) as q1,
-  sum(Case when params.name = 'ТЭМ-104 Q Система2 Суточный -- adress: 10  channel: 0' then daily_values.value  end) as q2,
-  sum(Case when params.name = 'ТЭМ-104 Ti Система1 Суточный -- adress: 34  channel: 0' then daily_values.value  end) as t_in1,
-  sum(Case when params.name = 'ТЭМ-104 Ti Система2 Суточный -- adress: 37  channel: 0' then daily_values.value  end) as t_in2,
-  sum(Case when params.name = 'ТЭМ-104 Tnar Система2 Суточный -- adress: 15  channel: 0' then daily_values.value  end) as t_nar2,
-  sum(Case when params.name = 'ТЭМ-104 Tnar Система1 Суточный -- adress: 14  channel: 0' then daily_values.value  end) as t_nar1,
-  sum(Case when params.name = 'ТЭМ-104 To Система2 Суточный -- adress: 38  channel: 0' then daily_values.value  end) as t_out2,
-  sum(Case when params.name = 'ТЭМ-104 To Система1 Суточный -- adress: 35  channel: 0' then daily_values.value  end) as t_out1,
-  sum(Case when params.name = 'ТЭМ-104 Объем Система1 Суточный -- adress: 1  channel: 0' then daily_values.value  end) as v_1,
-  sum(Case when params.name = 'ТЭМ-104 Объем Система2 Суточный -- adress: 2  channel: 0' then daily_values.value  end) as v_2
+  MAX(Case when params.name = 'ТЭМ-104 P_in Система1 Суточный -- adress: 46  channel: 0' then daily_values.value  end) as p_in1,
+  MAX(Case when params.name = 'ТЭМ-104 P_in Система2 Суточный -- adress: 49  channel: 0' then daily_values.value  end) as p_in2,
+  MAX(Case when params.name = 'ТЭМ-104 P_out Система1 Суточный -- adress: 47  channel: 0' then daily_values.value  end) as p_out1,
+  MAX(Case when params.name = 'ТЭМ-104 P_out Система2 Суточный -- adress: 50  channel: 0' then daily_values.value  end) as p_out2,
+  MAX(Case when params.name = 'ТЭМ-104 Q Система1 Суточный -- adress: 9  channel: 0' then daily_values.value  end) as q1,
+  MAX(Case when params.name = 'ТЭМ-104 Q Система2 Суточный -- adress: 10  channel: 0' then daily_values.value  end) as q2,
+  MAX(Case when params.name = 'ТЭМ-104 Ti Система1 Суточный -- adress: 34  channel: 0' then daily_values.value  end) as t_in1,
+  MAX(Case when params.name = 'ТЭМ-104 Ti Система2 Суточный -- adress: 37  channel: 0' then daily_values.value  end) as t_in2,
+  MAX(Case when params.name = 'ТЭМ-104 Tnar Система2 Суточный -- adress: 15  channel: 0' then daily_values.value  end) as t_nar2,
+  MAX(Case when params.name = 'ТЭМ-104 Tnar Система1 Суточный -- adress: 14  channel: 0' then daily_values.value  end) as t_nar1,
+  MAX(Case when params.name = 'ТЭМ-104 To Система2 Суточный -- adress: 38  channel: 0' then daily_values.value  end) as t_out2,
+  MAX(Case when params.name = 'ТЭМ-104 To Система1 Суточный -- adress: 35  channel: 0' then daily_values.value  end) as t_out1,
+  MAX(Case when params.name = 'ТЭМ-104 Объем Система1 Суточный -- adress: 1  channel: 0' then daily_values.value  end) as v_1,
+  MAX(Case when params.name = 'ТЭМ-104 Объем Система2 Суточный -- adress: 2  channel: 0' then daily_values.value  end) as v_2
 FROM
   public.objects,
   public.abonents,
@@ -13853,20 +13883,20 @@ LEFT JOIN
   meters.address,
   daily_values.date,
   resources.name as res_name,
-  sum(Case when params.name = 'ТЭМ-104 P_in Система1 Суточный -- adress: 46  channel: 0' then daily_values.value  end) as p_in1,
-  sum(Case when params.name = 'ТЭМ-104 P_in Система2 Суточный -- adress: 49  channel: 0' then daily_values.value  end) as p_in2,
-  sum(Case when params.name = 'ТЭМ-104 P_out Система1 Суточный -- adress: 47  channel: 0' then daily_values.value  end) as p_out1,
-  sum(Case when params.name = 'ТЭМ-104 P_out Система2 Суточный -- adress: 50  channel: 0' then daily_values.value  end) as p_out2,
-  sum(Case when params.name = 'ТЭМ-104 Q Система1 Суточный -- adress: 9  channel: 0' then daily_values.value  end) as q1,
-  sum(Case when params.name = 'ТЭМ-104 Q Система2 Суточный -- adress: 10  channel: 0' then daily_values.value  end) as q2,
-  sum(Case when params.name = 'ТЭМ-104 Ti Система1 Суточный -- adress: 34  channel: 0' then daily_values.value  end) as t_in1,
-  sum(Case when params.name = 'ТЭМ-104 Ti Система2 Суточный -- adress: 37  channel: 0' then daily_values.value  end) as t_in2,
-  sum(Case when params.name = 'ТЭМ-104 Tnar Система2 Суточный -- adress: 15  channel: 0' then daily_values.value  end) as t_nar2,
-  sum(Case when params.name = 'ТЭМ-104 Tnar Система1 Суточный -- adress: 14  channel: 0' then daily_values.value  end) as t_nar1,
-  sum(Case when params.name = 'ТЭМ-104 To Система2 Суточный -- adress: 38  channel: 0' then daily_values.value  end) as t_out2,
-  sum(Case when params.name = 'ТЭМ-104 To Система1 Суточный -- adress: 35  channel: 0' then daily_values.value  end) as t_out1,
-  sum(Case when params.name = 'ТЭМ-104 Объем Система1 Суточный -- adress: 1  channel: 0' then daily_values.value  end) as v_1,
-  sum(Case when params.name = 'ТЭМ-104 Объем Система2 Суточный -- adress: 2  channel: 0' then daily_values.value  end) as v_2
+  MAX(Case when params.name = 'ТЭМ-104 P_in Система1 Суточный -- adress: 46  channel: 0' then daily_values.value  end) as p_in1,
+  MAX(Case when params.name = 'ТЭМ-104 P_in Система2 Суточный -- adress: 49  channel: 0' then daily_values.value  end) as p_in2,
+  MAX(Case when params.name = 'ТЭМ-104 P_out Система1 Суточный -- adress: 47  channel: 0' then daily_values.value  end) as p_out1,
+  MAX(Case when params.name = 'ТЭМ-104 P_out Система2 Суточный -- adress: 50  channel: 0' then daily_values.value  end) as p_out2,
+  MAX(Case when params.name = 'ТЭМ-104 Q Система1 Суточный -- adress: 9  channel: 0' then daily_values.value  end) as q1,
+  MAX(Case when params.name = 'ТЭМ-104 Q Система2 Суточный -- adress: 10  channel: 0' then daily_values.value  end) as q2,
+  MAX(Case when params.name = 'ТЭМ-104 Ti Система1 Суточный -- adress: 34  channel: 0' then daily_values.value  end) as t_in1,
+  MAX(Case when params.name = 'ТЭМ-104 Ti Система2 Суточный -- adress: 37  channel: 0' then daily_values.value  end) as t_in2,
+  MAX(Case when params.name = 'ТЭМ-104 Tnar Система2 Суточный -- adress: 15  channel: 0' then daily_values.value  end) as t_nar2,
+  MAX(Case when params.name = 'ТЭМ-104 Tnar Система1 Суточный -- adress: 14  channel: 0' then daily_values.value  end) as t_nar1,
+  MAX(Case when params.name = 'ТЭМ-104 To Система2 Суточный -- adress: 38  channel: 0' then daily_values.value  end) as t_out2,
+  MAX(Case when params.name = 'ТЭМ-104 To Система1 Суточный -- adress: 35  channel: 0' then daily_values.value  end) as t_out1,
+  MAX(Case when params.name = 'ТЭМ-104 Объем Система1 Суточный -- adress: 1  channel: 0' then daily_values.value  end) as v_1,
+  MAX(Case when params.name = 'ТЭМ-104 Объем Система2 Суточный -- adress: 2  channel: 0' then daily_values.value  end) as v_2
 FROM
   public.objects,
   public.abonents,
@@ -14136,69 +14166,69 @@ def make_sql_query_electric_by_day_for_year(obj_parent_title, obj_title, electri
 from electric_abons_2
 LEFT JOIN
 	(SELECT z1.name_objects, z1.name_abonents, z1.factory_number_manual, z1.type_meter,
-	sum(Case when z1.params_name = 'T0 A+' and daily_date = '%s' then z1.value_daily  end) as t0,
-	sum(Case when z1.params_name = 'T1 A+' and daily_date = '%s' then z1.value_daily  end) as t1,
-	sum(Case when z1.params_name = 'T2 A+' and daily_date = '%s' then z1.value_daily  end) as t2,
-	sum(Case when z1.params_name = 'T3 A+' and daily_date = '%s' then z1.value_daily  end) as t3,
-	sum(Case when z1.params_name = 'T0 A+' and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '1 month') then z1.value_daily  end) as t0_1,
-	sum(Case when z1.params_name = 'T1 A+' and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '1 month') then z1.value_daily  end) as t1_1,
-	sum(Case when z1.params_name = 'T2 A+' and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '1 month') then z1.value_daily  end) as t2_1,
-	sum(Case when z1.params_name = 'T3 A+' and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '1 month') then z1.value_daily  end) as t3_1,
+	MAX(Case when z1.params_name = 'T0 A+' and daily_date = '%s' then z1.value_daily  end) as t0,
+	MAX(Case when z1.params_name = 'T1 A+' and daily_date = '%s' then z1.value_daily  end) as t1,
+	MAX(Case when z1.params_name = 'T2 A+' and daily_date = '%s' then z1.value_daily  end) as t2,
+	MAX(Case when z1.params_name = 'T3 A+' and daily_date = '%s' then z1.value_daily  end) as t3,
+	MAX(Case when z1.params_name = 'T0 A+' and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '1 month') then z1.value_daily  end) as t0_1,
+	MAX(Case when z1.params_name = 'T1 A+' and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '1 month') then z1.value_daily  end) as t1_1,
+	MAX(Case when z1.params_name = 'T2 A+' and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '1 month') then z1.value_daily  end) as t2_1,
+	MAX(Case when z1.params_name = 'T3 A+' and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '1 month') then z1.value_daily  end) as t3_1,
 	 
-	 sum(Case when z1.params_name = 'T0 A+' and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '2 month') then z1.value_daily  end) as t0_2,
-	sum(Case when z1.params_name = 'T1 A+' and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '2 month') then z1.value_daily  end) as t1_2,
-	sum(Case when z1.params_name = 'T2 A+' and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '2 month') then z1.value_daily  end) as t2_2,
-	sum(Case when z1.params_name = 'T3 A+' and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '2 month') then z1.value_daily  end) as t3_2,
+	 MAX(Case when z1.params_name = 'T0 A+' and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '2 month') then z1.value_daily  end) as t0_2,
+	MAX(Case when z1.params_name = 'T1 A+' and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '2 month') then z1.value_daily  end) as t1_2,
+	MAX(Case when z1.params_name = 'T2 A+' and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '2 month') then z1.value_daily  end) as t2_2,
+	MAX(Case when z1.params_name = 'T3 A+' and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '2 month') then z1.value_daily  end) as t3_2,
 	 
-	 sum(Case when z1.params_name = 'T0 A+' and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '3 month') then z1.value_daily  end) as t0_3,
-	sum(Case when z1.params_name = 'T1 A+' and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '3 month') then z1.value_daily  end) as t1_3,
-	sum(Case when z1.params_name = 'T2 A+' and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '3 month') then z1.value_daily  end) as t2_3,
-	sum(Case when z1.params_name = 'T3 A+' and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '3 month') then z1.value_daily  end) as t3_3,
+	 MAX(Case when z1.params_name = 'T0 A+' and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '3 month') then z1.value_daily  end) as t0_3,
+	MAX(Case when z1.params_name = 'T1 A+' and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '3 month') then z1.value_daily  end) as t1_3,
+	MAX(Case when z1.params_name = 'T2 A+' and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '3 month') then z1.value_daily  end) as t2_3,
+	MAX(Case when z1.params_name = 'T3 A+' and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '3 month') then z1.value_daily  end) as t3_3,
 	 
-	 sum(Case when z1.params_name = 'T0 A+' and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '4 month') then z1.value_daily  end) as t0_4,
-	sum(Case when z1.params_name = 'T1 A+' and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '4 month') then z1.value_daily  end) as t1_4,
-	sum(Case when z1.params_name = 'T2 A+' and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '4 month') then z1.value_daily  end) as t2_4,
-	sum(Case when z1.params_name = 'T3 A+' and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '4 month') then z1.value_daily  end) as t3_4,
+	 MAX(Case when z1.params_name = 'T0 A+' and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '4 month') then z1.value_daily  end) as t0_4,
+	MAX(Case when z1.params_name = 'T1 A+' and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '4 month') then z1.value_daily  end) as t1_4,
+	MAX(Case when z1.params_name = 'T2 A+' and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '4 month') then z1.value_daily  end) as t2_4,
+	MAX(Case when z1.params_name = 'T3 A+' and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '4 month') then z1.value_daily  end) as t3_4,
 	 
-	 sum(Case when z1.params_name = 'T0 A+' and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '5 month') then z1.value_daily  end) as t0_5,
-	sum(Case when z1.params_name = 'T1 A+' and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '5 month') then z1.value_daily  end) as t1_5,
-	sum(Case when z1.params_name = 'T2 A+' and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '5 month') then z1.value_daily  end) as t2_5,
-	sum(Case when z1.params_name = 'T3 A+' and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '5 month') then z1.value_daily  end) as t3_5,
+	 MAX(Case when z1.params_name = 'T0 A+' and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '5 month') then z1.value_daily  end) as t0_5,
+	MAX(Case when z1.params_name = 'T1 A+' and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '5 month') then z1.value_daily  end) as t1_5,
+	MAX(Case when z1.params_name = 'T2 A+' and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '5 month') then z1.value_daily  end) as t2_5,
+	MAX(Case when z1.params_name = 'T3 A+' and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '5 month') then z1.value_daily  end) as t3_5,
 	 
-	 sum(Case when z1.params_name = 'T0 A+' and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '6 month') then z1.value_daily  end) as t0_6,
-	sum(Case when z1.params_name = 'T1 A+' and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '6 month') then z1.value_daily  end) as t1_6,
-	sum(Case when z1.params_name = 'T2 A+' and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '6 month') then z1.value_daily  end) as t2_6,
-	sum(Case when z1.params_name = 'T3 A+' and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '6 month') then z1.value_daily  end) as t3_6,
+	 MAX(Case when z1.params_name = 'T0 A+' and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '6 month') then z1.value_daily  end) as t0_6,
+	MAX(Case when z1.params_name = 'T1 A+' and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '6 month') then z1.value_daily  end) as t1_6,
+	MAX(Case when z1.params_name = 'T2 A+' and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '6 month') then z1.value_daily  end) as t2_6,
+	MAX(Case when z1.params_name = 'T3 A+' and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '6 month') then z1.value_daily  end) as t3_6,
 	 
-	 sum(Case when z1.params_name = 'T0 A+' and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '7 month') then z1.value_daily  end) as t0_7,
-	sum(Case when z1.params_name = 'T1 A+' and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '7 month') then z1.value_daily  end) as t1_7,
-	sum(Case when z1.params_name = 'T2 A+' and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '7 month') then z1.value_daily  end) as t2_7,
-	sum(Case when z1.params_name = 'T3 A+' and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '7 month') then z1.value_daily  end) as t3_7,
+	 MAX(Case when z1.params_name = 'T0 A+' and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '7 month') then z1.value_daily  end) as t0_7,
+	MAX(Case when z1.params_name = 'T1 A+' and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '7 month') then z1.value_daily  end) as t1_7,
+	MAX(Case when z1.params_name = 'T2 A+' and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '7 month') then z1.value_daily  end) as t2_7,
+	MAX(Case when z1.params_name = 'T3 A+' and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '7 month') then z1.value_daily  end) as t3_7,
 	 
-	 sum(Case when z1.params_name = 'T0 A+' and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '8 month') then z1.value_daily  end) as t0_8,
-	sum(Case when z1.params_name = 'T1 A+' and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '8 month') then z1.value_daily  end) as t1_8,
-	sum(Case when z1.params_name = 'T2 A+' and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '8 month') then z1.value_daily  end) as t2_8,
-	sum(Case when z1.params_name = 'T3 A+' and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '8 month') then z1.value_daily  end) as t3_8,
+	 MAX(Case when z1.params_name = 'T0 A+' and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '8 month') then z1.value_daily  end) as t0_8,
+	MAX(Case when z1.params_name = 'T1 A+' and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '8 month') then z1.value_daily  end) as t1_8,
+	MAX(Case when z1.params_name = 'T2 A+' and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '8 month') then z1.value_daily  end) as t2_8,
+	MAX(Case when z1.params_name = 'T3 A+' and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '8 month') then z1.value_daily  end) as t3_8,
 	 
-	 sum(Case when z1.params_name = 'T0 A+' and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '9 month') then z1.value_daily  end) as t0_9,
-	sum(Case when z1.params_name = 'T1 A+' and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '9 month') then z1.value_daily  end) as t1_9,
-	sum(Case when z1.params_name = 'T2 A+' and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '9 month') then z1.value_daily  end) as t2_9,
-	sum(Case when z1.params_name = 'T3 A+' and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '9 month') then z1.value_daily  end) as t3_9,
+	 MAX(Case when z1.params_name = 'T0 A+' and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '9 month') then z1.value_daily  end) as t0_9,
+	MAX(Case when z1.params_name = 'T1 A+' and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '9 month') then z1.value_daily  end) as t1_9,
+	MAX(Case when z1.params_name = 'T2 A+' and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '9 month') then z1.value_daily  end) as t2_9,
+	MAX(Case when z1.params_name = 'T3 A+' and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '9 month') then z1.value_daily  end) as t3_9,
 	 
-	 sum(Case when z1.params_name = 'T0 A+' and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '10 month') then z1.value_daily  end) as t0_10,
-	sum(Case when z1.params_name = 'T1 A+' and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '10 month') then z1.value_daily  end) as t1_10,
-	sum(Case when z1.params_name = 'T2 A+' and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '10 month') then z1.value_daily  end) as t2_10,
-	sum(Case when z1.params_name = 'T3 A+' and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '10 month') then z1.value_daily  end) as t3_10,
+	 MAX(Case when z1.params_name = 'T0 A+' and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '10 month') then z1.value_daily  end) as t0_10,
+	MAX(Case when z1.params_name = 'T1 A+' and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '10 month') then z1.value_daily  end) as t1_10,
+	MAX(Case when z1.params_name = 'T2 A+' and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '10 month') then z1.value_daily  end) as t2_10,
+	MAX(Case when z1.params_name = 'T3 A+' and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '10 month') then z1.value_daily  end) as t3_10,
 	 
-	 sum(Case when z1.params_name = 'T0 A+' and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '11 month') then z1.value_daily  end) as t0_11,
-	sum(Case when z1.params_name = 'T1 A+' and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '11 month') then z1.value_daily  end) as t1_11,
-	sum(Case when z1.params_name = 'T2 A+' and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '11 month') then z1.value_daily  end) as t2_11,
-	sum(Case when z1.params_name = 'T3 A+' and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '11 month') then z1.value_daily  end) as t3_11,
+	 MAX(Case when z1.params_name = 'T0 A+' and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '11 month') then z1.value_daily  end) as t0_11,
+	MAX(Case when z1.params_name = 'T1 A+' and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '11 month') then z1.value_daily  end) as t1_11,
+	MAX(Case when z1.params_name = 'T2 A+' and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '11 month') then z1.value_daily  end) as t2_11,
+	MAX(Case when z1.params_name = 'T3 A+' and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '11 month') then z1.value_daily  end) as t3_11,
 	 
-	 sum(Case when z1.params_name = 'T0 A+' and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '12 month') then z1.value_daily  end) as t0_12,
-	sum(Case when z1.params_name = 'T1 A+' and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '12 month') then z1.value_daily  end) as t1_12,
-	sum(Case when z1.params_name = 'T2 A+' and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '12 month') then z1.value_daily  end) as t2_12,
-	sum(Case when z1.params_name = 'T3 A+' and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '12 month') then z1.value_daily  end) as t3_12
+	 MAX(Case when z1.params_name = 'T0 A+' and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '12 month') then z1.value_daily  end) as t0_12,
+	MAX(Case when z1.params_name = 'T1 A+' and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '12 month') then z1.value_daily  end) as t1_12,
+	MAX(Case when z1.params_name = 'T2 A+' and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '12 month') then z1.value_daily  end) as t2_12,
+	MAX(Case when z1.params_name = 'T3 A+' and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '12 month') then z1.value_daily  end) as t3_12
 	 
 	
 	from
@@ -14326,19 +14356,19 @@ def make_sql_query_water_by_day_for_year(obj_parent_title, obj_title, electric_d
 from water_pulsar_abons
 left join
 (Select z.ab_name, z.factory_number_manual, z.type_meter,
- sum(Case when daily_date = '%s' then z.value end) as volume,
- sum(Case when daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '1 month')  then z.value end) as volume1,
-  sum(Case when daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '2 month')  then z.value end) as volume2,
-  sum(Case when daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '3 month')  then z.value end) as volume3,
-  sum(Case when daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '4 month')  then z.value end) as volume4,
-  sum(Case when daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '5 month')  then z.value end) as volume5,
-  sum(Case when daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '6 month')  then z.value end) as volume6,
-  sum(Case when daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '7 month')  then z.value end) as volume7,
-  sum(Case when daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '8 month')  then z.value end) as volume8,
-  sum(Case when daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '9 month')  then z.value end) as volume9,
-  sum(Case when daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '10 month')  then z.value end) as volume10,
-  sum(Case when daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '11 month')  then z.value end) as volume11,
-  sum(Case when daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '12 month')  then z.value end) as volume12 
+ MAX(Case when daily_date = '%s' then z.value end) as volume,
+ MAX(Case when daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '1 month')  then z.value end) as volume1,
+  MAX(Case when daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '2 month')  then z.value end) as volume2,
+  MAX(Case when daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '3 month')  then z.value end) as volume3,
+  MAX(Case when daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '4 month')  then z.value end) as volume4,
+  MAX(Case when daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '5 month')  then z.value end) as volume5,
+  MAX(Case when daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '6 month')  then z.value end) as volume6,
+  MAX(Case when daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '7 month')  then z.value end) as volume7,
+  MAX(Case when daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '8 month')  then z.value end) as volume8,
+  MAX(Case when daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '9 month')  then z.value end) as volume9,
+  MAX(Case when daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '10 month')  then z.value end) as volume10,
+  MAX(Case when daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '11 month')  then z.value end) as volume11,
+  MAX(Case when daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '12 month')  then z.value end) as volume12 
  
  from
 		(SELECT
@@ -14436,44 +14466,44 @@ round(z2.volume12::numeric,7)
 from heat_abons
 left join
 (SELECT z1.name_objects, z1.name_abonents, z1.number_manual,
-            sum(Case when z1.params_name = 'Энергия' and daily_date = '%s' then z1.value_daily  end) as energy,
-            sum(Case when z1.params_name = 'Объем' and daily_date = '%s' then z1.value_daily  end) as volume,
+            MAX(Case when z1.params_name = 'Энергия' and daily_date = '%s' then z1.value_daily  end) as energy,
+            MAX(Case when z1.params_name = 'Объем' and daily_date = '%s' then z1.value_daily  end) as volume,
  
-            sum(Case when z1.params_name = 'Энергия'  and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '1 month') then z1.value_daily  end) as energy1,
-            sum(Case when z1.params_name = 'Объем'  and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '1 month') then z1.value_daily  end) as volume1,
+            MAX(Case when z1.params_name = 'Энергия'  and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '1 month') then z1.value_daily  end) as energy1,
+            MAX(Case when z1.params_name = 'Объем'  and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '1 month') then z1.value_daily  end) as volume1,
  
-            sum(Case when z1.params_name = 'Энергия'  and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '2 month') then z1.value_daily  end) as energy2,
-            sum(Case when z1.params_name = 'Объем'  and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '2 month') then z1.value_daily  end) as volume2,
+            MAX(Case when z1.params_name = 'Энергия'  and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '2 month') then z1.value_daily  end) as energy2,
+            MAX(Case when z1.params_name = 'Объем'  and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '2 month') then z1.value_daily  end) as volume2,
  
-            sum(Case when z1.params_name = 'Энергия'  and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '3 month') then z1.value_daily  end) as energy3,
-            sum(Case when z1.params_name = 'Объем'  and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '3 month') then z1.value_daily  end) as volume3,
+            MAX(Case when z1.params_name = 'Энергия'  and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '3 month') then z1.value_daily  end) as energy3,
+            MAX(Case when z1.params_name = 'Объем'  and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '3 month') then z1.value_daily  end) as volume3,
  
-            sum(Case when z1.params_name = 'Энергия'  and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '4 month') then z1.value_daily  end) as energy4,
-            sum(Case when z1.params_name = 'Объем'  and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '4 month') then z1.value_daily  end) as volume4,
+            MAX(Case when z1.params_name = 'Энергия'  and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '4 month') then z1.value_daily  end) as energy4,
+            MAX(Case when z1.params_name = 'Объем'  and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '4 month') then z1.value_daily  end) as volume4,
  
-            sum(Case when z1.params_name = 'Энергия'  and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '5 month') then z1.value_daily  end) as energy5,
-            sum(Case when z1.params_name = 'Объем'  and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '5 month') then z1.value_daily  end) as volume5,
+            MAX(Case when z1.params_name = 'Энергия'  and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '5 month') then z1.value_daily  end) as energy5,
+            MAX(Case when z1.params_name = 'Объем'  and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '5 month') then z1.value_daily  end) as volume5,
  
-            sum(Case when z1.params_name = 'Энергия'  and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '6 month') then z1.value_daily  end) as energy6,
-            sum(Case when z1.params_name = 'Объем'  and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '6 month') then z1.value_daily  end) as volume6,
+            MAX(Case when z1.params_name = 'Энергия'  and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '6 month') then z1.value_daily  end) as energy6,
+            MAX(Case when z1.params_name = 'Объем'  and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '6 month') then z1.value_daily  end) as volume6,
  
-            sum(Case when z1.params_name = 'Энергия'  and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '7 month') then z1.value_daily  end) as energy7,
-            sum(Case when z1.params_name = 'Объем'  and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '7 month') then z1.value_daily  end) as volume7,
+            MAX(Case when z1.params_name = 'Энергия'  and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '7 month') then z1.value_daily  end) as energy7,
+            MAX(Case when z1.params_name = 'Объем'  and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '7 month') then z1.value_daily  end) as volume7,
  
-            sum(Case when z1.params_name = 'Энергия'  and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '8 month') then z1.value_daily  end) as energy8,
-            sum(Case when z1.params_name = 'Объем'  and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '8 month') then z1.value_daily  end) as volume8,
+            MAX(Case when z1.params_name = 'Энергия'  and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '8 month') then z1.value_daily  end) as energy8,
+            MAX(Case when z1.params_name = 'Объем'  and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '8 month') then z1.value_daily  end) as volume8,
  
-            sum(Case when z1.params_name = 'Энергия'  and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '9 month') then z1.value_daily  end) as energy9,
-            sum(Case when z1.params_name = 'Объем'  and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '9 month') then z1.value_daily  end) as volume9,
+            MAX(Case when z1.params_name = 'Энергия'  and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '9 month') then z1.value_daily  end) as energy9,
+            MAX(Case when z1.params_name = 'Объем'  and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '9 month') then z1.value_daily  end) as volume9,
  
-            sum(Case when z1.params_name = 'Энергия'  and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '10 month') then z1.value_daily  end) as energy10,
-            sum(Case when z1.params_name = 'Объем'  and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '10 month') then z1.value_daily  end) as volume10,
+            MAX(Case when z1.params_name = 'Энергия'  and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '10 month') then z1.value_daily  end) as energy10,
+            MAX(Case when z1.params_name = 'Объем'  and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '10 month') then z1.value_daily  end) as volume10,
  
-            sum(Case when z1.params_name = 'Энергия'  and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '11 month') then z1.value_daily  end) as energy11,
-            sum(Case when z1.params_name = 'Объем'  and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '11 month') then z1.value_daily  end) as volume11,
+            MAX(Case when z1.params_name = 'Энергия'  and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '11 month') then z1.value_daily  end) as energy11,
+            MAX(Case when z1.params_name = 'Объем'  and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '11 month') then z1.value_daily  end) as volume11,
  
-            sum(Case when z1.params_name = 'Энергия'  and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '12 month') then z1.value_daily  end) as energy12,
-            sum(Case when z1.params_name = 'Объем'  and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '12 month') then z1.value_daily  end) as volume12
+            MAX(Case when z1.params_name = 'Энергия'  and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '12 month') then z1.value_daily  end) as energy12,
+            MAX(Case when z1.params_name = 'Объем'  and daily_date = (to_date('%s','dd.mm.YYYY') - INTERVAL '12 month') then z1.value_daily  end) as volume12
             
 
                                     FROM
@@ -14612,30 +14642,30 @@ SELECT
   abonents.name,   
   names_params.name, 
   meters.factory_number_manual,
-  sum(Case when (various_values."time">='00:00:00' and various_values."time"<='00:30:00') then various_values.value end)/2  as t0,
-  sum(Case when (various_values."time">='01:00' and various_values."time"<='01:30') then various_values.value end)/2  as t1,
-  sum(Case when (various_values."time">='02:00' and various_values."time"<='02:30') then various_values.value end)/2  as t2,
-  sum(Case when (various_values."time">='03:00' and various_values."time"<='03:30') then various_values.value end)/2 as t3,
-  sum(Case when (various_values."time">='04:00' and various_values."time"<='04:30') then various_values.value end)/2  as t4,
-  sum(Case when (various_values."time">='05:00' and various_values."time"<='05:30') then various_values.value end)/2  as t5,
-  sum(Case when (various_values."time">='06:00' and various_values."time"<='06:30') then various_values.value end)/2  as t6,
-  sum(Case when (various_values."time">='07:00' and various_values."time"<='07:30') then various_values.value end)/2  as t7,
-  sum(Case when (various_values."time">='08:00' and various_values."time"<='08:30') then various_values.value end)/2  as t8,
-  sum(Case when (various_values."time">='09:00' and various_values."time"<='09:30') then various_values.value end)/2  as t9,
-  sum(Case when (various_values."time">='10:00' and various_values."time"<='10:30') then various_values.value end)/2  as t10,
-  sum(Case when (various_values."time">='11:00' and various_values."time"<='11:30') then various_values.value end)/2  as t11,
-  sum(Case when (various_values."time">='12:00' and various_values."time"<='12:30') then various_values.value end)/2  as t12,
-  sum(Case when (various_values."time">='13:00' and various_values."time"<='13:30') then various_values.value end)/2  as t13,
-  sum(Case when (various_values."time">='14:00' and various_values."time"<='14:30') then various_values.value end)/2  as t14,
-  sum(Case when (various_values."time">='15:00' and various_values."time"<='15:30') then various_values.value end)/2  as t15,
-  sum(Case when (various_values."time">='16:00' and various_values."time"<='16:30') then various_values.value end)/2  as t16,
-  sum(Case when (various_values."time">='17:00' and various_values."time"<='17:30') then various_values.value end)/2  as t17,
-  sum(Case when (various_values."time">='18:00' and various_values."time"<='18:30') then various_values.value end)/2  as t18,
-  sum(Case when (various_values."time">='19:00' and various_values."time"<='19:30') then various_values.value end)/2  as t19,
-  sum(Case when (various_values."time">='20:00' and various_values."time"<='20:30') then various_values.value end)/2 as t20,
-  sum(Case when (various_values."time">='21:00' and various_values."time"<='21:30') then various_values.value end)/2 as t21,
-  sum(Case when (various_values."time">='22:00' and various_values."time"<='22:30') then various_values.value end)/2 as t22,
-  sum(Case when (various_values."time">='23:00' and various_values."time"<='23:30') then various_values.value end)/2 as t23
+  MAX(Case when (various_values."time">='00:00:00' and various_values."time"<='00:30:00') then various_values.value end)/2  as t0,
+  MAX(Case when (various_values."time">='01:00' and various_values."time"<='01:30') then various_values.value end)/2  as t1,
+  MAX(Case when (various_values."time">='02:00' and various_values."time"<='02:30') then various_values.value end)/2  as t2,
+  MAX(Case when (various_values."time">='03:00' and various_values."time"<='03:30') then various_values.value end)/2 as t3,
+  MAX(Case when (various_values."time">='04:00' and various_values."time"<='04:30') then various_values.value end)/2  as t4,
+  MAX(Case when (various_values."time">='05:00' and various_values."time"<='05:30') then various_values.value end)/2  as t5,
+  MAX(Case when (various_values."time">='06:00' and various_values."time"<='06:30') then various_values.value end)/2  as t6,
+  MAX(Case when (various_values."time">='07:00' and various_values."time"<='07:30') then various_values.value end)/2  as t7,
+  MAX(Case when (various_values."time">='08:00' and various_values."time"<='08:30') then various_values.value end)/2  as t8,
+  MAX(Case when (various_values."time">='09:00' and various_values."time"<='09:30') then various_values.value end)/2  as t9,
+  MAX(Case when (various_values."time">='10:00' and various_values."time"<='10:30') then various_values.value end)/2  as t10,
+  MAX(Case when (various_values."time">='11:00' and various_values."time"<='11:30') then various_values.value end)/2  as t11,
+  MAX(Case when (various_values."time">='12:00' and various_values."time"<='12:30') then various_values.value end)/2  as t12,
+  MAX(Case when (various_values."time">='13:00' and various_values."time"<='13:30') then various_values.value end)/2  as t13,
+  MAX(Case when (various_values."time">='14:00' and various_values."time"<='14:30') then various_values.value end)/2  as t14,
+  MAX(Case when (various_values."time">='15:00' and various_values."time"<='15:30') then various_values.value end)/2  as t15,
+  MAX(Case when (various_values."time">='16:00' and various_values."time"<='16:30') then various_values.value end)/2  as t16,
+  MAX(Case when (various_values."time">='17:00' and various_values."time"<='17:30') then various_values.value end)/2  as t17,
+  MAX(Case when (various_values."time">='18:00' and various_values."time"<='18:30') then various_values.value end)/2  as t18,
+  MAX(Case when (various_values."time">='19:00' and various_values."time"<='19:30') then various_values.value end)/2  as t19,
+  MAX(Case when (various_values."time">='20:00' and various_values."time"<='20:30') then various_values.value end)/2 as t20,
+  MAX(Case when (various_values."time">='21:00' and various_values."time"<='21:30') then various_values.value end)/2 as t21,
+  MAX(Case when (various_values."time">='22:00' and various_values."time"<='22:30') then various_values.value end)/2 as t22,
+  MAX(Case when (various_values."time">='23:00' and various_values."time"<='23:30') then various_values.value end)/2 as t23
 FROM 
   public.abonents, 
   public.objects, 
@@ -14726,12 +14756,12 @@ from
 from electric_abons_2
 Left join
 (SELECT z1.ktt, z1.ktn, z1.a,z1.date, z1.name_objects, z1.name as name_abonent, z1.num_manual, z1.name_res,
-sum(Case when z1.params_name = '%s' then z1.value else null end) as t0,
-sum(Case when z1.params_name = '%s' then z1.value else null end) as t1,
-sum(Case when z1.params_name = '%s' then z1.value else null end) as t2,
-sum(Case when z1.params_name = '%s' then z1.value else null end) as t3,
-sum(Case when z1.params_name = '%s' then z1.value else null end) as t4,
-sum(Case when z1.params_name = '%s' then z1.value else null end) as t0R
+MAX(Case when z1.params_name = '%s' then z1.value else null end) as t0,
+MAX(Case when z1.params_name = '%s' then z1.value else null end) as t1,
+MAX(Case when z1.params_name = '%s' then z1.value else null end) as t2,
+MAX(Case when z1.params_name = '%s' then z1.value else null end) as t3,
+MAX(Case when z1.params_name = '%s' then z1.value else null end) as t4,
+MAX(Case when z1.params_name = '%s' then z1.value else null end) as t0R
 
                         FROM
                         (
@@ -14792,12 +14822,12 @@ where electric_abons_2.obj_name='%s') z4,
 from electric_abons_2
 Left join
 (SELECT z1.date, z1.name_objects, z1.name as name_abonent, z1.num_manual, z1.name_res,
-sum(Case when z1.params_name = '%s' then z1.value else null end) as t0,
-sum(Case when z1.params_name = '%s' then z1.value else null end) as t1,
-sum(Case when z1.params_name = '%s' then z1.value else null end) as t2,
-sum(Case when z1.params_name = '%s' then z1.value else null end) as t3,
-sum(Case when z1.params_name = '%s' then z1.value else null end) as t4,
-sum(Case when z1.params_name = '%s' then z1.value else null end) as t0R
+MAX(Case when z1.params_name = '%s' then z1.value else null end) as t0,
+MAX(Case when z1.params_name = '%s' then z1.value else null end) as t1,
+MAX(Case when z1.params_name = '%s' then z1.value else null end) as t2,
+MAX(Case when z1.params_name = '%s' then z1.value else null end) as t3,
+MAX(Case when z1.params_name = '%s' then z1.value else null end) as t4,
+MAX(Case when z1.params_name = '%s' then z1.value else null end) as t0R
 
                         FROM
                         (
@@ -15234,18 +15264,18 @@ round((z2.gvs_1+z2.gvs_2+z2.gvs_3)::numeric,3) as sum_gvs
 FROM
 (Select z1.date_end, 
 z1.ab_name,
-sum(Case when z1.attr1 = 'Стояк 1' and z1.type_meter='ХВС'  then z1.factory_number_manual::bigint  end) as hvs_1_num,
-sum(Case when z1.attr1 = 'Стояк 1' and z1.type_meter='ХВС'  then z1.value else 0 end) as hvs_1,
-sum(Case when z1.attr1 = 'Стояк 1' and z1.type_meter='ГВС'  then z1.factory_number_manual::bigint  end) as gvs_1_num,
-sum(Case when z1.attr1 = 'Стояк 1' and z1.type_meter='ГВС'  then z1.value else 0 end) as gvs_1,
-sum(Case when z1.attr1 = 'Стояк 2' and z1.type_meter='ХВС'  then z1.factory_number_manual::bigint end) as hvs_2_num,
-sum(Case when z1.attr1 = 'Стояк 2' and z1.type_meter='ХВС'  then z1.value else 0  end) as hvs_2,
-sum(Case when z1.attr1 = 'Стояк 2' and z1.type_meter='ГВС'  then z1.factory_number_manual::bigint end) as gvs_2_num,
-sum(Case when z1.attr1 = 'Стояк 2' and z1.type_meter='ГВС'  then z1.value else 0  end) as gvs_2,
-sum(Case when z1.attr1 = 'Стояк 3' and z1.type_meter='ХВС'  then z1.factory_number_manual::bigint  end) as hvs_3_num,
-sum(Case when z1.attr1 = 'Стояк 3' and z1.type_meter='ХВС'  then z1.value else 0  end) as hvs_3,
-sum(Case when z1.attr1 = 'Стояк 3' and z1.type_meter='ГВС'  then z1.factory_number_manual::bigint  end) as gvs_3_num,
-sum(Case when z1.attr1 = 'Стояк 3' and z1.type_meter='ГВС'  then z1.value else 0  end) as gvs_3
+MAX(Case when z1.attr1 = 'Стояк 1' and z1.type_meter='ХВС'  then z1.factory_number_manual::bigint  end) as hvs_1_num,
+MAX(Case when z1.attr1 = 'Стояк 1' and z1.type_meter='ХВС'  then z1.value else 0 end) as hvs_1,
+MAX(Case when z1.attr1 = 'Стояк 1' and z1.type_meter='ГВС'  then z1.factory_number_manual::bigint  end) as gvs_1_num,
+MAX(Case when z1.attr1 = 'Стояк 1' and z1.type_meter='ГВС'  then z1.value else 0 end) as gvs_1,
+MAX(Case when z1.attr1 = 'Стояк 2' and z1.type_meter='ХВС'  then z1.factory_number_manual::bigint end) as hvs_2_num,
+MAX(Case when z1.attr1 = 'Стояк 2' and z1.type_meter='ХВС'  then z1.value else 0  end) as hvs_2,
+MAX(Case when z1.attr1 = 'Стояк 2' and z1.type_meter='ГВС'  then z1.factory_number_manual::bigint end) as gvs_2_num,
+MAX(Case when z1.attr1 = 'Стояк 2' and z1.type_meter='ГВС'  then z1.value else 0  end) as gvs_2,
+MAX(Case when z1.attr1 = 'Стояк 3' and z1.type_meter='ХВС'  then z1.factory_number_manual::bigint  end) as hvs_3_num,
+MAX(Case when z1.attr1 = 'Стояк 3' and z1.type_meter='ХВС'  then z1.value else 0  end) as hvs_3,
+MAX(Case when z1.attr1 = 'Стояк 3' and z1.type_meter='ГВС'  then z1.factory_number_manual::bigint  end) as gvs_3_num,
+MAX(Case when z1.attr1 = 'Стояк 3' and z1.type_meter='ГВС'  then z1.value else 0  end) as gvs_3
 from
 (
 Select '%s' as date_end, 
@@ -15325,18 +15355,18 @@ round((z2.gvs_1+z2.gvs_2+z2.gvs_3)::numeric,3) as sum_gvs
 FROM
 (Select z1.date_end, 
 z1.ab_name,
-sum(Case when z1.attr1 = 'Стояк 1' and z1.type_meter='ХВС'  then z1.factory_number_manual::bigint  end) as hvs_1_num,
-sum(Case when z1.attr1 = 'Стояк 1' and z1.type_meter='ХВС'  then z1.value else 0 end) as hvs_1,
-sum(Case when z1.attr1 = 'Стояк 1' and z1.type_meter='ГВС'  then z1.factory_number_manual::bigint  end) as gvs_1_num,
-sum(Case when z1.attr1 = 'Стояк 1' and z1.type_meter='ГВС'  then z1.value else 0 end) as gvs_1,
-sum(Case when z1.attr1 = 'Стояк 2' and z1.type_meter='ХВС'  then z1.factory_number_manual::bigint end) as hvs_2_num,
-sum(Case when z1.attr1 = 'Стояк 2' and z1.type_meter='ХВС'  then z1.value else 0  end) as hvs_2,
-sum(Case when z1.attr1 = 'Стояк 2' and z1.type_meter='ГВС'  then z1.factory_number_manual::bigint end) as gvs_2_num,
-sum(Case when z1.attr1 = 'Стояк 2' and z1.type_meter='ГВС'  then z1.value else 0  end) as gvs_2,
-sum(Case when z1.attr1 = 'Стояк 3' and z1.type_meter='ХВС'  then z1.factory_number_manual::bigint  end) as hvs_3_num,
-sum(Case when z1.attr1 = 'Стояк 3' and z1.type_meter='ХВС'  then z1.value else 0  end) as hvs_3,
-sum(Case when z1.attr1 = 'Стояк 3' and z1.type_meter='ГВС'  then z1.factory_number_manual::bigint  end) as gvs_3_num,
-sum(Case when z1.attr1 = 'Стояк 3' and z1.type_meter='ГВС'  then z1.value else 0  end) as gvs_3
+MAX(Case when z1.attr1 = 'Стояк 1' and z1.type_meter='ХВС'  then z1.factory_number_manual::bigint  end) as hvs_1_num,
+MAX(Case when z1.attr1 = 'Стояк 1' and z1.type_meter='ХВС'  then z1.value else 0 end) as hvs_1,
+MAX(Case when z1.attr1 = 'Стояк 1' and z1.type_meter='ГВС'  then z1.factory_number_manual::bigint  end) as gvs_1_num,
+MAX(Case when z1.attr1 = 'Стояк 1' and z1.type_meter='ГВС'  then z1.value else 0 end) as gvs_1,
+MAX(Case when z1.attr1 = 'Стояк 2' and z1.type_meter='ХВС'  then z1.factory_number_manual::bigint end) as hvs_2_num,
+MAX(Case when z1.attr1 = 'Стояк 2' and z1.type_meter='ХВС'  then z1.value else 0  end) as hvs_2,
+MAX(Case when z1.attr1 = 'Стояк 2' and z1.type_meter='ГВС'  then z1.factory_number_manual::bigint end) as gvs_2_num,
+MAX(Case when z1.attr1 = 'Стояк 2' and z1.type_meter='ГВС'  then z1.value else 0  end) as gvs_2,
+MAX(Case when z1.attr1 = 'Стояк 3' and z1.type_meter='ХВС'  then z1.factory_number_manual::bigint  end) as hvs_3_num,
+MAX(Case when z1.attr1 = 'Стояк 3' and z1.type_meter='ХВС'  then z1.value else 0  end) as hvs_3,
+MAX(Case when z1.attr1 = 'Стояк 3' and z1.type_meter='ГВС'  then z1.factory_number_manual::bigint  end) as gvs_3_num,
+MAX(Case when z1.attr1 = 'Стояк 3' and z1.type_meter='ГВС'  then z1.value else 0  end) as gvs_3
 from
 (
 Select '%s' as date_end, 
@@ -15711,14 +15741,14 @@ def MakeSqlQuery_water_from_heat_daily_row(obj_parent_title, obj_title, electric
           danfoss_water_from_heat.obj_name,
           danfoss_water_from_heat.ab_name,
           --danfoss_water_from_heat.factory_number_manual,	  
-		  sum(Case when danfoss_water_from_heat.res_name = 'ХВС' then danfoss_water_from_heat.num_meter::bigint  end) as hvs_1_num,
-          sum(Case when danfoss_water_from_heat.res_name = 'ХВС'  then round(z2.value::numeric,3)::double precision else 0 end) as hvs_1,
-          sum(Case when danfoss_water_from_heat.res_name = 'ГВС' then danfoss_water_from_heat.num_meter::bigint  end) as gvs_1_num,
-          sum(Case when danfoss_water_from_heat.res_name = 'ГВС'  then round(z2.value::numeric,3)::double precision else 0 end) as gvs_1,
+		  MAX(Case when danfoss_water_from_heat.res_name = 'ХВС' then danfoss_water_from_heat.num_meter::bigint  end) as hvs_1_num,
+          MAX(Case when danfoss_water_from_heat.res_name = 'ХВС'  then round(z2.value::numeric,3)::double precision else 0 end) as hvs_1,
+          MAX(Case when danfoss_water_from_heat.res_name = 'ГВС' then danfoss_water_from_heat.num_meter::bigint  end) as gvs_1_num,
+          MAX(Case when danfoss_water_from_heat.res_name = 'ГВС'  then round(z2.value::numeric,3)::double precision else 0 end) as gvs_1,
 		 '', '', '', '', 
      '', '', '', '',
-		  sum(Case when danfoss_water_from_heat.res_name = 'ХВС'  then round(z2.value::numeric,3)::double precision else 0 end) as hvs_sum,
-		  sum(Case when danfoss_water_from_heat.res_name = 'ГВС'  then round(z2.value::numeric,3)::double precision else 0 end) as gvs_sum
+		  MAX(Case when danfoss_water_from_heat.res_name = 'ХВС'  then round(z2.value::numeric,3)::double precision else 0 end) as hvs_sum,
+		  MAX(Case when danfoss_water_from_heat.res_name = 'ГВС'  then round(z2.value::numeric,3)::double precision else 0 end) as gvs_sum
           
 
 from danfoss_water_from_heat
@@ -16119,7 +16149,7 @@ def get_daily_consumption_by_30(obj_title, obj_parent_title,electric_data_start,
        factory_number_manual,
        ktt,
        c_date::date,
-	   round((sum(activ)*2*ktt)::numeric,3) as moshnost_day
+	   round((MAX(activ)*2*ktt)::numeric,3) as moshnost_day
 FROM
     (
    Select 
@@ -16257,7 +16287,7 @@ def get_data_table_consumption_30_sum_and_average(electric_data_start, electric_
 Select
 	'%s - %s',
 	%s obj_name,
-    round(sum(moshnost_kvt_ch)::numeric,3),
+    round(MAX(moshnost_kvt_ch)::numeric,3),
 	round(avg(moshnost_kvt_ch)::numeric,3),
 	round(max(moshnost_kvt_ch)::numeric,3),
 	round(min(moshnost_kvt_ch)::numeric,3)
@@ -16509,9 +16539,9 @@ def get_value_by_meter_by_date_electrika(meter, electric_data_end):
     data_table=[]
     sQuery = """
     SELECT z1.daily_date, z1.number_manual,
-sum(Case when z1.params_name = 'T1 A+' then ceil(z1.value_daily::numeric)  end) as t1,
-sum(Case when z1.params_name = 'T2 A+' then ceil(z1.value_daily::numeric)  end) as t2,
-sum(Case when z1.params_name = 'T3 A+' then ceil(z1.value_daily::numeric)  end) as t3,
+MAX(Case when z1.params_name = 'T1 A+' then ceil(z1.value_daily::numeric)  end) as t1,
+MAX(Case when z1.params_name = 'T2 A+' then ceil(z1.value_daily::numeric)  end) as t2,
+MAX(Case when z1.params_name = 'T3 A+' then ceil(z1.value_daily::numeric)  end) as t3,
 z1.ktt,z1.ktn,z1.a
 
                         FROM
@@ -16560,8 +16590,8 @@ def get_value_by_meter_by_date_heat(meter, electric_data_end):
     data_table=[]
     sQuery = """
     SELECT z1.daily_date, z1.number_manual,
-round(sum(Case when z1.params_name = 'Энергия' then z1.value_daily  end)::numeric,4) as t1,
-round(sum(Case when z1.params_name = 'Объем' then z1.value_daily  end)::numeric,4) as t2
+round(MAX(Case when z1.params_name = 'Энергия' then z1.value_daily  end)::numeric,4) as t1,
+round(MAX(Case when z1.params_name = 'Объем' then z1.value_daily  end)::numeric,4) as t2
 
                         FROM
                         (SELECT daily_values.date as daily_date,                        
@@ -16629,8 +16659,8 @@ FROM
 (Select
 ab_name, 
 attr1, 
- SUM(CASE WHEN type_meter = 'ХВС' THEN delta ELSE null END) AS cold_water,
- SUM(CASE WHEN type_meter = 'ГВС' THEN delta ELSE null END) AS hot_water
+ MAX(CASE WHEN type_meter = 'ХВС' THEN delta ELSE null END) AS cold_water,
+ MAX(CASE WHEN type_meter = 'ГВС' THEN delta ELSE null END) AS hot_water
 FROM
 (
 Select z_start.ab_name, 

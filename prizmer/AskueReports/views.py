@@ -29,6 +29,7 @@ import time as pt
 import zipfile
 import random 
 from datetime import datetime, timedelta
+from openpyxl.utils import column_index_from_string
 
 import os
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
@@ -43,6 +44,12 @@ def get_val_by_round(val, ROUND_SIZE, separator):
     new_val = f"{val:.{ROUND_SIZE}f}" #<--- для питона старше 3.6
     new_val = str(new_val).replace('.',separator)
     return new_val
+
+def get_val_as_number(val, ROUND_SIZE):
+    """Возвращает отформатированное число (не строку)"""
+    # Округляем число, но сохраняем как float
+    rounded_val = round(val, ROUND_SIZE)
+    return rounded_val
 
 def zagotovka(request):
     response = io.StringIO()
@@ -72,17 +79,43 @@ def zagotovka(request):
 ali_grey   = NamedStyle(name = "ali_grey", fill=PatternFill(fill_type='solid', start_color='DCDCDC'), border=Border(left=Side(border_style='thin',color='FF000000'), bottom=Side(border_style='thin',color='FF000000'), right=Side(border_style='thin',color='FF000000'), top=Side(border_style='thin',color='FF000000')), alignment = Alignment(horizontal='center', vertical='center', wrap_text=True, shrink_to_fit=True))
 ali_white  = NamedStyle(name = "ali_white", border=Border(left=Side(border_style='thin',color='FF000000'), bottom=Side(border_style='thin',color='FF000000'), right=Side(border_style='thin',color='FF000000'), top=Side(border_style='thin',color='FF000000')), alignment = Alignment(horizontal='center', vertical='center', wrap_text=True, shrink_to_fit=True))
 ali_white_bold  = NamedStyle(name = "ali_white_bold", border=Border(left=Side(border_style='thin',color='FF000000'), bottom=Side(border_style='thin',color='FF000000'), right=Side(border_style='thin',color='FF000000'), top=Side(border_style='thin',color='FF000000')), alignment = Alignment(horizontal='center', vertical='center', wrap_text=True, shrink_to_fit=True), font=Font(bold=True))
-ali_blue   = NamedStyle(name = "ali_blue", fill=PatternFill(fill_type='solid', start_color='DCECFF'), border=Border(left=Side(border_style='thin',color='FF000000'), bottom=Side(border_style='thin',color='FF000000'), right=Side(border_style='thin',color='FF000000'), top=Side(border_style='thin',color='FF000000')), alignment = Alignment(horizontal='center', vertical='center', wrap_text=True, shrink_to_fit=True))
-ali_pink   = NamedStyle(name = "ali_pink", fill=PatternFill(fill_type='solid', start_color='FFDCE5'), border=Border(left=Side(border_style='thin',color='FF000000'), bottom=Side(border_style='thin',color='FF000000'), right=Side(border_style='thin',color='FF000000'), top=Side(border_style='thin',color='FF000000')), alignment = Alignment(horizontal='center', vertical='center', wrap_text=True, shrink_to_fit=True))
+ali_blue   = NamedStyle(name = "ali_blue", fill=PatternFill(fill_type='solid', start_color='F0F8FF'), border=Border(left=Side(border_style='thin',color='FF000000'), bottom=Side(border_style='thin',color='FF000000'), right=Side(border_style='thin',color='FF000000'), top=Side(border_style='thin',color='FF000000')), alignment = Alignment(horizontal='center', vertical='center', wrap_text=True, shrink_to_fit=True))
+ali_pink   = NamedStyle(name = "ali_pink", fill=PatternFill(fill_type='solid', start_color='FFF0F5'), border=Border(left=Side(border_style='thin',color='FF000000'), bottom=Side(border_style='thin',color='FF000000'), right=Side(border_style='thin',color='FF000000'), top=Side(border_style='thin',color='FF000000')), alignment = Alignment(horizontal='center', vertical='center', wrap_text=True, shrink_to_fit=True))
 ali_green   = NamedStyle(name = "ali_green", fill=PatternFill(fill_type='solid', start_color='E6F4EA'), border=Border(left=Side(border_style='thin',color='FF000000'), bottom=Side(border_style='thin',color='FF000000'), right=Side(border_style='thin',color='FF000000'), top=Side(border_style='thin',color='FF000000')), alignment = Alignment(horizontal='center', vertical='center', wrap_text=True, shrink_to_fit=True))
-ali_green_header   = NamedStyle(name = "ali_green_header", fill=PatternFill(fill_type='solid', start_color='135c23'), font = Font(color='FFFFFF', bold=True), border=Border(left=Side(border_style='thin',color='FF000000'), bottom=Side(border_style='thin',color='FF000000'), right=Side(border_style='thin',color='FF000000'), top=Side(border_style='thin',color='FF000000')), alignment = Alignment(horizontal='center', vertical='center', wrap_text=True, shrink_to_fit=True))
+# Желтый заголовок с границами
+ali_yellow_header = NamedStyle(
+    name="ali_yellow_header",
+    font=Font(color="000000", bold=True),  # черный текст, жирный
+    fill=PatternFill(start_color="FFF176", end_color="FFF176", fill_type="solid"),  # желтый фон
+    alignment=Alignment(horizontal="center", vertical="center", wrap_text=True),
+    border=Border(
+        left=Side(style='thin', color='000000'),
+        right=Side(style='thin', color='000000'),
+        top=Side(style='thin', color='000000'),
+        bottom=Side(style='thin', color='000000')
+    )
+)
+
+# Зеленый заголовок тоже с границами
+ali_green_header = NamedStyle(
+    name="ali_green_header",
+    font=Font(color="FFFFFF", bold=True),  # белый текст, жирный
+    fill=PatternFill(start_color="2E7D32", end_color="2E7D32", fill_type="solid"),  # зеленый фон
+    alignment=Alignment(horizontal="center", vertical="center", wrap_text=True),
+    border=Border(
+        left=Side(style='thin', color='000000'),
+        right=Side(style='thin', color='000000'),
+        top=Side(style='thin', color='000000'),
+        bottom=Side(style='thin', color='000000')
+    )
+)
 ali_red    = NamedStyle(name = "ali_red", fill=PatternFill(fill_type='solid', start_color='FF3333'), border=Border(left=Side(border_style='thin',color='FF000000'), bottom=Side(border_style='thin',color='FF000000'), right=Side(border_style='thin',color='FF000000'), top=Side(border_style='thin',color='FF000000')), alignment = Alignment(horizontal='center', vertical='center', wrap_text=True, shrink_to_fit=True))
 
 ali_green_title  = NamedStyle(name = "ali_green_title", font = Font(color='122b12', bold=True, size=16), alignment = Alignment(horizontal='left', vertical='center', wrap_text=False, shrink_to_fit=False))
 
 ali_light_yellow = NamedStyle(name = "ali_light_yellow", fill=PatternFill(fill_type='solid', start_color='FFFFC5'), border=Border(left=Side(border_style='thin',color='FF000000'), bottom=Side(border_style='thin',color='FF000000'), right=Side(border_style='thin',color='FF000000'), top=Side(border_style='thin',color='FF000000')), alignment = Alignment(horizontal='center', vertical='center', wrap_text=True, shrink_to_fit=True))
 
-ali_yellow = NamedStyle(name = "ali_yellow", fill=PatternFill(fill_type='solid', start_color='EEEE00'), border=Border(left=Side(border_style='thin',color='FF000000'), bottom=Side(border_style='thin',color='FF000000'), right=Side(border_style='thin',color='FF000000'), top=Side(border_style='thin',color='FF000000')), alignment = Alignment(horizontal='center', vertical='center', wrap_text=True, shrink_to_fit=True))
+ali_yellow = NamedStyle(name = "ali_yellow", fill=PatternFill(fill_type='solid', start_color='FFF176'), border=Border(left=Side(border_style='thin',color='FF000000'), bottom=Side(border_style='thin',color='FF000000'), right=Side(border_style='thin',color='FF000000'), top=Side(border_style='thin',color='FF000000')), alignment = Alignment(horizontal='center', vertical='center', wrap_text=True, shrink_to_fit=True))
 ali_white_size_18  = NamedStyle(name = "ali_white_size_18", font=Font(size=18))
 # Конец описания стилей
 
@@ -4888,6 +4921,84 @@ def report_water_potreblenie_pulsar(request):
     response['Content-Disposition'] = 'attachment;filename="%s.%s"' % (output_name.replace('"', '\"'), file_ext)   
     return response
 
+def report_water_potreblenie_pulsar_v2(request):
+    # Берем настройки из settings
+    SHOW_LIC_NUM = getattr(settings, 'SHOW_LIC_NUM', 'False')
+    ROUND_SIZE = getattr(settings, 'ROUND_SIZE', 3)
+    NUM_IS_STRING = getattr(settings, 'NUM_IS_STRING', 'False')
+    
+    meters_name = request.GET.get('obj_title')
+    electric_data_end = request.GET.get('electric_data_end')
+    electric_data_start = request.GET.get('electric_data_start')
+    parent_name = request.GET.get('obj_parent_title')
+    obj_key = request.GET.get('obj_key')
+    
+    # Запрашиваем данные для отчета
+    is_abonent_level = re.compile(r'level2')
+    is_object_level_2 = re.compile(r'level1')
+    data_table = []
+    
+    if bool(is_abonent_level.search(obj_key)): 
+        data_table = common_sql.get_data_table_water_period_pulsar(meters_name, parent_name, electric_data_start, electric_data_end, True)
+    elif bool(is_object_level_2.search(obj_key)):
+        data_table = common_sql.get_data_table_water_period_pulsar(meters_name, parent_name, electric_data_start, electric_data_end, False)
+
+    # Заменяем None на N/D везде
+    if len(data_table) > 0: 
+        data_table = common_sql.ChangeNull(data_table, None)
+    
+    # Базовые заголовки (без лицевого номера)
+    headers = [
+        # (merge_range, cell_ref, value, style, width)
+        ('A2:F2', 'A2', f'{meters_name}. Потребление по импульсным водосчётчикам в период с {electric_data_start} по {electric_data_end}', ali_green_title, None),
+        ('A5:A5', 'A5', 'Абонент', ali_green_header, 25),
+        ('B5:B5', 'B5', 'Счётчик', ali_green_header, 17),
+        ('C5:C5', 'C5', 'Тип ресурса', ali_green_header, None),
+        ('D5:D5', 'D5', f'Показания на {electric_data_start}, м3', ali_green_header, 18),
+        ('E5:E5', 'E5', f'Показания на {electric_data_end}, м3', ali_green_header, 18),
+        ('F5:F5', 'F5', 'Потребление, м3', ali_green_header, 18),
+    ]
+    
+    # Базовые колонки данных (без лицевого номера)
+    columns_config = [
+        ('A', 0, None, False, None),  # Абонент
+        ('B', 3, None, False, None),  # Счётчик (заводской номер)
+        ('C', 4, None, False, None),  # Тип ресурса
+        ('D', 5, None, True, None),   # Показания на начало (числовое)
+        ('E', 6, None, True, None),   # Показания на конец (числовое)
+        ('F', 7, None, True, None),   # Потребление (числовое)
+    ]
+    
+    # Добавляем лицевой номер если включена настройка
+    if SHOW_LIC_NUM:
+        # Добавляем заголовок для лицевого номера
+        headers.append(('G5:G5', 'G5', 'Лицевой номер', ali_green_header, 25))
+        
+        # Добавляем колонку данных для лицевого номера
+        columns_config.append(('G', 1, None, False, None))  # Лицевой номер
+        
+        # Расширяем основной заголовок
+        headers[0] = ('A2:G2', 'A2', f'{meters_name}. Потребление по импульсным водосчётчикам в период с {electric_data_start} по {electric_data_end}', ali_green_title, None)
+    
+    # Создаем Excel через упрощенную гибридную функцию
+    wb = export_to_excel_hybrid_simple(
+        data_table=data_table,
+        headers=headers,
+        columns_config=columns_config,
+        sheet_title="Потребление воды",
+        round_size=ROUND_SIZE,
+        num_is_string=NUM_IS_STRING,
+        freeze_panes='A6'  # Фиксируем с A6 (первая строка данных)
+    )
+
+    # Сохраняем в excel  
+    response = HttpResponse(save_virtual_workbook(wb), content_type="application/vnd.ms-excel")
+    output_name = 'potreblenie_water_report_' + translate(meters_name) + '_' + electric_data_start + '-' + electric_data_end
+    response['Content-Disposition'] = f'attachment;filename="{output_name.replace(chr(34), chr(92)+chr(34))}.xlsx"'
+    
+    return response
+
+
 def pokazaniya_water_current_report(request):
     response = io.StringIO()
     wb = Workbook()
@@ -8197,6 +8308,151 @@ def report_pulsar_water_period(request):
     response['Content-Disposition'] = 'attachment;filename="%s.%s"' % (output_name.replace('"', '\"'), file_ext)   
     return response
 
+
+def report_pulsar_water_period_v2(request):
+    # Берем настройки из settings
+    SHOW_LIC_NUM = getattr(settings, 'SHOW_LIC_NUM', 'False')
+    COMMENT_TO_EXCEL = getattr(settings, 'COMMENT_TO_EXCEL', 'False')
+    ROUND_SIZE = getattr(settings, 'ROUND_SIZE', 3)
+    NUM_IS_STRING = getattr(settings, 'NUM_IS_STRING', 'False')
+    
+    # Получаем параметры из session
+    obj_parent_title = request.session.get('obj_parent_title')
+    obj_title = request.session.get('obj_title')
+    electric_data_end = request.session.get('electric_data_end')
+    electric_data_start = request.session.get('electric_data_start')
+    obj_key = request.session.get('obj_key')
+    
+    # Запрашиваем данные для отчета
+    is_abonent_level = re.compile(r'abonent')
+    is_object_level_2 = re.compile(r'level2')
+    data_table = []
+    
+    sortDir = "ASC"              
+    if bool(is_abonent_level.search(obj_key)):
+        data_table = common_sql.get_data_table_pulsar_water_for_period(obj_parent_title, obj_title, electric_data_start, electric_data_end, True, sortDir)
+    elif bool(is_object_level_2.search(obj_key)):
+        data_table = common_sql.get_data_table_pulsar_water_for_period(obj_parent_title, obj_title, electric_data_start, electric_data_end, False, sortDir)
+    
+    # Заменяем None на N/D везде с помощью безопасной функции
+    if len(data_table) > 0:
+        data_table = common_sql.safe_change_null(data_table, default_value='Н/Д')
+    
+    # Базовые заголовки (A-G) - как в оригинале
+    headers = [
+        # (merge_range, cell_ref, value, style, width)
+        ('A2:G2', 'A2', f'Пульсар. Потребление воды на {electric_data_end}', ali_green_title, None),
+        ('A5:A5', 'A5', 'Абонент', ali_green_header, 17),
+        ('B5:B5', 'B5', 'Тип счётчика', ali_green_header, None),
+        ('C5:C5', 'C5', 'Стояк', ali_green_header, None),
+        ('D5:D5', 'D5', 'Счётчик', ali_green_header, 17),
+        ('E5:E5', 'E5', f'Показания на {electric_data_start}, м3', ali_green_header, 17),
+        ('F5:F5', 'F5', f'Показания на {electric_data_end}, м3', ali_green_header, 17),
+        ('G5:G5', 'G5', 'Разница, м3', ali_green_header, 20),
+    ]
+    
+    # Базовые колонки данных (A-G)
+    # Индексы из SQL запроса:
+    # 0 - Абонент, 1 - Тип счетчика, 2 - Стояк, 3 - Счетчик, 
+    # 4 - Показания начало, 5 - Показания конец, 6 - Разница
+    columns_config = [
+        ('A', 0, None, False, None),  # Абонент (индекс 0)
+        ('B', 1, None, False, None),  # Тип счётчика (индекс 1)
+        ('C', 2, None, False, None),  # Стояк (индекс 2)
+        ('D', 3, None, False, None),  # Счётчик (индекс 3)
+        ('E', 4, None, True, None),   # Показания начало (индекс 4) - числовое
+        ('F', 5, None, True, None),   # Показания конец (индекс 5) - числовое
+        ('G', 6, None, True, None),   # Разница (индекс 6) - числовое
+    ]
+    
+    # Текущая последняя колонка
+    last_col = 'G'
+    
+    # В оригинале не было лицевого номера и комментария, но добавим если нужно
+    # (если в данных есть эти колонки)
+    if data_table and len(data_table) > 0:
+        sample_row = data_table[0]
+        row_length = len(sample_row)
+        
+        # Лицевой номер - если есть данные и включена настройка
+        if SHOW_LIC_NUM and row_length > 7:
+            current_col = 'H'
+            headers.append((f'{current_col}5:{current_col}5', f'{current_col}5', 'Лицевой номер', ali_green_header, None))
+            columns_config.append((current_col, 7, None, False, None))  # Предположим индекс 7
+            last_col = current_col
+        
+        # Комментарий - если есть данные и включена настройка
+        if COMMENT_TO_EXCEL and row_length > 8:
+            comment_col = 'H' if not (SHOW_LIC_NUM and row_length > 7) else 'I'
+            headers.append((f'{comment_col}5:{comment_col}5', f'{comment_col}5', 'Комментарий к абоненту', ali_green_header, None))
+            
+            # Для комментария: если значение "Н/Д" - меняем на пустую строку
+            # Предобработка данных
+            processed_data = []
+            for row in data_table:
+                if isinstance(row, (list, tuple)) and len(row) > 8:
+                    row_list = list(row)
+                    # Комментарий на индексе 8
+                    if str(row_list[8]).strip() == 'Н/Д':
+                        row_list[8] = ''
+                    processed_data.append(tuple(row_list))
+                else:
+                    processed_data.append(row)
+            data_table = processed_data
+            
+            columns_config.append((comment_col, 8, None, False, None))  # Комментарий (индекс 8)
+            last_col = comment_col
+    
+    # Обновляем основной заголовок для охвата всех колонок
+    headers[0] = (f'A2:{last_col}2', 'A2', f'Пульсар. Потребление воды на {electric_data_end}', ali_green_title, None)
+    
+    # Создаем Excel через упрощенную гибридную функцию
+    wb = export_to_excel_hybrid_simple(
+        data_table=data_table,
+        headers=headers,
+        columns_config=columns_config,
+        sheet_title="Потребление воды за период",
+        round_size=ROUND_SIZE,
+        num_is_string=NUM_IS_STRING,
+        freeze_panes='A6'  # Фиксируем с A6 (первая строка данных)
+    )
+
+    # Настраиваем высоту строк для заголовков
+    ws = wb.active
+    
+    # Увеличиваем высоту строк заголовков
+    ws.row_dimensions[2].height = 35  # Основной заголовок
+    ws.row_dimensions[5].height = 63  # Заголовки колонок
+    
+    # Настраиваем ширину колонок (как в оригинале)
+    ws.column_dimensions['A'].width = 17  # Абонент
+    
+    # Включаем перенос текста и настраиваем выравнивание
+    for row in [2, 5]:
+        for cell in ws[row]:
+            if row == 2:
+                # Для основного заголовка - выравнивание по левому краю
+                cell.alignment = cell.alignment.copy(
+                    wrap_text=True, 
+                    vertical='center', 
+                    horizontal='left'
+                )
+            else:
+                # Для заголовков колонок - по центру
+                cell.alignment = cell.alignment.copy(
+                    wrap_text=True, 
+                    vertical='center', 
+                    horizontal='center'
+                )
+         
+    # Сохраняем в excel  
+    response = HttpResponse(save_virtual_workbook(wb), content_type="application/vnd.ms-excel")
+    output_name = 'pulsar_water_period_report_' + translate(obj_parent_title) + '_' + translate(obj_title) + '_' + electric_data_start + '-' + electric_data_end
+    response['Content-Disposition'] = f'attachment;filename="{output_name.replace(chr(34), chr(92)+chr(34))}.xlsx"'
+    
+    return response
+
+
 def report_pulsar_water_daily(request):
     COMMENT_TO_EXCEL = getattr(settings, 'COMMENT_TO_EXCEL', 'False')
 
@@ -8661,6 +8917,267 @@ def report_pulsar_water_daily_row(request):
     response['Content-Disposition'] = 'attachment;filename="%s.%s"' % (output_name.replace('"', '\"'), file_ext)   
     return response
     
+def report_pulsar_water_daily_row_v2(request):
+    # Берем настройки из settings
+    SHOW_LIC_NUM = getattr(settings, 'SHOW_LIC_NUM', 'False')
+    ROUND_SIZE = getattr(settings, 'ROUND_SIZE', 3)
+    NUM_IS_STRING = getattr(settings, 'NUM_IS_STRING', 'False')
+    
+    # Получаем параметры из session
+    obj_parent_title = request.session.get('obj_parent_title')
+    obj_title = request.session.get('obj_title')
+    electric_data_end = request.session.get('electric_data_end')
+    obj_key = request.session.get('obj_key')
+    
+    # Проверяем обязательные параметры
+    if not all([obj_parent_title, obj_title, electric_data_end, obj_key]):
+        return HttpResponse("Missing required parameters", status=400)
+    
+    # Запрашиваем данные для отчета
+    is_abonent_level = re.compile(r'abonent')
+    is_object_level_2 = re.compile(r'level2')
+    data_table = []
+    
+    try:
+        if bool(is_abonent_level.search(obj_key)):
+            data_table = common_sql.get_data_table_pulsar_water_daily_row(obj_parent_title, obj_title, electric_data_end, True)
+        elif bool(is_object_level_2.search(obj_key)):
+            data_table = common_sql.get_data_table_pulsar_water_daily_row(obj_parent_title, obj_title, electric_data_end, False)
+        else:
+            # Если не подошел ни один уровень - возвращаем ошибку
+            return HttpResponse("Invalid object level", status=400)
+    except Exception as e:
+        return HttpResponse(f"Error getting data: {str(e)}", status=500)
+    
+    # Заменяем None на N/D везде с помощью специальной функции для пульсара
+    if len(data_table) > 0 and hasattr(common_sql, 'ChangeNull_for_pulsar'):
+        try:
+            data_table = common_sql.ChangeNull_for_pulsar(data_table)
+        except Exception as e:
+            # Если функция не работает, продолжаем без обработки
+            print(f"Warning: ChangeNull_for_pulsar failed: {e}")
+    
+    # Просто создаем Workbook вручную как в оригинале, но с зелеными заголовками
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Потребление воды по стоякам"
+    
+    # Добавляем стили
+    wb.add_named_style(ali_grey)
+    wb.add_named_style(ali_white)
+    wb.add_named_style(ali_yellow)
+    wb.add_named_style(ali_pink)
+    wb.add_named_style(ali_blue)
+    wb.add_named_style(ali_green)
+    wb.add_named_style(ali_yellow_header)
+    wb.add_named_style(ali_green_header)
+    wb.add_named_style(ali_green_title)
+    
+    # ШАПКА как в оригинале, но с зелеными стилями
+    ws.merge_cells('A2:O3')  # Основной заголовок
+    ws['A2'] = f'Пульсар. Потребление воды на {electric_data_end}'
+    ws['A2'].style = ali_green_title
+    
+    # Основные заголовки с мерджем (как в оригинале, но строка 5)
+    ws.merge_cells('A5:A6')
+    ws['A5'] = 'Абонент'
+    ws['A5'].style = ali_green_header
+    
+    ws.merge_cells('B5:E5')
+    ws['B5'] = 'Стояк 1'
+    ws['B5'].style = ali_green_header
+    
+    ws.merge_cells('F5:I5')
+    ws['F5'] = 'Стояк 2'
+    ws['F5'].style = ali_green_header
+    
+    ws.merge_cells('J5:M5')
+    ws['J5'] = 'Стояк 3'
+    ws['J5'].style = ali_green_header
+    
+    ws.merge_cells('N5:N6')
+    ws['N5'] = 'Сумма ХВС, м3'
+    ws['N5'].style = ali_green_header
+    
+    ws.merge_cells('O5:O6')
+    ws['O5'] = 'Сумма ГВС, м3'
+    ws['O5'].style = ali_green_header
+    
+    # Подзаголовки (строка 6)
+    ws['B6'] = 'Счётчик ХВС'
+    ws['B6'].style = ali_green_header
+    ws['C6'] = 'Значение ХВС, м3'
+    ws['C6'].style = ali_green_header
+    ws['D6'] = 'Счётчик ГВС'
+    ws['D6'].style = ali_green_header
+    ws['E6'] = 'Значение ГВС, м3'
+    ws['E6'].style = ali_green_header
+    
+    ws['F6'] = 'Счётчик ХВС'
+    ws['F6'].style = ali_green_header
+    ws['G6'] = 'Значение ХВС, м3'
+    ws['G6'].style = ali_green_header
+    ws['H6'] = 'Счётчик ГВС'
+    ws['H6'].style = ali_green_header
+    ws['I6'] = 'Значение ГВС, м3'
+    ws['I6'].style = ali_green_header
+    
+    ws['J6'] = 'Счётчик ХВС'
+    ws['J6'].style = ali_green_header
+    ws['K6'] = 'Значение ХВС, м3'
+    ws['K6'].style = ali_green_header
+    ws['L6'] = 'Счётчик ГВС'
+    ws['L6'].style = ali_green_header
+    ws['M6'] = 'Значение ГВС, м3'
+    ws['M6'].style = ali_green_header
+    
+    # Настраиваем ширину
+    ws.column_dimensions['A'].width = 17
+    
+    # Заполняем данные (начинаем с строки 7)
+    for row_idx, data_row in enumerate(data_table, start=7):
+        # Определяем стиль строки (чередование для колонки А)
+        is_even = (row_idx - 7) % 2 == 0
+        
+        # Абонент (колонка А) - чередование
+        if 1 < len(data_row):
+            ws.cell(row=row_idx, column=1).value = str(data_row[1])
+            ws.cell(row=row_idx, column=1).style = ali_green if is_even else ali_white
+        
+        # Стояк 1
+        if 2 < len(data_row):
+            ws.cell(row=row_idx, column=2).value = str(data_row[2])  # Счётчик ХВС 1
+            ws.cell(row=row_idx, column=2).style = ali_blue
+        
+        if 3 < len(data_row):
+            try:
+                val = float(str(data_row[3]).replace(',', '.'))
+                if NUM_IS_STRING:
+                    ws.cell(row=row_idx, column=3).value = f"{val:.{ROUND_SIZE}f}".replace('.', ',')
+                else:
+                    ws.cell(row=row_idx, column=3).value = val
+                    ws.cell(row=row_idx, column=3).number_format = f'0.{"0" * ROUND_SIZE}'
+            except:
+                ws.cell(row=row_idx, column=3).value = str(data_row[3])
+            ws.cell(row=row_idx, column=3).style = ali_blue
+        
+        if 4 < len(data_row):
+            ws.cell(row=row_idx, column=4).value = str(data_row[4])  # Счётчик ГВС 1
+            ws.cell(row=row_idx, column=4).style = ali_pink
+        
+        if 5 < len(data_row):
+            try:
+                val = float(str(data_row[5]).replace(',', '.'))
+                if NUM_IS_STRING:
+                    ws.cell(row=row_idx, column=5).value = f"{val:.{ROUND_SIZE}f}".replace('.', ',')
+                else:
+                    ws.cell(row=row_idx, column=5).value = val
+                    ws.cell(row=row_idx, column=5).number_format = f'0.{"0" * ROUND_SIZE}'
+            except:
+                ws.cell(row=row_idx, column=5).value = str(data_row[5])
+            ws.cell(row=row_idx, column=5).style = ali_pink
+        
+        # Стояк 2
+        if 6 < len(data_row):
+            ws.cell(row=row_idx, column=6).value = str(data_row[6])  # Счётчик ХВС 2
+            ws.cell(row=row_idx, column=6).style = ali_blue
+        
+        if 7 < len(data_row):
+            try:
+                val = float(str(data_row[7]).replace(',', '.'))
+                if NUM_IS_STRING:
+                    ws.cell(row=row_idx, column=7).value = f"{val:.{ROUND_SIZE}f}".replace('.', ',')
+                else:
+                    ws.cell(row=row_idx, column=7).value = val
+                    ws.cell(row=row_idx, column=7).number_format = f'0.{"0" * ROUND_SIZE}'
+            except:
+                ws.cell(row=row_idx, column=7).value = str(data_row[7])
+            ws.cell(row=row_idx, column=7).style = ali_blue
+        
+        if 8 < len(data_row):
+            ws.cell(row=row_idx, column=8).value = str(data_row[8])  # Счётчик ГВС 2
+            ws.cell(row=row_idx, column=8).style = ali_pink
+        
+        if 9 < len(data_row):
+            try:
+                val = float(str(data_row[9]).replace(',', '.'))
+                if NUM_IS_STRING:
+                    ws.cell(row=row_idx, column=9).value = f"{val:.{ROUND_SIZE}f}".replace('.', ',')
+                else:
+                    ws.cell(row=row_idx, column=9).value = val
+                    ws.cell(row=row_idx, column=9).number_format = f'0.{"0" * ROUND_SIZE}'
+            except:
+                ws.cell(row=row_idx, column=9).value = str(data_row[9])
+            ws.cell(row=row_idx, column=9).style = ali_pink
+        
+        # Стояк 3
+        if 10 < len(data_row):
+            ws.cell(row=row_idx, column=10).value = str(data_row[10])  # Счётчик ХВС 3
+            ws.cell(row=row_idx, column=10).style = ali_blue
+        
+        if 11 < len(data_row):
+            try:
+                val = float(str(data_row[11]).replace(',', '.'))
+                if NUM_IS_STRING:
+                    ws.cell(row=row_idx, column=11).value = f"{val:.{ROUND_SIZE}f}".replace('.', ',')
+                else:
+                    ws.cell(row=row_idx, column=11).value = val
+                    ws.cell(row=row_idx, column=11).number_format = f'0.{"0" * ROUND_SIZE}'
+            except:
+                ws.cell(row=row_idx, column=11).value = str(data_row[11])
+            ws.cell(row=row_idx, column=11).style = ali_blue
+        
+        if 12 < len(data_row):
+            ws.cell(row=row_idx, column=12).value = str(data_row[12])  # Счётчик ГВС 3
+            ws.cell(row=row_idx, column=12).style = ali_pink
+        
+        if 13 < len(data_row):
+            try:
+                val = float(str(data_row[13]).replace(',', '.'))
+                if NUM_IS_STRING:
+                    ws.cell(row=row_idx, column=13).value = f"{val:.{ROUND_SIZE}f}".replace('.', ',')
+                else:
+                    ws.cell(row=row_idx, column=13).value = val
+                    ws.cell(row=row_idx, column=13).number_format = f'0.{"0" * ROUND_SIZE}'
+            except:
+                ws.cell(row=row_idx, column=13).value = str(data_row[13])
+            ws.cell(row=row_idx, column=13).style = ali_pink
+        
+        # Итоги
+        if 14 < len(data_row):
+            try:
+                val = float(str(data_row[14]).replace(',', '.'))
+                if NUM_IS_STRING:
+                    ws.cell(row=row_idx, column=14).value = f"{val:.{ROUND_SIZE}f}".replace('.', ',')
+                else:
+                    ws.cell(row=row_idx, column=14).value = val
+                    ws.cell(row=row_idx, column=14).number_format = f'0.{"0" * ROUND_SIZE}'
+            except:
+                ws.cell(row=row_idx, column=14).value = str(data_row[14])
+            ws.cell(row=row_idx, column=14).style = ali_blue
+        
+        if 15 < len(data_row):
+            try:
+                val = float(str(data_row[15]).replace(',', '.'))
+                if NUM_IS_STRING:
+                    ws.cell(row=row_idx, column=15).value = f"{val:.{ROUND_SIZE}f}".replace('.', ',')
+                else:
+                    ws.cell(row=row_idx, column=15).value = val
+                    ws.cell(row=row_idx, column=15).number_format = f'0.{"0" * ROUND_SIZE}'
+            except:
+                ws.cell(row=row_idx, column=15).value = str(data_row[15])
+            ws.cell(row=row_idx, column=15).style = ali_pink
+    
+    # Фиксируем шапку
+    ws.freeze_panes = 'A7'
+    
+    # Сохраняем в excel  
+    response = HttpResponse(save_virtual_workbook(wb), content_type="application/vnd.ms-excel")
+    output_name = 'report_water_pulsar_row_' + translate(obj_parent_title) + '_' + translate(obj_title) + '_' + str(electric_data_end)
+    response['Content-Disposition'] = f'attachment;filename="{output_name.replace(chr(34), chr(92)+chr(34))}.xlsx"'
+    
+    return response
+    
 def report_pulsar_heat_daily(request):
     COMMENT_TO_EXCEL = getattr(settings, 'COMMENT_TO_EXCEL', 'False')
     response = io.StringIO()
@@ -8793,7 +9310,131 @@ def report_pulsar_heat_daily(request):
     
     response['Content-Disposition'] = 'attachment;filename="%s.%s"' % (output_name.replace('"', '\"'), file_ext)   
     return response
+  
+  
+def report_pulsar_heat_daily_v2(request):
+    # Берем настройки из settings
+    SHOW_LIC_NUM = getattr(settings, 'SHOW_LIC_NUM', 'False')
+    COMMENT_TO_EXCEL = getattr(settings, 'COMMENT_TO_EXCEL', 'False')
+    ROUND_SIZE = getattr(settings, 'ROUND_SIZE', 3)
+    NUM_IS_STRING = getattr(settings, 'NUM_IS_STRING', 'False')
     
+    # Получаем параметры из session
+    obj_parent_title = request.session.get('obj_parent_title')
+    obj_title = request.session.get('obj_title')
+    electric_data_end = request.session.get('electric_data_end')
+    obj_key = request.session.get('obj_key')
+    is_electric_monthly = request.session.get('is_electric_monthly')
+    
+    # Определяем тип данных (ежедневные/ежемесячные)
+    dm = 'daily'
+    if is_electric_monthly == "1":
+        dm = 'monthly'
+    
+    # Запрашиваем данные для отчета
+    is_abonent_level = re.compile(r'abonent')
+    is_object_level_2 = re.compile(r'level2')
+    data_table = []
+    
+    if bool(is_abonent_level.search(obj_key)):
+        data_table = common_sql.get_data_table_by_date_daily_pulsar_teplo(obj_parent_title, obj_title, electric_data_end, True, dm)
+    elif bool(is_object_level_2.search(obj_key)):
+        data_table = common_sql.get_data_table_by_date_daily_pulsar_teplo(obj_parent_title, obj_title, electric_data_end, False, dm)
+    
+    # Заменяем None на N/D везде (если функция существует)
+    if len(data_table) > 0 and hasattr(common_sql, 'ChangeNull'):
+        data_table = common_sql.ChangeNull(data_table, None)
+    
+    # Базовые заголовки (A-F)
+    headers = [
+        # (merge_range, cell_ref, value, style, width)
+        ('A2:F2', 'A2', f'Пульсар. Показания по теплу на {electric_data_end}', ali_green_title, None),
+        ('A5:A5', 'A5', 'Абонент', ali_green_header, 20),
+        ('B5:B5', 'B5', 'Счётчик', ali_green_header, None),
+        ('C5:C5', 'C5', 'Энергия, Гкал', ali_green_header, 23),
+        ('D5:D5', 'D5', 'Объем, м3', ali_green_header, 17),
+        ('E5:E5', 'E5', 'Температура входа, С', ali_green_header, 17),
+        ('F5:F5', 'F5', 'Температура выхода, С', ali_green_header, 17),
+    ]
+    
+    # Базовые колонки данных (A-F)
+    # Индексы из SQL запроса:
+    # 1 - Абонент, 2 - Счётчик, 3 - Энергия, 4 - Объем, 5 - Температура входа, 6 - Температура выхода, 7 - Комментарий
+    columns_config = [
+        ('A', 1, None, False, None),  # Абонент
+        ('B', 2, None, False, None),  # Счётчик
+        ('C', 3, None, True, None),   # Энергия, Гкал (числовое)
+        ('D', 4, None, True, None),   # Объем, м3 (числовое)
+        ('E', 5, None, True, None),   # Температура входа, С (числовое)
+        ('F', 6, None, True, None),   # Температура выхода, С (числовое)
+    ]
+    
+    # Текущая последняя колонка
+    last_col = 'F'
+    
+    # Добавляем лицевой номер если включена настройка
+    if SHOW_LIC_NUM:
+        # Нужно узнать, есть ли данные для лицевого номера (индекс 0?)
+        # Предположим, что лицевой номер находится в data_table[row][0]
+        current_col = 'G'
+        headers.append((f'{current_col}5:{current_col}5', f'{current_col}5', 'Лицевой номер', ali_green_header, None))
+        columns_config.append((current_col, 0, None, False, None))  # Лицевой номер (предположительно индекс 0)
+        last_col = current_col
+    
+    # Добавляем комментарий если включена настройка
+    if COMMENT_TO_EXCEL:
+        # Определяем правильную колонку для комментария
+        comment_col = 'G' if not SHOW_LIC_NUM else 'H'
+        headers.append((f'{comment_col}5:{comment_col}5', f'{comment_col}5', 'Комментарий к абоненту', ali_green_header, 30))
+        columns_config.append((comment_col, 7, None, False, None))  # Комментарий (индекс 7)
+        last_col = comment_col
+    
+    # Обновляем основной заголовок для охвата всех колонок
+    headers[0] = (f'A2:{last_col}2', 'A2', f'Пульсар. Показания по теплу на {electric_data_end}', ali_green_title, None)
+    
+    # Создаем Excel через упрощенную гибридную функцию
+    wb = export_to_excel_hybrid_simple(
+        data_table=data_table,
+        headers=headers,
+        columns_config=columns_config,
+        sheet_title="Показания тепла",
+        round_size=ROUND_SIZE,
+        num_is_string=NUM_IS_STRING,
+        freeze_panes='A6'  # Фиксируем с A6 (первая строка данных)
+    )
+
+    # Настраиваем высоту строк для заголовков
+    ws = wb.active
+    
+    # Увеличиваем высоту строк заголовков для лучшего отображения длинного текста
+    ws.row_dimensions[2].height = 35  # Основной заголовок
+    ws.row_dimensions[5].height = 40  # Заголовки колонок
+    
+    # Включаем перенос текста и настраиваем выравнивание
+    for row in [2, 5]:
+        for cell in ws[row]:
+            if row == 2:
+                # Для основного заголовка - выравнивание по левому краю
+                cell.alignment = cell.alignment.copy(
+                    wrap_text=True, 
+                    vertical='center', 
+                    horizontal='left'  # ← ИЗМЕНЕНО: было 'center', стало 'left'
+                )
+            else:
+                # Для заголовков колонок - по центру
+                cell.alignment = cell.alignment.copy(
+                    wrap_text=True, 
+                    vertical='center', 
+                    horizontal='center'
+                )
+    
+    # Сохраняем в excel  
+    response = HttpResponse(save_virtual_workbook(wb), content_type="application/vnd.ms-excel")
+    output_name = 'pulsar_heat_report_' + translate(obj_parent_title) + '_' + translate(obj_title) + '_' + electric_data_end
+    response['Content-Disposition'] = f'attachment;filename="{output_name.replace(chr(34), chr(92)+chr(34))}.xlsx"'
+    
+    return response
+  
 def report_pulsar_heat_period(request):
     #SHOW_LIC_NUM = getattr(settings, 'SHOW_LIC_NUM', 'False')
     ROUND_SIZE = getattr(settings, 'ROUND_SIZE', 3)
@@ -8933,6 +9574,112 @@ def report_pulsar_heat_period(request):
     response['Content-Disposition'] = 'attachment;filename="%s.%s"' % (output_name.replace('"', '\"'), file_ext)   
     return response
     
+def report_pulsar_heat_period_v2(request):
+    # Берем настройки из settings
+    ROUND_SIZE = getattr(settings, 'ROUND_SIZE', 3)
+    NUM_IS_STRING = getattr(settings, 'NUM_IS_STRING', 'False')
+    
+    # Получаем параметры из session
+    obj_parent_title = request.session.get('obj_parent_title')
+    obj_title = request.session.get('obj_title')
+    electric_data_end = request.session.get('electric_data_end')
+    electric_data_start = request.session.get('electric_data_start')
+    obj_key = request.session.get('obj_key')
+    is_electric_monthly = request.session.get('is_electric_monthly')
+    
+    # Определяем тип данных (ежедневные/ежемесячные)
+    dm = 'daily'
+    if is_electric_monthly == "1":
+        dm = 'monthly'
+    
+    # Запрашиваем данные для отчета
+    is_abonent_level = re.compile(r'abonent')
+    is_object_level_2 = re.compile(r'level2')
+    data_table = []
+    
+    if bool(is_abonent_level.search(obj_key)):
+        data_table = common_sql.get_data_table_pulsar_teplo_for_period(obj_parent_title, obj_title, electric_data_end, electric_data_start, True, dm)
+    elif bool(is_object_level_2.search(obj_key)):
+        data_table = common_sql.get_data_table_pulsar_teplo_for_period(obj_parent_title, obj_title, electric_data_end, electric_data_start, False, dm)
+    
+    # Заменяем None на N/D везде (если функция существует)
+    if len(data_table) > 0 and hasattr(common_sql, 'ChangeNull'):
+        data_table = common_sql.ChangeNull(data_table, None)
+    
+    # Конфигурация заголовков (ТОЧНО как в оригинале - A-H)
+    headers = [
+        # (merge_range, cell_ref, value, style, width)
+        ('A2:H2', 'A2', f'Пульсар. Потребление тепла с {electric_data_start} по {electric_data_end}', ali_green_title, None),
+        ('A5:A5', 'A5', 'Абонент', ali_green_header, 25),
+        ('B5:B5', 'B5', 'Счётчик', ali_green_header, 17),
+        ('C5:C5', 'C5', f'Показания Энергии на {electric_data_start}, Гкал', ali_green_header, 17),
+        ('D5:D5', 'D5', f'Показания Энергии на {electric_data_end}, Гкал', ali_green_header, 17),
+        ('E5:E5', 'E5', 'Потребление Энергии, Гкал', ali_green_header, 20),
+        ('F5:F5', 'F5', f'Показания Объёма на {electric_data_start}, м3', ali_green_header, 17),
+        ('G5:G5', 'G5', f'Показания Объёма на {electric_data_end}, м3', ali_green_header, 17),
+        ('H5:H5', 'H5', 'Потребление Объёма, м3', ali_green_header, 20),
+    ]
+    
+    # Конфигурация колонок данных
+    columns_config = [
+        ('A', 0, None, False, None),  # Абонент (индекс 0)
+        ('B', 1, None, False, None),  # Счётчик (индекс 1)
+        ('C', 2, None, True, None),   # Энергия на начало (индекс 2)
+        ('D', 3, None, True, None),   # Энергия на конец (индекс 3)
+        ('E', 4, None, True, None),   # Потребление энергии (индекс 4)
+        ('F', 5, None, True, None),   # Объем на начало (индекс 5)
+        ('G', 6, None, True, None),   # Объем на конец (индекс 6)
+        ('H', 7, None, True, None),   # Потребление объема (индекс 7)
+    ]
+    
+    # Создаем Excel через упрощенную гибридную функцию
+    wb = export_to_excel_hybrid_simple(
+        data_table=data_table,
+        headers=headers,
+        columns_config=columns_config,
+        sheet_title="Потребление тепла за период",
+        round_size=ROUND_SIZE,
+        num_is_string=NUM_IS_STRING,
+        freeze_panes='A6'  # Фиксируем с A6 (первая строка данных)
+    )
+
+    # Настраиваем высоту строк для заголовков
+    ws = wb.active
+    
+    # Увеличиваем высоту строк заголовков для лучшего отображения длинного текста
+    ws.row_dimensions[2].height = 35  # Основной заголовок
+    ws.row_dimensions[5].height = 60  # Заголовки колонок (увеличено с 54)
+    
+    # Настраиваем ширину колонок (как в оригинале)
+    ws.column_dimensions['A'].width = 17  # Абонент
+    ws.column_dimensions['H'].width = 15  # Потребление объема
+    
+    # Включаем перенос текста и настраиваем выравнивание
+    for row in [2, 5]:
+        for cell in ws[row]:
+            if row == 2:
+                # Для основного заголовка - выравнивание по левому краю
+                cell.alignment = cell.alignment.copy(
+                    wrap_text=True, 
+                    vertical='center', 
+                    horizontal='left'
+                )
+            else:
+                # Для заголовков колонок - по центру
+                cell.alignment = cell.alignment.copy(
+                    wrap_text=True, 
+                    vertical='center', 
+                    horizontal='center'
+                )
+    
+    # Сохраняем в excel  
+    response = HttpResponse(save_virtual_workbook(wb), content_type="application/vnd.ms-excel")
+    output_name = 'report_heat_pulsar_period_' + translate(obj_parent_title) + '_' + translate(obj_title) + '_' + str(electric_data_start) + '-' + str(electric_data_end)
+    response['Content-Disposition'] = f'attachment;filename="{output_name.replace(chr(34), chr(92)+chr(34))}.xlsx"'
+    
+    return response
+
+
 def report_pulsar_heat_period_2(request):
     response = io.StringIO()
     wb = Workbook()
@@ -9916,6 +10663,327 @@ def report_water_pulsar_potreblenie_skladochnaya(request):
     return response
     
     
+def report_water_pulsar_potreblenie_v2(request):
+    # Берем настройки из settings
+    SHOW_LIC_NUM = getattr(settings, 'SHOW_LIC_NUM', 'False')
+    COMMENT_TO_EXCEL = getattr(settings, 'COMMENT_TO_EXCEL', 'False')
+    ROUND_SIZE = getattr(settings, 'ROUND_SIZE', 3)
+    NUM_IS_STRING = getattr(settings, 'NUM_IS_STRING', 'False')
+    
+    # Получаем параметры из request.GET
+    obj_parent_title = request.GET.get('obj_parent_title')
+    obj_title = request.GET.get('obj_title')
+    electric_data_end = request.GET.get("electric_data_end")
+    electric_data_start = request.GET.get("electric_data_start")
+    obj_key = request.GET.get('obj_key')
+    
+    # Проверяем обязательные параметры
+    if not all([obj_parent_title, obj_title, electric_data_end, electric_data_start, obj_key]):
+        return HttpResponse("Missing required parameters", status=400)
+    
+    # Запрашиваем данные для отчета
+    is_abonent_level = re.compile(r'abonent')
+    is_object_level_2 = re.compile(r'level2')
+    data_table = []
+    
+    try:
+        if bool(is_abonent_level.search(obj_key)):
+            data_table = common_sql.get_data_table_pulsar_water_for_period_Skladochnaya(obj_parent_title, obj_title, electric_data_start, electric_data_end, True)
+        elif bool(is_object_level_2.search(obj_key)):
+            data_table = common_sql.get_data_table_pulsar_water_for_period_Skladochnaya(obj_parent_title, obj_title, electric_data_start, electric_data_end, False)
+        else:
+            return HttpResponse("Invalid object level", status=400)
+    except Exception as e:
+        return HttpResponse(f"Error getting data: {str(e)}", status=500)
+    
+    # Заменяем None на N/D везде
+    if len(data_table) > 0 and hasattr(common_sql, 'ChangeNull'):
+        try:
+            data_table = common_sql.ChangeNull(data_table, None)
+        except Exception as e:
+            print(f"Warning: ChangeNull failed: {e}")
+    
+    # Вместо использования сложной функции, создадим Workbook вручную
+    # чтобы избежать проблем с объединенными ячейками
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Потребление воды (складочная)"
+    
+    # Добавляем стили
+    wb.add_named_style(ali_grey)
+    wb.add_named_style(ali_white)
+    wb.add_named_style(ali_yellow)
+    wb.add_named_style(ali_pink)
+    wb.add_named_style(ali_blue)
+    wb.add_named_style(ali_green)
+    wb.add_named_style(ali_yellow_header)
+    wb.add_named_style(ali_green_header)
+    wb.add_named_style(ali_green_title)
+    
+    # Создаем сложную шапку вручную
+    # Основные заголовки
+    ws.merge_cells('B2:N2')
+    ws['B2'] = f'Теплосчётчик Пульсар. Потребление воды в период c {electric_data_start} по {electric_data_end}'
+    ws['B2'].style = ali_green_title
+    ws['B2'].alignment = Alignment(horizontal='left', vertical='center', wrap_text=True)
+    
+    ws.merge_cells('B3:N3')
+    ws['B3'] = f'{obj_parent_title} - {obj_title}'
+    ws['B3'].style = ali_green_title
+    ws['B3'].alignment = Alignment(horizontal='left', vertical='center', wrap_text=True)
+    
+    # Основные заголовки колонок (строка 4-5)
+    ws.merge_cells('B4:B5')
+    ws['B4'] = 'Квартира'
+    ws['B4'].style = ali_green_header
+    ws['B4'].alignment = Alignment(horizontal='center', vertical='center', wrap_text=True)
+    
+    # ГВС - начало периода
+    ws.merge_cells('C4:E4')
+    ws['C4'] = 'ГВС'
+    ws['C4'].style = ali_green_header
+    ws['C4'].alignment = Alignment(horizontal='center', vertical='center', wrap_text=True)
+    
+    ws['C5'] = 'Счётчик'
+    ws['C5'].style = ali_green_header
+    ws['C5'].alignment = Alignment(horizontal='center', vertical='center', wrap_text=True)
+    
+    ws['D5'] = 'Нач. показание Т1, м3'
+    ws['D5'].style = ali_green_header
+    ws['D5'].alignment = Alignment(horizontal='center', vertical='center', wrap_text=True)
+    
+    ws['E5'] = 'Дата/Время'
+    ws['E5'].style = ali_green_header
+    ws['E5'].alignment = Alignment(horizontal='center', vertical='center', wrap_text=True)
+    
+    # ГВС - конец периода
+    ws.merge_cells('F4:H4')
+    ws['F4'] = 'ГВС'
+    ws['F4'].style = ali_green_header
+    ws['F4'].alignment = Alignment(horizontal='center', vertical='center', wrap_text=True)
+    
+    ws['F5'] = 'Кон, показание Т1, м3'
+    ws['F5'].style = ali_green_header
+    ws['F5'].alignment = Alignment(horizontal='center', vertical='center', wrap_text=True)
+    
+    ws['G5'] = 'Дата/Время'
+    ws['G5'].style = ali_green_header
+    ws['G5'].alignment = Alignment(horizontal='center', vertical='center', wrap_text=True)
+    
+    ws['H5'] = 'Разница ГВС'
+    ws['H5'].style = ali_green_header
+    ws['H5'].alignment = Alignment(horizontal='center', vertical='center', wrap_text=True)
+    
+    # ХВС - начало периода
+    ws.merge_cells('I4:K4')
+    ws['I4'] = 'ХВС'
+    ws['I4'].style = ali_green_header
+    ws['I4'].alignment = Alignment(horizontal='center', vertical='center', wrap_text=True)
+    
+    ws['I5'] = 'Счётчик'
+    ws['I5'].style = ali_green_header
+    ws['I5'].alignment = Alignment(horizontal='center', vertical='center', wrap_text=True)
+    
+    ws['J5'] = 'Нач, показание Т1, м3'
+    ws['J5'].style = ali_green_header
+    ws['J5'].alignment = Alignment(horizontal='center', vertical='center', wrap_text=True)
+    
+    ws['K5'] = 'Дата/Время'
+    ws['K5'].style = ali_green_header
+    ws['K5'].alignment = Alignment(horizontal='center', vertical='center', wrap_text=True)
+    
+    # ХВС - конец периода
+    ws.merge_cells('L4:N4')
+    ws['L4'] = 'ХВС'
+    ws['L4'].style = ali_green_header
+    ws['L4'].alignment = Alignment(horizontal='center', vertical='center', wrap_text=True)
+    
+    ws['L5'] = 'Кон, показание Т1, м3'
+    ws['L5'].style = ali_green_header
+    ws['L5'].alignment = Alignment(horizontal='center', vertical='center', wrap_text=True)
+    
+    ws['M5'] = 'Дата/Время'
+    ws['M5'].style = ali_green_header
+    ws['M5'].alignment = Alignment(horizontal='center', vertical='center', wrap_text=True)
+    
+    ws['N5'] = 'Разница ХВС'
+    ws['N5'].style = ali_green_header
+    ws['N5'].alignment = Alignment(horizontal='center', vertical='center', wrap_text=True)
+    
+    # Настраиваем ширину колонок (обязательно ДО заполнения данных)
+    ws.column_dimensions['B'].width = 17   # Квартира
+    ws.column_dimensions['D'].width = 25   # Нач ГВС
+    ws.column_dimensions['E'].width = 17   # Дата ГВС
+    ws.column_dimensions['G'].width = 17   # Дата ГВС
+    ws.column_dimensions['M'].width = 17   # Дата ГВС
+    ws.column_dimensions['F'].width = 25   # Кон ГВС
+    ws.column_dimensions['H'].width = 18   # Разница ГВС
+    ws.column_dimensions['J'].width = 25   # Нач ХВС
+    ws.column_dimensions['K'].width = 17   # Дата ХВС
+    ws.column_dimensions['L'].width = 25   # Кон ХВС
+    ws.column_dimensions['N'].width = 18   # Разница ХВС
+    
+    # Настраиваем высоту строк
+    ws.row_dimensions[4].height = 25  # Основные заголовки
+    ws.row_dimensions[5].height = 40  # Подзаголовки
+    
+    # Заполняем данные (начинаем с строки 6)
+    for row_idx, data_row in enumerate(data_table, start=6):
+        # Определяем стиль строки (чередование для колонки B)
+        is_even = (row_idx - 6) % 2 == 0
+        
+        # Квартира (колонка B) - чередование
+        if len(data_row) > 0:
+            cell = ws.cell(row=row_idx, column=2)
+            cell.value = str(data_row[0])
+            cell.style = ali_green if is_even else ali_white
+        
+        # ГВС - начало периода
+        if len(data_row) > 1:
+            cell = ws.cell(row=row_idx, column=3)
+            cell.value = str(data_row[1])
+            cell.style = ali_pink
+        
+        if len(data_row) > 2:
+            cell = ws.cell(row=row_idx, column=4)
+            try:
+                val = float(str(data_row[2]).replace(',', '.'))
+                if NUM_IS_STRING:
+                    cell.value = f"{val:.{ROUND_SIZE}f}".replace('.', ',')
+                else:
+                    cell.value = val
+                    cell.number_format = f'0.{"0" * ROUND_SIZE}'
+            except:
+                cell.value = str(data_row[2])
+            cell.style = ali_pink
+        
+        if len(data_row) > 3:
+            cell = ws.cell(row=row_idx, column=5)
+            try:
+                if hasattr(data_row[3], 'strftime'):
+                    cell.value = data_row[3].strftime("%d-%m-%Y")
+                else:
+                    cell.value = str(data_row[3])
+            except:
+                cell.value = str(data_row[3])
+            cell.style = ali_pink
+        
+        # ГВС - конец периода
+        if len(data_row) > 4:
+            cell = ws.cell(row=row_idx, column=6)
+            try:
+                val = float(str(data_row[4]).replace(',', '.'))
+                if NUM_IS_STRING:
+                    cell.value = f"{val:.{ROUND_SIZE}f}".replace('.', ',')
+                else:
+                    cell.value = val
+                    cell.number_format = f'0.{"0" * ROUND_SIZE}'
+            except:
+                cell.value = str(data_row[4])
+            cell.style = ali_pink
+        
+        if len(data_row) > 5:
+            cell = ws.cell(row=row_idx, column=7)
+            try:
+                if hasattr(data_row[5], 'strftime'):
+                    cell.value = data_row[5].strftime("%d-%m-%Y")
+                else:
+                    cell.value = str(data_row[5])
+            except:
+                cell.value = str(data_row[5])
+            cell.style = ali_pink
+        
+        if len(data_row) > 6:
+            cell = ws.cell(row=row_idx, column=8)
+            try:
+                val = float(str(data_row[6]).replace(',', '.'))
+                if NUM_IS_STRING:
+                    cell.value = f"{val:.{ROUND_SIZE}f}".replace('.', ',')
+                else:
+                    cell.value = val
+                    cell.number_format = f'0.{"0" * ROUND_SIZE}'
+            except:
+                cell.value = str(data_row[6])
+            cell.style = ali_pink
+        
+        # ХВС - начало периода
+        if len(data_row) > 7:
+            cell = ws.cell(row=row_idx, column=9)
+            cell.value = str(data_row[7])
+            cell.style = ali_blue
+        
+        if len(data_row) > 8:
+            cell = ws.cell(row=row_idx, column=10)
+            try:
+                val = float(str(data_row[8]).replace(',', '.'))
+                if NUM_IS_STRING:
+                    cell.value = f"{val:.{ROUND_SIZE}f}".replace('.', ',')
+                else:
+                    cell.value = val
+                    cell.number_format = f'0.{"0" * ROUND_SIZE}'
+            except:
+                cell.value = str(data_row[8])
+            cell.style = ali_blue
+        
+        if len(data_row) > 9:
+            cell = ws.cell(row=row_idx, column=11)
+            try:
+                if hasattr(data_row[9], 'strftime'):
+                    cell.value = data_row[9].strftime("%d-%m-%Y")
+                else:
+                    cell.value = str(data_row[9])
+            except:
+                cell.value = str(data_row[9])
+            cell.style = ali_blue
+        
+        # ХВС - конец периода
+        if len(data_row) > 10:
+            cell = ws.cell(row=row_idx, column=12)
+            try:
+                val = float(str(data_row[10]).replace(',', '.'))
+                if NUM_IS_STRING:
+                    cell.value = f"{val:.{ROUND_SIZE}f}".replace('.', ',')
+                else:
+                    cell.value = val
+                    cell.number_format = f'0.{"0" * ROUND_SIZE}'
+            except:
+                cell.value = str(data_row[10])
+            cell.style = ali_blue
+        
+        if len(data_row) > 11:
+            cell = ws.cell(row=row_idx, column=13)
+            try:
+                if hasattr(data_row[11], 'strftime'):
+                    cell.value = data_row[11].strftime("%d-%m-%Y")
+                else:
+                    cell.value = str(data_row[11])
+            except:
+                cell.value = str(data_row[11])
+            cell.style = ali_blue
+        
+        if len(data_row) > 12:
+            cell = ws.cell(row=row_idx, column=14)
+            try:
+                val = float(str(data_row[12]).replace(',', '.'))
+                if NUM_IS_STRING:
+                    cell.value = f"{val:.{ROUND_SIZE}f}".replace('.', ',')
+                else:
+                    cell.value = val
+                    cell.number_format = f'0.{"0" * ROUND_SIZE}'
+            except:
+                cell.value = str(data_row[12])
+            cell.style = ali_blue
+    
+    # Фиксируем шапку
+    ws.freeze_panes = 'B6'
+    
+    # Сохраняем в excel  
+    response = HttpResponse(save_virtual_workbook(wb), content_type="application/vnd.ms-excel")
+    output_name = 'pulsar_water_report_' + translate(obj_parent_title) + '_' + translate(obj_title) + '_' + electric_data_start + '-' + electric_data_end
+    response['Content-Disposition'] = f'attachment;filename="{output_name.replace(chr(34), chr(92)+chr(34))}.xlsx"'
+    
+    return response
+
 def report_rejim_electro(request):
     response = io.StringIO()
     wb = Workbook()
@@ -16073,6 +17141,7 @@ def report_electric_3_zones_v2(request):
     SHOW_LIC_NUM = getattr(settings, 'SHOW_LIC_NUM', 'False')
     ROUND_SIZE = getattr(settings, 'ROUND_SIZE', 3)
     COMMENT_TO_EXCEL = getattr(settings, 'COMMENT_TO_EXCEL', 'False')
+    NUM_IS_STRING = getattr(settings, 'NUM_IS_STRING', 'False')
     response = io.StringIO()
     wb = Workbook()
     wb.add_named_style(ali_grey)
@@ -16291,15 +17360,24 @@ def report_electric_3_zones_v2(request):
             ws.cell('F%s'%(row)).style = "ali_white"
             next
 
-        try:
-            ws.cell('G%s'%(row)).value = '%s' % get_val_by_round(data_table[row-6][3], ROUND_SIZE, separator)  #str(val).replace('.', separator)
-            ws.cell('G%s'%(row)).style = "ali_white"
-            
+        try:         
+            col_idx = column_index_from_string('G') 
+            cell = ws.cell(row=row, column=col_idx)
+            cell.style = "ali_white" 
+            val = data_table[row-6][3]            
+             
+            if NUM_IS_STRING:
+                cell.value = '%s' % get_val_by_round(val, ROUND_SIZE, separator)  #str(val).replace('.', separator)
+            else:
+                # Записываем число
+                cell.value = get_val_as_number(val, ROUND_SIZE)                           
+                cell.number_format = f'0.{ "0" * ROUND_SIZE }' # Дополнительно установить числовой формат            
         except:
-            ws.cell('G%s'%(row)).style = "ali_white"
+            cell = ws.cell(row=row, column=col_idx)
+            cell.style = "ali_white" 
             next
     
-        try:            
+        try:                                  
             ws.cell('H%s'%(row)).value = '%s' % get_val_by_round((data_table[row-6][3]*data_table[row-6][8]*data_table[row-6][9]),ROUND_SIZE, separator)  # "Энергия Сумма А+
             ws.cell('H%s'%(row)).style = "ali_yellow"
         except:
@@ -22962,6 +24040,146 @@ def report_pulsar_water_daily_floors(request):
     response['Content-Disposition'] = 'attachment;filename="%s.%s"' % (output_name.replace('"', '\"'), file_ext)   
     return response
 
+def report_pulsar_water_daily_floors_v2(request):
+    # Берем настройки из settings
+    SHOW_LIC_NUM = getattr(settings, 'SHOW_LIC_NUM', 'False')
+    COMMENT_TO_EXCEL = getattr(settings, 'COMMENT_TO_EXCEL', 'False')
+    SHOW_STOYAK = getattr(settings, 'SHOW_STOYAK', 'False')
+    SHOW_FLOORS = getattr(settings, 'SHOW_FLOORS', 'True')
+    ROUND_SIZE = getattr(settings, 'ROUND_SIZE', 3)
+    NUM_IS_STRING = getattr(settings, 'NUM_IS_STRING', 'False')
+    
+    # Получаем параметры из session
+    obj_parent_title = request.session.get('obj_parent_title')
+    obj_title = request.session.get('obj_title')
+    electric_data_end = request.session.get('electric_data_end')
+    obj_key = request.session.get('obj_key')
+    
+    # Запрашиваем данные для отчета
+    is_abonent_level = re.compile(r'abonent')
+    is_object_level_2 = re.compile(r'level2')
+    data_table = []
+    
+    sortDir = 'ASC'
+    if bool(is_abonent_level.search(obj_key)):
+        data_table = common_sql.get_data_table_pulsar_water_daily(obj_parent_title, obj_title, electric_data_end, True, sortDir)
+    elif bool(is_object_level_2.search(obj_key)):
+        data_table = common_sql.get_data_table_pulsar_water_daily(obj_parent_title, obj_title, electric_data_end, False, sortDir)
+    
+    # Заменяем None на N/D везде с помощью безопасной функции
+    if len(data_table) > 0:
+        data_table = common_sql.safe_change_null(data_table, default_value='Н/Д')
+        
+        # Для комментария: если значение "Н/Д" - меняем на пустую строку
+        # Но только если комментарий будет выводиться
+        if COMMENT_TO_EXCEL:
+            processed_data = []
+            for row in data_table:
+                if isinstance(row, (list, tuple)) and len(row) > 7:
+                    row_list = list(row)
+                    # Комментарий на индексе 7
+                    if str(row_list[7]).strip() == 'Н/Д':
+                        row_list[7] = ''
+                    processed_data.append(tuple(row_list))
+                else:
+                    processed_data.append(row)
+            data_table = processed_data
+    
+    # Базовые заголовки (A-F) - как в оригинале
+    headers = [
+        # (merge_range, cell_ref, value, style, width)
+        ('A2:F2', 'A2', f'Пульсар. Потребление воды на {electric_data_end}', ali_green_title, None),
+        ('A5:A5', 'A5', 'Абонент', ali_green_header, 23),
+        ('B5:B5', 'B5', 'Тип счётчика', ali_green_header, None),
+        ('C5:C5', 'C5', 'Стояк', ali_green_header, None),
+        ('D5:D5', 'D5', 'Этаж', ali_green_header, None),
+        ('E5:E5', 'E5', 'Счётчик', ali_green_header, 17),
+        ('F5:F5', 'F5', f'Показания на {electric_data_end}, м3', ali_green_header, 17),
+    ]
+    
+    # Базовые колонки данных (A-F)
+    # Индексы из SQL запроса:
+    # 1 - Абонент, 2 - Тип счетчика, 3 - Стояк, 4 - Счетчик, 5 - Показания, 
+    # 7 - Комментарий, 8 - Этаж
+    columns_config = [
+        ('A', 1, None, False, None),  # Абонент (индекс 1)
+        ('B', 2, None, False, None),  # Тип счётчика (индекс 2)
+        ('C', 3, None, False, None),  # Стояк (индекс 3)
+        ('D', 8, None, False, None),  # Этаж (индекс 8)
+        ('E', 4, None, False, None),  # Счётчик (индекс 4)
+        ('F', 5, None, True, None),   # Показания (индекс 5) - числовое
+    ]
+    
+    # Текущая последняя колонка
+    last_col = 'F'
+    
+    # Добавляем комментарий если включена настройка
+    if COMMENT_TO_EXCEL:
+        comment_col = 'G'
+        headers.append((f'{comment_col}5:{comment_col}5', f'{comment_col}5', 'Комментарий к абоненту', ali_green_header, 30))
+        columns_config.append((comment_col, 7, None, False, None))  # Комментарий (индекс 7)
+        last_col = comment_col
+    
+    # Обновляем основной заголовок для охвата всех колонок
+    headers[0] = (f'A2:{last_col}2', 'A2', f'Пульсар. Потребление воды на {electric_data_end}', ali_green_title, None)
+    
+    # Создаем Excel через упрощенную гибридную функцию
+    wb = export_to_excel_hybrid_simple(
+        data_table=data_table,
+        headers=headers,
+        columns_config=columns_config,
+        sheet_title="Потребление воды",
+        round_size=ROUND_SIZE,
+        num_is_string=NUM_IS_STRING,
+        freeze_panes='A6'  # Фиксируем с A6 (первая строка данных)
+    )
+
+    # Настраиваем высоту строк для заголовков и скрываем колонки
+    ws = wb.active
+    
+    # Увеличиваем высоту строк заголовков
+    ws.row_dimensions[2].height = 35  # Основной заголовок
+    ws.row_dimensions[5].height = 63  # Заголовки колонок
+    
+    # Скрываем колонки согласно настройкам
+    ws.column_dimensions['C'].hidden = not SHOW_STOYAK  # Стояк
+    ws.column_dimensions['D'].hidden = not SHOW_FLOORS  # Этаж
+    
+    # Настраиваем ширину колонок (как в оригинале)
+    ws.column_dimensions['A'].width = 23  # Абонент
+    ws.column_dimensions['E'].width = 17  # Счётчик
+    ws.column_dimensions['F'].width = 17  # Показания
+    
+    # Настраиваем ширину для комментария если есть
+    if COMMENT_TO_EXCEL:
+        ws.column_dimensions['G'].width = 30
+    
+    # Включаем перенос текста и настраиваем выравнивание
+    for row in [2, 5]:
+        for cell in ws[row]:
+            if row == 2:
+                # Для основного заголовка - выравнивание по левому краю
+                cell.alignment = cell.alignment.copy(
+                    wrap_text=True, 
+                    vertical='center', 
+                    horizontal='left'
+                )
+            else:
+                # Для заголовков колонок - по центру
+                cell.alignment = cell.alignment.copy(
+                    wrap_text=True, 
+                    vertical='center', 
+                    horizontal='center'
+                )
+    
+    # Сохраняем в excel  
+    response = HttpResponse(save_virtual_workbook(wb), content_type="application/vnd.ms-excel")
+    output_name = 'pulsar_water_report_' + translate(obj_title) + '_' + electric_data_end
+    response['Content-Disposition'] = f'attachment;filename="{output_name.replace(chr(34), chr(92)+chr(34))}.xlsx"'
+    
+    return response
+
+
 def report_pulsar_heat_daily_floors(request):
     COMMENT_TO_EXCEL = getattr(settings, 'COMMENT_TO_EXCEL', 'False')
     SHOW_FLOORS = getattr(settings, 'SHOW_FLOORS', 'True')
@@ -24375,6 +25593,7 @@ def report_water_ridan_daily(request):
     
     params = ['Объем', 'Объем_выходящий', 'magnet_flag', 'magnet_time']
 
+    data_table = []
     if (bool(is_abonent_level.search(obj_key))):
         is_abon = True 
         data_table = common_sql.get_data_table_daily(meters_name, parent_name, electric_data_end, is_abon, params, resource = 'Вода')
@@ -24445,7 +25664,7 @@ def report_water_ridan_consumption(request):
     obj_key             = request.GET['obj_key']
     
     params = ['Объем', 'Объем_выходящий']
-
+    data_table = []
     if (bool(is_abonent_level.search(obj_key))):
         is_abon = True 
         data_table = common_sql.get_data_table_consumption(meters_name, parent_name, electric_data_start, electric_data_end, is_abon, params, resource = 'Вода')
@@ -24520,7 +25739,7 @@ def report_heat_vzlet_daily(request):
     obj_key             = request.GET['obj_key']
     
     params = ['Энергия_1', 'Масса_1']
-
+    data_table = []
     if (bool(is_abonent_level.search(obj_key))):
         is_abon = True 
         data_table = common_sql.get_data_table_daily(meters_name, parent_name, electric_data_end, is_abon, params, resource = 'Тепло')
@@ -24584,7 +25803,7 @@ def report_heat_vzlet_consumption(request):
     obj_key             = request.GET['obj_key']
     
     params = ['Энергия_1', 'Масса_1']
-
+    data_table = []
     if (bool(is_abonent_level.search(obj_key))):
         is_abon = True 
         data_table = common_sql.get_data_table_consumption(meters_name, parent_name, electric_data_start, electric_data_end, is_abon, params, resource = 'Тепло')
@@ -24853,3 +26072,1328 @@ def report_electr_integral_from_template(request):
         file_ext = 'txt'    
         response['Content-Disposition'] = 'attachment;filename="%s.%s"' % (output_name.replace('"', '\"'), file_ext)  
         return response
+    
+
+def report_electric_3_zones_v3(request):
+    SHOW_LIC_NUM = getattr(settings, 'SHOW_LIC_NUM', 'False')
+    ROUND_SIZE = getattr(settings, 'ROUND_SIZE', 3)
+    COMMENT_TO_EXCEL = getattr(settings, 'COMMENT_TO_EXCEL', 'False')
+    NUM_IS_STRING = getattr(settings, 'NUM_IS_STRING', 'False')
+    
+    response = io.StringIO()
+    wb = Workbook()
+    wb.add_named_style(ali_grey)
+    wb.add_named_style(ali_white)
+    wb.add_named_style(ali_yellow)
+    wb.add_named_style(ali_pink)
+    wb.add_named_style(ali_blue)
+    ws = wb.active
+    wb.guess_types = True
+    
+    obj_title = request.GET.get('obj_title')
+    electric_data_end = request.GET.get('electric_data_end')
+
+    # Конфигурация основной шапки для 3-тарифного отчета
+    header_config = [
+        # (merge_range, cell_ref, value, style, width)
+        ('A2:E2', 'A2', f'{obj_title} . Срез показаний с коэффициентами на дату {electric_data_end}', None, None),
+        ('A4:A5', 'A4', 'Наименование объекта', 'ali_grey', 20),
+        ('B4:B5', 'B4', 'Наименование абонента', 'ali_grey', 30),
+        ('C4:C5', 'C4', 'Заводской номер', 'ali_grey', 17),
+        ('D4:F4', 'D4', 'Коэффициенты', 'ali_grey', None),
+        (None, 'D5', 'Ктн', 'ali_grey', None),
+        (None, 'E5', 'Ктт', 'ali_grey', None),
+        (None, 'F5', 'А', 'ali_grey', None),
+        ('G4:H4', 'G4', 'Сумма', 'ali_grey', 13),
+        (None, 'G5', f'Показания A+ на {electric_data_end}', 'ali_grey', None),
+        (None, 'H5', f'Энергия A+ на {electric_data_end}', 'ali_yellow', None),
+        ('I4:J4', 'I4', 'Тариф 1', 'ali_grey', 13),
+        (None, 'I5', f'Показания A+ на {electric_data_end}', 'ali_grey', None),
+        (None, 'J5', f'Энергия A+ на {electric_data_end}', 'ali_yellow', None),
+        ('K4:L4', 'K4', 'Тариф 2', 'ali_grey', 13),
+        (None, 'K5', f'Показания A+ на {electric_data_end}', 'ali_grey', None),
+        (None, 'L5', f'Энергия A+ на {electric_data_end}', 'ali_yellow', None),
+        ('M4:N4', 'M4', 'Тариф 3', 'ali_grey', 13),
+        (None, 'M5', f'Показания A+ на {electric_data_end}', 'ali_grey', None),
+        (None, 'N5', f'Энергия A+ на {electric_data_end}', 'ali_yellow', None),
+    ]
+    
+    # Динамические дополнительные колонки
+    additional_columns = []
+    
+    if SHOW_LIC_NUM:
+        current_col = 'O'
+        additional_columns.append(
+            (f'{current_col}4:{current_col}5', f'{current_col}4', 'Лицевой номер абонента', 'ali_grey', 17)
+        )
+        current_col = chr(ord(current_col) + 1)  # Переходим к следующей колонке
+    
+    if COMMENT_TO_EXCEL:
+        current_col = 'P'
+        additional_columns.append(
+            (f'{current_col}4:{current_col}5', f'{current_col}4', 'Комментарий к абоненту', 'ali_grey', 30)
+        )
+    
+    # Конфигурация колонок данных для 3-тарифного отчета
+    columns_config = [
+        # (column_letter, data_index, style, is_numeric, calculation_func)
+        ('A', 7, 'ali_white', False, None),  # Наименование объекта
+        ('B', 1, 'ali_white', False, None),  # Наименование абонента
+        ('C', 2, 'ali_white', False, None),  # Заводской номер
+        ('D', 9, 'ali_white', False, None),  # Ктн
+        ('E', 8, 'ali_white', False, None),  # Ктт
+        ('F', 10, 'ali_white', False, None), # Ка
+        ('G', 3, 'ali_white', True, None),   # Сумма показания
+        ('H', None, 'ali_yellow', True, lambda row: row[3] * row[8] * row[9]),  # Энергия Сумма
+        ('I', 4, 'ali_white', True, None),   # Тариф 1 показания
+        ('J', None, 'ali_yellow', True, lambda row: row[4] * row[8] * row[9]),  # Энергия Тариф 1
+        ('K', 5, 'ali_white', True, None),   # Тариф 2 показания
+        ('L', None, 'ali_yellow', True, lambda row: row[5] * row[8] * row[9]),  # Энергия Тариф 2
+        ('M', 6, 'ali_white', True, None),   # Тариф 3 показания
+        ('N', None, 'ali_yellow', True, lambda row: row[6] * row[8] * row[9]),  # Энергия Тариф 3
+    ]
+    
+    # Динамически добавляем колонки данных
+    if SHOW_LIC_NUM:
+        columns_config.append(('O', 15, 'ali_white', False, None))
+        current_data_col = chr(ord(current_data_col) + 1)
+    
+    if COMMENT_TO_EXCEL:
+        columns_config.append(('P', 11, 'ali_white', False, None))
+
+    # Создание шапки
+    create_excel_header(ws, header_config, additional_columns)
+     # ##################################################
+    # Получение данных
+    is_abonent_level = re.compile(r'abonent')
+    is_object_level = re.compile(r'level')
+    is_group_level = re.compile(r'group')
+    data_table = []
+    
+    obj_title           = request.GET['obj_title']
+    obj_key             = request.GET['obj_key']
+    obj_parent_title    = request.GET['obj_parent_title']
+    is_electric_monthly = request.GET['is_electric_monthly']
+    is_electric_daily   = request.GET['is_electric_daily']
+    electric_data_start = request.GET['electric_data_start']
+    electric_data_end   = request.GET['electric_data_end']
+    is_electric_period  = request.GET['is_electric_period']
+
+    if (is_electric_monthly == '1') & (bool(is_abonent_level.search(obj_key))):   # месячные для абонента
+        data_table = common_sql.get_electric_by_date(obj_parent_title, obj_title, electric_data_end, 'monthly', True)
+        
+    elif (is_electric_daily == '1') & (is_electric_period == "0") & (bool(is_abonent_level.search(obj_key))):   # суточные для абонента
+        data_table = common_sql.get_electric_by_date(obj_parent_title, obj_title, electric_data_end, 'daily', True)
+
+    elif (is_electric_monthly == '1') & (bool(is_object_level.search(obj_key))): # месячные для объекта
+            data_table = common_sql.get_electric_by_date(obj_parent_title, obj_title, electric_data_end, 'monthly', False)
+            if obj_key == 'level1-0':
+                data_table = common_sql.get_electric_by_date_level2(obj_parent_title, obj_title, electric_data_end, 'monthly')
+            if not data_table:
+                data_table = [[electric_data_end, obj_title, u'Н/Д', u'Н/Д', u'Н/Д', u'Н/Д', u'Н/Д']]        
+
+    elif (is_electric_daily == '1') & (bool(is_object_level.search(obj_key))): # daily for object
+            data_table= common_sql.get_electric_by_date(obj_parent_title, obj_title, electric_data_end, 'daily', False)
+            if obj_key == 'level1-0':
+                data_table = common_sql.get_electric_by_date_level2(obj_parent_title, obj_title, electric_data_end, 'daily')
+            if not data_table:
+                data_table = [[electric_data_end, obj_title, u'Н/Д', u'Н/Д', u'Н/Д', u'Н/Д', u'Н/Д']]
+
+    elif (is_electric_daily == '1') & (bool(is_group_level.search(obj_key))): # показания по баланскной группе                    
+            data_table = common_sql.get_electric_by_date_balance(obj_parent_title, obj_title, electric_data_end, 'daily')            
+        
+    elif (is_electric_monthly == '1') & (bool(is_group_level.search(obj_key))): # показания по баланскной группе месячные
+            data_table = common_sql.get_electric_by_date_balance(obj_parent_title, obj_title, electric_data_end, 'monthly')
+    # ##################################################
+        
+    # Заполнение данных
+    fill_excel_data(ws, data_table, columns_config, ROUND_SIZE, NUM_IS_STRING)
+
+    # Сохраняем в excel  
+    response = HttpResponse(save_virtual_workbook(wb), content_type="application/vnd.ms-excel")
+    output_name = u'3_tariffa_' + translate(obj_title) + '_' + electric_data_end
+    response['Content-Disposition'] = f'attachment;filename="{output_name.replace(chr(34), chr(92)+chr(34))}.xlsx"'
+    return response
+
+def get_column_range(start_col, end_col):
+    """Генерирует диапазон букв колонок (поддерживает до ZZ)"""
+    def col_to_num(col):
+        num = 0
+        for c in col:
+            num = num * 26 + (ord(c.upper()) - ord('A') + 1)
+        return num
+    
+    def num_to_col(num):
+        col = ''
+        while num > 0:
+            num, remainder = divmod(num - 1, 26)
+            col = chr(65 + remainder) + col
+        return col
+    
+    start_num = col_to_num(start_col)
+    end_num = col_to_num(end_col)
+    
+    for num in range(start_num, end_num + 1):
+        yield num_to_col(num)
+
+def create_excel_header(ws, header_config, additional_columns=None):
+    """Создание шапки отчета Excel с переданной конфигурацией"""
+    
+    def apply_style_to_merged_range(ws, merge_range, style):
+        """Применяет стиль ко всем ячейкам объединенного диапазона"""
+        if not style:
+            return
+            
+        try:
+            start_cell, end_cell = merge_range.split(':')
+            # Извлекаем буквы колонок и номера строк
+            start_col = ''.join(filter(str.isalpha, start_cell))
+            start_row = int(''.join(filter(str.isdigit, start_cell)))
+            end_col = ''.join(filter(str.isalpha, end_cell))
+            end_row = int(''.join(filter(str.isdigit, end_cell)))
+            
+            # Применяем стиль ко всем ячейкам объединенного диапазона
+            for row in range(start_row, end_row + 1):
+                for col_letter in get_column_range(start_col, end_col):
+                    try:
+                        ws[f'{col_letter}{row}'].style = style
+                    except:
+                        pass
+        except Exception as e:
+            print(f"Ошибка применения стиля к {merge_range}: {e}")
+    
+    # Применение конфигурации шапки
+    for config in header_config:
+        merge_range, cell_ref, value, style, width = config
+        
+        # Объединяем ячейки если указано
+        if merge_range:
+            ws.merge_cells(merge_range)
+        
+        # Устанавливаем значение и стиль для основной ячейки
+        cell = ws[cell_ref]
+        cell.value = value
+        if style:
+            cell.style = style
+        
+        # Применяем стиль ко всему объединенному диапазону
+        if merge_range and style:
+            apply_style_to_merged_range(ws, merge_range, style)
+        
+        # Устанавливаем ширину колонки если указано
+        if width and cell_ref[0].isalpha():
+            col_letter = cell_ref[0]
+            ws.column_dimensions[col_letter].width = width
+    
+    # Дополнительные колонки из конфигурации
+    if additional_columns:
+        for col_config in additional_columns:
+            merge_range, cell_ref, value, style, width = col_config
+            
+            if merge_range:
+                ws.merge_cells(merge_range)
+            
+            cell = ws[cell_ref]
+            cell.value = value
+            if style:
+                cell.style = style
+            
+            # Применяем стиль ко всему объединенному диапазону
+            if merge_range and style:
+                apply_style_to_merged_range(ws, merge_range, style)
+            
+            if width and cell_ref[0].isalpha():
+                col_letter = cell_ref[0]
+                ws.column_dimensions[col_letter].width = width
+    
+    ws.row_dimensions[5].height = 43
+
+   
+def fill_excel_data(ws, data_table, columns_config, ROUND_SIZE, NUM_IS_STRING, separator='.'):
+    """Заполнение таблицы Excel данными по переданной конфигурации колонок"""    
+    from openpyxl.utils import column_index_from_string
+    
+    # Кэш индексов колонок
+    col_indices = {col: column_index_from_string(col) for col, _, _, _, _ in columns_config}
+    
+    # Заполнение данных
+    for row_num in range(6, len(data_table) + 6):
+        data_row = data_table[row_num - 6]
+        
+        # Преобразуем все числовые данные к float заранее
+        numeric_data_row = []
+        for item in data_row:
+            if item is not None:
+                if isinstance(item, str):
+                    try:
+                        numeric_data_row.append(float(item.replace(',', '.')))
+                    except (ValueError, TypeError):
+                        numeric_data_row.append(0.0)
+                else:
+                    try:
+                        numeric_data_row.append(float(item))
+                    except (ValueError, TypeError):
+                        numeric_data_row.append(0.0)
+            else:
+                numeric_data_row.append(0.0)
+        
+        for col_letter, data_idx, style, is_numeric, calc_func in columns_config:
+            try:
+                cell = ws.cell(row=row_num, column=col_indices[col_letter])
+                cell.style = style
+                
+                if calc_func:
+                    # Вычисляемое значение - используем преобразованные числа
+                    value = calc_func(numeric_data_row)
+                else:
+                    # Прямое значение из данных
+                    if data_idx is not None and data_idx < len(data_row):
+                        raw_value = data_row[data_idx]
+                        if raw_value is not None:
+                            if is_numeric:
+                                # Используем преобразованное число
+                                value = numeric_data_row[data_idx]
+                            else:
+                                value = str(raw_value)
+                        else:
+                            value = None
+                    else:
+                        value = None
+                
+                if value is not None:
+                    if is_numeric:
+                        if NUM_IS_STRING:
+                            cell.value = get_val_by_round(value, ROUND_SIZE, separator)
+                        else:
+                            cell.value = get_val_as_number(value, ROUND_SIZE)
+                            cell.number_format = f'0.{"0" * ROUND_SIZE}'
+                    else:
+                        cell.value = str(value)
+                else:
+                    cell.value = ''
+                        
+            except Exception as e:
+                print(f"ERROR: Ошибка в колонке {col_letter}, строка {row_num}: {e}")
+                # В случае ошибки просто устанавливаем стиль
+                cell = ws.cell(row=row_num, column=col_indices[col_letter])
+                cell.style = style
+                cell.value = ''
+                
+
+
+def report_electric_potreblenie_3_zones_v3(request):
+    SHOW_LIC_NUM = getattr(settings, 'SHOW_LIC_NUM', 'False')
+    ROUND_SIZE = getattr(settings, 'ROUND_SIZE', 3)
+    NUM_IS_STRING = getattr(settings, 'NUM_IS_STRING', 'False')
+    
+    response = io.StringIO()
+    wb = Workbook()
+    wb.add_named_style(ali_grey)
+    wb.add_named_style(ali_white)
+    wb.add_named_style(ali_yellow)
+    wb.add_named_style(ali_pink)
+    wb.add_named_style(ali_blue)
+    ws = wb.active
+    
+    obj_title = request.session['obj_title']
+    electric_data_end = request.session['electric_data_end']
+    electric_data_start = request.session['electric_data_start']
+
+    # Конфигурация основной шапки для отчета потребления
+    header_config = [
+        # (merge_range, cell_ref, value, style, width)
+        ('A2:E2', 'A2', f'{obj_title}. Потребление электроэнергии в период с {electric_data_start} по {electric_data_end}', None, None),
+        ('A4:A5', 'A4', 'Наименование абонента', 'ali_grey', 35),
+        ('B4:B5', 'B4', 'Заводской номер', 'ali_grey', 17),
+        ('C4:E4', 'C4', 'Коэффициенты', 'ali_grey', None),
+        (None, 'C5', 'Ктн', 'ali_grey', None),
+        (None, 'D5', 'Ктт', 'ali_grey', None),
+        (None, 'E5', 'А', 'ali_grey', None),
+        
+        # Сумма
+        ('F3:I3', 'F3', 'Сумма A+, кВт*ч', 'ali_grey', None),
+        ('F4:G4', 'F4', f'На {electric_data_start}', 'ali_grey', None),
+        ('H4:I4', 'H4', f'На {electric_data_end}', 'ali_grey', None),
+        (None, 'F5', 'Показания', 'ali_grey', None),
+        (None, 'G5', 'Энергия', 'ali_yellow', None),
+        (None, 'H5', 'Показания', 'ali_grey', None),
+        (None, 'I5', 'Энергия', 'ali_yellow', None),
+        
+        # Тариф 1
+        ('J3:M3', 'J3', 'Тариф 1 A+, кВт*ч', 'ali_grey', None),
+        ('J4:K4', 'J4', f'На {electric_data_start}', 'ali_grey', None),
+        ('L4:M4', 'L4', f'На {electric_data_end}', 'ali_grey', None),
+        (None, 'J5', 'Показания', 'ali_grey', None),
+        (None, 'K5', 'Энергия', 'ali_yellow', None),
+        (None, 'L5', 'Показания', 'ali_grey', None),
+        (None, 'M5', 'Энергия', 'ali_yellow', None),
+        
+        # Тариф 2
+        ('N3:Q3', 'N3', 'Тариф 2 A+, кВт*ч', 'ali_grey', None),
+        ('N4:O4', 'N4', f'На {electric_data_start}', 'ali_grey', None),
+        ('P4:Q4', 'P4', f'На {electric_data_end}', 'ali_grey', None),
+        (None, 'N5', 'Показания', 'ali_grey', None),
+        (None, 'O5', 'Энергия', 'ali_yellow', None),
+        (None, 'P5', 'Показания', 'ali_grey', None),
+        (None, 'Q5', 'Энергия', 'ali_yellow', None),
+        
+        # Тариф 3
+        ('R3:U3', 'R3', 'Тариф 3 A+, кВт*ч', 'ali_grey', None),
+        ('R4:S4', 'R4', f'На {electric_data_start}', 'ali_grey', None),
+        ('T4:U4', 'T4', f'На {electric_data_end}', 'ali_grey', None),
+        (None, 'R5', 'Показания', 'ali_grey', None),
+        (None, 'S5', 'Энергия', 'ali_yellow', None),
+        (None, 'T5', 'Показания', 'ali_grey', None),
+        (None, 'U5', 'Энергия', 'ali_yellow', None),
+        
+        # Расход
+        ('V3:AC3', 'V3', 'Расход А+, кВт*ч', 'ali_grey', None),
+        ('V4:W4', 'V4', 'Сумма', 'ali_grey', None),
+        (None, 'V5', 'Показания', 'ali_grey', None),
+        (None, 'W5', 'Энергия', 'ali_yellow', None),
+        ('X4:Y4', 'X4', 'Tариф 1', 'ali_grey', None),
+        (None, 'X5', 'Показания', 'ali_grey', None),
+        (None, 'Y5', 'Энергия', 'ali_yellow', None),
+        ('Z4:AA4', 'Z4', 'Tариф 2', 'ali_grey', None),
+        (None, 'Z5', 'Показания', 'ali_grey', None),
+        (None, 'AA5', 'Энергия', 'ali_yellow', None),
+        ('AB4:AC4', 'AB4', 'Tариф 3', 'ali_grey', None),
+        (None, 'AB5', 'Показания', 'ali_grey', None),
+        (None, 'AC5', 'Энергия', 'ali_yellow', None),
+    ]
+    
+    # Динамические дополнительные колонки
+    additional_columns = []
+    
+    if SHOW_LIC_NUM:
+        current_col = 'AD'
+        additional_columns.append(
+            (f'{current_col}4:{current_col}5', f'{current_col}4', 'Лицевой номер абонента', 'ali_grey', 17)
+        )
+    
+    # Конфигурация колонок данных для отчета потребления
+    columns_config = [
+        # (column_letter, data_index, style, is_numeric, calculation_func)
+        ('A', 0, 'ali_white', False, None),  # Наименование абонента
+        ('B', 1, 'ali_white', False, None),  # Заводской номер
+        ('C', 23, 'ali_white', True, None),  # Ктн
+        ('D', 20, 'ali_white', True, None),  # Ктт
+        ('E', 24, 'ali_white', True, None),  # Ка
+        
+        # Сумма - начало периода
+        ('F', 2, 'ali_white', True, None),   # Сумма А+ на начало
+        ('G', None, 'ali_yellow', True, lambda row: row[23] * row[20] * row[2]),  # Энергия Сумма на начало
+        
+        # Сумма - конец периода
+        ('H', 7, 'ali_white', True, None),   # Сумма А+ на конец
+        ('I', None, 'ali_yellow', True, lambda row: row[23] * row[20] * row[7]),  # Энергия Сумма на конец
+        
+        # Тариф 1 - начало периода
+        ('J', 3, 'ali_white', True, None),   # Тариф 1 А+ на начало
+        ('K', None, 'ali_yellow', True, lambda row: row[23] * row[20] * row[3]),  # Энергия Тариф 1 на начало
+        
+        # Тариф 1 - конец периода
+        ('L', 8, 'ali_white', True, None),   # Тариф 1 А+ на конец
+        ('M', None, 'ali_yellow', True, lambda row: row[23] * row[20] * row[8]),  # Энергия Тариф 1 на конец
+        
+        # Тариф 2 - начало периода
+        ('N', 4, 'ali_white', True, None),   # Тариф 2 А+ на начало
+        ('O', None, 'ali_yellow', True, lambda row: row[23] * row[20] * row[4]),  # Энергия Тариф 2 на начало
+        
+        # Тариф 2 - конец периода
+        ('P', 9, 'ali_white', True, None),   # Тариф 2 А+ на конец
+        ('Q', None, 'ali_yellow', True, lambda row: row[23] * row[20] * row[9]),  # Энергия Тариф 2 на конец
+        
+        # Тариф 3 - начало периода
+        ('R', 5, 'ali_white', True, None),   # Тариф 3 А+ на начало
+        ('S', None, 'ali_yellow', True, lambda row: row[23] * row[20] * row[5]),  # Энергия Тариф 3 на начало
+        
+        # Тариф 3 - конец периода
+        ('T', 10, 'ali_white', True, None),  # Тариф 3 А+ на конец
+        ('U', None, 'ali_yellow', True, lambda row: row[23] * row[20] * row[10]), # Энергия Тариф 3 на конец
+        
+        # Расход
+        ('V', 12, 'ali_white', True, None),  # Расход Сумма А+
+        ('W', None, 'ali_yellow', True, lambda row: row[23] * row[20] * row[12]), # Расход Сумма Энергия
+        ('X', 13, 'ali_white', True, None),  # Расход Тариф 1 А+
+        ('Y', None, 'ali_yellow', True, lambda row: row[23] * row[20] * row[13]), # Расход Тариф 1 Энергия
+        ('Z', 14, 'ali_white', True, None),  # Расход Тариф 2 А+
+        ('AA', None, 'ali_yellow', True, lambda row: row[23] * row[20] * row[14]), # Расход Тариф 2 Энергия
+        ('AB', 15, 'ali_white', True, None), # Расход Тариф 3 А+
+        ('AC', None, 'ali_yellow', True, lambda row: row[23] * row[20] * row[15]), # Расход Тариф 3 Энергия
+    ]
+    
+    # Динамически добавляем колонки данных
+    if SHOW_LIC_NUM:
+        columns_config.append(('AD', 25, 'ali_white', False, None))  # Лицевой номер
+
+    # Создание шапки
+    create_excel_header(ws, header_config, additional_columns)
+    ws.row_dimensions[5].height = 41
+    
+    # Получение данных
+    is_abonent_level = re.compile(r'abonent')
+    is_object_level = re.compile(r'level')
+    is_group_level = re.compile(r'group')
+    
+    obj_parent_title = request.session['obj_parent_title']
+    obj_key = request.session['obj_key']
+    is_electric_delta = request.session['is_electric_delta']
+    is_electric_monthly = request.session['is_electric_monthly']
+    
+    data_table = []
+    if True:
+        res = 'Электричество'
+        
+        if is_electric_monthly == "1":
+            dm = 'monthly'
+        else:
+            dm = 'daily'
+            
+        if (is_electric_delta == "1") & (bool(is_abonent_level.search(obj_key))): # delta for abonents
+            isAbon = True                    
+            data_table = common_sql.get_data_table_electric_period(isAbon, obj_title, obj_parent_title, electric_data_start, electric_data_end, res, dm)
+            request.session["data_table_export"] = data_table
+            
+        elif (is_electric_delta == '1') & (bool(is_object_level.search(obj_key))): # daily delta for abonents group
+            isAbon = False
+            data_table = common_sql.get_data_table_electric_period(isAbon, obj_title, obj_parent_title, electric_data_start, electric_data_end, res, dm)
+            request.session["data_table_export"] = data_table
+            
+        elif (is_electric_delta == '1') & (bool(is_group_level.search(obj_key))):
+            data_table = common_sql.get_data_table_electric_period_for_group(obj_title, obj_parent_title, electric_data_start, electric_data_end, res)
+            request.session["data_table_export"] = data_table
+        
+    # Заполнение данных
+    fill_excel_data(ws, data_table, columns_config, ROUND_SIZE, NUM_IS_STRING)
+
+    # Сохраняем в excel  
+    response = HttpResponse(save_virtual_workbook(wb), content_type="application/vnd.ms-excel")
+    output_name = 'rashod_3_zones_' + translate(obj_title) + '_' + str(electric_data_start) + '-' + str(electric_data_end)
+    response['Content-Disposition'] = f'attachment;filename="{output_name.replace(chr(34), chr(92)+chr(34))}.xlsx"'
+    return response
+
+def report_water_by_date_v2(request):
+    response = io.StringIO()
+    wb = Workbook()
+    wb.add_named_style(ali_grey)
+    wb.add_named_style(ali_white)
+    wb.add_named_style(ali_yellow)
+    wb.add_named_style(ali_pink)
+    wb.add_named_style(ali_blue)
+    ws = wb.active
+    
+    meters_name = request.GET.get('obj_title')
+    electric_data_end = request.GET.get('electric_data_end')
+    parent_name = request.GET.get('obj_parent_title')
+    obj_key = request.GET.get('obj_key')
+
+    # Конфигурация основной шапки для отчета по воде
+    header_config = [
+        # (merge_range, cell_ref, value, style, width)
+        ('A2:E2', 'A2', f'{meters_name}. Показания по воде на {electric_data_end}', None, None),
+        (None, 'A5', 'Абонент', 'ali_grey', 30),
+        (None, 'B5', 'Номер счётчика', 'ali_grey', 25),
+        (None, 'C5', 'Пульсар', 'ali_grey', 25),
+        (None, 'D5', 'Канал', 'ali_grey', None),
+        (None, 'E5', 'Показания', 'ali_grey', 15),
+    ]
+
+    # Конфигурация колонок данных для отчета по воде
+    columns_config = [
+        # (column_letter, data_index, style, is_numeric, calculation_func)
+        ('A', 1, 'ali_white', False, None),  # Абонент
+        ('B', 2, 'ali_white', False, None),  # Номер счётчика
+        ('C', 3, 'ali_white', False, None),  # Пульсар
+        ('D', 4, 'ali_white', False, None),  # Канал
+        ('E', 5, 'ali_white', True, None),   # Показания
+    ]
+
+    # Создание шапки
+    create_excel_header(ws, header_config)
+    ws.row_dimensions[5].height = 41
+
+    # Получение данных
+    is_abonent_level = re.compile(r'level2')
+    is_object_level_2 = re.compile(r'level1')
+    
+    dc = 'daily'
+    data_table = []
+    
+    if bool(is_abonent_level.search(obj_key)): 
+        data_table = common_sql.get_data_table_water_by_date(meters_name, parent_name, electric_data_end, True, dc)
+    elif bool(is_object_level_2.search(obj_key)):
+        data_table = common_sql.get_data_table_water_by_date(meters_name, parent_name, electric_data_end, False, dc)
+
+    # Заменяем None на N/D везде
+    if len(data_table) > 0: 
+        data_table = common_sql.ChangeNull(data_table, None)
+
+    # Заполнение данных
+    fill_excel_data(ws, data_table, columns_config, ROUND_SIZE=3, NUM_IS_STRING=False)
+
+    # Сохраняем в excel  
+    response = HttpResponse(save_virtual_workbook(wb), content_type="application/vnd.ms-excel")
+    output_name = 'water_' + translate(parent_name) + '_' + translate(meters_name) + '_' + electric_data_end
+    response['Content-Disposition'] = f'attachment;filename="{output_name.replace(chr(34), chr(92)+chr(34))}.xlsx"'
+    return response
+
+
+def export_to_excel_hybrid_simple(data_table, headers, columns_config, sheet_title="Report", 
+                                  round_size=3, num_is_string=False, freeze_panes=None):
+    """
+    Упрощенная функция для экспорта в Excel.
+    Работает с заголовками как в оригинальном коде.
+    
+    headers: список кортежей (merge_range, cell_ref, value, style, width)
+    columns_config: список кортежей (column_letter, data_index, style, is_numeric, calculation_func)
+    """
+    HVS_NAME= getattr(settings, 'HVS_NAME', 'ХВС')
+    GVS_NAME = getattr(settings, 'GVS_NAME', 'ГВС')
+    
+    wb = Workbook()
+    ws = wb.active
+    ws.title = sheet_title
+    
+    # Добавляем все стили (они уже определены)
+    wb.add_named_style(ali_grey)
+    wb.add_named_style(ali_white)
+    wb.add_named_style(ali_yellow)
+    wb.add_named_style(ali_pink)
+    wb.add_named_style(ali_blue)
+    wb.add_named_style(ali_green)
+    wb.add_named_style(ali_yellow_header)
+    wb.add_named_style(ali_green_header)
+    wb.add_named_style(ali_green_title)
+    
+    # Создаем заголовки
+    for header in headers:
+        merge_range, cell_ref, value, style, width = header
+        
+        if merge_range:
+            ws.merge_cells(merge_range)
+            
+            # После мерджа нужно применить стиль ко всем ячейкам в диапазоне
+            start_cell, end_cell = merge_range.split(':')
+            start_col = start_cell[0]
+            start_row = int(start_cell[1:])
+            end_col = end_cell[0]
+            end_row = int(end_cell[1:])
+            
+            # Применяем стиль ко всем ячейкам в мердж-диапазоне
+            for row in range(start_row, end_row + 1):
+                for col in range(column_index_from_string(start_col), column_index_from_string(end_col) + 1):
+                    cell = ws.cell(row=row, column=col)
+                    if style:
+                        cell.style = style
+        
+        # Основная ячейка
+        cell = ws[cell_ref]
+        cell.value = value
+        
+        if style:
+            cell.style = style
+        
+        if width and cell_ref[0].isalpha():
+            col_letter = cell_ref[0]
+            ws.column_dimensions[col_letter].width = width
+    
+    # Определяем строку начала данных (последняя строка заголовков + 1)
+    max_header_row = 1
+    for header in headers:
+        cell_ref = header[1]
+        row_num = int(''.join(filter(str.isdigit, cell_ref)))
+        max_header_row = max(max_header_row, row_num)
+    
+    data_start_row = max_header_row + 1
+    
+    # Заполняем данные с чередованием строк
+    for row_idx, data_row in enumerate(data_table, start=data_start_row):
+        # Определяем стиль строки (чередование: четные - зеленые, нечетные - белые)
+        is_even = (row_idx - data_start_row) % 2 == 0
+        
+        for col_letter, data_idx, style, is_numeric, calc_func in columns_config:
+            cell = ws.cell(row=row_idx, column=column_index_from_string(col_letter))
+            
+            # Устанавливаем стиль
+            if style:
+                cell.style = style
+            else:
+                # Чередование строк: четные - зеленые, нечетные - белые (как в сложной функции)
+                cell.style = ali_green if is_even else ali_white
+            
+            # Получаем значение
+            value = None
+            try:
+                if calc_func:
+                    value = calc_func(data_row)
+                elif data_idx is not None and data_idx < len(data_row):
+                    value = data_row[data_idx]
+                
+                # Обрабатываем значение
+                if value is not None:
+                    # ОСОБАЯ ОБРАБОТКА для "Н/Д" - всегда как текст
+                    if str(value).strip() == 'Н/Д':
+                        cell.value = 'Н/Д'
+                    # Обработка для "ХВС" и "ГВС" - раскрашиваем
+                    elif str(value).strip() == 'ХВС' or str(value).strip() == 'Холодное водоснабжение':
+                        cell.value = HVS_NAME
+                        cell.style = ali_blue
+                    elif str(value).strip() == 'ГВС' or str(value).strip() == 'Горячее водоснабжение':
+                        cell.value =  GVS_NAME
+                        cell.style = ali_pink
+                    elif is_numeric:
+                        try:
+                            num_val = float(str(value).replace(',', '.'))
+                            if num_is_string:
+                                # Форматируем как строку
+                                if round_size == 0:
+                                    formatted = str(int(round(num_val)))
+                                else:
+                                    formatted = f"{num_val:.{round_size}f}"
+                                cell.value = formatted.replace('.', ',') if ',' in formatted else formatted
+                            else:
+                                cell.value = num_val
+                                cell.number_format = f'0.{"0" * round_size}'
+                        except:
+                            cell.value = str(value)
+                    else:
+                        cell.value = str(value)
+                else:
+                    cell.value = ''
+            except Exception as e:
+                print(f"Error in cell {col_letter}{row_idx}: {e}")
+                cell.value = ''
+    
+    # Фиксируем шапку если нужно
+    if freeze_panes:
+        ws.freeze_panes = freeze_panes
+    else:
+        # По умолчанию фиксируем строку с данными
+        ws.freeze_panes = f'A{data_start_row}'
+    
+    return wb
+
+
+
+def report_electric_3_zones_v4(request):
+    SHOW_LIC_NUM = getattr(settings, 'SHOW_LIC_NUM', 'False')
+    ROUND_SIZE = getattr(settings, 'ROUND_SIZE', 3)
+    COMMENT_TO_EXCEL = getattr(settings, 'COMMENT_TO_EXCEL', 'False')
+    NUM_IS_STRING = getattr(settings, 'NUM_IS_STRING', 'False')
+    
+    # Получение параметров из запроса
+    obj_title = request.GET.get('obj_title')
+    electric_data_end = request.GET.get('electric_data_end')
+    obj_key = request.GET.get('obj_key')
+    obj_parent_title = request.GET.get('obj_parent_title')
+    is_electric_monthly = request.GET.get('is_electric_monthly')
+    is_electric_daily = request.GET.get('is_electric_daily')
+    electric_data_start = request.GET.get('electric_data_start')
+    is_electric_period = request.GET.get('is_electric_period')
+
+    # Определение уровня данных и получение таблицы данных
+    is_abonent_level = re.compile(r'abonent')
+    is_object_level = re.compile(r'level')
+    is_group_level = re.compile(r'group')
+    data_table = []
+
+    if (is_electric_monthly == '1') & (bool(is_abonent_level.search(obj_key))):
+        data_table = common_sql.get_electric_by_date(obj_parent_title, obj_title, electric_data_end, 'monthly', True)
+        
+    elif (is_electric_daily == '1') & (is_electric_period == "0") & (bool(is_abonent_level.search(obj_key))):
+        data_table = common_sql.get_electric_by_date(obj_parent_title, obj_title, electric_data_end, 'daily', True)
+
+    elif (is_electric_monthly == '1') & (bool(is_object_level.search(obj_key))):
+        data_table = common_sql.get_electric_by_date(obj_parent_title, obj_title, electric_data_end, 'monthly', False)
+        if obj_key == 'level1-0':
+            data_table = common_sql.get_electric_by_date_level2(obj_parent_title, obj_title, electric_data_end, 'monthly')
+        if not data_table:
+            data_table = [[electric_data_end, obj_title, u'Н/Д', u'Н/Д', u'Н/Д', u'Н/Д', u'Н/Д']]        
+
+    elif (is_electric_daily == '1') & (bool(is_object_level.search(obj_key))):
+        data_table = common_sql.get_electric_by_date(obj_parent_title, obj_title, electric_data_end, 'daily', False)
+        if obj_key == 'level1-0':
+            data_table = common_sql.get_electric_by_date_level2(obj_parent_title, obj_title, electric_data_end, 'daily')
+        if not data_table:
+            data_table = [[electric_data_end, obj_title, u'Н/Д', u'Н/Д', u'Н/Д', u'Н/Д', u'Н/Д']]
+
+    elif (is_electric_daily == '1') & (bool(is_group_level.search(obj_key))):
+        data_table = common_sql.get_electric_by_date_balance(obj_parent_title, obj_title, electric_data_end, 'daily')
+        
+    elif (is_electric_monthly == '1') & (bool(is_group_level.search(obj_key))):
+        data_table = common_sql.get_electric_by_date_balance(obj_parent_title, obj_title, electric_data_end, 'monthly')
+    
+    # Конфигурация основной шапки для 3-тарифного отчета
+    # Используем зеленые стили для заголовков как в сложной функции
+    headers = [
+        # (merge_range, cell_ref, value, style, width)
+        ('A2:E2', 'A2', f'{obj_title} . Срез показаний с коэффициентами на дату {electric_data_end}', ali_green_title, None),
+        ('A4:A5', 'A4', 'Наименование объекта', ali_green_header, 20),
+        ('B4:B5', 'B4', 'Наименование абонента', ali_green_header, 30),
+        ('C4:C5', 'C4', 'Заводской номер', ali_green_header, 17),
+        ('D4:F4', 'D4', 'Коэффициенты', ali_green_header, None),
+        (None, 'D5', 'Ктн', ali_green_header, None),
+        (None, 'E5', 'Ктт', ali_green_header, None),
+        (None, 'F5', 'А', ali_green_header, None),
+        ('G4:H4', 'G4', 'Сумма', ali_green_header, 13),
+        (None, 'G5', f'Показания A+ на {electric_data_end}', ali_green_header, None),
+        (None, 'H5', f'Энергия A+ на {electric_data_end}', ali_yellow_header, 13),
+        ('I4:J4', 'I4', 'Тариф 1', ali_green_header, 13),
+        (None, 'I5', f'Показания A+ на {electric_data_end}', ali_green_header, None),
+        (None, 'J5', f'Энергия A+ на {electric_data_end}', ali_yellow_header, 13),
+        ('K4:L4', 'K4', 'Тариф 2', ali_green_header, 13),
+        (None, 'K5', f'Показания A+ на {electric_data_end}', ali_green_header, None),
+        (None, 'L5', f'Энергия A+ на {electric_data_end}', ali_yellow_header, 13),
+        ('M4:N4', 'M4', 'Тариф 3', ali_green_header, 13),
+        (None, 'M5', f'Показания A+ на {electric_data_end}', ali_green_header, None),
+        (None, 'N5', f'Энергия A+ на {electric_data_end}', ali_yellow_header, 13),
+    ]
+    
+    # Определяем диапазон основного заголовка
+    base_cols = 14  # Базовые колонки A-N
+    
+    # Динамические дополнительные колонки
+    if SHOW_LIC_NUM:
+        current_col = 'O'
+        headers.append(
+            (f'{current_col}4:{current_col}5', f'{current_col}4', 'Лицевой номер абонента', ali_green_header, 17)
+        )
+        base_cols += 1
+    
+    if COMMENT_TO_EXCEL:
+        comment_col = 'P' if SHOW_LIC_NUM else 'O'
+        headers.append(
+            (f'{comment_col}4:{comment_col}5', f'{comment_col}4', 'Комментарий к абоненту', ali_green_header, 30)
+        )
+        base_cols += 1
+    
+    # Обновляем основной заголовок для охвата всех колонок
+    last_col = chr(ord('A') + base_cols - 1) if base_cols <= 26 else 'Z'
+    headers[0] = (f'A2:{last_col}2', 'A2', f'{obj_title} . Срез показаний с коэффициентами на дату {electric_data_end}', ali_green_title, None)
+    
+    # Конфигурация колонок данных для 3-тарифного отчета
+    columns_config = [
+        # (column_letter, data_index, style, is_numeric, calculation_func)
+        ('A', 7, None, False, None),  # Наименование объекта
+        ('B', 1, None, False, None),  # Наименование абонента
+        ('C', 2, None, False, None),  # Заводской номер
+        ('D', 9, None, False, None),  # Ктн
+        ('E', 8, None, False, None),  # Ктт
+        ('F', 10, None, False, None), # Ка
+        ('G', 3, None, True, None),   # Сумма показания
+        ('H', None, ali_yellow, True, lambda row: row[3] * row[8] * row[9]),  # Энергия Сумма
+        ('I', 4, None, True, None),   # Тариф 1 показания
+        ('J', None, ali_yellow, True, lambda row: row[4] * row[8] * row[9]),  # Энергия Тариф 1
+        ('K', 5, None, True, None),   # Тариф 2 показания
+        ('L', None, ali_yellow, True, lambda row: row[5] * row[8] * row[9]),  # Энергия Тариф 2
+        ('M', 6, None, True, None),   # Тариф 3 показания
+        ('N', None, ali_yellow, True, lambda row: row[6] * row[8] * row[9]),  # Энергия Тариф 3
+    ]
+    
+    # Динамически добавляем колонки данных
+    if SHOW_LIC_NUM:
+        columns_config.append(('O', 15, None, False, None))
+    
+    if COMMENT_TO_EXCEL:
+        comment_data_col = 'P' if SHOW_LIC_NUM else 'O'
+        columns_config.append((comment_data_col, 11, None, False, None))
+
+    # Создание Excel с помощью упрощенной функции
+    wb = export_to_excel_hybrid_simple(
+        data_table=data_table,
+        headers=headers,
+        columns_config=columns_config,
+        sheet_title="3-тарифный отчет",
+        round_size=ROUND_SIZE,
+        num_is_string=NUM_IS_STRING,
+        freeze_panes='A6'  # Фиксируем с A6 (первая строка данных)
+    )
+    
+    # Сохраняем в excel  
+    response = HttpResponse(save_virtual_workbook(wb), content_type="application/vnd.ms-excel")
+    output_name = u'3_tariffa_' + translate(obj_title) + '_' + electric_data_end
+    response['Content-Disposition'] = f'attachment;filename="{output_name.replace(chr(34), chr(92)+chr(34))}.xlsx"'
+    return response
+
+
+def export_to_excel_hybrid(data_table, headers_config, column_config, table_name, 
+                                   table_name_place=None, ws_title="Report", 
+                                   numeric_columns=None, round_size=3, num_is_string=False, 
+                                   freeze_panes='A6', additional_headers=None):
+    """
+    Универсальная функция для экспорта в Excel - ФИНАЛЬНАЯ РАБОЧАЯ ВЕРСИЯ
+    """
+    wb = Workbook()
+    ws = wb.active
+    ws.title = ws_title
+    
+    # Добавляем стили
+    wb.add_named_style(ali_green_header)
+    wb.add_named_style(ali_white)
+    wb.add_named_style(ali_green)
+    wb.add_named_style(ali_yellow)
+    wb.add_named_style(ali_yellow_header)
+    wb.add_named_style(ali_green_title)
+    wb.add_named_style(ali_pink)
+    wb.add_named_style(ali_blue)
+
+    # Основной заголовок
+    ws.merge_cells('A2:Q2')
+    ws['A2'] = table_name
+    ws['A2'].style = "ali_green_title"
+    
+    # Подзаголовок объекта
+    if table_name_place:
+        ws.merge_cells('A3:D3')
+        ws['A3'] = table_name_place
+        ws['A3'].style = "ali_green_title"
+        header_start_row = 5
+    else:
+        header_start_row = 4
+    
+    # Дополнительные заголовки
+    if additional_headers:
+        for header in additional_headers:
+            if 'range' in header:
+                try:
+                    ws.merge_cells(header['range'])
+                    start_cell = header['range'].split(':')[0]
+                    cell = ws[start_cell]
+                    cell.value = header['value']
+                    cell.style = header.get('style', 'ali_green_header')
+                except:
+                    pass
+    
+    # Основные заголовки
+    if headers_config:
+        for header in headers_config:
+            try:
+                if 'range' in header:
+                    ws.merge_cells(header['range'])
+                    start_cell = header['range'].split(':')[0]
+                    cell = ws[start_cell]
+                    cell.value = header['value']
+                    cell.style = header.get('style', 'ali_green_header')
+                    
+                    if 'width' in header and start_cell[0].isalpha():
+                        ws.column_dimensions[start_cell[0]].width = header['width']
+                        
+                elif 'cell' in header:
+                    cell = ws[header['cell']]
+                    cell.value = header['value']
+                    cell.style = header.get('style', 'ali_green_header')
+            except:
+                pass
+    
+    # Определяем строку начала данных
+    data_start_row = header_start_row + 1
+    
+    # ЗАПОЛНЕНИЕ ДАННЫХ - ПРОСТО И НАДЕЖНО
+    for row_idx in range(data_start_row, len(data_table) + data_start_row):
+        data_row = data_table[row_idx - data_start_row]
+        
+        # Чередование стилей
+        is_even_row = (row_idx - data_start_row) % 2 == 0
+        row_style = "ali_green" if is_even_row else "ali_white"
+        
+        # Заполняем каждую колонку
+        for col_letter, data_idx, style, is_numeric, calc_func in column_config:
+            cell = ws.cell(row=row_idx, column=column_index_from_string(col_letter))
+            
+            # Стиль
+            cell.style = style if style else row_style
+            
+            # Значение
+            try:
+                value = None
+                
+                if calc_func:
+                    value = calc_func(data_row)
+                elif data_idx is not None and data_idx < len(data_row):
+                    value = data_row[data_idx]
+                
+                # Записываем
+                if value is not None:
+                    # ОСОБАЯ ОБРАБОТКА для "Н/Д" - всегда как текст
+                    if str(value).strip() == 'Н/Д':
+                        cell.value = 'Н/Д'
+                    elif is_numeric:
+                        # Пробуем число
+                        try:
+                            num_val = float(str(value).replace(',', '.'))
+                            if num_is_string:
+                                cell.value = get_val_by_round(num_val, round_size, '.')
+                            else:
+                                cell.value = get_val_as_number(num_val, round_size)
+                                cell.number_format = f'0.{"0" * round_size}'
+                        except:
+                            cell.value = str(value)
+                    else:
+                        cell.value = str(value)
+                else:
+                    cell.value = ''
+                    
+            except Exception:
+                cell.value = ''
+    
+    # Фиксируем шапку
+    if freeze_panes:
+        ws.freeze_panes = freeze_panes
+    
+    return wb
+
+
+def apply_style_to_merged_range(ws, merge_range, style):
+    """Применяет стиль ко всем ячейкам объединенного диапазона"""
+    try:
+        from openpyxl.utils import range_boundaries
+        
+        min_col, min_row, max_col, max_row = range_boundaries(merge_range)
+        
+        for row in range(min_row, max_row + 1):
+            for col in range(min_col, max_col + 1):
+                cell = ws.cell(row=row, column=col)
+                cell.style = style
+    except Exception as e:
+        print(f"Ошибка применения стиля к {merge_range}: {e}")
+
+
+def get_column_range(start_col, end_col):
+    """Генерирует диапазон букв колонок"""
+    for col in range(ord(start_col), ord(end_col) + 1):
+        yield chr(col)
+        
+        
+        
+def report_water_by_date_v3(request):
+    # Берем настройки из settings
+    ROUND_SIZE = getattr(settings, 'ROUND_SIZE', 3)
+    NUM_IS_STRING = getattr(settings, 'NUM_IS_STRING', 'False')
+    
+    meters_name = request.GET.get('obj_title')
+    electric_data_end = request.GET.get('electric_data_end')
+    parent_name = request.GET.get('obj_parent_title')
+    obj_key = request.GET.get('obj_key')
+
+    # Получение данных
+    is_abonent_level = re.compile(r'level2')
+    is_object_level_2 = re.compile(r'level1')
+    
+    dc = 'daily'
+    data_table = []
+    
+    if bool(is_abonent_level.search(obj_key)): 
+        data_table = common_sql.get_data_table_water_by_date(meters_name, parent_name, electric_data_end, True, dc)
+    elif bool(is_object_level_2.search(obj_key)):
+        data_table = common_sql.get_data_table_water_by_date(meters_name, parent_name, electric_data_end, False, dc)
+
+    # Заменяем None на N/D везде
+    if len(data_table) > 0: 
+        data_table = common_sql.ChangeNull(data_table, None)
+
+    # Конфигурация основной шапки в новом формате
+    # headers: список кортежей (merge_range, cell_ref, value, style, width)
+    headers = [
+        # (merge_range, cell_ref, value, style, width)
+        ('A2:F2', 'A2', f'{meters_name}. Показания по воде на {electric_data_end}', ali_green_title, None),
+        ('A3:D3', 'A3', parent_name, ali_green_title, None),
+        ('A4:A4', 'A4', 'Абонент', ali_green_header, 30),
+        ('B4:B4', 'B4', 'Номер счётчика', ali_green_header, 25),
+        ('C4:C4', 'C4', 'Пульсар', ali_green_header, 25),
+        ('D4:D4', 'D4', 'Канал', ali_green_header, 12),
+        ('E4:E4', 'E4', 'Показания', ali_green_header, 15),
+        ('F4:F4', 'F4', 'Тип', ali_green_header, None),
+    ]
+
+    # Конфигурация колонок данных
+    # (column_letter, data_index, style, is_numeric, calculation_func)
+    columns_config = [
+        ('A', 1, None, False, None),  # Абонент (индекс 1)
+        ('B', 2, None, False, None),  # Номер счётчика (индекс 2)
+        ('C', 3, None, False, None),  # Пульсар (индекс 3)
+        ('D', 4, None, False, None),  # Канал (индекс 4)
+        ('E', 5, None, True, None),   # Показания (индекс 5) - числовое
+        ('F', 6, None, False, None),  # Тип ресурса (индекс 6)
+    ]
+
+    # Создаем Excel через упрощенную гибридную функцию
+    wb = export_to_excel_hybrid_simple(
+        data_table=data_table,
+        headers=headers,
+        columns_config=columns_config,
+        sheet_title="Показания воды",
+        round_size=ROUND_SIZE,
+        num_is_string=NUM_IS_STRING,
+        freeze_panes='A5'  # Фиксируем с A5 (первая строка данных)
+    )
+
+    # Сохраняем в excel  
+    response = HttpResponse(save_virtual_workbook(wb), content_type="application/vnd.ms-excel")
+    output_name = 'water_' + translate(parent_name) + '_' + translate(meters_name) + '_' + electric_data_end
+    response['Content-Disposition'] = f'attachment;filename="{output_name.replace(chr(34), chr(92)+chr(34))}.xlsx"'
+    return response
+
+
+def report_electric_potreblenie_3_zones_v4(request):
+    SHOW_LIC_NUM = getattr(settings, 'SHOW_LIC_NUM', 'False')
+    ROUND_SIZE = getattr(settings, 'ROUND_SIZE', 3)
+    NUM_IS_STRING = getattr(settings, 'NUM_IS_STRING', 'False')
+    
+    #Запрашиваем данные для отчета
+    is_abonent_level = re.compile(r'abonent')
+    is_object_level = re.compile(r'level')
+    is_group_level = re.compile(r'group')
+    
+    obj_parent_title    = request.session['obj_parent_title']
+    obj_title    = request.session['obj_title']
+    obj_key             = request.session['obj_key']
+    is_electric_delta  = request.session['is_electric_delta']
+    is_electric_monthly=request.session['is_electric_monthly']
+    electric_data_start = request.GET['electric_data_start']
+    electric_data_end   = request.GET['electric_data_end']
+    
+    data_table = []
+    if True:
+        if True:                        
+            res='Электричество'
+            
+            if (is_electric_monthly=="1"):
+                dm='monthly'
+            else:
+                dm='daily'
+            if (is_electric_delta == "1") & (bool(is_abonent_level.search(obj_key))): # delta for abonents
+                    isAbon=True                    
+                    data_table=common_sql.get_data_table_electric_period(isAbon,obj_title,obj_parent_title, electric_data_start, electric_data_end, res, dm)
+                    request.session["data_table_export"] = data_table
+                
+            elif (is_electric_delta == '1') & (bool(is_object_level.search(obj_key))): # daily delta for abonents group
+                    isAbon=False
+                    data_table=common_sql.get_data_table_electric_period(isAbon,obj_title,obj_parent_title, electric_data_start, electric_data_end, res, dm)
+                    request.session["data_table_export"] = data_table
+            #*********************************************************************************************************************************************************************
+            elif (is_electric_delta == '1') &(bool(is_group_level.search(obj_key))):
+                    data_table=common_sql.get_data_table_electric_period_for_group(obj_title,obj_parent_title, electric_data_start, electric_data_end, res)
+                    request.session["data_table_export"] = data_table
+    #Запрашиваем данные для отчета конец
+    #print(data_table)
+    #print("-----------------")
+    # ПРЕОБРАЗУЕМ данные как в старой функции - ЧИСЛА должны остаться числами!
+    if len(data_table) > 0: 
+        data_table = common_sql.safe_change_null(data_table, 'Н/Д')
+
+    # КОНВЕРТИРУЕМ старую конфигурацию в новую формат для export_to_excel_hybrid
+    
+    #print(data_table)
+    # 1. Создаем дополнительные заголовки
+    additional_headers = [
+        {'range': 'F3:I3', 'value': 'Сумма A+, кВт*ч', 'style': 'ali_green_header'},
+        {'range': 'J3:M3', 'value': 'Тариф 1 A+, кВт*ч', 'style': 'ali_green_header'},
+        {'range': 'N3:Q3', 'value': 'Тариф 2 A+, кВт*ч', 'style': 'ali_green_header'},
+        {'range': 'R3:U3', 'value': 'Тариф 3 A+, кВт*ч', 'style': 'ali_green_header'},
+        {'range': 'V3:AC3', 'value': 'Расход А+, кВт*ч', 'style': 'ali_green_header'},
+    ]
+
+    # 2. Создаем основную конфигурацию заголовков
+    headers_config = []
+    
+    # Основные колонки A-E
+    headers_config.extend([
+        {'range': 'A4:A5', 'value': 'Наименование абонента', 'style': 'ali_green_header', 'width': 35},
+        {'range': 'B4:B5', 'value': 'Заводской номер', 'style': 'ali_green_header', 'width': 17},
+        {'range': 'C4:E4', 'value': 'Коэффициенты', 'style': 'ali_green_header'},
+        {'cell': 'C5', 'value': 'Ктн', 'style': 'ali_green_header'},
+        {'cell': 'D5', 'value': 'Ктт', 'style': 'ali_green_header'},
+        {'cell': 'E5', 'value': 'А', 'style': 'ali_green_header'},
+    ])
+    
+    # Сумма
+    headers_config.extend([
+        {'range': 'F4:G4', 'value': f'На {electric_data_start}', 'style': 'ali_green_header'},
+        {'range': 'H4:I4', 'value': f'На {electric_data_end}', 'style': 'ali_green_header'},
+        {'cell': 'F5', 'value': 'Показания', 'style': 'ali_green_header'},
+        {'cell': 'G5', 'value': 'Энергия', 'style': 'ali_yellow_header'},
+        {'cell': 'H5', 'value': 'Показания', 'style': 'ali_green_header'},
+        {'cell': 'I5', 'value': 'Энергия', 'style': 'ali_yellow_header'},
+    ])
+    
+    # Тариф 1
+    headers_config.extend([
+        {'range': 'J4:K4', 'value': f'На {electric_data_start}', 'style': 'ali_green_header'},
+        {'range': 'L4:M4', 'value': f'На {electric_data_end}', 'style': 'ali_green_header'},
+        {'cell': 'J5', 'value': 'Показания', 'style': 'ali_green_header'},
+        {'cell': 'K5', 'value': 'Энергия', 'style': 'ali_yellow_header'},
+        {'cell': 'L5', 'value': 'Показания', 'style': 'ali_green_header'},
+        {'cell': 'M5', 'value': 'Энергия', 'style': 'ali_yellow_header'},
+    ])
+    
+    # Тариф 2
+    headers_config.extend([
+        {'range': 'N4:O4', 'value': f'На {electric_data_start}', 'style': 'ali_green_header'},
+        {'range': 'P4:Q4', 'value': f'На {electric_data_end}', 'style': 'ali_green_header'},
+        {'cell': 'N5', 'value': 'Показания', 'style': 'ali_green_header'},
+        {'cell': 'O5', 'value': 'Энергия', 'style': 'ali_yellow_header'},
+        {'cell': 'P5', 'value': 'Показания', 'style': 'ali_green_header'},
+        {'cell': 'Q5', 'value': 'Энергия', 'style': 'ali_yellow_header'},
+    ])
+    
+    # Тариф 3
+    headers_config.extend([
+        {'range': 'R4:S4', 'value': f'На {electric_data_start}', 'style': 'ali_green_header'},
+        {'range': 'T4:U4', 'value': f'На {electric_data_end}', 'style': 'ali_green_header'},
+        {'cell': 'R5', 'value': 'Показания', 'style': 'ali_green_header'},
+        {'cell': 'S5', 'value': 'Энергия', 'style': 'ali_yellow_header'},
+        {'cell': 'T5', 'value': 'Показания', 'style': 'ali_green_header'},
+        {'cell': 'U5', 'value': 'Энергия', 'style': 'ali_yellow_header'},
+    ])
+    
+    # Расход
+    headers_config.extend([
+        {'range': 'V4:W4', 'value': 'Сумма', 'style': 'ali_green_header'},
+        {'cell': 'V5', 'value': 'Показания', 'style': 'ali_green_header'},
+        {'cell': 'W5', 'value': 'Энергия', 'style': 'ali_yellow_header'},
+        
+        {'range': 'X4:Y4', 'value': 'Tариф 1', 'style': 'ali_green_header'},
+        {'cell': 'X5', 'value': 'Показания', 'style': 'ali_green_header'},
+        {'cell': 'Y5', 'value': 'Энергия', 'style': 'ali_yellow_header'},
+        
+        {'range': 'Z4:AA4', 'value': 'Tариф 2', 'style': 'ali_green_header'},
+        {'cell': 'Z5', 'value': 'Показания', 'style': 'ali_green_header'},
+        {'cell': 'AA5', 'value': 'Энергия', 'style': 'ali_yellow_header'},
+        
+        {'range': 'AB4:AC4', 'value': 'Tариф 3', 'style': 'ali_green_header'},
+        {'cell': 'AB5', 'value': 'Показания', 'style': 'ali_green_header'},
+        {'cell': 'AC5', 'value': 'Энергия', 'style': 'ali_yellow_header'},
+    ])
+    
+    if SHOW_LIC_NUM:
+        headers_config.append(
+            {'range': 'AD4:AD5', 'value': 'Лицевой номер абонента', 'style': 'ali_green_header', 'width': 17}
+        )
+
+    # 3. Конфигурация колонок данных - ТОЧНО как в старой функции
+    column_config = [
+        # (column_letter, data_index, style, is_numeric, calculation_func)
+        ('A', 0, None, False, None),  # Наименование абонента
+        ('B', 1, None, False, None),  # Заводской номер
+        ('C', 23, None, True, None),  # Ктн
+        ('D', 20, None, True, None),  # Ктт
+        ('E', 24, None, True, None),  # Ка
+        
+        # Сумма - начало периода
+        ('F', 2, None, True, None),   # Сумма А+ на начало
+        ('G', None, 'ali_yellow', True, 
+         lambda row: calculate_energy_for_cell(row, 23, 20, 2)),  # Энергия Сумма на начало
+        
+        # Сумма - конец периода
+        ('H', 7, None, True, None),   # Сумма А+ на конец
+        ('I', None, 'ali_yellow', True, 
+         lambda row: calculate_energy_for_cell(row, 23, 20, 7)),  # Энергия Сумма на конец
+        
+        # Тариф 1 - начало периода
+        ('J', 3, None, True, None),   # Тариф 1 А+ на начало
+        ('K', None, 'ali_yellow', True, 
+         lambda row: calculate_energy_for_cell(row, 23, 20, 3)),  # Энергия Тариф 1 на начало
+        
+        # Тариф 1 - конец периода
+        ('L', 8, None, True, None),   # Тариф 1 А+ на конец
+        ('M', None, 'ali_yellow', True, 
+         lambda row: calculate_energy_for_cell(row, 23, 20, 8)),  # Энергия Тариф 1 на конец
+        
+        # Тариф 2 - начало периода
+        ('N', 4, None, True, None),   # Тариф 2 А+ на начало
+        ('O', None, 'ali_yellow', True, 
+         lambda row: calculate_energy_for_cell(row, 23, 20, 4)),  # Энергия Тариф 2 на начало
+        
+        # Тариф 2 - конец периода
+        ('P', 9, None, True, None),   # Тариф 2 А+ на конец
+        ('Q', None, 'ali_yellow', True, 
+         lambda row: calculate_energy_for_cell(row, 23, 20, 9)),  # Энергия Тариф 2 на конец
+        
+        # Тариф 3 - начало периода
+        ('R', 5, None, True, None),   # Тариф 3 А+ на начало
+        ('S', None, 'ali_yellow', True, 
+         lambda row: calculate_energy_for_cell(row, 23, 20, 5)),  # Энергия Тариф 3 на начало
+        
+        # Тариф 3 - конец периода
+        ('T', 10, None, True, None),  # Тариф 3 А+ на конец
+        ('U', None, 'ali_yellow', True, 
+         lambda row: calculate_energy_for_cell(row, 23, 20, 10)), # Энергия Тариф 3 на конец
+        
+        # Расход
+        ('V', 12, None, True, None),  # Расход Сумма А+
+        ('W', None, 'ali_yellow', True, 
+         lambda row: calculate_energy_for_cell(row, 23, 20, 12)), # Расход Сумма Энергия
+        ('X', 13, None, True, None),  # Расход Тариф 1 А+
+        ('Y', None, 'ali_yellow', True, 
+         lambda row: calculate_energy_for_cell(row, 23, 20, 13)), # Расход Тариф 1 Энергия
+        ('Z', 14, None, True, None),  # Расход Тариф 2 А+
+        ('AA', None, 'ali_yellow', True, 
+         lambda row: calculate_energy_for_cell(row, 23, 20, 14)), # Расход Тариф 2 Энергия
+        ('AB', 15, None, True, None), # Расход Тариф 3 А+
+        ('AC', None, 'ali_yellow', True, 
+         lambda row: calculate_energy_for_cell(row, 23, 20, 15)), # Расход Тариф 3 Энергия
+    ]
+    
+    if SHOW_LIC_NUM:
+        column_config.append(('AD', 25, None, False, None))
+
+    # 4. Вспомогательная функция для вычислений (как в старой функции)
+    def calculate_energy_for_cell(row, idx1, idx2, idx3):
+        """Вычисление энергии (аналогично старой лямбде: row[23] * row[20] * row[2])"""
+        try:
+            # Проверяем индексы
+            if idx1 >= len(row) or idx2 >= len(row) or idx3 >= len(row):
+                return None
+            
+            val1 = row[idx1]
+            val2 = row[idx2]
+            val3 = row[idx3]
+            
+            # Если хотя бы одно значение "Н/Д" - возвращаем "Н/Д"
+            if val1 == 'Н/Д' or val2 == 'Н/Д' or val3 == 'Н/Д':
+                return 'Н/Д'
+            
+            # Пробуем вычислить
+            try:
+                # Преобразуем строки в числа если нужно
+                if isinstance(val1, str):
+                    num1 = float(val1.replace(',', '.'))
+                else:
+                    num1 = float(val1)
+                    
+                if isinstance(val2, str):
+                    num2 = float(val2.replace(',', '.'))
+                else:
+                    num2 = float(val2)
+                    
+                if isinstance(val3, str):
+                    num3 = float(val3.replace(',', '.'))
+                else:
+                    num3 = float(val3)
+                
+                return num1 * num2 * num3
+            except (ValueError, TypeError):
+                return 'Н/Д'
+                
+        except Exception:
+            return 'Н/Д'
+
+    # 5. Создаем Excel через новую функцию
+    wb = export_to_excel_hybrid(  # Используем простую версию
+    data_table=data_table,
+    headers_config=headers_config,
+    column_config=column_config,
+    table_name=f'{obj_title}. Потребление электроэнергии...',
+    table_name_place=obj_parent_title,
+    ws_title="Потребление электроэнергии",
+    additional_headers=additional_headers,
+    round_size=ROUND_SIZE,
+    num_is_string=NUM_IS_STRING,
+    freeze_panes='A6'
+    )
+
+    response = HttpResponse(save_virtual_workbook(wb), content_type="application/vnd.ms-excel")
+    output_name = 'rashod_3_zones_' + translate(obj_title) + '_' + str(electric_data_start) + '-' + str(electric_data_end)
+    response['Content-Disposition'] = f'attachment;filename="{output_name.replace(chr(34), chr(92)+chr(34))}.xlsx"'
+    return response

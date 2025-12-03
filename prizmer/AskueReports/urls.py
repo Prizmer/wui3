@@ -42,8 +42,8 @@ urlpatterns = [
     url(r'^36/$', views.report_water_tekon_gvs, name = '36'), # показжания на дату по теплосчётчикам Текон-гвс
     url(r'^37/$', views.report_water_potreblenie_tekon_gvs, name = '37'), # расход по теплосчётчикам Текон-гвс по двум датам
     
-    url(r'^38/$', views.report_water_by_date, name = '38'), #для Фили, выгрузка данных на дату по воде Импульсные
-    url(r'^39/$', views.report_water_potreblenie_pulsar, name = '39'), #для Фили, выгрузка данных за период по воде Импульсные
+    url(r'^38/$', views.report_water_by_date_v3, name = '38'), #для Фили, выгрузка данных на дату по воде Импульсные
+    url(r'^39/$', views.report_water_potreblenie_pulsar_v2, name = '39'), #для Фили, выгрузка данных за период по воде Импульсные
     url(r'^41/$', views.report_forma_80020_fast, name = '41'), #Выгрузка архива с файлами xml по форме Мосэнергосбыт 80020
     
     url(r'^42/$', views.report_all_res_by_date, name = '42'), #отчёт по всем ресурсам на дату
@@ -59,13 +59,14 @@ urlpatterns = [
     url(r'^54/$', views.report_elf_gvs_by_date, name = '54'), # показания по гвс -Эльф 
     url(r'^55/$', views.report_elf_gvs_potreblenie, name = '55'), # потребление по гвс -Эльф 
     
-    url(r'^56/$', views.report_pulsar_heat_daily, name = '56'), # Показание на дату с теплосчётчиков Пульсар
-    url(r'^59/$', views.report_pulsar_heat_period, name = '59'), # Показание на дату с теплосчётчиков Пульсар
+    url(r'^56/$', views.report_pulsar_heat_daily_v2, name = '56'), # Показание на дату с теплосчётчиков Пульсар
+    url(r'^59/$', views.report_pulsar_heat_period_v2, name = '59'), # Показание на дату с теплосчётчиков Пульсар
     
-    url(r'^57/$', views.report_pulsar_water_period, name = '57'), # Показание за период с водосчётчиков Пульсар
-    url(r'^58/$', views.report_pulsar_water_daily, name = '58'), # Показание на дату с водосчётчиков Пульсар
+    url(r'^57/$', views.report_pulsar_water_period_v2, name = '57'), # Показание за период с водосчётчиков Пульсар
+    #url(r'^58/$', views.report_pulsar_water_daily, name = '58'), # Показание на дату с водосчётчиков Пульсар
+    url(r'^58/$', views.report_pulsar_water_daily_floors_v2, name = '58'), # Показание на дату с водосчётчиков Пульсар
     
-    url(r'^60/$', views.report_pulsar_water_daily_row, name = '60'),# Показания по стоякам в одну строку на дату с водосчётчиков Пульсар   
+    url(r'^60/$', views.report_pulsar_water_daily_row_v2, name = '60'),# Показания по стоякам в одну строку на дату с водосчётчиков Пульсар   
     
     url(r'^62/$', views.report_pulsar_heat_daily_2, name = '62'), # Показание на дату с теплосчётчиков Пульсар
     url(r'^61/$', views.report_pulsar_heat_period_2, name = '61'), # Показание за период  с теплосчётчиков Пульсар
@@ -75,7 +76,8 @@ urlpatterns = [
     
     url(r'^66/$', views.report_heat_water_elf_daily, name = '66'), # Показание на дату Эльф-тепло и вода
     
-    url(r'^67/$', views.report_water_pulsar_potreblenie_skladochnaya, name = '67'), #skladochnaya - otch`t za period
+    url(r'^67/$', views.report_water_pulsar_potreblenie_v2, name = '67'), #skladochnaya - otch`t za period
+    #url(r'^67/$', views.report_water_pulsar_potreblenie_skladochnaya, name = '67'), #skladochnaya - otch`t za period
     
     url(r'^68/$', views.report_rejim_electro, name = '68'), #отчёт-режимный день
     url(r'^69/$', views.electric_between_3_zones_report, name = '69'), #отчёт как 29
@@ -83,7 +85,7 @@ urlpatterns = [
    
     url(r'^72/$', views.report_electric_simple_3_zones_v2, name = '72'),
 
-    url(r'^73/$', views.report_pulsar_water_period, name = '73'), # отчёт 57, Показание за период с водосчётчиков Пульсар
+    url(r'^73/$', views.report_pulsar_water_period_v2, name = '73'), # отчёт 57, Показание за период с водосчётчиков Пульсар
     #url(r'^74/$', views.report_current_3_zones_v2), # Электрика. Простой отчет по показаниям на дату. 3 Тарифа   
     url(r'^74/$', views.report_heat_karat_daily, name = '74'), #karat307 pokazaniya
     url(r'^75/$', views.report_heat_karat_potreblenie, name = '75'),#karat307 potreblenie
@@ -144,9 +146,9 @@ urlpatterns = [
     url(r'^111/$', views.report_heat_tem104_consumption, name = '111'), #*потребеление по теплу ТЭМ-104
     url(r'^112/$', views.report_heat_tem104_daily, name = '112'), #*показания по теплу ТЭМ-104 на дату
 
-    url(r'^113/$', views.report_electric_potreblenie_3_zones_v2, name = '113'), # отчёт - Электрика. Отчет по потреблению за период по двум датам. 3 Тарифа.
+    url(r'^113/$', views.report_electric_potreblenie_3_zones_v4, name = '113'), # отчёт - Электрика. Отчет по потреблению за период по двум датам. 3 Тарифа.
 
-    url(r'^114/$', views.report_electric_3_zones_v2, name = '114'), # *Показания по электричеству на дату. 3 тарифа
+    url(r'^114/$', views.report_electric_3_zones_v4, name = '114'), # *Показания по электричеству на дату. 3 тарифа
 
     url(r'^115/$', views.report_stk_heat_period, name = '115'), # Потребление за период с теплосчётчиков Пульс СТК
     url(r'^116/$', views.report_stk_heat_daily, name = '116'), # Показание на дату с теплосчётчиков Пульс СТК

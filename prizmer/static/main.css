@@ -9,6 +9,7 @@ html, body {
 #layout { 
     min-height: 100%;
     max-width: 1320px;
+    min-width: 1320px;
     margin: 0 auto;
     display: flex;
     flex-direction: column;
@@ -322,6 +323,7 @@ padding: 3px;
 {
     background: ghostwhite;
     border: 3px solid #D8E2EC;
+    color: #333;
 }
 
 .div_scroll
@@ -382,6 +384,7 @@ color: #8D8173;
     flex-wrap: wrap; /* Allow children to wrap if they exceed available width */
     border-bottom-left-radius: 8px;
     border-bottom-right-radius: 8px;
+	max-height: 700px;
 }
 
 
@@ -1147,8 +1150,9 @@ color: #004C79;
 }
 
 .ui-datepicker .ui-datepicker-calendar td .ui-state-active {
-    background-color: #0056b3;
-    color: #fff;
+    background: #0056b3 !important;
+    background-image: none !important;
+    color: #fff !important;
     font-weight: bold;
 }
 
