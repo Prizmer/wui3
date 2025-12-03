@@ -78,6 +78,13 @@ margin-left: 0px;
 width: 95%;
 }
 
+#logo_ridan {
+margin-top: 20px;
+margin-bottom: -20px;
+margin-left: 0px;
+width: 100%;
+}
+
 #title-exit{
  	align:right;
 	float:right;
@@ -1061,6 +1068,23 @@ color: #004C79;
     flex-shrink: 0; /* Prevent shrinking */
     max-width: 100%; /* Ensure it doesn't exceed parent's width */
     padding-right: 3.5%;
+}
+
+.footer-right-content-ridan {
+    display: flex;
+    gap: 10px; /* Space between elements */
+    align-items: center;
+    flex-shrink: 0; /* Prevent shrinking */
+    max-width: 100%; /* Ensure it doesn't exceed parent's width */
+    padding-right: 9.5%;
+    width: 300px;
+}
+#footer-logo {
+    width: 300px;
+}
+
+#footer-logo > img {
+    height: 50px;
 }
 
 /* Modernizing jQuery UI Datepicker */
