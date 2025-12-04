@@ -1,4 +1,4 @@
-html, body {
+html, body:not(.service-page-layout) {
     height: 100%;
     width: 100%;
     box-sizing: border-box;
@@ -6,7 +6,13 @@ html, body {
     padding: 0;
 }
 
-#layout { 
+body.service-page-layout {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box; /* Explicitly add for consistency */
+}
+
+#layout:not(.container) { 
     min-height: 100%;
     max-width: 1320px;
     min-width: 1320px;
