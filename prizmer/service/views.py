@@ -2668,12 +2668,31 @@ def add_taken_param_no_signals(instance, isR, isHalfs, is_ridan_impulse=False): 
         # "Показание Расход воды" Объем, м3
         add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "209894a8-8d19-4e4d-bad8-1767eec4fedf"))
         add_param.save()
+        #battery_voltage
+        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "b34e9c13-f8fc-4baa-acaa-4aa2b01e2866"))
+        add_param.save()
+        #ХВС_current_error
+        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "6ca83dce-dcc9-4e2d-94ca-e22ec855a65d"))
+        add_param.save()
+        #ХВС_accumulated_error
+        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "3c066109-31bf-4256-83de-40ccd02e20fd"))
+        add_param.save()
+        
 
     elif instance.guid_types_meters.name == 'Пульсар ГВС':
         #Добавляем параметры для водосчётчика Пульсар ГВС.
         #------------Суточные
         # "Показание Расход воды" Объем, м3
         add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "5fc2ff3b-999e-4154-ba49-84d3971369b0"))
+        add_param.save()
+        #battery_voltage
+        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "82e5717b-a4ec-4f88-9c18-338e5a0f8d30"))
+        add_param.save()
+        #ГВС_current_error
+        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "d5417782-4ea5-4bfb-bc3f-21e8e7868aa9"))
+        add_param.save()
+        #ГВС_accumulated_error
+        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "649603aa-93a8-44df-ba55-e15e3bf44c0e"))
         add_param.save()
         
     elif instance.guid_types_meters.name == 'Пульс СТК ХВС':

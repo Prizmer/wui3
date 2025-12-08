@@ -6981,7 +6981,7 @@ left join
 from
 (
 Select z1.date,z1.name,z1.guid, 
-max(Case when  z1.type_meter='%s'  then z1.factory_number_manualend) as hvs_1_num,
+max(Case when  z1.type_meter='%s'  then z1.factory_number_manual end) as hvs_1_num,
 max(Case when  z1.type_meter='%s'  then z1.value else 0 end) as hvs_1,
 max(Case when z1.type_meter='%s'  then z1.factory_number_manual  end) as gvs_1_num,
 max(Case when  z1.type_meter='%s'  then z1.value else 0 end) as gvs_1
@@ -7211,9 +7211,9 @@ max(Case when z1.attr1 = '%s' and z1.type_meter='%s'  then z1.factory_number_man
 max(Case when z1.attr1 = '%s' and z1.type_meter='%s'  then z1.value else 0 end) as hvs_1,
 max(Case when z1.attr1 = '%s' and z1.type_meter='%s'  then z1.factory_number_manual end) as gvs_1_num,
 max(Case when z1.attr1 = '%s' and z1.type_meter='%s'  then z1.value else 0 end) as gvs_1,
-max(Case when z1.attr1 = '%s' and z1.type_meter='%s'  then z1.factory_number_manualend) as hvs_2_num,
+max(Case when z1.attr1 = '%s' and z1.type_meter='%s'  then z1.factory_number_manual end) as hvs_2_num,
 max(Case when z1.attr1 = '%s' and z1.type_meter='%s'  then z1.value else 0  end) as hvs_2,
-max(Case when z1.attr1 = '%s' and z1.type_meter='%s'  then z1.factory_number_manualend) as gvs_2_num,
+max(Case when z1.attr1 = '%s' and z1.type_meter='%s'  then z1.factory_number_manual end) as gvs_2_num,
 max(Case when z1.attr1 = '%s' and z1.type_meter='%s'  then z1.value else 0  end) as gvs_2,
 max(Case when z1.attr1 = '%s' and z1.type_meter='%s'  then z1.factory_number_manual end) as hvs_3_num,
 max(Case when z1.attr1 = '%s' and z1.type_meter='%s'  then z1.value else 0  end) as hvs_3,
@@ -7264,6 +7264,7 @@ group by z1.date_end,z1.name
          my_params[6],my_params[2],my_params[6],my_params[2],my_params[6],my_params[3],my_params[6],my_params[3],
          electric_data_end,
          obj_parent_title, obj_title, electric_data_end, my_params[0], my_params[1], obj_title,obj_parent_title)
+    #print(sQuery)
     return sQuery
     
 def MakeSqlQuery_water_pulsar_daily_for_all_row(obj_parent_title, obj_title, electric_data_end, my_params):

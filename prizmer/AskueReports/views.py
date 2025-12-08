@@ -24180,6 +24180,146 @@ def report_pulsar_water_daily_floors_v2(request):
     return response
 
 
+def report_pulsar_water_daily_floors_v2_desc(request):
+    # Берем настройки из settings
+    SHOW_LIC_NUM = getattr(settings, 'SHOW_LIC_NUM', 'False')
+    COMMENT_TO_EXCEL = getattr(settings, 'COMMENT_TO_EXCEL', 'False')
+    SHOW_STOYAK = getattr(settings, 'SHOW_STOYAK', 'False')
+    SHOW_FLOORS = getattr(settings, 'SHOW_FLOORS', 'True')
+    ROUND_SIZE = getattr(settings, 'ROUND_SIZE', 3)
+    NUM_IS_STRING = getattr(settings, 'NUM_IS_STRING', 'False')
+    
+    # Получаем параметры из session
+    obj_parent_title = request.session.get('obj_parent_title')
+    obj_title = request.session.get('obj_title')
+    electric_data_end = request.session.get('electric_data_end')
+    obj_key = request.session.get('obj_key')
+    
+    # Запрашиваем данные для отчета
+    is_abonent_level = re.compile(r'abonent')
+    is_object_level_2 = re.compile(r'level2')
+    data_table = []
+    
+    sortDir = 'DESC'
+    if bool(is_abonent_level.search(obj_key)):
+        data_table = common_sql.get_data_table_pulsar_water_daily(obj_parent_title, obj_title, electric_data_end, True, sortDir)
+    elif bool(is_object_level_2.search(obj_key)):
+        data_table = common_sql.get_data_table_pulsar_water_daily(obj_parent_title, obj_title, electric_data_end, False, sortDir)
+    
+    # Заменяем None на N/D везде с помощью безопасной функции
+    if len(data_table) > 0:
+        data_table = common_sql.safe_change_null(data_table, default_value='Н/Д')
+        
+        # Для комментария: если значение "Н/Д" - меняем на пустую строку
+        # Но только если комментарий будет выводиться
+        if COMMENT_TO_EXCEL:
+            processed_data = []
+            for row in data_table:
+                if isinstance(row, (list, tuple)) and len(row) > 7:
+                    row_list = list(row)
+                    # Комментарий на индексе 7
+                    if str(row_list[7]).strip() == 'Н/Д':
+                        row_list[7] = ''
+                    processed_data.append(tuple(row_list))
+                else:
+                    processed_data.append(row)
+            data_table = processed_data
+    
+    # Базовые заголовки (A-F) - как в оригинале
+    headers = [
+        # (merge_range, cell_ref, value, style, width)
+        ('A2:F2', 'A2', f'Пульсар. Потребление воды на {electric_data_end}', ali_green_title, None),
+        ('A5:A5', 'A5', 'Абонент', ali_green_header, 23),
+        ('B5:B5', 'B5', 'Тип счётчика', ali_green_header, None),
+        ('C5:C5', 'C5', 'Стояк', ali_green_header, None),
+        ('D5:D5', 'D5', 'Этаж', ali_green_header, None),
+        ('E5:E5', 'E5', 'Счётчик', ali_green_header, 17),
+        ('F5:F5', 'F5', f'Показания на {electric_data_end}, м3', ali_green_header, 17),
+    ]
+    
+    # Базовые колонки данных (A-F)
+    # Индексы из SQL запроса:
+    # 1 - Абонент, 2 - Тип счетчика, 3 - Стояк, 4 - Счетчик, 5 - Показания, 
+    # 7 - Комментарий, 8 - Этаж
+    columns_config = [
+        ('A', 1, None, False, None),  # Абонент (индекс 1)
+        ('B', 2, None, False, None),  # Тип счётчика (индекс 2)
+        ('C', 3, None, False, None),  # Стояк (индекс 3)
+        ('D', 8, None, False, None),  # Этаж (индекс 8)
+        ('E', 4, None, False, None),  # Счётчик (индекс 4)
+        ('F', 5, None, True, None),   # Показания (индекс 5) - числовое
+    ]
+    
+    # Текущая последняя колонка
+    last_col = 'F'
+    
+    # Добавляем комментарий если включена настройка
+    if COMMENT_TO_EXCEL:
+        comment_col = 'G'
+        headers.append((f'{comment_col}5:{comment_col}5', f'{comment_col}5', 'Комментарий к абоненту', ali_green_header, 30))
+        columns_config.append((comment_col, 7, None, False, None))  # Комментарий (индекс 7)
+        last_col = comment_col
+    
+    # Обновляем основной заголовок для охвата всех колонок
+    headers[0] = (f'A2:{last_col}2', 'A2', f'Пульсар. Потребление воды на {electric_data_end}', ali_green_title, None)
+    
+    # Создаем Excel через упрощенную гибридную функцию
+    wb = export_to_excel_hybrid_simple(
+        data_table=data_table,
+        headers=headers,
+        columns_config=columns_config,
+        sheet_title="Потребление воды",
+        round_size=ROUND_SIZE,
+        num_is_string=NUM_IS_STRING,
+        freeze_panes='A6'  # Фиксируем с A6 (первая строка данных)
+    )
+
+    # Настраиваем высоту строк для заголовков и скрываем колонки
+    ws = wb.active
+    
+    # Увеличиваем высоту строк заголовков
+    ws.row_dimensions[2].height = 35  # Основной заголовок
+    ws.row_dimensions[5].height = 63  # Заголовки колонок
+    
+    # Скрываем колонки согласно настройкам
+    ws.column_dimensions['C'].hidden = not SHOW_STOYAK  # Стояк
+    ws.column_dimensions['D'].hidden = not SHOW_FLOORS  # Этаж
+    
+    # Настраиваем ширину колонок (как в оригинале)
+    ws.column_dimensions['A'].width = 23  # Абонент
+    ws.column_dimensions['E'].width = 17  # Счётчик
+    ws.column_dimensions['F'].width = 17  # Показания
+    
+    # Настраиваем ширину для комментария если есть
+    if COMMENT_TO_EXCEL:
+        ws.column_dimensions['G'].width = 30
+    
+    # Включаем перенос текста и настраиваем выравнивание
+    for row in [2, 5]:
+        for cell in ws[row]:
+            if row == 2:
+                # Для основного заголовка - выравнивание по левому краю
+                cell.alignment = cell.alignment.copy(
+                    wrap_text=True, 
+                    vertical='center', 
+                    horizontal='left'
+                )
+            else:
+                # Для заголовков колонок - по центру
+                cell.alignment = cell.alignment.copy(
+                    wrap_text=True, 
+                    vertical='center', 
+                    horizontal='center'
+                )
+    
+    # Сохраняем в excel  
+    response = HttpResponse(save_virtual_workbook(wb), content_type="application/vnd.ms-excel")
+    output_name = 'pulsar_water_report_' + translate(obj_title) + '_' + electric_data_end
+    response['Content-Disposition'] = f'attachment;filename="{output_name.replace(chr(34), chr(92)+chr(34))}.xlsx"'
+    
+    return response
+
+
 def report_pulsar_heat_daily_floors(request):
     COMMENT_TO_EXCEL = getattr(settings, 'COMMENT_TO_EXCEL', 'False')
     SHOW_FLOORS = getattr(settings, 'SHOW_FLOORS', 'True')

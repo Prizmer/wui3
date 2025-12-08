@@ -373,10 +373,7 @@ color: #8D8173;
 
 
 
-#tree {
-    width: 100%;
-    flex-grow: 1;
-}
+
 
 #myfooter{
     padding: 15px 0; /* Reduced height */
@@ -988,8 +985,10 @@ color: #004C79;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05); /* Subtle shadow */
     height: auto; /* Allow height to adjust to content */
     min-height: 480px; /* Maintain a minimum height */
+    max-height: calc(100vh - 300px); /* Limit max height to enable scrolling */
     overflow: auto; /* Add scrollbars if content overflows */
     width: 100%; /* Ensure it takes full width of its column */
+    flex-grow: 0; /* Prevent it from growing indefinitely */
 }
 
 /* Custom layout for main content area */
