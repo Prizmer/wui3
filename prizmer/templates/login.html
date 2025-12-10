@@ -8,33 +8,42 @@
 </head>
 <body class="login">
 
-<div id="container">
-<div>
-{% load static %} <img id="logo2" src="{%static "images/logo2.jpg" %}" alt="ООО Правильные Измерения">
+<div class="background-container">
+    <img src="{% static 'images/main_image.png' %}" class="background-image">
 </div>
-<div id="content" class="colM">
-<div id="content-main">
-    <form action="" method="post" id="login-form">
-        {% csrf_token %}
-        <div class="form-row">
-            <label for="id_username" class="required">Имя пользователя:</label>
-            <input type="text" name="username" id ="id_username">
-        </div>
-        <div class="form-row">
-            <label for="id_password" class="required">Пароль:</label>
-            <input type="password" name="password" id="id_password">
-        </div>
-            {% if login_error %}
-               <div>
-                <label id="error">{{ login_error }}</label><br>
-               </div>
-            {% endif %}
-        <div class="submit-row">
-           <input type="submit" value="Войти">
-        </div>
-    </form>
-</div>
-</div>
+
+<div id="container" class="login-card">
+    <div class="logo-wrapper">
+        {% if IS_RIDAN %}
+            <img id="logo2" src="{% static 'images/ridan24_logoRU_v_cmyk_red.svg' %}" alt="Ридан">
+        {% else %}
+            <h3 class="logo-text">ПРАВИЛЬНЫЕ ИЗМЕРЕНИЯ</h3>
+            <img id="logo2" src="{% static 'images/2logo-ico256.png' %}" alt="ООО Правильные Измерения">
+        {% endif %}
+    </div>
+    <div id="content" class="colM">
+    <div id="content-main">
+        <form action="" method="post" id="login-form">
+            {% csrf_token %}
+            <div class="form-row">
+                <label for="id_username" class="required">Имя пользователя:</label>
+                <input type="text" name="username" id ="id_username">
+            </div>
+            <div class="form-row">
+                <label for="id_password" class="required">Пароль:</label>
+                <input type="password" name="password" id="id_password">
+            </div>
+                {% if login_error %}
+                    <div>
+                    <label id="error">{{ login_error }}</label><br>
+                    </div>
+                {% endif %}
+            <div class="submit-row">
+                <input type="submit" value="Войти">
+            </div>
+        </form>
+    </div>
+    </div>
 </div>
 
 </body>

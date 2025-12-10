@@ -45,11 +45,12 @@
 	<div class="left-panel">  <!-- В этой колонке лого и дерево объектов -->	
 
 	<div id="logo-text-container">
-
-		<div>{% load static %} <img id="logo" src="{%static "images/new_ico/logo2-ico256.png" %}" alt="ООО Правильные Измерения"> </div>
-
-		<div id="blue-style"> <h6>ПРАВИЛЬНЫЕ ИЗМЕРЕНИЯ</h6></div>
-
+        {% if IS_RIDAN %}
+            <div><img id="logo" class="ridan-logo" src="{%static "images/ridan24_logoRU_v_cmyk_red.svg" %}" alt="Ридан"></div>
+        {% else %}
+            <div>{% load static %} <img id="logo" src="{%static "images/new_ico/logo2-ico256.png" %}" alt="ООО Правильные Измерения"> </div>
+            <div id="blue-style"> <h6>ПРАВИЛЬНЫЕ ИЗМЕРЕНИЯ</h6></div>
+        {% endif %}
 	</div>
 
 		<br>
@@ -183,13 +184,17 @@
 <div id="myfooter">
 		<div class="footer-left-content">
 			<!-- <div class="col-1">{% load static %} <a target="_blank" href="../../askue/instruction_user" ><img id="user_info-ico48" src="{%static "images/user_info-ico48.png" %}" data-toggle="tooltip" data-placement="top" title="Инструкция пользователя"></a>		</div> -->
-			<a target="_blank" href="../../askue/instruction_admin" ><img id="admin_info-ico48" src="{%static "images/admin_info-ico48.png" %}"  data-toggle="tooltip" data-placement="top" title="Инструкция администратора"></a>
-			<a target="_blank" href="../../admin" ><img id="admin_panel-ico48" src="{%static "images/admin_panel-ico48.png" %}" data-toggle="tooltip" data-placement="top" title="Панель администратора"></a>
-			<a target="_blank" href="../../service/config" ><img id="admin_config-ico48" src="{%static "images/admin_config-ico48.png" %}" data-toggle="tooltip" data-placement="top" title="Панель конфигурирования"></a>
+			<a target="_blank" href="../../askue/instruction_admin" ><img src="{%static "images/info-ico64_white2.svg" %}" height="54" data-toggle="tooltip" data-placement="top" title="Инструкция администратора"></a>
+			<a target="_blank" href="../../admin" ><img src="{%static "images/admin-ico64_white2.svg" %}" height="54" data-toggle="tooltip" data-placement="top" title="Панель администратора"></a>
+			<a target="_blank" href="../../service/config" ><img src="{%static "images/config-ico64_white2.svg" %}" height="54" data-toggle="tooltip" data-placement="top" title="Панель конфигурирования"></a>
 		</div>
 		<div class="footer-right-content">
-			<strong><a class="text-warning" href="http://www.prizmer.ru/"> ООО "Правильные измерения"</a></strong>	
-			<img src="{%static "images/new_ico/logo2-ico48.png" %}">			
+			{% if IS_RIDAN %}
+                <img src="{% static 'images/ridan_logo2025_white.svg' %}" alt="Ридан" height="40">
+            {% else %}
+                <strong><a class="text-warning footer-link" href="http://www.prizmer.ru/"> ООО "Правильные измерения"</a></strong>	
+			    <img src="{%static "images/new_ico/logo2-ico48.png" %}">
+            {% endif %}		
 			<span>v.2.4.0</span>
 		</div>
 	</div>

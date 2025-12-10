@@ -94,8 +94,12 @@
 
 <footer id="myfooter">
         <div id="vizitka">
-            <span><strong><a href="http://www.prizmer.ru/">ООО "Правильные измерения"</a></strong></span>
-            <img src="{% static 'images/new_ico/logo2-ico48.png' %}" style="vertical-align: middle; margin-left: 10px;">
+            {% if IS_RIDAN %}
+                <img src="{% static 'images/ridan_logo2025_red.svg' %}" alt="Ридан" height="40">
+            {% else %}
+                <span><strong><a class="footer-link" href="http://www.prizmer.ru/">ООО "Правильные измерения"</a></strong></span>
+                <img src="{% static 'images/new_ico/logo2-ico48.png' %}" style="vertical-align: middle; margin-left: 10px;">
+            {% endif %}
         </div>
     </footer>
 

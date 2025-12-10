@@ -2614,12 +2614,15 @@ def add_taken_param_no_signals(instance, isR, isHalfs, is_ridan_impulse=False): 
         # "Код ошибки" 
         add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "dce68a94-2fb1-4856-acd6-2a1b13d5ec99"))
         add_param.save()
-        #Канал 1. Импульсный
-        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "af842772-2e25-45d0-9c40-3b21f30fe808"))
+        #battery_voltage   
+        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "c1efbc03-04b8-4f6f-abaf-645c25d601b6"))
         add_param.save()
-        #Канал 2. Импульсный    
-        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "318bd700-815c-46fe-aa7c-1e5265bab53e"))
-        add_param.save()
+        # #Канал 1. Импульсный
+        # add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "af842772-2e25-45d0-9c40-3b21f30fe808"))
+        # add_param.save()
+        # #Канал 2. Импульсный    
+        # add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "318bd700-815c-46fe-aa7c-1e5265bab53e"))
+        # add_param.save()
 
     elif instance.guid_types_meters.name == 'Пульсар Холодосчётчик':
         #Добавляем параметры для Холодосчётчика Пульсар.

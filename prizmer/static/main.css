@@ -396,26 +396,69 @@ color: #8D8173;
 /* LOGIN FORM */
 
 #logo2 {
-width: 80%;
-height: 70%;
-float: right;
-padding: 5px 35px 20px 2em;
+    display: block;
+    width: 128px;
+    height: auto;
+    margin: 0 auto 1.5rem auto; /* Center horizontally, add bottom margin */
+}
 
+.logo-text {
+    font-size: 1.7rem; /* Larger font */
+    font-weight: 600;
+    color: #0056b3; /* Color from "Автоматизированная Система..." in base.html */
+    margin: 0 0 1rem 0; /* Remove top margin, add bottom margin */
+    text-align: center;
+}
 
+.ridan-logo {
+    margin-top: 1rem !important; /* Top margin for Ridan logo, force override */
 }
 
 body.login {
-`    background: #eee;
+    position: relative; /* Anchor for absolute children */
+    background-color: #e9ecef; /* Even lighter gray, used as page background */
+    padding-top: 1px; /* Prevent margin collapse from child */
+}
+
+.background-container {
+    position: absolute;
+    z-index: -1;
+    top: 150px;
+    left: 0;
+    width: 100%;
+    height: 844px; /* Fixed height for the container, matching the image */
+    border-radius: 30px;
+    overflow: hidden; /* This will clip the <img> tag to the rounded corners */
+}
+
+.background-image {
+    width: 1500px; /* Hardcoded width */
+    height: 844px; /* Hardcoded height, calculated proportionally (16:9) */
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%); /* Horizontally center the fixed-width image */
+    opacity: 0.3; /* Make it 70% more transparent */
+    border-radius: 30px; /* Apply border-radius directly to the image */
 }
 
 .login #container {
-    background: white;
-    border: 1px solid #ccc;
-    width: 20em;
+    width: 24em;
     min-width: 200px;
     margin-left: auto;
     margin-right: auto;
-    margin-top: 100px;
+    margin-top: 100px; /* Add 100px top margin */
+}
+
+.login-card {
+    background-color: white; /* Reverted to white background */
+    border: 2px solid #007bff; /* Brighter, more vibrant blue border */
+    border-radius: 15px !important; /* Rounded corners */
+    box-shadow: 0 8px 20px rgba(0, 123, 255, 0.6) !important; /* Brighter and more prominent shadow */
+    padding: 2rem; /* Updated padding */
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Center logo and form horizontally */
 }
 
 .login #content-main {
@@ -427,27 +470,34 @@ body.login {
 }
 
 .login .form-row {
-    padding: 1px 15px;
-    float: left;
-    width: 90%;
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 1.25rem; /* Spacing between rows */
 }
 
 .login .form-row label {
-    padding-right: 0.5em;
-    line-height: 1em;
-    font-size: 1em;
-    clear: both;
-    color: #333;
+    font-weight: 500;
+    color: #34495e;
+    margin-bottom: 0.5rem; /* Space between label and input */
+    font-size: 0.9rem;
 }
 
-.login .form-row #id_username, .login .form-row #id_password {
-    clear: both;
-    padding: 6px;
+.login .form-row input {
     width: 100%;
-    -webkit-box-sizing: border-box;
-       -moz-box-sizing: border-box;
-            box-sizing: border-box;
+    padding: 0.75rem;
+    font-size: 1rem;
+    background-color: #f8f9fa;
+    border: 1px solid #ced4da;
+    border-radius: 5px;
+    box-sizing: border-box;
+    transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;
+}
 
+.login .form-row input:focus {
+    border-color: #80bdff;
+    outline: 0;
+    box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
+    background-color: white;
 }
 
 .login span.help {
@@ -456,9 +506,26 @@ body.login {
 }
 
 .login .submit-row {
-    clear: both;
+    margin-top: 1.5rem;
+    border: none;
+    padding: 0;
+}
+
+.login .submit-row input {
     width: 100%;
-    padding: 2px 8em 0 8em;
+    padding: 0.75rem;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.login .submit-row input:hover {
+    background-color: #0056b3;
 }
 
 .login .password-reset-link {
@@ -466,11 +533,13 @@ body.login {
 }
 
 #error {
-margin: auto;
-text-align: center;
-color: red;
-padding: 0 3em 0 3.5em;
-
+    text-align: center;
+    color: #721c24;
+    background-color: #f8d7da;
+    border: 1px solid #f5c6cb;
+    border-radius: 5px;
+    padding: 0.75rem 1.25rem;
+    margin-bottom: 1rem;
 }
 
 /* LOADER START */
@@ -1177,6 +1246,10 @@ color: #004C79;
 
 .footer-right-content a {
     color: #004C79;
+}
+
+.footer-link {
+    color: white !important;
 }
 
 .footer-right-content span {

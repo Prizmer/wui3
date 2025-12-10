@@ -29,7 +29,8 @@ TEMPLATES = [
                 'django.template.context_processors.static',
                 'django.template.context_processors.tz',
                 'django.contrib.messages.context_processors.messages',            
-                'django.template.context_processors.request',                
+                'django.template.context_processors.request',
+                'prizmer.context_processors.ridan_flag',
             ],
         },
     },
@@ -177,3 +178,4 @@ NUM_IS_STRING = False #выводить ли в отчёты числа как �
 HVS_NAME = "ХВС" #как в отчёте будет выводится ХВС, н/п Холодное водоснабжение, ХВС, хвс
 GVS_NAME = "ГВС" #как в отчёте будет выводится ГВС, н/п Горячее водоснабжение, ХВС, хвс
 # Если NUM_IS_STRING = True, то будет срабатывать separator, иначе будет просто число в excel
+IS_RIDAN = False #Версия ПО с лого-ридан
