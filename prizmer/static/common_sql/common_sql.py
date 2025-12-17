@@ -6477,6 +6477,7 @@ def get_data_table_pulsar_frost_for_period(obj_parent_title, obj_title, electric
     if len(data_table)>0: data_table=ChangeNull(data_table, None)
     return data_table
 
+
 def MakeSqlQuery_water_pulsar_period_for_abonent(obj_parent_title, obj_title,electric_data_start, electric_data_end, my_params, sortDir):
     #print obj_parent_title, obj_title,electric_data_start, my_params[0], my_params[1]
     #print obj_parent_title, obj_title,  electric_data_end, my_params[0], my_params[1]    
@@ -6494,7 +6495,7 @@ left join
    
   meters.attr1,
   meters.factory_number_manual,   
-  (Case when (types_meters.name = 'Пульс СТК ХВС' or types_meters.name = 'Пульс СТК ГВС') then daily_values.value/1000 else daily_values.value end)
+  MAX(Case when (types_meters.name = 'Пульс СТК ХВС' or types_meters.name = 'Пульс СТК ГВС') then daily_values.value/1000 else daily_values.value end)
              AS value,   
   abonents.guid
 FROM 
@@ -6517,6 +6518,14 @@ WHERE
   daily_values.date = '%s' and
   (types_meters.name like '%s' or types_meters.name like '%s' or types_meters.name like 'Декаст%%ВС')
    AND   taken_params.name not like '%%battery%%'
+   
+GROUP BY
+daily_values.date,  
+  abonents.name, 
+  types_meters.name ,   
+  meters.attr1,
+  meters.factory_number_manual,   
+  abonents.guid
 ) as z0
 on z0.factory_number_manual=water_pulsar_abons.factory_number_manual
 where water_pulsar_abons.obj_name='%s' 
@@ -6533,7 +6542,7 @@ left join
    
   meters.attr1,
   meters.factory_number_manual,   
-  (Case when (types_meters.name = 'Пульс СТК ХВС' or types_meters.name = 'Пульс СТК ГВС') then daily_values.value/1000 else daily_values.value end)
+  MAX(Case when (types_meters.name = 'Пульс СТК ХВС' or types_meters.name = 'Пульс СТК ГВС') then daily_values.value/1000 else daily_values.value end)
              AS value,   
   abonents.guid
 FROM 
@@ -6556,6 +6565,14 @@ WHERE
   daily_values.date = '%s' and
   (types_meters.name like '%s' or types_meters.name like '%s' or types_meters.name like 'Декаст%%ВС')
    AND   taken_params.name not like '%%battery%%'
+   
+   GROUP BY
+daily_values.date,  
+  abonents.name, 
+  types_meters.name ,   
+  meters.attr1,
+  meters.factory_number_manual,   
+  abonents.guid
 ) as z1
 on z1.factory_number_manual=water_pulsar_abons.factory_number_manual
 where water_pulsar_abons.obj_name='%s' 
@@ -6588,7 +6605,7 @@ Left join
   objects.name, 
   abonents.name, 
   daily_values.date, 
-  (Case when (types_meters.name = 'Пульс СТК ХВС' or types_meters.name = 'Пульс СТК ГВС') then daily_values.value/1000 else daily_values.value end)
+  MAX(Case when (types_meters.name = 'Пульс СТК ХВС' or types_meters.name = 'Пульс СТК ГВС') then daily_values.value/1000 else daily_values.value end)
              AS value, 
   meters.name,
   meters.factory_number_manual, 
@@ -6616,10 +6633,20 @@ WHERE
   names_params.guid_resources = resources.guid AND
   daily_values.date = '%s' AND 
   (resources.name like '%s' OR   resources.name like '%s')
-   AND   taken_params.name not like '%%battery%%')as z1
+   AND   taken_params.name not like '%%battery%%'
+   GROUP BY
+  objects.name, 
+  abonents.name, 
+  daily_values.date, 
+  types_meters.name , 
+  meters.name,
+  meters.factory_number_manual, 
+  resources.name)as z1
   on z1.factory_number_manual=water_pulsar_abons.factory_number_manual
   where water_pulsar_abons.obj_name='%s'
-  order by ab_name) as z_end,
+  
+   
+) as z_end,
 (SELECT water_pulsar_abons.ab_name, water_pulsar_abons.type_meter, water_pulsar_abons.attr1, water_pulsar_abons.factory_number_manual, z1.value
 from
 water_pulsar_abons
@@ -6628,7 +6655,7 @@ Left join
   objects.name, 
   abonents.name, 
   daily_values.date, 
-  (Case when (types_meters.name = 'Пульс СТК ХВС' or types_meters.name = 'Пульс СТК ГВС') then daily_values.value/1000 else daily_values.value end)
+  MAX(Case when (types_meters.name = 'Пульс СТК ХВС' or types_meters.name = 'Пульс СТК ГВС') then daily_values.value/1000 else daily_values.value end)
              AS value, 
   meters.name,
   meters.factory_number_manual, 
@@ -6656,10 +6683,18 @@ WHERE
   names_params.guid_resources = resources.guid AND
   daily_values.date = '%s' AND 
   (resources.name like '%s' OR   resources.name like '%s')
-   AND   taken_params.name not like '%%battery%%')as z1
+   AND   taken_params.name not like '%%battery%%'
+   GROUP BY
+  objects.name, 
+  abonents.name, 
+  daily_values.date, 
+  types_meters.name , 
+  meters.name,
+  meters.factory_number_manual, 
+  resources.name)as z1
   on z1.factory_number_manual=water_pulsar_abons.factory_number_manual
   where water_pulsar_abons.obj_name='%s'
-  order by ab_name) as z_start
+ ) as z_start
 where z_end.factory_number_manual=z_start.factory_number_manual
 group by z_start.ab_name, 
 z_start.type_meter, 
@@ -6833,9 +6868,11 @@ def get_data_table_pulsar_water_battery(obj_parent_title, obj_title, electric_da
     
     return data_table
     
+   
 def MakeSqlQuery_water_pulsar_daily_for_abonent(obj_parent_title, obj_title, electric_data_end, my_params, sortDir):
     sQuery="""
-    Select z1.date,water_pulsar_abons.ab_name, water_pulsar_abons.type_meter, water_pulsar_abons.attr1, water_pulsar_abons.factory_number_manual, round(z1.value::numeric,3),
+    Select z1.date,water_pulsar_abons.ab_name, water_pulsar_abons.type_meter, water_pulsar_abons.attr1, water_pulsar_abons.factory_number_manual, 
+    round(z1.value::numeric,3),
      water_pulsar_abons.ab_guid, 
     water_pulsar_abons.comment,
     water_pulsar_abons.attr4
@@ -6851,7 +6888,7 @@ left join
              AS type_meter,   
   meters.attr1,
   meters.factory_number_manual,
-  (Case when (types_meters.name = 'Пульс СТК ХВС' or types_meters.name = 'Пульс СТК ГВС') then daily_values.value/1000 else daily_values.value end)
+  MAX(Case when (types_meters.name = 'Пульс СТК ХВС' or types_meters.name = 'Пульс СТК ГВС') then daily_values.value/1000 else daily_values.value end)
              AS value,   
     
   abonents.guid
@@ -6875,6 +6912,14 @@ WHERE
   daily_values.date = '%s' and
   (types_meters.name like '%s' or types_meters.name like '%s' or types_meters.name like 'Декаст%%ВС')
    AND   taken_params.name not like '%%battery%%'
+   group by 
+   daily_values.date,  
+  abonents.name, 
+       meters.attr1,
+  meters.factory_number_manual,   
+  abonents.guid,
+  types_meters.name
+   
 ) as z1
 on z1.factory_number_manual=water_pulsar_abons.factory_number_manual
 where 
@@ -6899,7 +6944,8 @@ water_pulsar_abons.type_meter %s
     
 def MakeSqlQuery_water_pulsar_daily_for_all(obj_parent_title, obj_title, electric_data_end, my_params, sortDir):
     sQuery="""
-    Select z1.date, water_pulsar_abons.ab_name, water_pulsar_abons.type_meter, water_pulsar_abons.attr1, water_pulsar_abons.factory_number_manual, round(z1.value::numeric,3),water_pulsar_abons.ab_guid,
+    Select z1.date, water_pulsar_abons.ab_name, water_pulsar_abons.type_meter, water_pulsar_abons.attr1, water_pulsar_abons.factory_number_manual, 
+    round(z1.value::numeric,3),water_pulsar_abons.ab_guid,
  water_pulsar_abons.comment, water_pulsar_abons.attr4
 from water_pulsar_abons
 left join 
@@ -6913,7 +6959,7 @@ left join
              AS type_meter,
   meters.attr1,
   meters.factory_number_manual,   
-  (Case when (types_meters.name = 'Пульс СТК ХВС' or types_meters.name = 'Пульс СТК ГВС') then daily_values.value/1000 else daily_values.value end)
+  MAX(Case when (types_meters.name = 'Пульс СТК ХВС' or types_meters.name = 'Пульс СТК ГВС') then daily_values.value/1000 else daily_values.value end)
              AS value,   
   abonents.guid
 FROM 
@@ -6935,6 +6981,15 @@ WHERE
   daily_values.date = '%s' and
   (types_meters.name like '%s' or types_meters.name like '%s' or types_meters.name like 'Декаст%%ВС')
    AND   taken_params.name not like '%%battery%%'
+   
+group by 
+   daily_values.date,  
+  abonents.name, 
+       meters.attr1,
+  meters.factory_number_manual,   
+  abonents.guid,
+  types_meters.name
+  
 ORDER BY
   abonents.name ASC) as z1
 on water_pulsar_abons.factory_number_manual=z1.factory_number_manual
