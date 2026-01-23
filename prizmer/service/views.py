@@ -5026,8 +5026,8 @@ def change_meters_v2(request):
     change_meter_status="Функция в разработке"
     if request.is_ajax():
         if request.method == 'GET':            
-            request.session["old_meter"]    = old_meter    = request.GET.get('old_meter')
-            request.session["new_meter"]    = new_meter   = request.GET.get('new_meter')
+            request.session["old_meter"]    = old_meter    = request.GET.get('old_meter', '').strip()
+            request.session["new_meter"]    = new_meter   = request.GET.get('new_meter', '').strip()
             if (not old_meter or old_meter==None or new_meter==None or not new_meter):
                 change_meter_status="Заполните обе ячейки"
             else:
@@ -5102,8 +5102,9 @@ def replace_electric_meters_v2(request):
     replace_meter_status='НЕ удалось поменять счётчики местами'
     if request.is_ajax():
         if request.method == 'GET':                        
-            request.session["meter1"]    = meter1    = request.GET.get('meter1')
-            request.session["meter2"]    = meter2   = request.GET.get('meter2')
+            request.session["meter1"]    = meter1 = request.GET.get('meter1', '').strip()
+            request.session["meter2"]    = meter2 = request.GET.get('meter2', '').strip()
+            
             
             if (not meter1 or meter1==None or meter2==None or not meter2):
                 replace_meter_status="Заполните обе ячейки"
@@ -5702,46 +5703,83 @@ def del_meters(request):
 
 def delete_meters_by_excel(sPath, sheet):
     global cfg_excel_name
-    cfg_excel_name=sPath
+    cfg_excel_name = sPath
     global cfg_sheet_name
     cfg_sheet_name = sheet
     result = []
-    dtAll = GetTableFromExcel(sPath,sheet) #получили из excel все строки до первой пустой строки (проверка по колонке А)
+    dtAll = GetTableFromExcel(sPath, sheet)
 
-    isImpulse = False
-    #выясняем какая ведомость импульсная или цифровая, в зависимости от этого - из какой колонки брать номера счётчиков
-    if dtAll[0][0] == 'Населенный пункт':
+    # Определяем тип ведомости (МЗТА - импульсная или цифровая)
+    m_col = None
+    c = 0
+    header_text = ""
+    
+    # Проверяем формат файла МЗТА
+    if dtAll[0][0] == 'Населенный пункт':  # Цифровая ведомость (МЗТА цифр)
         isImpulse = False
-        result.append('Удаление цифровых ПУ')
-        m_col = 6
-        c = 1
-    if dtAll[1][0] == 'Наименование дома':
+        header_text = 'Удаление цифровых ПУ (МЗТА цифр)'
+        m_col = 6  # Колонка G (7-я колонка, индекс 6)
+        c = 1  # Пропускаем 1 строку заголовка
+    elif dtAll[1][0] == 'Наименование дома':  # Импульсная ведомость (МЗТА имп)
         isImpulse = True
-        result.append('Удаление импульсных ПУ')
-        m_col = 5
-        c = 2
-        
-            
+        header_text = 'Удаление импульсных ПУ (МЗТА имп)'
+        m_col = 5  # Колонка F (6-я колонка, индекс 5)
+        c = 2  # Пропускаем 2 строки заголовка
+    else:
+        result.append('ОШИБКА: Неизвестный формат файла МЗТА')
+        return result
+    
+    result.append(header_text)
+    result.append(f'Формат: импульсный={isImpulse}, колонка={m_col+1}, пропуск строк={c}')
+    
     i = 0
+    meters_to_delete = []
+    
+    # Собираем все номера приборов из указанной колонки
     for row in dtAll:
-        if i<c: 
-            i+=1
+        if i < c:
+            i += 1
             continue
-        meter = row[m_col]
-        if(row[6] == 'МЗТА'):
-            ind = str(row[3]).find('(')
-            if ind > 0:
-                meter =  str(row[3])[0:ind]
-            else:
-                meter =  str(row[3])
-        try:
-            del_meter = Meters.objects.get(factory_number_manual = str(meter))
-            del_meter.delete()
-            print('del - good')
-            result.append('Удалён ПУ: {}'.format(meter))
-        except ObjectDoesNotExist:
-            result.append('НЕ найден: {}'.format(meter))
-        i+=1
+            
+        if len(row) > m_col:  # Проверяем, что строка имеет нужную колонку
+            meter = str(row[m_col]).strip()
+            if meter and meter not in ['', ' ', None]:
+                meters_to_delete.append(meter)
+        i += 1
+    
+    result.append(f'Найдено {len(meters_to_delete)} номеров в файле')
+    
+    # Удаляем все приборы с этими номерами (включая дубли)
+    deleted_count = 0
+    not_found_count = 0
+    unique_meters = set(meters_to_delete)
+    
+    result.append(f'Уникальных номеров для удаления: {len(unique_meters)}')
+    
+    for meter in unique_meters:
+        # Ищем ВСЕ приборы с таким заводским номером
+        meters = Meters.objects.filter(factory_number_manual=meter)
+        count = meters.count()
+        
+        if count > 0:
+            # Дополнительная информация о типах найденных приборов
+            meter_types = list(meters.values_list('meter_type', flat=True).distinct())
+            meter_info = f" (типы: {', '.join(map(str, meter_types))})" if meter_types else ""
+            
+            meters.delete()  # Удаляем ВСЕ найденные приборы
+            deleted_count += count
+            result.append(f'✓ Удалено {count} приборов: {meter}{meter_info}')
+        else:
+            not_found_count += 1
+            result.append(f'✗ Не найден: {meter}')
+    
+    # Итоговая статистика
+    result.append('=' * 50)
+    result.append(f'ИТОГО:')
+    result.append(f'Удалено приборов: {deleted_count}')
+    result.append(f'Не найдено номеров: {not_found_count}')
+    result.append(f'Всего обработано: {len(unique_meters)}')
+    
     return result
 
 def del_various30(request):

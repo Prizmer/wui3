@@ -104,12 +104,12 @@ urlpatterns = [
     url(r'^84/$', views.report_water_elf_daily, name = '84'), # 
     url(r'^85/$', views.report_water_elf_potreblenie, name = '85'), # Потребление за период с эльфов хв и гв
     
-    url(r'^86/$', views.report_electric_res_status, name = '86'),
-    url(r'^88/$', views.report_heat_res_status, name = '88'),
+    url(r'^86/$', views.export_electric_statistic, name = '86'), #url(r'^86/$', views.report_electric_res_status, name = '86'),
+    url(r'^88/$', views.export_heat_digital_statistic, name = '88'),  # url(r'^88/$', views.report_heat_res_status, name = '88'),
 
     url(r'^89/$', views.report_electric_report_for_c300, name = '89'), #отчёт по потрелениею элеткричества для ботсада в csv
 
-    url(r'^90/$', views.report_water_impulse_res_status, name = '90'),
+    url(r'^90/$', views.export_water_impulse_statistic, name = '90'), # url(r'^90/$', views.report_water_impulse_res_status, name = '90'),
     
     url(r'^91/$', views.report_electric_potreblenie_3_zones_v2, name = '91'), # отчёт 17, Электрика. Отчет по потреблению за период по двум датам. 3 Тарифа.
     
@@ -118,7 +118,7 @@ urlpatterns = [
 
     url(r'^93/$', views.report_water_impulse_report_for_c300, name = '93'), #отчёт по потрелениею элеткричества для ботсада в csv
 
-    url(r'^94/$', views.report_water_digital_pulsar_res_status, name = '94'),
+    url(r'^94/$', views.export_water_digital_pulsar_statistic, name = '94'),
 
     url(r'^95/$', views.electric_period_graphic_activ_reactiv_report, name = '95'), #отчёт профиль r+ a+ за период с дельтами
 

@@ -133,13 +133,13 @@ urlpatterns = [
     url(r'^84/$', views.water_elf_daily, name = 'water_elf'), # 
     url(r'^85/$', views.water_elf_potreblenie, name = 'period_water_elf'), # Потребление за период с эльфов хв и гв    
     
-    url(r'^86/$', views.electric_res_status, name = 'electric_res_status'),
+    url(r'^86/$', views.electric_res_status_v2, name = 'electric_res_status_v2'),
 
     url(r'^87/$', views.balance_period_water_impulse, name = 'period_balance_water_imp'),
 
-    url(r'^88/$', views.heat_digital_res_status, name = 'heat_res_status'),
+    url(r'^88/$', views.heat_digital_res_status_v2, name = 'heat_res_status_v2'),
     url(r'^89/$', views.electric_report_for_c300, name = 'electric_report_for_c300'), #отчёт по потрелениею элеткричества для ботсада
-    url(r'^90/$', views.water_impulse_res_status, name = 'water_imp_res_status'),
+    url(r'^90/$', views.water_impulse_res_status_v2, name = 'water_imp_res_status_v2'),
     
     url(r'^91/$', views.electric_potreblenie_3_zones_v3, name = 'period_electric_3zone_graphic'), # отчёт 17, но с графиком!! Потребление по электричеству за период. 3 тарифа
 
@@ -147,7 +147,7 @@ urlpatterns = [
 
     url(r'^93/$', views.water_impulse_report_for_c300, name = 'water_impulse_report_for_c300'), #отчёт по потрелению воды для ботсада
 
-    url(r'^94/$', views.water_digital_pulsar_res_status, name = 'water_pulsar_res_status'), 
+    url(r'^94/$', views.water_digital_pulsar_res_status_v2, name = 'water_pulsar_res_status'), 
 
     url(r'^95/$', views.electric_period_graphic_activ_reactiv, name = 'period_electric_activ_reactiv_graphic'), #график потребления электроэнергии по дням 3 тарифа R+ A+
     url(r'^96/$', views.water_current_impulse, name = 'water_imp_current'), #текущие по воде-импульсные ПУ

@@ -4,7 +4,7 @@
     <body>
 <script src="/static/libs/liHighLight.js" type=text/javascript></script>
 <br>
-<span>Статистика опроса по воде на <strong>{{electric_data_end}}</strong> (цифровые ПУ) </span>
+<span>&#128202; &#128167;Статистика опроса по воде на <strong>{{electric_data_end}}</strong> (цифровые ПУ) </span>
 <br>
 <br>
 	
@@ -44,7 +44,10 @@
 <th>Абонент</th>
 <th>Счётчик</th>
 <th>Показания</th>
-<th>Тип счётчика</th>
+<th>Сет. адрес</th>
+<th>IP адрес</th>
+<th>IP порт</th>
+<th>Тип прибора</th>
 
 
 </tr>
@@ -56,6 +59,11 @@
 <td>{{value.2}}</td>
 <td>{{value.3}}</td>
 <td>{{value.4}}</td>
+<td>{{value.5}}</td>
+<td>{{value.6}}</td>
+<td>{{value.7}}</td>
+
+
 
 </tr>
 {% endfor %}

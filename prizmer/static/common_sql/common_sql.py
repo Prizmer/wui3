@@ -9765,6 +9765,136 @@ def get_electric_no_data(obj_title, electric_data_end):
     data_table = cursor.fetchall()    
     return data_table
 
+def get_electric_count_for_all_objects(electric_data_end):
+    """
+    Возвращает полную статистику по ВСЕМ объектам:
+    [объект, опрошено, всего, процент, не опрошено]
+    """
+    query = """
+    SELECT 
+        objects.name as obj_name,
+        -- Опрошено (хотя бы один тариф с данными)
+        COUNT(DISTINCT CASE WHEN daily_values.date = %s 
+              AND names_params.name IN ('T0 A+','T1 A+','T2 A+','T3 A+') 
+              AND daily_values.value IS NOT NULL 
+              THEN meters.factory_number_manual END) as meters_with_data,
+        -- Всего счетчиков
+        COUNT(DISTINCT meters.factory_number_manual) as total_meters,
+        -- Процент опроса (опрошено / всего * 100)
+        ROUND(
+            CASE 
+                WHEN COUNT(DISTINCT meters.factory_number_manual) > 0 
+                THEN COUNT(DISTINCT CASE WHEN daily_values.date = %s 
+                      AND names_params.name IN ('T0 A+','T1 A+','T2 A+','T3 A+') 
+                      AND daily_values.value IS NOT NULL 
+                      THEN meters.factory_number_manual END) * 100.0 / 
+                     COUNT(DISTINCT meters.factory_number_manual)
+                ELSE 0 
+            END, 2
+        ) as percent,
+        -- Не опрошено (всего - опрошено)
+        COUNT(DISTINCT meters.factory_number_manual) - 
+        COUNT(DISTINCT CASE WHEN daily_values.date = %s 
+              AND names_params.name IN ('T0 A+','T1 A+','T2 A+','T3 A+') 
+              AND daily_values.value IS NOT NULL 
+              THEN meters.factory_number_manual END) as meters_without_data
+    FROM objects
+    JOIN abonents ON abonents.guid_objects = objects.guid
+    JOIN link_abonents_taken_params ON link_abonents_taken_params.guid_abonents = abonents.guid
+    JOIN taken_params ON taken_params.guid = link_abonents_taken_params.guid_taken_params
+    JOIN meters ON meters.guid = taken_params.guid_meters
+    JOIN params ON params.guid = taken_params.guid_params
+    JOIN names_params ON names_params.guid = params.guid_names_params
+    JOIN resources ON resources.guid = names_params.guid_resources
+    LEFT JOIN daily_values ON daily_values.id_taken_params = taken_params.id
+        AND daily_values.date = %s
+        AND names_params.name IN ('T0 A+','T1 A+','T2 A+','T3 A+')
+    WHERE resources.name = 'Электричество'
+    GROUP BY objects.name
+    ORDER BY objects.name
+    """
+    
+    cursor = connection.cursor()
+    cursor.execute(query, [
+        electric_data_end,  # для meters_with_data
+        electric_data_end,  # для percent
+        electric_data_end,  # для meters_without_data
+        electric_data_end   # для JOIN daily_values
+    ])
+    return cursor.fetchall()
+  
+  
+def get_electric_no_data_for_all_objects(electric_data_end):
+
+    query = """
+    WITH meter_data AS (
+        SELECT 
+            o.name as obj_name,
+            a.name as ab_name,
+            m.factory_number_manual,
+            MAX(CASE WHEN np.name = 'T0 A+' THEN dv.value END) as t0_value,
+            MAX(CASE WHEN np.name = 'T1 A+' THEN dv.value END) as t1_value,
+            MAX(CASE WHEN np.name = 'T2 A+' THEN dv.value END) as t2_value,
+            MAX(CASE WHEN np.name = 'T3 A+' THEN dv.value END) as t3_value,
+            COALESCE(m.address::VARCHAR, 'не указан') as address,
+            COALESCE(ts.ip_address, '! Нет ip !') as ip_address,
+            COALESCE(ts.ip_port::VARCHAR, 'Не указан') as ip_port,
+            tm.name as type_meter,
+            m.attr1,
+            m.attr2,
+            m.attr3,
+            m.attr4,
+            COUNT(dv.value) as values_count
+        FROM meters m
+        JOIN types_meters tm ON tm.guid = m.guid_types_meters
+        JOIN taken_params tp ON tp.guid_meters = m.guid
+        JOIN params p ON p.guid = tp.guid_params
+        JOIN names_params np ON np.guid = p.guid_names_params
+        JOIN resources r ON r.guid = np.guid_resources
+        JOIN link_abonents_taken_params latp ON latp.guid_taken_params = tp.guid
+        JOIN abonents a ON a.guid = latp.guid_abonents
+        JOIN objects o ON o.guid = a.guid_objects
+        
+        -- TCP/IP настройки (как в electric_abons)
+        LEFT JOIN link_meters_tcpip_settings lmts ON lmts.guid_meters = m.guid
+        LEFT JOIN tcpip_settings ts ON ts.guid = lmts.guid_tcpip_settings
+        
+        LEFT JOIN daily_values dv ON dv.id_taken_params = tp.id 
+            AND dv.date = %s
+            AND np.name IN ('T0 A+','T1 A+','T2 A+','T3 A+')
+            
+        WHERE r.name = 'Электричество'
+        GROUP BY m.factory_number_manual, o.name, a.name, 
+                 m.address, ts.ip_address, ts.ip_port, tm.name,
+                 m.attr1, m.attr2, m.attr3, m.attr4
+    )
+    SELECT 
+        obj_name,
+        ab_name,
+        factory_number_manual,
+        t0_value,
+        t1_value,
+        t2_value,
+        t3_value,
+        address,
+        ip_address,
+        ip_port,
+        type_meter,
+        attr1,
+        attr2,
+        attr3,
+        attr4
+    FROM meter_data
+    WHERE (t0_value IS NULL AND t1_value IS NULL AND t2_value IS NULL AND t3_value IS NULL)
+        OR values_count < 4
+    ORDER BY obj_name, ab_name
+    """    
+    cursor = connection.cursor()
+    cursor.execute(query, [electric_data_end])
+    result = cursor.fetchall()
+    return result
+
+
 def MakeSqlQuery_electric_count( obj_title,  electric_data_end, my_params):
     sQuery="""
     select obj_name, count (t0) as have_val,  count (ab_name) as all_row, round((count(t0)*100/count(ab_name))::numeric,0) as percent_val, (count (ab_name)-count (t0)) as no_val, '%s'
@@ -17822,3 +17952,322 @@ def get_data_table_consumption(abonent, obj_name, data_start, data_end, is_abon,
     cursor.execute(sql, sql_params)
     data_table = cursor.fetchall()
     return data_table
+  
+  
+def get_heat_count_for_all_objects(electric_data_end):
+    """
+    Статистика по теплу для всех объектов
+    Возвращает: [объект, опрошено, всего, процент, не опрошено]
+    """
+    query = """
+    WITH heat_data AS (
+        SELECT 
+            o.name as obj_name,
+            m.factory_number_manual,
+            -- Проверяем есть ли данные по энергии
+            CASE 
+                WHEN MAX(CASE 
+                    WHEN np.name LIKE 'Энергия%%' AND dv.value IS NOT NULL 
+                    THEN 1 
+                    ELSE 0 
+                END) = 1 THEN 1
+                ELSE 0
+            END as has_energy_data
+        FROM objects o
+        JOIN abonents a ON a.guid_objects = o.guid
+        JOIN link_abonents_taken_params latp ON latp.guid_abonents = a.guid
+        JOIN taken_params tp ON tp.guid = latp.guid_taken_params
+        JOIN meters m ON m.guid = tp.guid_meters
+        JOIN params p ON p.guid = tp.guid_params
+        JOIN names_params np ON np.guid = p.guid_names_params
+        JOIN resources r ON r.guid = np.guid_resources
+        LEFT JOIN daily_values dv ON dv.id_taken_params = tp.id
+            AND dv.date = %s
+            AND np.name IN ('Энергия', 'Энергия1', 'Энергия2', 'Объем', 'Ti', 'To')
+        WHERE r.name = 'Тепло'
+        GROUP BY o.name, m.factory_number_manual
+    )
+    SELECT 
+        obj_name,
+        -- Опрошено (есть данные по энергии)
+        COUNT(DISTINCT CASE WHEN has_energy_data = 1 THEN factory_number_manual END) as meters_with_data,
+        -- Всего счетчиков
+        COUNT(DISTINCT factory_number_manual) as total_meters,
+        -- Процент опроса
+        ROUND(
+            CASE 
+                WHEN COUNT(DISTINCT factory_number_manual) > 0
+                THEN COUNT(DISTINCT CASE WHEN has_energy_data = 1 THEN factory_number_manual END) * 100.0 /
+                     COUNT(DISTINCT factory_number_manual)
+                ELSE 0
+            END, 0
+        ) as percent,
+        -- Не опрошено
+        COUNT(DISTINCT factory_number_manual) - 
+        COUNT(DISTINCT CASE WHEN has_energy_data = 1 THEN factory_number_manual END) as meters_without_data
+    FROM heat_data
+    GROUP BY obj_name
+    ORDER BY obj_name
+    """
+    
+    cursor = connection.cursor()
+    cursor.execute(query, [electric_data_end])
+    return cursor.fetchall()
+  
+def get_heat_no_data_for_all_objects(electric_data_end):
+    query = """
+    SELECT 
+        o.name as obj_name,
+        a.name as ab_name,
+        m.factory_number_manual,
+        ROUND(MAX(CASE WHEN np.name LIKE 'Энергия%%' THEN dv.value END)::numeric, 7) as energy,
+        ROUND(MAX(CASE WHEN np.name = 'Объем' THEN dv.value END)::numeric, 7) as volume,
+        ROUND(MAX(CASE WHEN np.name = 'Ti' THEN dv.value END)::numeric, 1) as t_in,
+        ROUND(MAX(CASE WHEN np.name = 'To' THEN dv.value END)::numeric, 1) as t_out,
+        COALESCE(m.address::VARCHAR, 'не указан') as address,
+            COALESCE(ts.ip_address, '! Нет ip !') as ip_address,
+            COALESCE(ts.ip_port::VARCHAR, 'Не указан') as ip_port,
+            tm.name as type_meter,
+        COALESCE(a.account_1, '') as account_1,
+        COALESCE(a.account_2, '') as account_2,
+        m.attr1,
+        m.attr2,
+        m.attr3,
+        m.attr4
+    FROM meters m
+    JOIN types_meters tm ON tm.guid = m.guid_types_meters
+        JOIN taken_params tp ON tp.guid_meters = m.guid
+        JOIN params p ON p.guid = tp.guid_params
+        JOIN names_params np ON np.guid = p.guid_names_params
+        JOIN resources r ON r.guid = np.guid_resources
+        JOIN link_abonents_taken_params latp ON latp.guid_taken_params = tp.guid
+        JOIN abonents a ON a.guid = latp.guid_abonents
+        JOIN objects o ON o.guid = a.guid_objects
+        
+        -- TCP/IP настройки (как в electric_abons)
+        LEFT JOIN link_meters_tcpip_settings lmts ON lmts.guid_meters = m.guid
+        LEFT JOIN tcpip_settings ts ON ts.guid = lmts.guid_tcpip_settings
+    
+    LEFT JOIN daily_values dv ON dv.id_taken_params = tp.id
+        AND dv.date = %s
+        AND np.name IN ('Энергия', 'Энергия1', 'Энергия2', 'Объем', 'Ti', 'To')
+        
+    WHERE r.name = 'Тепло'
+    GROUP BY 
+             a.account_1, a.account_2,
+             m.factory_number_manual, o.name, a.name, 
+                 m.address, ts.ip_address, ts.ip_port, tm.name,
+                 m.attr1, m.attr2, m.attr3, m.attr4
+    
+    HAVING MAX(CASE WHEN np.name LIKE 'Энергия%%' THEN dv.value END) IS NULL
+    
+    ORDER BY o.name, a.name
+    """
+    cursor = connection.cursor()
+    cursor.execute(query, [electric_data_end])
+    return cursor.fetchall()
+  
+  
+def get_water_digital_pulsar_count_for_all_objects(electric_data_end):
+    query = """
+    SELECT 
+        o.name as obj_name,
+        COUNT(DISTINCT CASE WHEN dv.value IS NOT NULL THEN m.factory_number_manual END) as meters_with_data,
+        COUNT(DISTINCT m.factory_number_manual) as total_meters,
+        ROUND(
+            CASE 
+                WHEN COUNT(DISTINCT m.factory_number_manual) > 0
+                THEN COUNT(DISTINCT CASE WHEN dv.value IS NOT NULL THEN m.factory_number_manual END) * 100.0 /
+                     COUNT(DISTINCT m.factory_number_manual)
+                ELSE 0
+            END, 2
+        ) as percent,
+        COUNT(DISTINCT m.factory_number_manual) - 
+        COUNT(DISTINCT CASE WHEN dv.value IS NOT NULL THEN m.factory_number_manual END) as meters_without_data
+    FROM meters m
+    JOIN types_meters tm ON tm.guid = m.guid_types_meters
+    JOIN taken_params tp ON tp.guid_meters = m.guid
+    JOIN params p ON p.guid = tp.guid_params
+    JOIN names_params np ON np.guid = p.guid_names_params
+    JOIN resources r ON r.guid = np.guid_resources
+    JOIN link_abonents_taken_params latp ON latp.guid_taken_params = tp.guid
+    JOIN abonents a ON a.guid = latp.guid_abonents
+    JOIN objects o ON o.guid = a.guid_objects
+    
+    LEFT JOIN daily_values dv ON dv.id_taken_params = tp.id
+        AND dv.date = %s
+        
+    WHERE (tm.name LIKE 'Пульс%%ГВС%%' OR tm.name LIKE 'Пульс%%ХВС%%')
+        AND r.name IN ('ГВС', 'ХВС')
+    GROUP BY o.name
+    ORDER BY o.name
+    """
+    
+    cursor = connection.cursor()
+    cursor.execute(query, [electric_data_end])
+    return cursor.fetchall()
+  
+def get_water_digital_pulsar_no_data_for_all_objects(electric_data_end):
+    """
+    Упрощенный вариант без комментариев
+    """
+    query = """
+    SELECT 
+        o.name as obj_name,
+        a.name as ab_name,
+        m.factory_number_manual,
+        ROUND(MAX(dv.value)::numeric, 3) as volume,
+        COALESCE(m.address::VARCHAR, 'не указан') as address,
+        COALESCE(ts.ip_address, '! Нет ip !') as ip_address,
+        COALESCE(ts.ip_port::VARCHAR, 'Не указан') as ip_port,
+        --CASE
+        --    WHEN tm.name::text = 'Пульс СТК ХВС'::text OR tm.name::text = 'Пульс СТК ГВС'::text 
+        --    THEN SUBSTRING(tm.name::text, 11, 13)
+        --    ELSE SUBSTRING(tm.name::text, 9, 11)
+        --END as type_meter,
+        tm.name,
+        m.name as additional_name,
+        m.attr1,
+        m.attr2,
+        m.attr3,
+        m.attr4
+    FROM meters m
+    JOIN types_meters tm ON tm.guid = m.guid_types_meters
+    JOIN taken_params tp ON tp.guid_meters = m.guid
+    JOIN params p ON p.guid = tp.guid_params
+    JOIN names_params np ON np.guid = p.guid_names_params
+    JOIN resources r ON r.guid = np.guid_resources
+    JOIN link_abonents_taken_params latp ON latp.guid_taken_params = tp.guid
+    JOIN abonents a ON a.guid = latp.guid_abonents
+    JOIN objects o ON o.guid = a.guid_objects
+    
+    -- TCP/IP настройки
+    LEFT JOIN link_meters_tcpip_settings lmts ON lmts.guid_meters = m.guid
+    LEFT JOIN tcpip_settings ts ON ts.guid = lmts.guid_tcpip_settings
+    
+    LEFT JOIN daily_values dv ON dv.id_taken_params = tp.id
+        AND dv.date = %s
+        
+    WHERE (tm.name LIKE 'Пульс%%ГВС%%' OR tm.name LIKE 'Пульс%%ХВС%%')
+        AND r.name IN ('ГВС', 'ХВС')
+    GROUP BY o.name, a.name, m.factory_number_manual, tm.name, m.name,
+             m.address, ts.ip_address, ts.ip_port,
+             m.attr1, m.attr2, m.attr3, m.attr4
+    
+    HAVING MAX(dv.value) IS NULL
+    
+    ORDER BY o.name, a.name
+    """    
+    cursor = connection.cursor()
+    cursor.execute(query, [electric_data_end])
+    return cursor.fetchall()
+  
+def get_water_impulse_count_for_all_objects(electric_data_end):
+    """
+    Статистика по импульсной воде - считаем по абонентам (счетчикам), а не по регистраторам
+    """
+    query = """
+    SELECT 
+        o_parent.name as obj_name,
+        -- Опрошено: абоненты у которых есть данные
+        COUNT(DISTINCT CASE WHEN dv.value IS NOT NULL THEN a.guid END) as abonents_with_data,
+        -- Всего абонентов
+        COUNT(DISTINCT a.guid) as total_abonents,
+        -- Процент опроса
+        ROUND(
+            CASE 
+                WHEN COUNT(DISTINCT a.guid) > 0
+                THEN COUNT(DISTINCT CASE WHEN dv.value IS NOT NULL THEN a.guid END) * 100.0 /
+                     COUNT(DISTINCT a.guid)
+                ELSE 0
+            END, 0
+        ) as percent,
+        -- Не опрошено абонентов
+        COUNT(DISTINCT a.guid) - 
+        COUNT(DISTINCT CASE WHEN dv.value IS NOT NULL THEN a.guid END) as abonents_without_data
+    FROM objects o_parent
+    JOIN objects o ON o.guid_parent = o_parent.guid
+    JOIN abonents a ON a.guid_objects = o.guid
+    JOIN link_abonents_taken_params latp ON latp.guid_abonents = a.guid
+    JOIN taken_params tp ON tp.guid = latp.guid_taken_params
+    JOIN meters m ON m.guid = tp.guid_meters
+    JOIN params p ON p.guid = tp.guid_params
+    JOIN names_params np ON np.guid = p.guid_names_params
+    JOIN resources r ON r.guid = np.guid_resources
+    
+    LEFT JOIN daily_values dv ON dv.id_taken_params = tp.id
+        AND dv.date = %s
+        
+    WHERE r.name = 'Импульс'
+        AND o_parent.name LIKE '%%Вода%%'
+    GROUP BY o_parent.name
+    ORDER BY o_parent.name
+    """
+    
+    cursor = connection.cursor()
+    cursor.execute(query, [electric_data_end])
+    return cursor.fetchall()
+    
+    cursor = connection.cursor()
+    cursor.execute(query, [electric_data_end])
+    return cursor.fetchall()
+  
+def get_water_impulse_no_data_for_all_objects(electric_data_end):
+    """
+    Приборы импульсной воды без данных с IP адресами
+    Структура как в шаблоне 90.html:
+    [объект, абонент, счетчик, регистратор, канал, показания, IP, порт, адрес]
+    """
+    query = """
+    SELECT 
+        o_parent.name as obj_name,                    -- 0: Объект (корпус)
+        o.name as ab_name,                            -- 1: Абонент (дочерний объект)
+        a.name as meter_name,                         -- 2: Счётчик (из abonents)
+        COALESCE(m.name::VARCHAR, 'не указан') as address,     -- 8: Адрес -- 3: Регистратор
+        np.name as channel,                           -- 4: Канал
+        ROUND(MAX(dv.value)::numeric, 3) as value,    -- 5: Показания
+        -- IP и сетевые настройки
+        COALESCE(ts.ip_address, '! Нет ip !') as ip_address,      -- 6: IP
+        COALESCE(ts.ip_port::VARCHAR, 'Не указан') as ip_port,    -- 7: Порт
+        
+        -- Дополнительные поля
+        m.factory_number_manual,                      -- 9: Заводской номер
+        CASE
+            WHEN a.name LIKE '%%ГВС%%' THEN 'ГВС'
+            ELSE 'ХВС'
+        END as type_meter,                            -- 10: Тип (ГВС/ХВС)
+        m.attr1,                                      -- 11: attr1
+        m.attr2,                                      -- 12: attr2
+        m.attr3,                                      -- 13: attr3
+        m.attr4                                       -- 14: attr4
+    FROM objects o_parent
+    JOIN objects o ON o.guid_parent = o_parent.guid
+    JOIN abonents a ON a.guid_objects = o.guid
+    JOIN link_abonents_taken_params latp ON latp.guid_abonents = a.guid
+    JOIN taken_params tp ON tp.guid = latp.guid_taken_params
+    JOIN meters m ON m.guid = tp.guid_meters
+    JOIN params p ON p.guid = tp.guid_params
+    JOIN names_params np ON np.guid = p.guid_names_params
+    JOIN resources r ON r.guid = np.guid_resources
+    
+    -- TCP/IP настройки
+    LEFT JOIN link_meters_tcpip_settings lmts ON lmts.guid_meters = m.guid
+    LEFT JOIN tcpip_settings ts ON ts.guid = lmts.guid_tcpip_settings
+    
+    LEFT JOIN daily_values dv ON dv.id_taken_params = tp.id
+        AND dv.date = %s
+        
+    WHERE r.name = 'Импульс'
+        AND o_parent.name LIKE '%%Вода%%'
+    GROUP BY o_parent.name, o.name, a.name, a.account_2, m.name, np.name,
+             m.factory_number_manual, m.address, ts.ip_address, ts.ip_port,
+             m.attr1, m.attr2, m.attr3, m.attr4, m.name
+    
+    HAVING MAX(dv.value) IS NULL
+    
+    ORDER BY o_parent.name, o.name
+    """
+    
+    cursor = connection.cursor()
+    cursor.execute(query, [electric_data_end])
+    return cursor.fetchall()

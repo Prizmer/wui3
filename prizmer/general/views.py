@@ -9172,6 +9172,69 @@ def electric_res_status(request):
     args['electric_data_start'] = electric_data_start
 
     return render(request, "data_table/86.html", args)
+
+def electric_res_status_v2(request):
+    args = {}
+    
+    # Инициализация переменных
+    obj_title = request.GET.get('obj_title', 'Не выбран')
+    obj_key = request.GET.get('obj_key', 'Не выбран')
+    obj_parent_title = request.GET.get('obj_parent_title', 'Не выбран')
+    electric_data_start = request.GET.get('electric_data_start', '')
+    electric_data_end = request.GET.get('electric_data_end', '')
+    
+    # Сохраняем в сессии
+    if request.is_ajax() and request.method == 'GET':
+        request.session.update({
+            "obj_title": obj_title,
+            "obj_key": obj_key,
+            "obj_parent_title": obj_parent_title,
+            "electric_data_start": electric_data_start,
+            "electric_data_end": electric_data_end
+        })
+    
+    # Получаем статистику
+    dtAll_statistic = []
+    dtAll_no_data_meters = []
+    
+    if electric_data_end:
+        # Получаем данные из БД
+        statistic_data = common_sql.get_electric_count_for_all_objects(electric_data_end)
+        no_data_meters = common_sql.get_electric_no_data_for_all_objects(electric_data_end)
+        
+        # dtAll_statistic должен быть списком списков
+        if statistic_data:
+            dtAll_statistic = [list(row) for row in statistic_data]
+            dtAll_statistic = [[row] for row in statistic_data]
+        
+        # dtAll_no_data_meters тоже должен быть списком списков
+        if no_data_meters:
+            from collections import defaultdict
+            grouped_by_object = defaultdict(list)
+            
+            for meter in no_data_meters:
+                obj_name = meter[0]  # первый элемент - название объекта
+                grouped_by_object[obj_name].append(meter)
+            
+            # Преобразуем в список списков
+            dtAll_no_data_meters = list(grouped_by_object.values())
+    
+    # Подготавливаем аргументы для шаблона
+    args.update({
+        'dtAll_statistic': dtAll_statistic,
+        'dtAll_no_data_meters': dtAll_no_data_meters,
+        'obj_title': obj_title,
+        'obj_key': obj_key,
+        'obj_parent_title': obj_parent_title,
+        'electric_data_end': electric_data_end,
+        'electric_data_start': electric_data_start,
+        'is_electric_monthly': request.GET.get('is_electric_monthly', ''),
+        'is_electric_daily': request.GET.get('is_electric_daily', ''),
+        'is_electric_current': request.GET.get('is_electric_current', ''),
+        'is_electric_delta': request.GET.get('is_electric_delta', ''),
+    })
+    
+    return render(request, "data_table/86.html", args)
     
 def heat_digital_res_status(request):
     args = {}
@@ -9205,10 +9268,7 @@ def heat_digital_res_status(request):
         if len(dt_no_data_meters)>0: 
             dt_no_data_meters=common_sql.ChangeNull(dt_no_data_meters, None)
             dtAll_no_data_meters.append(dt_no_data_meters)
-      
-   
-    
-    
+
     args['dtAll_statistic'] = dtAll_statistic
     args['dtAll_no_data_meters'] = dtAll_no_data_meters
     args['obj_title'] = obj_title
@@ -9222,6 +9282,65 @@ def heat_digital_res_status(request):
     args['electric_data_start'] = electric_data_start
 
     return render(request, "data_table/88.html", args)
+
+def heat_digital_res_status_v2(request):
+    args = {}
+    
+    # Инициализация переменных с безопасным get
+    obj_title = request.GET.get('obj_title', 'Не выбран')
+    obj_key = request.GET.get('obj_key', 'Не выбран')
+    obj_parent_title = request.GET.get('obj_parent_title', 'Не выбран')
+    electric_data_end = request.GET.get('electric_data_end', '')
+    
+    if request.is_ajax() and request.method == 'GET':
+        request.session.update({
+            "obj_title": obj_title,
+            "obj_key": obj_key,
+            "obj_parent_title": obj_parent_title,
+            "electric_data_end": electric_data_end
+        })
+    
+    # Получаем статистику для всех объектов одним запросом
+    dtAll_statistic = []
+    dtAll_no_data_meters = []
+    
+    if electric_data_end:
+        # Новые оптимизированные функции
+        statistic_data = common_sql.get_heat_count_for_all_objects(electric_data_end)
+        no_data_meters = common_sql.get_heat_no_data_for_all_objects(electric_data_end)
+        
+        # Форматируем данные для шаблона
+        if statistic_data:
+            dtAll_statistic = [[row] for row in statistic_data]
+        
+        if no_data_meters:
+            # Группируем по объектам
+            from collections import defaultdict
+            grouped = defaultdict(list)
+            for meter in no_data_meters:
+                obj_name = meter[0]  # первый элемент - название объекта
+                grouped[obj_name].append(meter)
+            
+            dtAll_no_data_meters = list(grouped.values())
+            dtAll_no_data_meters = common_sql.ChangeNull(dtAll_no_data_meters, None)
+    
+    # Подготавливаем аргументы для шаблона
+    args.update({
+        'dtAll_statistic': dtAll_statistic,
+        'dtAll_no_data_meters': dtAll_no_data_meters,
+        'obj_title': obj_title,
+        'obj_key': obj_key,
+        'obj_parent_title': obj_parent_title,
+        'electric_data_end': electric_data_end,
+        'electric_data_start': request.GET.get('electric_data_start', ''),
+        'is_electric_monthly': request.GET.get('is_electric_monthly', ''),
+        'is_electric_daily': request.GET.get('is_electric_daily', ''),
+        'is_electric_current': request.GET.get('is_electric_current', ''),
+        'is_electric_delta': request.GET.get('is_electric_delta', ''),
+    })
+    
+    return render(request, "data_table/88.html", args)
+    
     
 def water_impulse_res_status(request):
     args = {}
@@ -9271,6 +9390,67 @@ def water_impulse_res_status(request):
     args['electric_data_end'] = electric_data_end
     args['electric_data_start'] = electric_data_start
 
+    return render(request, "data_table/90.html", args)
+
+def water_impulse_res_status_v2(request):
+    args = {}
+    
+    # Инициализация
+    obj_title = request.GET.get('obj_title', 'Не выбран')
+    obj_key = request.GET.get('obj_key', 'Не выбран')
+    obj_parent_title = request.GET.get('obj_parent_title', 'Не выбран')
+    electric_data_end = request.GET.get('electric_data_end', '')
+    
+    # Сохраняем в сессии
+    if request.is_ajax() and request.method == 'GET':
+        request.session.update({
+            "obj_title": obj_title,
+            "obj_key": obj_key,
+            "obj_parent_title": obj_parent_title,
+            "electric_data_end": electric_data_end
+        })
+    
+    # Получаем статистику
+    dtAll_statistic = []
+    dtAll_no_data_meters = []
+    
+    if electric_data_end:
+        # Получаем данные
+        statistic_data = common_sql.get_water_impulse_count_for_all_objects(electric_data_end)
+        no_data_meters = common_sql.get_water_impulse_no_data_for_all_objects(electric_data_end)
+        
+        # Форматируем для шаблона
+        if statistic_data:
+            dtAll_statistic = [[row] for row in statistic_data]
+        
+        if no_data_meters:
+            # Группируем по объектам
+            from collections import defaultdict
+            grouped = defaultdict(list)
+            for meter in no_data_meters:
+                obj_name = meter[0]
+                grouped[obj_name].append(meter)
+            
+            dtAll_no_data_meters = list(grouped.values())
+            
+            if hasattr(common_sql, 'ChangeNull'):
+                dtAll_no_data_meters = common_sql.ChangeNull(dtAll_no_data_meters, None)
+    
+    # Аргументы для шаблона
+    args.update({
+        'dtAll_statistic': dtAll_statistic,
+        'dtAll_no_data_meters': dtAll_no_data_meters,
+        'obj_title': obj_title,
+        'obj_key': obj_key,
+        'obj_parent_title': obj_parent_title,
+        'electric_data_end': electric_data_end,
+        'electric_data_start': request.GET.get('electric_data_start', ''),
+        'is_electric_monthly': request.GET.get('is_electric_monthly', ''),
+        'is_electric_daily': request.GET.get('is_electric_daily', ''),
+        'is_electric_current': request.GET.get('is_electric_current', ''),
+        'is_electric_delta': request.GET.get('is_electric_delta', ''),
+    })
+    
     return render(request, "data_table/90.html", args)
     
 def water_digital_pulsar_res_status(request):
@@ -9323,6 +9503,65 @@ def water_digital_pulsar_res_status(request):
 
     return render(request, "data_table/94.html", args)
 
+def water_digital_pulsar_res_status_v2(request):
+    args = {}
+    
+    # Инициализация переменных с безопасным get
+    obj_title = request.GET.get('obj_title', 'Не выбран')
+    obj_key = request.GET.get('obj_key', 'Не выбран')
+    obj_parent_title = request.GET.get('obj_parent_title', 'Не выбран')
+    electric_data_end = request.GET.get('electric_data_end', '')
+    
+    # Сохраняем в сессии
+    if request.is_ajax() and request.method == 'GET':
+        request.session.update({
+            "obj_title": obj_title,
+            "obj_key": obj_key,
+            "obj_parent_title": obj_parent_title,
+            "electric_data_end": electric_data_end
+        })
+    
+    # Получаем статистику для всех объектов одним запросом
+    dtAll_statistic = []
+    dtAll_no_data_meters = []
+    
+    if electric_data_end:
+        # Новые оптимизированные функции
+        statistic_data = common_sql.get_water_digital_pulsar_count_for_all_objects(electric_data_end)
+        no_data_meters = common_sql.get_water_digital_pulsar_no_data_for_all_objects(electric_data_end)
+        
+        # Форматируем данные для шаблона
+        if statistic_data:
+            dtAll_statistic = [[row] for row in statistic_data]
+        
+        if no_data_meters:
+            # Группируем по объектам
+            from collections import defaultdict
+            grouped = defaultdict(list)
+            for meter in no_data_meters:
+                obj_name = meter[0]
+                grouped[obj_name].append(meter)
+            
+            dtAll_no_data_meters = list(grouped.values())
+            if hasattr(common_sql, 'ChangeNull'):
+                dtAll_no_data_meters = common_sql.ChangeNull(dtAll_no_data_meters, None)
+    
+    # Подготавливаем аргументы для шаблона
+    args.update({
+        'dtAll_statistic': dtAll_statistic,
+        'dtAll_no_data_meters': dtAll_no_data_meters,
+        'obj_title': obj_title,
+        'obj_key': obj_key,
+        'obj_parent_title': obj_parent_title,
+        'electric_data_end': electric_data_end,
+        'electric_data_start': request.GET.get('electric_data_start', ''),
+        'is_electric_monthly': request.GET.get('is_electric_monthly', ''),
+        'is_electric_daily': request.GET.get('is_electric_daily', ''),
+        'is_electric_current': request.GET.get('is_electric_current', ''),
+        'is_electric_delta': request.GET.get('is_electric_delta', ''),
+    })
+    
+    return render(request, "data_table/94.html", args)
 
 def balance_period_water_impulse(request):
     args = {}

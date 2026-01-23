@@ -27537,3 +27537,576 @@ def report_electric_potreblenie_3_zones_v4(request):
     output_name = 'rashod_3_zones_' + translate(obj_title) + '_' + str(electric_data_start) + '-' + str(electric_data_end)
     response['Content-Disposition'] = f'attachment;filename="{output_name.replace(chr(34), chr(92)+chr(34))}.xlsx"'
     return response
+
+
+
+# функции для выгрузки статистики на 2 страницы
+def export_to_excel_two_sheets_with_styles(data_table1, data_table2, headers1, headers2, 
+                                           columns_config1, columns_config2, 
+                                           sheet_title1="Статистика", sheet_title2="Приборы без данных",
+                                           round_size=3, num_is_string=False, 
+                                           freeze_panes1=None, freeze_panes2=None):
+    """
+    Создает Excel с двумя страницами используя ВАШИ стили.
+    
+    headers: список кортежей (merge_range, cell_ref, value, style_name, width)
+    style_name: 'ali_green_title', 'ali_green_header', 'ali_green', 'ali_white', 'ali_blue', 'ali_pink'
+    """
+    wb = Workbook()
+    
+    # Добавляем ВАШИ стили в workbook
+    wb.add_named_style(ali_grey)
+    wb.add_named_style(ali_white)
+    wb.add_named_style(ali_yellow)
+    wb.add_named_style(ali_pink)
+    wb.add_named_style(ali_blue)
+    wb.add_named_style(ali_green)
+    wb.add_named_style(ali_yellow_header)
+    wb.add_named_style(ali_green_header)
+    wb.add_named_style(ali_green_title)
+    
+    # --- ПЕРВАЯ СТРАНИЦА ---
+    ws1 = wb.active
+    ws1.title = sheet_title1
+    
+    # Заполняем первую страницу
+    _fill_sheet_with_styles(ws1, headers1, data_table1, columns_config1, round_size, num_is_string)
+    
+    # Фиксируем шапку
+    if freeze_panes1:
+        ws1.freeze_panes = freeze_panes1
+    else:
+        data_start_row1 = _get_data_start_row(headers1)
+        ws1.freeze_panes = f'A{data_start_row1}'
+    
+    # --- ВТОРАЯ СТРАНИЦА ---
+    ws2 = wb.create_sheet(title=sheet_title2)
+    
+    # Заполняем вторую страницу
+    _fill_sheet_with_styles(ws2, headers2, data_table2, columns_config2, round_size, num_is_string)
+    
+    # Фиксируем шапку
+    if freeze_panes2:
+        ws2.freeze_panes = freeze_panes2
+    else:
+        data_start_row2 = _get_data_start_row(headers2)
+        ws2.freeze_panes = f'A{data_start_row2}'
+    
+    return wb
+
+
+def _get_data_start_row(headers):
+    """Определяет строку, с которой начинаются данные на основе заголовков"""
+    max_row = 1
+    for header in headers:
+        # Получаем номер строки из cell_ref (например, 'A2' -> 2)
+        cell_ref = header[1]
+        # Извлекаем числовую часть из cell_ref
+        row_num = int(''.join(filter(str.isdigit, cell_ref)))
+        max_row = max(max_row, row_num)
+    # Данные начинаются со следующей строки после последней строки заголовка
+    return max_row + 1
+
+
+def _fill_sheet_with_styles(ws, headers, data_table, columns_config, round_size, num_is_string):
+    """Заполняет страницу с использованием ваших стилей"""
+    # 1. Заполняем заголовки
+    _fill_headers_with_styles(ws, headers)
+    
+    # 2. Определяем строку начала данных
+    data_start_row = _get_data_start_row(headers)
+    
+    # 3. Заполняем данные
+    _fill_data_with_styles(ws, data_table, columns_config, data_start_row, round_size, num_is_string)
+
+
+def _fill_headers_with_styles(ws, headers):
+    """Заполняет заголовки с вашими стилями"""
+    for header in headers:
+        merge_range, cell_ref, value, style_name, width = header
+        
+        # Мерджим ячейки если нужно
+        if merge_range:
+            ws.merge_cells(merge_range)
+        
+        # Заполняем значение и стиль
+        cell = ws[cell_ref]
+        cell.value = value
+        
+        # Применяем ваш именованный стиль
+        if style_name:
+            # Сопоставляем имя стиля с объектом стиля
+            style_map = {
+                'ali_green_title': ali_green_title,
+                'ali_green_header': ali_green_header,
+                'ali_green': ali_green,
+                'ali_white': ali_white,
+                'ali_yellow': ali_yellow,
+                'ali_pink': ali_pink,
+                'ali_blue': ali_blue,
+                'ali_grey': ali_grey,
+                'ali_yellow_header': ali_yellow_header,
+            }
+            if style_name in style_map:
+                cell.style = style_map[style_name]
+        
+        # Устанавливаем ширину колонки
+        if width and cell_ref[0].isalpha():
+            col_letter = cell_ref[0]
+            ws.column_dimensions[col_letter].width = width
+
+
+def _fill_data_with_styles(ws, data_table, columns_config, data_start_row, round_size, num_is_string):
+    """Заполняет данные с чередованием стилей строк"""
+    HVS_NAME = getattr(settings, 'HVS_NAME', 'ХВС')
+    GVS_NAME = getattr(settings, 'GVS_NAME', 'ГВС')
+    
+    for row_idx, data_row in enumerate(data_table, start=data_start_row):
+        # Определяем базовый стиль строки (чередование: четные - зеленые, нечетные - белые)
+        is_even = (row_idx - data_start_row) % 2 == 0
+        base_style = ali_green if is_even else ali_white
+        
+        for col_letter, data_idx, style_name, is_numeric, calc_func in columns_config:
+            cell = ws.cell(row=row_idx, column=column_index_from_string(col_letter))
+            
+            # Устанавливаем базовый стиль строки
+            cell.style = base_style
+            
+            # Получаем значение
+            value = None
+            try:
+                if calc_func:
+                    value = calc_func(data_row)
+                elif data_idx is not None and data_idx < len(data_row):
+                    value = data_row[data_idx]
+                
+                # Обрабатываем значение
+                if value is not None:
+                    # ОСОБАЯ ОБРАБОТКА для "Н/Д"
+                    if str(value).strip() == 'Н/Д':
+                        cell.value = 'Н/Д'
+                    # Обработка для "ХВС" и "ГВС" - переопределяем стиль
+                    elif str(value).strip() == 'ХВС' or str(value).strip() == 'Холодное водоснабжение':
+                        cell.value = HVS_NAME
+                        cell.style = ali_blue
+                    elif str(value).strip() == 'ГВС' or str(value).strip() == 'Горячее водоснабжение':
+                        cell.value = GVS_NAME
+                        cell.style = ali_pink
+                    elif is_numeric:
+                        try:
+                            num_val = float(str(value).replace(',', '.'))
+                            if num_is_string:
+                                # Форматируем как строку
+                                if round_size == 0:
+                                    formatted = str(int(round(num_val)))
+                                else:
+                                    formatted = f"{num_val:.{round_size}f}"
+                                cell.value = formatted.replace('.', ',') if ',' in formatted else formatted
+                            else:
+                                cell.value = num_val
+                                # Добавляем числовой формат к стилю
+                                cell.number_format = f'0.{"0" * round_size}'
+                        except:
+                            cell.value = str(value)
+                    else:
+                        cell.value = str(value)
+                else:
+                    cell.value = ''
+                
+                # Применяем дополнительный стиль из columns_config если есть
+                if style_name:
+                    style_map = {
+                        'ali_green': ali_green,
+                        'ali_white': ali_white,
+                        'ali_yellow': ali_yellow,
+                        'ali_pink': ali_pink,
+                        'ali_blue': ali_blue,
+                        'ali_grey': ali_grey,
+                    }
+                    if style_name in style_map:
+                        cell.style = style_map[style_name]
+                        
+            except Exception as e:
+                print(f"Error in cell {col_letter}{row_idx}: {e}")
+                cell.value = ''
+
+
+# Остальной код остается без изменений
+def export_water_impulse_statistic(request):
+    """
+    Выгрузка для импульсной воды с ВАШИМИ стилями
+    """
+    ROUND_SIZE = getattr(settings, 'ROUND_SIZE', 3)
+    NUM_IS_STRING = getattr(settings, 'NUM_IS_STRING', 'False')
+    
+    obj_title = request.GET.get('obj_title', 'Все объекты')
+    electric_data_end = request.GET.get('electric_data_end', '')
+    
+    # Получаем данные
+    statistic_data = common_sql.get_water_impulse_count_for_all_objects(electric_data_end)
+    no_data_meters = common_sql.get_water_impulse_no_data_for_all_objects(electric_data_end)
+    
+    # Заменяем None на N/D
+    if statistic_data:
+        statistic_data = common_sql.ChangeNull(statistic_data, None)
+    if no_data_meters:
+        no_data_meters = common_sql.ChangeNull(no_data_meters, None)
+    
+    # --- КОНФИГУРАЦИЯ ПЕРВОЙ СТРАНИЦЫ (Статистика) ---
+    headers_stat = [
+        # (merge_range, cell_ref, value, style_name, width)
+        ('A2:E2', 'A2', f'Статистика опроса импульсной воды на {electric_data_end}', 'ali_green_title', None),
+        ('A3:A3', 'A3', 'Объект', 'ali_green_header', 30),
+        ('B3:B3', 'B3', 'Опрошено', 'ali_green_header', 15),
+        ('C3:C3', 'C3', 'Всего счетчиков', 'ali_green_header', 18),
+        ('D3:D3', 'D3', 'Процент опроса', 'ali_green_header', 18),
+        ('E3:E3', 'E3', 'Не опрошено', 'ali_green_header', 18),
+    ]
+    
+    columns_config_stat = [
+        # (col_letter, data_idx, style_name, is_numeric, calc_func)
+        ('A', 0, None, False, None),  # Объект - будет чередоваться
+        ('B', 1, None, True, None),   # Опрошено - числовое
+        ('C', 2, None, True, None),   # Всего счетчиков - числовое
+        ('D', 3, None, True, None),   # Процент опроса - числовое
+        ('E', 4, None, True, None),   # Не опрошено - числовое
+    ]
+    
+    # --- КОНФИГУРАЦИЯ ВТОРОЙ СТРАНИЦЫ (Приборы без данных) ---
+    headers_no_data = [
+        ('A2:F2', 'A2', f'Не отвечающие ПУ импульсной воды на {electric_data_end}', 'ali_green_title', None),
+        ('A3:A3', 'A3', 'Объект', 'ali_green_header', 30),
+        ('B3:B3', 'B3', 'Абонент', 'ali_green_header', 30),
+        ('C3:C3', 'C3', 'Счётчик', 'ali_green_header', 25),
+        ('D3:D3', 'D3', 'Регистратор', 'ali_green_header', 25),
+        ('E3:E3', 'E3', 'Канал', 'ali_green_header', 12),
+        ('F3:F3', 'F3', 'Показания', 'ali_green_header', 15),
+    ]
+    
+    columns_config_no_data = [
+        ('A', 0, None, False, None),  # Объект
+        ('B', 1, None, False, None),  # Абонент
+        ('C', 2, None, False, None),  # Счётчик
+        ('D', 3, None, False, None),  # Регистратор
+        ('E', 4, None, False, None),  # Канал
+        ('F', 5, None, True, None),   # Показания - числовое
+    ]
+    
+    # Создаем Excel
+    wb = export_to_excel_two_sheets_with_styles(
+        data_table1=statistic_data,
+        data_table2=no_data_meters,
+        headers1=headers_stat,
+        headers2=headers_no_data,
+        columns_config1=columns_config_stat,
+        columns_config2=columns_config_no_data,
+        sheet_title1="Статистика",
+        sheet_title2="Приборы без данных",
+        round_size=ROUND_SIZE,
+        num_is_string=NUM_IS_STRING,
+        freeze_panes1='A4',  # Фиксируем с строки заголовков
+        freeze_panes2='A4'
+    )
+    
+    # Сохраняем и возвращаем
+    response = HttpResponse(
+        save_virtual_workbook(wb),
+        content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
+    
+    # Формируем имя файла
+    filename = f'statistic_impuls_water_{electric_data_end}.xlsx'
+    filename = filename.replace('/', '_').replace('\\', '_').replace(':', '_')
+    
+    response['Content-Disposition'] = f'attachment; filename="{filename}"'
+    return response
+
+def export_water_digital_pulsar_statistic(request):
+    """
+    Выгрузка для цифровых ПУ воды с ВАШИМИ стилями
+    """
+    ROUND_SIZE = getattr(settings, 'ROUND_SIZE', 3)
+    NUM_IS_STRING = getattr(settings, 'NUM_IS_STRING', 'False')
+    
+    obj_title = request.GET.get('obj_title', 'Все объекты')
+    electric_data_end = request.GET.get('electric_data_end', '')
+    
+    # Получаем данные
+    statistic_data = common_sql.get_water_digital_pulsar_count_for_all_objects(electric_data_end)
+    no_data_meters = common_sql.get_water_digital_pulsar_no_data_for_all_objects(electric_data_end)
+    
+    # Заменяем None на N/D
+    if statistic_data:
+        statistic_data = common_sql.ChangeNull(statistic_data, None)
+    if no_data_meters:
+        no_data_meters = common_sql.ChangeNull(no_data_meters, None)
+    
+    # --- КОНФИГУРАЦИЯ ПЕРВОЙ СТРАНИЦЫ (Статистика) ---
+    headers_stat = [
+        # (merge_range, cell_ref, value, style_name, width)
+        ('A2:E2', 'A2', f'Статистика опроса цифровых ПУ воды на {electric_data_end}', 'ali_green_title', None),
+        ('A3:A3', 'A3', 'Объект', 'ali_green_header', 30),
+        ('B3:B3', 'B3', 'Опрошено', 'ali_green_header', 15),
+        ('C3:C3', 'C3', 'Всего счетчиков', 'ali_green_header', 18),
+        ('D3:D3', 'D3', 'Процент опроса', 'ali_green_header', 18),
+        ('E3:E3', 'E3', 'Не опрошено', 'ali_green_header', 18),
+    ]
+    
+    columns_config_stat = [
+        # (col_letter, data_idx, style_name, is_numeric, calc_func)
+        ('A', 0, None, False, None),  # Объект - будет чередоваться
+        ('B', 1, None, True, None),   # Опрошено - числовое
+        ('C', 2, None, True, None),   # Всего счетчиков - числовое
+        ('D', 3, None, True, None),   # Процент опроса - числовое
+        ('E', 4, None, True, None),   # Не опрошено - числовое
+    ]
+    
+    # --- КОНФИГУРАЦИЯ ВТОРОЙ СТРАНИЦЫ (Приборы без данных) ---
+    headers_no_data = [
+        ('A2:H2', 'A2', f'Цифровые ПУ воды без данных на {electric_data_end}', 'ali_green_title', None),
+        ('A3:A3', 'A3', 'Объект', 'ali_green_header', 30),
+        ('B3:B3', 'B3', 'Абонент', 'ali_green_header', 30),
+        ('C3:C3', 'C3', 'Счётчик', 'ali_green_header', 25),
+        ('D3:D3', 'D3', 'Показания', 'ali_green_header', 15),
+        ('E3:E3', 'E3', 'Сетевой адрес', 'ali_green_header', 25),
+        ('F3:F3', 'F3', 'IP адрес', 'ali_green_header', 20),
+        ('G3:G3', 'G3', 'IP порт', 'ali_green_header', 12),
+        ('H3:H3', 'H3', 'Тип прибора', 'ali_green_header', 20),
+    ]
+    
+    columns_config_no_data = [
+        ('A', 0, None, False, None),  # Объект
+        ('B', 1, None, False, None),  # Абонент
+        ('C', 2, None, False, None),  # Счётчик
+        ('D', 3, None, True, None),   # Показания - числовое
+        ('E', 4, None, False, None),  # Сетевой адрес
+        ('F', 5, None, False, None),  # IP адрес
+        ('G', 6, None, False, None),  # IP порт
+        ('H', 7, None, False, None),  # Тип прибора
+    ]
+    
+    # Создаем Excel
+    wb = export_to_excel_two_sheets_with_styles(
+        data_table1=statistic_data,
+        data_table2=no_data_meters,
+        headers1=headers_stat,
+        headers2=headers_no_data,
+        columns_config1=columns_config_stat,
+        columns_config2=columns_config_no_data,
+        sheet_title1="Статистика",
+        sheet_title2="Приборы без данных",
+        round_size=ROUND_SIZE,
+        num_is_string=NUM_IS_STRING,
+        freeze_panes1='A4',  # Фиксируем с строки заголовков
+        freeze_panes2='A4'
+    )
+    
+    # Сохраняем и возвращаем
+    response = HttpResponse(
+        save_virtual_workbook(wb),
+        content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
+        
+    # Создаем имя файла на латинице
+    filename = f'water_digital_pulsar_{electric_data_end}.xlsx'
+    
+    response['Content-Disposition'] = f'attachment; filename="{filename}"'
+    return response
+
+def export_heat_digital_statistic(request):
+    """
+    Выгрузка для тепла в Excel
+    """
+    ROUND_SIZE = getattr(settings, 'ROUND_SIZE', 3)
+    NUM_IS_STRING = getattr(settings, 'NUM_IS_STRING', 'False')
+    
+    obj_title = request.GET.get('obj_title', 'Все объекты')
+    electric_data_end = request.GET.get('electric_data_end', '')
+    
+    # Получаем данные
+    statistic_data = common_sql.get_heat_count_for_all_objects(electric_data_end)
+    no_data_meters = common_sql.get_heat_no_data_for_all_objects(electric_data_end)
+    
+    # Заменяем None на N/D
+    if statistic_data:
+        statistic_data = common_sql.ChangeNull(statistic_data, None)
+    if no_data_meters:
+        no_data_meters = common_sql.ChangeNull(no_data_meters, None)
+    
+    # --- КОНФИГУРАЦИЯ ПЕРВОЙ СТРАНИЦЫ (Статистика) ---
+    headers_stat = [
+        ('A2:E2', 'A2', f'Статистика опроса тепла на {electric_data_end}', 'ali_green_title', None),
+        ('A3:A3', 'A3', 'Объект', 'ali_green_header', 30),
+        ('B3:B3', 'B3', 'Опрошено', 'ali_green_header', 15),
+        ('C3:C3', 'C3', 'Всего счетчиков', 'ali_green_header', 18),
+        ('D3:D3', 'D3', 'Процент опроса', 'ali_green_header', 18),
+        ('E3:E3', 'E3', 'Не опрошено', 'ali_green_header', 18),
+    ]
+    
+    columns_config_stat = [
+        ('A', 0, None, False, None),
+        ('B', 1, None, True, None),
+        ('C', 2, None, True, None),
+        ('D', 3, None, True, None),
+        ('E', 4, None, True, None),
+    ]
+    
+    # --- КОНФИГУРАЦИЯ ВТОРОЙ СТРАНИЦЫ (Приборы без данных) ---
+    headers_no_data = [
+        ('A2:K2', 'A2', f'Приборы тепла без данных на {electric_data_end}', 'ali_green_title', None),
+        ('A3:A3', 'A3', 'Объект', 'ali_green_header', 30),
+        ('B3:B3', 'B3', 'Абонент', 'ali_green_header', 30),
+        ('C3:C3', 'C3', 'Счётчик', 'ali_green_header', 25),
+        ('D3:D3', 'D3', 'Энергия, Гкал', 'ali_green_header', 15),
+        ('E3:E3', 'E3', 'Объем, м³', 'ali_green_header', 15),
+        ('F3:F3', 'F3', 'Темп. входа, °C', 'ali_green_header', 15),
+        ('G3:G3', 'G3', 'Темп. выхода, °C', 'ali_green_header', 15),
+        ('H3:H3', 'H3', 'Сетевой адрес', 'ali_green_header', 25),
+        ('I3:I3', 'I3', 'IP адрес', 'ali_green_header', 20),
+        ('J3:J3', 'J3', 'IP порт', 'ali_green_header', 12),
+        ('K3:K3', 'K3', 'Тип прибора', 'ali_green_header', 20),
+    ]
+    
+    columns_config_no_data = [
+        ('A', 0, None, False, None),  # Объект
+        ('B', 1, None, False, None),  # Абонент
+        ('C', 2, None, False, None),  # Счётчик
+        ('D', 3, None, True, None),   # Энергия, Гкал
+        ('E', 4, None, True, None),   # Объем, м³
+        ('F', 5, None, True, None),   # Темп. входа, °C
+        ('G', 6, None, True, None),   # Темп. выхода, °C
+        ('H', 7, None, False, None),  # Сетевой адрес
+        ('I', 8, None, False, None),  # IP адрес
+        ('J', 9, None, False, None),  # IP порт
+        ('K', 10, None, False, None), # Тип прибора
+    ]
+    
+    # Создаем Excel
+    wb = export_to_excel_two_sheets_with_styles(
+        data_table1=statistic_data,
+        data_table2=no_data_meters,
+        headers1=headers_stat,
+        headers2=headers_no_data,
+        columns_config1=columns_config_stat,
+        columns_config2=columns_config_no_data,
+        sheet_title1="Статистика",
+        sheet_title2="Приборы без данных",
+        round_size=ROUND_SIZE,
+        num_is_string=NUM_IS_STRING,
+        freeze_panes1='A4',
+        freeze_panes2='A4'
+    )
+    
+    # Сохраняем и возвращаем
+    response = HttpResponse(
+        save_virtual_workbook(wb),
+        content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
+    
+    # Формируем имя файла    
+    filename = f'statisic_heat_{electric_data_end}.xlsx'
+    
+    response['Content-Disposition'] = f'attachment; filename="{filename}"'
+    return response
+
+
+def export_electric_statistic(request):
+    """
+    Выгрузка для электричества в Excel
+    """
+    ROUND_SIZE = getattr(settings, 'ROUND_SIZE', 3)
+    NUM_IS_STRING = getattr(settings, 'NUM_IS_STRING', 'False')
+    
+    obj_title = request.GET.get('obj_title', 'Все объекты')
+    electric_data_end = request.GET.get('electric_data_end', '')
+    
+    # Получаем данные
+    statistic_data = common_sql.get_electric_count_for_all_objects(electric_data_end)
+    no_data_meters = common_sql.get_electric_no_data_for_all_objects(electric_data_end)
+    
+    # Заменяем None на N/D
+    if statistic_data:
+        statistic_data = common_sql.ChangeNull(statistic_data, None)
+    if no_data_meters:
+        no_data_meters = common_sql.ChangeNull(no_data_meters, None)
+    
+    # --- КОНФИГУРАЦИЯ ПЕРВОЙ СТРАНИЦЫ (Статистика) ---
+    headers_stat = [
+        ('A2:E2', 'A2', f'Статистика опроса электричества на {electric_data_end}', 'ali_green_title', None),
+        ('A3:A3', 'A3', 'Объект', 'ali_green_header', 30),
+        ('B3:B3', 'B3', 'Опрошено', 'ali_green_header', 15),
+        ('C3:C3', 'C3', 'Всего счетчиков', 'ali_green_header', 18),
+        ('D3:D3', 'D3', 'Процент опроса', 'ali_green_header', 18),
+        ('E3:E3', 'E3', 'Не опрошено', 'ali_green_header', 18),
+    ]
+    
+    columns_config_stat = [
+        ('A', 0, None, False, None),
+        ('B', 1, None, True, None),
+        ('C', 2, None, True, None),
+        ('D', 3, None, True, None),
+        ('E', 4, None, True, None),
+    ]
+    
+    # --- КОНФИГУРАЦИЯ ВТОРОЙ СТРАНИЦЫ (Приборы без данных) ---
+    headers_no_data = [
+        ('A2:K2', 'A2', f'Приборы электричества без данных на {electric_data_end}', 'ali_green_title', None),
+        ('A3:A3', 'A3', 'Объект', 'ali_green_header', 30),
+        ('B3:B3', 'B3', 'Абонент', 'ali_green_header', 30),
+        ('C3:C3', 'C3', 'Счётчик', 'ali_green_header', 25),
+        ('D3:D3', 'D3', 'T0, кВт*ч', 'ali_green_header', 15),
+        ('E3:E3', 'E3', 'T1, кВт*ч', 'ali_green_header', 15),
+        ('F3:F3', 'F3', 'T2, кВт*ч', 'ali_green_header', 15),
+        ('G3:G3', 'G3', 'T3, кВт*ч', 'ali_green_header', 15),
+        ('H3:H3', 'H3', 'Сетевой адрес', 'ali_green_header', 25),
+        ('I3:I3', 'I3', 'IP адрес', 'ali_green_header', 20),
+        ('J3:J3', 'J3', 'IP порт', 'ali_green_header', 12),
+        ('K3:K3', 'K3', 'Тип прибора', 'ali_green_header', 20),
+    ]
+    
+    columns_config_no_data = [
+        ('A', 0, None, False, None),  # Объект
+        ('B', 1, None, False, None),  # Абонент
+        ('C', 2, None, False, None),  # Счётчик
+        ('D', 3, None, True, None),   # T0, кВт*ч
+        ('E', 4, None, True, None),   # T1, кВт*ч
+        ('F', 5, None, True, None),   # T2, кВт*ч
+        ('G', 6, None, True, None),   # T3, кВт*ч
+        ('H', 7, None, False, None),  # Сетевой адрес
+        ('I', 8, None, False, None),  # IP адрес
+        ('J', 9, None, False, None),  # IP порт
+        ('K', 10, None, False, None), # Тип прибора
+        # Если нужно дополнительные колонки attr1-attr4:
+        # ('L', 11, None, False, None),  # attr1
+        # ('M', 12, None, False, None),  # attr2
+        # ('N', 13, None, False, None),  # attr3
+        # ('O', 14, None, False, None),  # attr4
+    ]
+    
+    # Создаем Excel
+    wb = export_to_excel_two_sheets_with_styles(
+        data_table1=statistic_data,
+        data_table2=no_data_meters,
+        headers1=headers_stat,
+        headers2=headers_no_data,
+        columns_config1=columns_config_stat,
+        columns_config2=columns_config_no_data,
+        sheet_title1="Статистика",
+        sheet_title2="Приборы без данных",
+        round_size=ROUND_SIZE,
+        num_is_string=NUM_IS_STRING,
+        freeze_panes1='A4',
+        freeze_panes2='A4'
+    )
+    
+    # Сохраняем и возвращаем
+    response = HttpResponse(
+        save_virtual_workbook(wb),
+        content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
+    
+    # Формируем имя файла
+    filename = f'electric_{electric_data_end}.xlsx'
+    
+    response['Content-Disposition'] = f'attachment; filename="{filename}"'
+    return response
