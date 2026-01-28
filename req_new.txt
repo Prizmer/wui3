@@ -2,9 +2,9 @@ django==3.1.14
 django-debug-toolbar==2.2
 django-excel-response==2.0.5
 django-extensions==3.0.2
-lxml==4.6.2
+lxml==4.9.4
 openpyxl==2.4.11
-psycopg2==2.8.6
+psycopg2
 #pytz
 simplejson==3.17.0
 libscrc

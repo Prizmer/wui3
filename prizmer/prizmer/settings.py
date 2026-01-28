@@ -108,14 +108,15 @@ DATABASES = {
     'default': {
         'ENGINE':'django.db.backends.postgresql_psycopg2',
         #'NAME': 'ostrov2',
-        'NAME': 'simvol_10',
+        #'NAME': 'simvol_10',
+        'NAME': 'ce308',
         #'NAME': 'prizmer',
         #'NAME': 'vzlet',
         #'NAME': 'ridan',
         #'NAME': 'hov_sev',
         'USER': 'postgres',
         'PASSWORD': '1',
-        'HOST': 'localhost',
+        'HOST': '192.168.50.7',
         'PORT': '5432',
         'OPTIONS': {
             'client_encoding': 'UTF8',            
