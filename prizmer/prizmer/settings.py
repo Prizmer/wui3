@@ -109,7 +109,7 @@ DATABASES = {
         'ENGINE':'django.db.backends.postgresql_psycopg2',
         #'NAME': 'ostrov2',
         #'NAME': 'simvol_10',
-        'NAME': 'ce308',
+        'NAME': 'mirtek',
         #'NAME': 'prizmer',
         #'NAME': 'vzlet',
         #'NAME': 'ridan',
