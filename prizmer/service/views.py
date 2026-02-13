@@ -554,8 +554,8 @@ def LoadObjectsAndAbons(sPath, sSheet):
         obj_l1_name = str(dtAll[i][1]).strip()
         obj_l2_name = str(dtAll[i][2]).strip()
         abon_name = str(dtAll[i][3]).strip()
-        account_1 = str(dtAll[i][4])
-        account_2 = str(dtAll[i][5])
+        account_1 = str(dtAll[i][4]).strip()
+        account_2 = str(dtAll[i][5]).strip()
 
         # Создание или получение объектов с учетом иерархии
         obj_l0 = get_or_create_object_with_parent(obj_l0_name, 0)
@@ -3506,11 +3506,11 @@ def add_link_abonents_taken_params2(sender, instance, created, **kwargs):
 def add_link_abonent_taken_params_from_excel_cfg_electric(sender, instance, created, **kwargs):
     dtAll=GetTableFromExcel(cfg_excel_name,cfg_sheet_name)
     for i in range(1,len(dtAll)):
-        meter=dtAll[i][6]
-        abon=str(dtAll[i][3])
-        obj_l2_name=str(dtAll[i][2])
-        obj_l1_name=str(dtAll[i][1])
-        obj_l0_name=str(dtAll[i][0])
+        meter=dtAll[i][6].strip()
+        abon=str(dtAll[i][3]).strip()
+        obj_l2_name=str(dtAll[i][2]).strip()
+        obj_l1_name=str(dtAll[i][1]).strip()
+        obj_l0_name=str(dtAll[i][0]).strip()
 
         if meter is not None and str(meter) == instance.guid_meters.factory_number_manual:
             cursor = connection.cursor()
@@ -4726,9 +4726,9 @@ def LoadImpulseWaterBalance(dtAll):
     count_new_link=0
     for i in range(1,len(dtAll)):        
         balance_group=str(dtAll[i][0])
-        znak=str(dtAll[i][1])        
-        meter=str(dtAll[i][4])
-        type_abonent=str(dtAll[i][5])
+        znak=str(dtAll[i][1]).strip()        
+        meter=str(dtAll[i][4]).strip()
+        type_abonent=str(dtAll[i][5]).strip()
         isNewBalanceGroup=not SimpleCheckIfExist('balance_groups','name',balance_group,"","","")
         isNewMeter=not SimpleCheckIfExist('meters','factory_number_manual',meter,"","","")
         isNewTypeAbonent=not SimpleCheckIfExist('types_abonents','name',type_abonent,"","","")
@@ -4785,12 +4785,12 @@ def LoadBalance(sPath, sheet):
     else:      
     
         for i in range(1,len(dtAll)):        
-            balance_group=str(dtAll[i][0])
-            znak=str(dtAll[i][1])
-            object_name=str(dtAll[i][2])
-            abonent_name=str(dtAll[i][3])
-            meter=str(dtAll[i][4])
-            type_abonent=str(dtAll[i][5])
+            balance_group=str(dtAll[i][0]).strip()
+            znak=str(dtAll[i][1]).strip()
+            object_name=str(dtAll[i][2]).strip()
+            abonent_name=str(dtAll[i][3]).strip()
+            meter=str(dtAll[i][4]).strip()
+            type_abonent=str(dtAll[i][5]).strip()
             isNewBalanceGroup=not SimpleCheckIfExist('balance_groups','name',balance_group,"","","")
             isNewMeter=not SimpleCheckIfExist('meters','factory_number_manual',meter,"","","")
             isNewTypeAbonent=not SimpleCheckIfExist('types_abonents','name',type_abonent,"","","")

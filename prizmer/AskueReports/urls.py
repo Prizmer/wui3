@@ -220,4 +220,7 @@ urlpatterns = [
     url(r'^171/$', views.report_water_ridan_consumption, name = '171'), #вода - выгрузка по ресурсу, без привязки к приборам
     
     url(r'^172/$', views.report_electr_integral_from_template, name = '172'), #электрика инетегр.показания из шаблона
+    
+    url(r'^173/$', views.report_custom_173, name = '173'), #электрика, вода, тепло
+
 ]

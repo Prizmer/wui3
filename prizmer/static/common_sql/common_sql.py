@@ -7003,7 +7003,7 @@ water_pulsar_abons.ab_guid,
  water_pulsar_abons.comment,
  water_pulsar_abons.attr4,
  water_pulsar_abons.attr1
-  order by water_pulsar_abons.ab_name ASC, water_pulsar_abons.attr1 ASC, water_pulsar_abons.type_meter %s
+  order by water_pulsar_abons.ab_name ASC, water_pulsar_abons.attr4 ASC,water_pulsar_abons.attr1 ASC, water_pulsar_abons.type_meter %s
   
     """%(obj_title, electric_data_end, my_params[0],my_params[1],obj_title, sortDir)
     #print(sQuery)
@@ -18271,3 +18271,64 @@ def get_water_impulse_no_data_for_all_objects(electric_data_end):
     cursor = connection.cursor()
     cursor.execute(query, [electric_data_end])
     return cursor.fetchall()
+  
+def get_val_by_num_meter_and_date_and_resource(meter, type_res, electric_data_end):
+    #  type_res - "Электричество", "Электричество ЩЭСС",  "ХВС", "ГВС"
+    cursor = connection.cursor()
+    data_table = []
+    
+    if type_res == "Электричество" or type_res == "Электричество ЩЭСС":
+        str_param = "MAX(Case when z1.params_name = 'T0 A+' then round(z1.value_daily::numeric, 3) end) as t0"
+    else:
+        str_param = "MAX(Case when z1.params_name like '%%Объем%%' then round(z1.value_daily::numeric, 3) end) as volume"
+    
+    sQuery = """
+    SELECT distinct
+
+    %s
+    --, z1.ktt, z1.ktn, z1.a
+    FROM
+    (SELECT daily_values.date as daily_date,                        
+        meters.factory_number_manual as number_manual,
+        daily_values.value as value_daily,
+        names_params.name as params_name,
+        link_abonents_taken_params.coefficient as ktt,
+        link_abonents_taken_params.coefficient_2 as ktn,
+        link_abonents_taken_params.coefficient_3 as a
+    FROM
+        public.daily_values,
+        public.link_abonents_taken_params,
+        public.taken_params,                        
+        public.names_params,
+        public.params,
+        public.meters,
+        public.types_meters
+    WHERE
+        taken_params.guid = link_abonents_taken_params.guid_taken_params AND
+        taken_params.id = daily_values.id_taken_params AND
+        taken_params.guid_params = params.guid AND
+        taken_params.guid_meters = meters.guid AND                    
+        names_params.guid = params.guid_names_params AND
+        params.guid_names_params = names_params.guid AND
+        types_meters.guid = meters.guid_types_meters AND                       
+        meters.factory_number_manual = '%s' AND
+        daily_values.date = '%s'
+    GROUP BY
+        daily_values.date,                       
+        meters.factory_number_manual,
+        daily_values.value,
+        names_params.name,
+        link_abonents_taken_params.coefficient,
+        link_abonents_taken_params.coefficient_2,
+        link_abonents_taken_params.coefficient_3
+    ) z1
+    GROUP BY z1.daily_date, z1.number_manual, z1.ktt, z1.ktn, z1.a
+    """ % (str_param, meter, electric_data_end)  # Подставляем str_param через форматирование строки
+
+    # print(sQuery)
+    # Выполняем запрос с параметрами для meter и date
+    cursor.execute(sQuery)
+    
+    data_table = cursor.fetchall()
+    return data_table
+  

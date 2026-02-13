@@ -28110,3 +28110,223 @@ def export_electric_statistic(request):
     
     response['Content-Disposition'] = f'attachment; filename="{filename}"'
     return response
+
+def extract_device_number(device_str):
+    """Простое извлечение номера прибора, когда в номере есть тире или нижнее подчёркивание"""
+    device_str = str(device_str).strip()
+    
+    if '-' in device_str:
+        return device_str.split('-')[0]  # берем то, что ДО тире
+    
+    elif '_' in device_str:
+        parts = device_str.split('_')
+        # Если первая часть - короткое число (дата), берем вторую часть
+        if parts[0].isdigit() and len(parts[0]) < 3:
+            return parts[1]
+        else:
+            return parts[0]
+    
+    return device_str
+
+
+def report_custom_173(request):
+    ROUND_SIZE = getattr(settings, 'ROUND_SIZE', 2)
+    response = io.StringIO()
+
+    electric_data_start = request.session.get('electric_data_start', '')
+    electric_data_end = request.session.get('electric_data_end', '')
+
+    result = "1"
+    directory = os.path.join(BASE_DIR,'static\\excel\\excel_template\\custom_173') 
+
+    files = os.listdir(directory) 
+    # Фильтруем только Excel файлы
+    excel_files = [f for f in files if f.lower().endswith(('.xlsx'))]
+    #print(files)
+    if len(excel_files) > 1:
+        result += "В директории должен быть только один Excel файл с расширение xlsx. Работа с более ранними версиями excel(.xls) не поддерживается, пересохраните файл в новой версии."
+        response = HttpResponse(result, content_type="text/plain")
+        output_name = 'error'
+        file_ext = 'txt'    
+        response['Content-Disposition'] = 'attachment;filename="%s.%s"' % (output_name.replace('"', '\"'), file_ext)  
+        return response
+    
+    try:
+        # Загружаем книгу Excel
+        file_path = os.path.join(directory, excel_files[0])
+        wb = load_workbook(file_path, data_only=True)
+        
+        # Обрабатываем каждый лист
+        for sheet_name in wb.sheetnames:
+            ws = wb[sheet_name]  # ws - это объект листа!
+            
+            # Лист с приборами учета
+            if "Приборы учета" in sheet_name:
+                print(f'Обработка листа: {sheet_name}')                
+                meter = ""
+                type_res = ""
+                ws['F1'].value= f'Показания на {electric_data_start}'
+                ws['G1'].value = f'Показания на {electric_data_end}'
+                for row_idx, row in enumerate(ws.iter_rows(min_row=2), start=2):
+                    print('_________________')
+                    meter = row[ord('C') - ord('A')].value
+                    type_res = row[ord('D') - ord('A')].value
+                    meter = extract_device_number(meter)
+                    # print(meter, type_res)
+                    val_start = common_sql.get_val_by_num_meter_and_date_and_resource(meter, type_res, electric_data_start)
+                    val_end = common_sql.get_val_by_num_meter_and_date_and_resource(meter, type_res, electric_data_end)
+                    
+                    # print('val_start:', val_start, 'val_end:', val_end)
+                    if val_start and len(val_start) > 0 and val_start[0][0] is not None:
+                        row[ord('F') - ord('A')].value = get_val_as_number(val_start[0][0], ROUND_SIZE)
+                        row[ord('F') - ord('A')].number_format = f'0.{"0" * ROUND_SIZE}'
+                    else:
+                        row[ord('F') - ord('A')].value = None
+                    
+                    # Запись конца - с проверкой на None
+                    if val_end and len(val_end) > 0 and val_end[0][0] is not None:
+                        row[ord('G') - ord('A')].value = get_val_as_number(val_end[0][0], ROUND_SIZE)
+                        row[ord('G') - ord('A')].number_format = f'0.{"0" * ROUND_SIZE}'
+                    else:
+                        row[ord('G') - ord('A')].value = None
+                        
+                    # Формула потребление с коэф
+                    row[ord('H') - ord('A')].value = f"=G{row_idx}-F{row_idx}"
+                
+            elif 'Электроэнергия' in sheet_name:
+                print(f'Обработка листа: {sheet_name}')                
+                meter = ""
+                type_res = ""
+                ws['B1'].value= f'Показания на {electric_data_start}'
+                ws['C1'].value = f'Показания на {electric_data_end}'
+                for row_idx, row in enumerate(ws.iter_rows(min_row=2), start=2):
+                    meter = row[ord('A') - ord('A')].value
+                    # print(meter)
+                    type_res = 'Электричество'
+                    meter = extract_device_number(meter)
+                    val_start = common_sql.get_val_by_num_meter_and_date_and_resource(meter, type_res, electric_data_start)
+                    val_end = common_sql.get_val_by_num_meter_and_date_and_resource(meter, type_res, electric_data_end)
+                    
+                    # print('val_start:', val_start, 'val_end:', val_end)
+                    if val_start and len(val_start) > 0 and val_start[0][0] is not None:
+                        row[ord('B') - ord('A')].value = get_val_as_number(val_start[0][0], ROUND_SIZE)
+                        row[ord('B') - ord('A')].number_format = f'0.{"0" * ROUND_SIZE}'
+                    else:
+                        row[ord('B') - ord('A')].value = None
+                    
+                    # Запись конца - с проверкой на None
+                    if val_end and len(val_end) > 0 and val_end[0][0] is not None:
+                        row[ord('C') - ord('A')].value = get_val_as_number(val_end[0][0], ROUND_SIZE)
+                        row[ord('C') - ord('A')].number_format = f'0.{"0" * ROUND_SIZE}'
+                    else:
+                        row[ord('C') - ord('A')].value = None
+                        
+                    # Формула потребление с коэф
+                    row[ord('E') - ord('A')].value = f"=D{row_idx}*(C{row_idx}-B{row_idx})"
+                    
+                    ws['E115'].value = "=СУММ(E2:E111)"
+                    ws['E117'].value = "=СУММ(E2:E14)"
+                    ws['E119'].value = "=E16+E22+E25+E33+E39+E41+E44+E47+E48+E51++E55+E56+E58+E61+E62+E65+E66+E68+E70+E71+E74+E76+E77+E79+E82+E89+E90+E94+E96+E111"
+                    ws['E121'].value = "=E117+E119"
+                    ws['E123'].value = "=E115-E121"
+                    
+                
+            elif 'ХВС' in sheet_name:
+                print(f'Обработка листа: {sheet_name}')                
+                meter = ""
+                type_res = ""
+                ws['B1'].value= f'Показания на {electric_data_start}'
+                ws['C1'].value = f'Показания на {electric_data_end}'
+                for row_idx, row in enumerate(ws.iter_rows(min_row=2), start=2):
+                    meter = row[ord('A') - ord('A')].value
+                    # print(meter)
+                    type_res = 'ХВС'
+                    meter = extract_device_number(meter)
+                    val_start = common_sql.get_val_by_num_meter_and_date_and_resource(meter, type_res, electric_data_start)
+                    val_end = common_sql.get_val_by_num_meter_and_date_and_resource(meter, type_res, electric_data_end)
+                    
+                    # print('val_start:', val_start, 'val_end:', val_end)
+                    if val_start and len(val_start) > 0 and val_start[0][0] is not None:
+                        row[ord('B') - ord('A')].value = get_val_as_number(val_start[0][0], ROUND_SIZE)
+                        row[ord('B') - ord('A')].number_format = f'0.{"0" * ROUND_SIZE}'
+                    else:
+                        row[ord('B') - ord('A')].value = None
+                    
+                    # Запись конца - с проверкой на None
+                    if val_end and len(val_end) > 0 and val_end[0][0] is not None:
+                        row[ord('C') - ord('A')].value = get_val_as_number(val_end[0][0], ROUND_SIZE)
+                        row[ord('C') - ord('A')].number_format = f'0.{"0" * ROUND_SIZE}'
+                    else:
+                        row[ord('C') - ord('A')].value = None
+                        
+                    # Формула потребление 
+                    row[ord('D') - ord('A')].value = f"=(C{row_idx}-B{row_idx})"
+                    
+                    ws['D177'].value = "=СУММ(D2:D172)"
+                    ws['D179'].value = "=СУММ(D2:D10)"
+                    ws['D177'].value = "=СУММ(D2:D172)"
+                    ws['D181'].value = "=D12+D18+D21+D35+D43+D47+D51+D52+D54+D57+D58+D68+D69+D71+D72+D73+D74+D75+D76+D77+D81+D90+D94+D95+D99+D100+D104+D107+D108+D122+D136+D147+D168+D172"
+                    ws['D183'].value = "=D179+D181"
+                    ws['D185'].value = "=D177-D183"
+            
+            elif 'ГВС' in sheet_name:
+                print(f'Обработка листа: {sheet_name}')                
+                meter = ""
+                type_res = ""
+                ws['B1'].value= f'Показания на {electric_data_start}'
+                ws['C1'].value = f'Показания на {electric_data_end}'
+                for row_idx, row in enumerate(ws.iter_rows(min_row=2), start=2):
+                    meter = row[ord('A') - ord('A')].value
+                    # print(meter)
+                    type_res = 'ГВС'
+                    meter = extract_device_number(meter)
+                    val_start = common_sql.get_val_by_num_meter_and_date_and_resource(meter, type_res, electric_data_start)
+                    val_end = common_sql.get_val_by_num_meter_and_date_and_resource(meter, type_res, electric_data_end)
+                    
+                    # print('val_start:', val_start, 'val_end:', val_end)
+                    if val_start and len(val_start) > 0 and val_start[0][0] is not None:
+                        row[ord('B') - ord('A')].value = get_val_as_number(val_start[0][0], ROUND_SIZE)
+                        row[ord('B') - ord('A')].number_format = f'0.{"0" * ROUND_SIZE}'
+                    else:
+                        row[ord('B') - ord('A')].value = None
+                    
+                    # Запись конца - с проверкой на None
+                    if val_end and len(val_end) > 0 and val_end[0][0] is not None:
+                        row[ord('C') - ord('A')].value = get_val_as_number(val_end[0][0], ROUND_SIZE)
+                        row[ord('C') - ord('A')].number_format = f'0.{"0" * ROUND_SIZE}'
+                    else:
+                        row[ord('C') - ord('A')].value = None
+                        
+                    # Формула потребление 
+                    row[ord('D') - ord('A')].value = f"=(C{row_idx}-B{row_idx})"
+                    
+                    ws['D176'].value = "=СУММ(D2:D171)"
+                    ws['D178'].value = "=СУММ(D2:D9)"
+                    ws['D177'].value = "=СУММ(D2:D172)"
+                    ws['D180'].value = "=D17+D20+D34+D46+D50+D51+D53+D56+D67+D69+D74+D75+D78+D79+D84+D87+D93+D94+D98+D99+D103+D105+D106+D121+D129+D130+D135+D145+D146+D171"
+                    ws['D182'].value = "=D178+D180"
+                    ws['D184'].value = "=D176-D182"
+
+        response.seek(0)
+        response = HttpResponse(save_virtual_workbook(wb),content_type="application/vnd.ms-excel")
+        
+        output_name = 'report_173_'+str(electric_data_start)+'_'+str(electric_data_end)
+        file_ext = 'xlsx'    
+        response['Content-Disposition'] = 'attachment;filename="%s.%s"' % (output_name.replace('"', '\"'), file_ext)   
+        return response
+    except Exception as e:
+        # Если файл не является корректным Excel файлом
+        result += f"Ошибка при открытии файла: {str(e)}"
+        response = HttpResponse(result, content_type="text/plain")
+        output_name = 'error'
+        file_ext = 'txt'    
+        response['Content-Disposition'] = 'attachment;filename="%s.%s"' % (output_name.replace('"', '\"'), file_ext)  
+        return response
+            
+    else:
+        result += "В директории нет Excel файлов (.xlsx, .xls)"
+        response = HttpResponse(result, content_type="text/plain")
+        output_name = 'empty'
+        file_ext = 'txt'    
+        response['Content-Disposition'] = 'attachment;filename="%s.%s"' % (output_name.replace('"', '\"'), file_ext)  
+        return response
