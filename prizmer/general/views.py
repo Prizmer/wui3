@@ -7536,6 +7536,8 @@ def pulsar_water_daily(request):
     return render(request, "data_table/water/58.html", args)
     
 def pulsar_water_daily_desc(request):
+    SHOW_STOYAK = getattr(settings, 'SHOW_STOYAK', 'False')
+    SHOW_FLOORS = getattr(settings, 'SHOW_FLOORS', 'True')
     args = {}
     is_abonent_level = re.compile(r'abonent')
     is_object_level_2 = re.compile(r'level2')
@@ -7565,7 +7567,7 @@ def pulsar_water_daily_desc(request):
               
     if len(data_table)>0: 
         data_table=common_sql.ChangeNull_and_LeaveEmptyCol(data_table, None, 7)
-        
+    
     args['data_table'] = data_table
     args['obj_title'] = obj_title
     args['obj_key'] = obj_key
@@ -7576,9 +7578,10 @@ def pulsar_water_daily_desc(request):
     args['is_electric_delta'] = is_electric_delta
     args['electric_data_start'] = electric_data_start
     args['electric_data_end'] = electric_data_end
-   
+    args['SHOW_FLOORS'] = SHOW_FLOORS
+    args['SHOW_STOYAK'] = SHOW_STOYAK
 
-    return render(request, "data_table/water/58.html", args)
+    return render(request, "data_table/water/152.html", args)
 
 def pulsar_water_battery(request):
     args = {}
@@ -8176,7 +8179,7 @@ def pulsar_water_period_2(request):
               
     if len(data_table)>0: 
         data_table=common_sql.ChangeNull(data_table, None)
-    
+    #print(data_table)
     AllData=[]
     Xcoord=[]
     #print data_table_graphic

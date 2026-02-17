@@ -9655,18 +9655,19 @@ def report_pulsar_heat_period_v2(request):
     ws.column_dimensions['H'].width = 15  # Потребление объема
     
     # Включаем перенос текста и настраиваем выравнивание
-    for row in [2, 5]:
-        for cell in ws[row]:
-            if row == 2:
+        # Включаем перенос текста и настраиваем выравнивание
+    for row_num in [2, 5]:
+        for cell in ws[row_num]:
+            if row_num == 2:
                 # Для основного заголовка - выравнивание по левому краю
-                cell.alignment = cell.alignment.copy(
+                cell.alignment = Alignment(
                     wrap_text=True, 
                     vertical='center', 
                     horizontal='left'
                 )
             else:
                 # Для заголовков колонок - по центру
-                cell.alignment = cell.alignment.copy(
+                cell.alignment = Alignment(
                     wrap_text=True, 
                     vertical='center', 
                     horizontal='center'
@@ -24184,10 +24185,14 @@ def report_pulsar_water_daily_floors_v2_desc(request):
     # Берем настройки из settings
     SHOW_LIC_NUM = getattr(settings, 'SHOW_LIC_NUM', 'False')
     COMMENT_TO_EXCEL = getattr(settings, 'COMMENT_TO_EXCEL', 'False')
-    SHOW_STOYAK = getattr(settings, 'SHOW_STOYAK', 'False')
-    SHOW_FLOORS = getattr(settings, 'SHOW_FLOORS', 'True')
+    SHOW_STOYAK = getattr(settings, 'SHOW_STOYAK', True)
+    SHOW_FLOORS = getattr(settings, 'SHOW_FLOORS', False)
+
+    print(f"SHOW_STOYAK из settings: {SHOW_STOYAK}, тип: {type(SHOW_STOYAK)}")
+    print(f"SHOW_FLOORS из settings: {SHOW_FLOORS}, тип: {type(SHOW_FLOORS)}")
     ROUND_SIZE = getattr(settings, 'ROUND_SIZE', 3)
     NUM_IS_STRING = getattr(settings, 'NUM_IS_STRING', 'False')
+
     
     # Получаем параметры из session
     obj_parent_title = request.session.get('obj_parent_title')
@@ -24206,9 +24211,6 @@ def report_pulsar_water_daily_floors_v2_desc(request):
     elif bool(is_object_level_2.search(obj_key)):
         data_table = common_sql.get_data_table_pulsar_water_daily(obj_parent_title, obj_title, electric_data_end, False, sortDir)
     
-    # Заменяем None на N/D везде с помощью безопасной функции
-    if len(data_table) > 0:
-        data_table = common_sql.safe_change_null(data_table, default_value='Н/Д')
         
         # Для комментария: если значение "Н/Д" - меняем на пустую строку
         # Но только если комментарий будет выводиться
@@ -24230,9 +24232,9 @@ def report_pulsar_water_daily_floors_v2_desc(request):
         # (merge_range, cell_ref, value, style, width)
         ('A2:F2', 'A2', f'Пульсар. Потребление воды на {electric_data_end}', ali_green_title, None),
         ('A5:A5', 'A5', 'Абонент', ali_green_header, 23),
-        ('B5:B5', 'B5', 'Тип счётчика', ali_green_header, None),
-        ('C5:C5', 'C5', 'Стояк', ali_green_header, None),
-        ('D5:D5', 'D5', 'Этаж', ali_green_header, None),
+        ('B5:B5', 'B5', 'Тип счётчика', ali_green_header, 17),
+        ('C5:C5', 'C5', 'Стояк', ali_green_header, 17),
+        ('D5:D5', 'D5', 'Этаж', ali_green_header, 17),
         ('E5:E5', 'E5', 'Счётчик', ali_green_header, 17),
         ('F5:F5', 'F5', f'Показания на {electric_data_end}, м3', ali_green_header, 17),
     ]
@@ -24247,7 +24249,7 @@ def report_pulsar_water_daily_floors_v2_desc(request):
         ('C', 3, None, False, None),  # Стояк (индекс 3)
         ('D', 8, None, False, None),  # Этаж (индекс 8)
         ('E', 4, None, False, None),  # Счётчик (индекс 4)
-        ('F', 5, None, True, None),   # Показания (индекс 5) - числовое
+        ('F', None, None, True, lambda row: to_number(row[5])),   # Показания (индекс 5) - числовое
     ]
     
     # Текущая последняя колонка
@@ -24289,24 +24291,26 @@ def report_pulsar_water_daily_floors_v2_desc(request):
     ws.column_dimensions['A'].width = 23  # Абонент
     ws.column_dimensions['E'].width = 17  # Счётчик
     ws.column_dimensions['F'].width = 17  # Показания
+    # ws.column_dimensions['C'].width = 17  # 
+    # ws.column_dimensions['D'].width = 17  # 
     
     # Настраиваем ширину для комментария если есть
     if COMMENT_TO_EXCEL:
         ws.column_dimensions['G'].width = 30
     
     # Включаем перенос текста и настраиваем выравнивание
-    for row in [2, 5]:
-        for cell in ws[row]:
-            if row == 2:
+    for row_num in [2, 5]:
+        for cell in ws[row_num]:
+            if row_num == 2:
                 # Для основного заголовка - выравнивание по левому краю
-                cell.alignment = cell.alignment.copy(
+                cell.alignment = Alignment(
                     wrap_text=True, 
                     vertical='center', 
                     horizontal='left'
                 )
             else:
                 # Для заголовков колонок - по центру
-                cell.alignment = cell.alignment.copy(
+                cell.alignment = Alignment(
                     wrap_text=True, 
                     vertical='center', 
                     horizontal='center'
@@ -24319,6 +24323,58 @@ def report_pulsar_water_daily_floors_v2_desc(request):
     
     return response
 
+def to_number(value):
+    """
+    Преобразует значение в число для Excel.
+    На вход может прийти: decimal.Decimal, строка "143,", "195.001", и т.д.
+    Возвращает float для правильного отображения в Excel.
+    """
+    from decimal import Decimal
+    """Преобразует значение в число для Excel"""
+    # print(f"to_number получила: {value}, тип: {type(value)}")
+    
+    # Проверяем на None и специальные значения
+    if value is None:
+        # print("→ value is None, возвращаем None")
+        return None
+    
+    if value == 'Н/Д':
+        # print("→ value = Н/Д, возвращаем None")
+        return None
+    
+    # Если это Decimal или число
+    if isinstance(value, (int, float, Decimal)):
+        result = float(value)
+        # print(f"→ уже число, преобразуем в float: {result}")
+        return result
+    
+    # Если это строка
+    if isinstance(value, str):
+        str_value = value.strip()
+        # print(f"→ строка после strip: '{str_value}'")
+        
+        if not str_value or str_value == 'Н/Д':
+            # print("→ пустая строка или Н/Д, возвращаем None")
+            return None
+        
+        # Убираем запятые в конце
+        str_value = str_value.rstrip(',')
+        # print(f"→ после rstrip(','): '{str_value}'")
+        
+        # Заменяем запятую на точку
+        str_value = str_value.replace(',', '.')
+        # print(f"→ после replace: '{str_value}'")
+        
+        try:
+            result = float(str_value)
+            # print(f"→ успешно преобразовано в {result}")
+            return result
+        except ValueError as e:
+            print(f"→ ошибка преобразования: {e}")
+            return None
+    
+    print(f"→ неподдерживаемый тип, возвращаем None")
+    return None
 
 def report_pulsar_heat_daily_floors(request):
     COMMENT_TO_EXCEL = getattr(settings, 'COMMENT_TO_EXCEL', 'False')
@@ -26894,7 +26950,10 @@ def export_to_excel_hybrid_simple(data_table, headers, columns_config, sheet_tit
                                 cell.value = formatted.replace('.', ',') if ',' in formatted else formatted
                             else:
                                 cell.value = num_val
-                                cell.number_format = f'0.{"0" * round_size}'
+                                if round_size == 0:
+                                    cell.number_format = '0'  # Для целых чисел
+                                else:
+                                    cell.number_format = f'0.{"0" * round_size}'  # Для чисел с дробной частью
                         except:
                             cell.value = str(value)
                     else:

@@ -6518,7 +6518,7 @@ WHERE
   daily_values.date = '%s' and
   (types_meters.name like '%s' or types_meters.name like '%s' or types_meters.name like 'Декаст%%ВС')
    AND   taken_params.name not like '%%battery%%'
-   
+   AND   taken_params.name like '%%Объем%%'
 GROUP BY
 daily_values.date,  
   abonents.name, 
@@ -6565,7 +6565,7 @@ WHERE
   daily_values.date = '%s' and
   (types_meters.name like '%s' or types_meters.name like '%s' or types_meters.name like 'Декаст%%ВС')
    AND   taken_params.name not like '%%battery%%'
-   
+   AND   taken_params.name like '%%Объем%%'
    GROUP BY
 daily_values.date,  
   abonents.name, 
@@ -6634,6 +6634,7 @@ WHERE
   daily_values.date = '%s' AND 
   (resources.name like '%s' OR   resources.name like '%s')
    AND   taken_params.name not like '%%battery%%'
+   AND   taken_params.name like '%%Объем%%'
    GROUP BY
   objects.name, 
   abonents.name, 
@@ -6684,6 +6685,7 @@ WHERE
   daily_values.date = '%s' AND 
   (resources.name like '%s' OR   resources.name like '%s')
    AND   taken_params.name not like '%%battery%%'
+   AND   taken_params.name like '%%Объем%%'
    GROUP BY
   objects.name, 
   abonents.name, 
@@ -6912,6 +6914,7 @@ WHERE
   daily_values.date = '%s' and
   (types_meters.name like '%s' or types_meters.name like '%s' or types_meters.name like 'Декаст%%ВС')
    AND   taken_params.name not like '%%battery%%'
+   and taken_params.name like '%%Объем%%'
    group by 
    daily_values.date,  
   abonents.name, 
@@ -6945,7 +6948,7 @@ water_pulsar_abons.type_meter %s
 def MakeSqlQuery_water_pulsar_daily_for_all(obj_parent_title, obj_title, electric_data_end, my_params, sortDir):
     sQuery="""
     Select z1.date, water_pulsar_abons.ab_name, water_pulsar_abons.type_meter, water_pulsar_abons.attr1, water_pulsar_abons.factory_number_manual, 
-    round(z1.value::numeric,3),water_pulsar_abons.ab_guid,
+    round(z1.value::numeric,3), water_pulsar_abons.ab_guid,
  water_pulsar_abons.comment, water_pulsar_abons.attr4
 from water_pulsar_abons
 left join 
@@ -6981,6 +6984,7 @@ WHERE
   daily_values.date = '%s' and
   (types_meters.name like '%s' or types_meters.name like '%s' or types_meters.name like 'Декаст%%ВС')
    AND   taken_params.name not like '%%battery%%'
+   and taken_params.name like '%%Объем%%'
    
 group by 
    daily_values.date,  
@@ -7071,6 +7075,7 @@ WHERE
 
   daily_values.date = '%s' and
   (types_meters.name='%s' or types_meters.name='%s')
+  AND   taken_params.name like '%%Объем%%'
 ) as z1
 group by z1.date,z1.name,z1.guid) as z2) as z3
 on  water_pulsar_abons.ab_guid=z3.guid
@@ -7179,6 +7184,7 @@ WHERE
 
   daily_values.date = '%s' and
   (types_meters.name='%s' or types_meters.name='%s')
+  AND   taken_params.name like '%%Объем%%'
 ) as z1
 group by z1.date,z1.name,z1.guid) as z2) as z3
 on  water_pulsar_abons.ab_guid=z3.guid
@@ -7307,6 +7313,7 @@ WHERE
   daily_values.date = '%s' and
   (types_meters.name='%s' or types_meters.name='%s')
    AND   taken_params.name not like '%%battery%%'
+   and taken_params.name like '%%Объем%%'
 ) as z0
 on z0.factory_number_manual=water_pulsar_abons.factory_number_manual
 where water_pulsar_abons.ab_name='%s' and
@@ -7377,6 +7384,7 @@ WHERE
   daily_values.date = '%s' and
   (types_meters.name='%s' or types_meters.name='%s')
    AND   taken_params.name not like '%%battery%%'
+   and taken_params.name like '%%Объем%%'
 ) as z0
 on z0.factory_number_manual=water_pulsar_abons.factory_number_manual
 where 

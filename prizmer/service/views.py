@@ -3506,7 +3506,7 @@ def add_link_abonents_taken_params2(sender, instance, created, **kwargs):
 def add_link_abonent_taken_params_from_excel_cfg_electric(sender, instance, created, **kwargs):
     dtAll=GetTableFromExcel(cfg_excel_name,cfg_sheet_name)
     for i in range(1,len(dtAll)):
-        meter=dtAll[i][6].strip()
+        meter=str(dtAll[i][6]).strip()
         abon=str(dtAll[i][3]).strip()
         obj_l2_name=str(dtAll[i][2]).strip()
         obj_l1_name=str(dtAll[i][1]).strip()
