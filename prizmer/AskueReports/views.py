@@ -17722,6 +17722,7 @@ def report_stk_heat_period(request):
     response['Content-Disposition'] = 'attachment;filename="%s.%s"' % (output_name.replace('"', '\"'), file_ext)   
     return response
 
+
 def report_pulsar_frost_daily(request):
     response = io.StringIO()
     wb = Workbook()
@@ -23566,6 +23567,8 @@ def pulsar_consumption_moselectrika_from_template(request):
         response['Content-Disposition'] = 'attachment;filename="%s.%s"' % (output_name.replace('"', '\"'), file_ext)  
         return response
         
+        
+
 def pulsar_heat_consumption_from_template(request):
     response = io.StringIO()
 
@@ -23616,19 +23619,25 @@ def pulsar_heat_consumption_from_template(request):
                 # Проверяем, содержит ли строка "_" или "-"
                 if meter and ("_" in meter or "-" in meter):
                     meter = meter[3:]
-                
                 if meter and meter.startswith('0'):
                     print(meter)
-                    meter = meter[1:]            
+                    meter = meter[1:]
                 
+                real_type_meter = common_sql.check_type_meter(meter)
+                if len(real_type_meter)>0:
+                    real_type_meter = real_type_meter[0][0]
+                else:
+                    real_type_meter = ""
                 # Если значение не пустое, выполняем запрос в БД
+                # if (meter == '3517623'):
+                #     print(real_type_meter)
                 if meter:
-                    if type_meter == 'ТЭ ИПУ':
+                    if real_type_meter == 'Тепло':
                         try:
+                            # print('heat')
                             val = common_sql.get_value_by_meter_by_date_heat(meter, electric_data_end)
                             if len(val) > 0:
-                                cur_val = float(val[0][2])
-                                # ДОБАВЛЯЕМ ПРОВЕРКУ КАК В РАБОЧЕЙ ВЕРСИИ
+                                cur_val = float(val[0][2])                                
                                 if prev_val > cur_val:
                                     row[ord('H') - ord('A')].value = prev_val
                                 else:
@@ -23636,21 +23645,21 @@ def pulsar_heat_consumption_from_template(request):
                                 row[ord('G') - ord('A')].value = electric_data_end
                         except:
                             continue
-                    else:  # ГВС Индивидуальный
+                    elif (real_type_meter == 'ГВС'):  # ГВС Индивидуальный
                         try:
+                            # print('gvs')
                             round_num = 0
                             val = common_sql.get_value_by_meter_by_date(meter, electric_data_end, 'meters.address', round_num)
                             if len(val) > 0:
-                                cur_val = float(val[0][0])
-                                # ДОБАВЛЯЕМ ПРОВЕРКУ КАК В РАБОЧЕЙ ВЕРСИИ
+                                cur_val = float(val[0][0])                                
                                 row[ord('G') - ord('A')].value = electric_data_end
                                 if prev_val > cur_val:
                                     row[ord('H') - ord('A')].value = float('{:.4f}'.format(prev_val))
                                 else:
-                                    row[ord('H') - ord('A')].value = float('{:.4f}'.format(cur_val))
+                                    row[ord('H') - ord('A')].value = float('{:.4f}'.format(cur_val))                    
                         except:
                             continue
-                    
+                                        
                     try:
                         current_val_cell = row[ord('H') - ord('A')].value
                         prev_val_cell = row[ord('F') - ord('A')].value
@@ -24376,6 +24385,7 @@ def to_number(value):
     print(f"→ неподдерживаемый тип, возвращаем None")
     return None
 
+
 def report_pulsar_heat_daily_floors(request):
     COMMENT_TO_EXCEL = getattr(settings, 'COMMENT_TO_EXCEL', 'False')
     SHOW_FLOORS = getattr(settings, 'SHOW_FLOORS', 'True')
@@ -24521,6 +24531,273 @@ def report_pulsar_heat_daily_floors(request):
     response['Content-Disposition'] = 'attachment;filename="%s.%s"' % (output_name.replace('"', '\"'), file_ext)   
     return response
 
+
+def report_pulsar_frost_daily_floors_v2(request):
+    # Берем настройки из settings
+    COMMENT_TO_EXCEL = getattr(settings, 'COMMENT_TO_EXCEL', 'False')
+    SHOW_FLOORS = getattr(settings, 'SHOW_FLOORS', 'True')
+    ROUND_SIZE = getattr(settings, 'ROUND_SIZE', 3)
+    NUM_IS_STRING = getattr(settings, 'NUM_IS_STRING', 'False')
+    
+    # Получаем параметры из session
+    obj_parent_title = request.session.get('obj_parent_title')
+    obj_title = request.session.get('obj_title')
+    electric_data_end = request.session.get('electric_data_end')
+    obj_key = request.session.get('obj_key')
+    
+    # Запрашиваем данные для отчета
+    is_abonent_level = re.compile(r'abonent')
+    is_object_level_2 = re.compile(r'level2')
+    
+    data_table = []
+    
+    if bool(is_abonent_level.search(obj_key)):
+        data_table = common_sql.get_data_table_by_date_daily_pulsar_frost(obj_parent_title, obj_title, electric_data_end, True)
+    elif bool(is_object_level_2.search(obj_key)):
+        data_table = common_sql.get_data_table_by_date_daily_pulsar_frost(obj_parent_title, obj_title, electric_data_end, False)
+    
+    # Заменяем None на Н/Д
+    if len(data_table) > 0:
+        data_table = common_sql.safe_change_null(data_table, default_value='Н/Д')
+        
+        # Для комментария: если значение "Н/Д" - меняем на пустую строку
+        if COMMENT_TO_EXCEL:
+            processed_data = []
+            for row in data_table:
+                if isinstance(row, (list, tuple)) and len(row) > 7:
+                    row_list = list(row)
+                    # Комментарий на индексе 7
+                    if str(row_list[7]).strip() == 'Н/Д':
+                        row_list[7] = ''
+                    processed_data.append(tuple(row_list))
+                else:
+                    processed_data.append(row)
+            data_table = processed_data
+    
+    # Определяем последнюю колонку в зависимости от наличия комментария
+    last_col = 'G'
+    if COMMENT_TO_EXCEL:
+        last_col = 'H'
+    
+    # Конфигурация заголовков
+    headers = [
+        # (merge_range, cell_ref, value, style, width)
+        (f'A2:{last_col}2', 'A2', f'Пульсар. Показания по теплу на {electric_data_end}', ali_green_title, None),
+        ('A5:A5', 'A5', 'Абонент', ali_green_header, 20),
+        ('B5:B5', 'B5', 'Счётчик', ali_green_header, 23),
+        ('C5:C5', 'C5', 'Этаж', ali_green_header, None),
+        ('D5:D5', 'D5', 'Энергия, Гкал', ali_green_header, 17),
+        ('E5:E5', 'E5', 'Объем, м3', ali_green_header, 17),
+        ('F5:F5', 'F5', 'Температура входа, С', ali_green_header, 17),
+        ('G5:G5', 'G5', 'Температура выхода, С', ali_green_header, 17),
+    ]
+    
+    # Добавляем комментарий если включена настройка
+    if COMMENT_TO_EXCEL:
+        headers.append((f'H5:H5', 'H5', 'Комментарий к абоненту', ali_green_header, 30))
+    
+    # Конфигурация колонок данных
+    # Индексы из SQL запроса:
+    # 1 - Абонент, 2 - Тип счетчика, 3 - Энергия, 4 - Объем, 
+    # 5 - Температура входа, 6 - Температура выхода, 7 - Комментарий, 10 - Этаж
+    columns_config = [
+        ('A', 1, None, False, None),   # Абонент (индекс 1)
+        ('B', 2, None, False, None),   # Тип счётчика (индекс 2)
+        ('C', 10, None, False, None),  # Этаж (индекс 10)
+        ('D', 3, None, True, None),    # Энергия (индекс 3) - числовое
+        ('E', 4, None, True, None),    # Объем (индекс 4) - числовое
+        ('F', 5, None, True, None),    # Температура входа (индекс 5) - числовое
+        ('G', 6, None, True, None),    # Температура выхода (индекс 6) - числовое
+    ]
+    
+    # Добавляем комментарий если включена настройка
+    if COMMENT_TO_EXCEL:
+        columns_config.append(('H', 7, None, False, None))  # Комментарий (индекс 7)
+    
+    # Создаем Excel через упрощенную гибридную функцию
+    wb = export_to_excel_hybrid_simple(
+        data_table=data_table,
+        headers=headers,
+        columns_config=columns_config,
+        sheet_title="Пульсар. Тепло",
+        round_size=ROUND_SIZE,
+        num_is_string=NUM_IS_STRING,
+        freeze_panes='A6'  # Фиксируем с A6 (первая строка данных)
+    )
+    
+    # Настраиваем внешний вид
+    ws = wb.active
+    
+    # Увеличиваем высоту строк заголовков
+    ws.row_dimensions[2].height = 35  # Основной заголовок
+    ws.row_dimensions[5].height = 63  # Заголовки колонок
+    
+    # Скрываем колонку этажа если нужно
+    ws.column_dimensions['C'].hidden = not SHOW_FLOORS
+    
+    # Настраиваем ширину колонок (как в оригинале)
+    ws.column_dimensions['A'].width = 20   # Абонент
+    ws.column_dimensions['B'].width = 23   # Счётчик
+    ws.column_dimensions['D'].width = 17   # Энергия
+    ws.column_dimensions['E'].width = 17   # Объем
+    ws.column_dimensions['F'].width = 17   # Температура входа
+    ws.column_dimensions['G'].width = 17   # Температура выхода
+    
+    # Настраиваем ширину для комментария если есть
+    if COMMENT_TO_EXCEL:
+        ws.column_dimensions['H'].width = 30
+    
+    # Включаем перенос текста и настраиваем выравнивание
+    for row in [2, 5]:
+        for cell in ws[row]:
+            if row == 2:
+                # Для основного заголовка - выравнивание по левому краю
+                cell.alignment = cell.alignment.copy(
+                    wrap_text=True, 
+                    vertical='center', 
+                    horizontal='left'
+                )
+            else:
+                # Для заголовков колонок - по центру
+                cell.alignment = cell.alignment.copy(
+                    wrap_text=True, 
+                    vertical='center', 
+                    horizontal='center'
+                )
+    
+    # Формируем ответ
+    output_name = f'pulsar_frost_report_{translate(obj_parent_title)}_{translate(obj_title)}_{electric_data_end}'
+    output_name = output_name.replace(':', '-').replace(' ', '_').replace('.', '-')
+    
+    response = HttpResponse(
+        save_virtual_workbook(wb),
+        content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )
+    response['Content-Disposition'] = f'attachment; filename="{output_name}.xlsx"'
+    
+    return response
+
+def report_pulsar_frost_period_v2(request):
+    # Берем настройки из settings
+    ROUND_SIZE = getattr(settings, 'ROUND_SIZE', 3)
+    NUM_IS_STRING = getattr(settings, 'NUM_IS_STRING', 'False')
+    
+    # Получаем параметры из session
+    obj_parent_title = request.session.get('obj_parent_title')
+    obj_title = request.session.get('obj_title')
+    electric_data_start = request.session.get('electric_data_start')
+    electric_data_end = request.session.get('electric_data_end')
+    obj_key = request.session.get('obj_key')
+    
+    # Запрашиваем данные для отчета
+    is_abonent_level = re.compile(r'abonent')
+    is_object_level_2 = re.compile(r'level2')
+    
+    data_table = []
+    
+    if bool(is_abonent_level.search(obj_key)):
+        data_table = common_sql.get_data_table_pulsar_frost_for_period(
+            obj_parent_title, obj_title, electric_data_end, electric_data_start, True
+        )
+    elif bool(is_object_level_2.search(obj_key)):
+        data_table = common_sql.get_data_table_pulsar_frost_for_period(
+            obj_parent_title, obj_title, electric_data_end, electric_data_start, False
+        )
+    
+    # Заменяем None на Н/Д
+    if len(data_table) > 0:
+        data_table = common_sql.ChangeNull(data_table, None)
+    
+    # Определяем последнюю колонку
+    last_col = 'H'
+    
+    # Конфигурация заголовков
+    headers = [
+        # (merge_range, cell_ref, value, style, width)
+        (f'A2:{last_col}2', 'A2', f'Пульсар. Потребление холода с {electric_data_start} по {electric_data_end}', ali_green_title, None),
+        ('A5:A5', 'A5', 'Абонент', ali_green_header, 30),
+        ('B5:B5', 'B5', 'Счётчик', ali_green_header, 20),
+        ('C5:C5', 'C5', f'Показания Энергии на {electric_data_start}, Гкал', ali_green_header, 17),
+        ('D5:D5', 'D5', f'Показания Энергии на {electric_data_end}, Гкал', ali_green_header, 17),
+        ('E5:E5', 'E5', 'Потребление Энергии, Гкал', ali_green_header, 17),
+        ('F5:F5', 'F5', f'Показания Объёма на {electric_data_start}, м3', ali_green_header, 17),
+        ('G5:G5', 'G5', f'Показания Объёма на {electric_data_end}, м3', ali_green_header, 17),
+        ('H5:H5', 'H5', 'Потребление Объёма, м3', ali_green_header, 17),
+    ]
+    
+    # Конфигурация колонок данных
+    # Индексы из SQL запроса:
+    # 0 - Абонент, 1 - Заводской номер, 2 - Энергия нач, 3 - Энергия кон, 
+    # 4 - Потребление энергии, 5 - Объем нач, 6 - Объем кон, 7 - Потребление объема
+    columns_config = [
+        ('A', 0, None, False, None),  # Абонент (индекс 0)
+        ('B', 1, None, False, None),  # Заводской номер (индекс 1)
+        ('C', 2, None, True, None),   # Энергия нач (индекс 2) - числовое
+        ('D', 3, None, True, None),   # Энергия кон (индекс 3) - числовое
+        ('E', 4, None, True, None),   # Потребление энергии (индекс 4) - числовое
+        ('F', 5, None, True, None),   # Объем нач (индекс 5) - числовое
+        ('G', 6, None, True, None),   # Объем кон (индекс 6) - числовое
+        ('H', 7, None, True, None),   # Потребление объема (индекс 7) - числовое
+    ]
+    
+    # Создаем Excel через упрощенную гибридную функцию
+    wb = export_to_excel_hybrid_simple(
+        data_table=data_table,
+        headers=headers,
+        columns_config=columns_config,
+        sheet_title="Пульсар. Холод за период",
+        round_size=ROUND_SIZE,
+        num_is_string=NUM_IS_STRING,
+        freeze_panes='A6'  # Фиксируем с A6 (первая строка данных)
+    )
+    
+    # Настраиваем внешний вид
+    ws = wb.active
+    
+    # Увеличиваем высоту строк заголовков
+    ws.row_dimensions[2].height = 35  # Основной заголовок
+    ws.row_dimensions[5].height = 54  # Заголовки колонок (как в оригинале)
+    
+    # Настраиваем ширину колонок (как в оригинале)
+    ws.column_dimensions['A'].width = 30  # Абонент
+    ws.column_dimensions['B'].width = 20  # Счётчик
+    ws.column_dimensions['C'].width = 17  # Энергия нач
+    ws.column_dimensions['D'].width = 17  # Энергия кон
+    ws.column_dimensions['E'].width = 17  # Потребление энергии
+    ws.column_dimensions['F'].width = 17  # Объем нач
+    ws.column_dimensions['G'].width = 17  # Объем кон
+    ws.column_dimensions['H'].width = 17  # Потребление объема
+    
+    # Включаем перенос текста и настраиваем выравнивание
+    for row in [2, 5]:
+        for cell in ws[row]:
+            if row == 2:
+                # Для основного заголовка - выравнивание по левому краю
+                cell.alignment = cell.alignment.copy(
+                    wrap_text=True, 
+                    vertical='center', 
+                    horizontal='left'
+                )
+            else:
+                # Для заголовков колонок - по центру
+                cell.alignment = cell.alignment.copy(
+                    wrap_text=True, 
+                    vertical='center', 
+                    horizontal='center'
+                )
+    
+    # Формируем ответ
+    output_name = f'report_frost_pulsar_period_{translate(obj_parent_title)}_{translate(obj_title)}_{electric_data_start}-{electric_data_end}'
+    output_name = output_name.replace(':', '-').replace(' ', '_').replace('.', '-')
+    
+    response = HttpResponse(
+        save_virtual_workbook(wb),
+        content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )
+    response['Content-Disposition'] = f'attachment; filename="{output_name}.xlsx"'
+    
+    return response
+
 def report_pulsar_frost_daily_floors(request):
     COMMENT_TO_EXCEL = getattr(settings, 'COMMENT_TO_EXCEL', 'False')
     SHOW_FLOORS = getattr(settings, 'SHOW_FLOORS', 'True')
@@ -24663,6 +24940,9 @@ def report_pulsar_frost_daily_floors(request):
     
     response['Content-Disposition'] = 'attachment;filename="%s.%s"' % (output_name.replace('"', '\"'), file_ext)   
     return response
+
+
+
 
 def report_impulse_heat_by_date(request):
     response = io.StringIO()
@@ -26941,19 +27221,17 @@ def export_to_excel_hybrid_simple(data_table, headers, columns_config, sheet_tit
                     elif is_numeric:
                         try:
                             num_val = float(str(value).replace(',', '.'))
-                            if num_is_string:
-                                # Форматируем как строку
-                                if round_size == 0:
-                                    formatted = str(int(round(num_val)))
-                                else:
-                                    formatted = f"{num_val:.{round_size}f}"
-                                cell.value = formatted.replace('.', ',') if ',' in formatted else formatted
+                            if round_size == 0:
+                                rounded_val = round(num_val)
+                                cell.value = rounded_val
+                                cell.number_format = '0'
                             else:
-                                cell.value = num_val
-                                if round_size == 0:
-                                    cell.number_format = '0'  # Для целых чисел
-                                else:
-                                    cell.number_format = f'0.{"0" * round_size}'  # Для чисел с дробной частью
+                                # Округляем до нужного количества знаков
+                                rounded_val = round(num_val, round_size)
+                                cell.value = rounded_val
+                                # Формат только для отображения (но число уже округлено!)
+                                cell.number_format = f'0.{"0" * round_size}'
+                                
                         except:
                             cell.value = str(value)
                     else:
@@ -27218,16 +27496,22 @@ def export_to_excel_hybrid(data_table, headers_config, column_config, table_name
                     if str(value).strip() == 'Н/Д':
                         cell.value = 'Н/Д'
                     elif is_numeric:
-                        # Пробуем число
                         try:
                             num_val = float(str(value).replace(',', '.'))
-                            if num_is_string:
-                                cell.value = get_val_by_round(num_val, round_size, '.')
+                            if round_size == 0:
+                                rounded_val = round(num_val)
+                                cell.value = rounded_val
+                                cell.number_format = '0'
                             else:
-                                cell.value = get_val_as_number(num_val, round_size)
+                                # Округляем до нужного количества знаков
+                                rounded_val = round(num_val, round_size)
+                                cell.value = rounded_val
+                                # Формат только для отображения (но число уже округлено!)
                                 cell.number_format = f'0.{"0" * round_size}'
+                                
                         except:
                             cell.value = str(value)
+                        
                     else:
                         cell.value = str(value)
                 else:
@@ -27754,17 +28038,17 @@ def _fill_data_with_styles(ws, data_table, columns_config, data_start_row, round
                     elif is_numeric:
                         try:
                             num_val = float(str(value).replace(',', '.'))
-                            if num_is_string:
-                                # Форматируем как строку
-                                if round_size == 0:
-                                    formatted = str(int(round(num_val)))
-                                else:
-                                    formatted = f"{num_val:.{round_size}f}"
-                                cell.value = formatted.replace('.', ',') if ',' in formatted else formatted
+                            if round_size == 0:
+                                rounded_val = round(num_val)
+                                cell.value = rounded_val
+                                cell.number_format = '0'
                             else:
-                                cell.value = num_val
-                                # Добавляем числовой формат к стилю
+                                # Округляем до нужного количества знаков
+                                rounded_val = round(num_val, round_size)
+                                cell.value = rounded_val
+                                # Формат только для отображения (но число уже округлено!)
                                 cell.number_format = f'0.{"0" * round_size}'
+                                
                         except:
                             cell.value = str(value)
                     else:
@@ -28386,6 +28670,213 @@ def report_custom_173(request):
         result += "В директории нет Excel файлов (.xlsx, .xls)"
         response = HttpResponse(result, content_type="text/plain")
         output_name = 'empty'
+        file_ext = 'txt'    
+        response['Content-Disposition'] = 'attachment;filename="%s.%s"' % (output_name.replace('"', '\"'), file_ext)  
+        return response
+    
+    
+
+def report_custom_173_v2(request):
+
+    ROUND_SIZE = getattr(settings, 'ROUND_SIZE', 3)
+    response = io.StringIO()
+
+    electric_data_start = request.GET['electric_data_start']
+    electric_data_end   = request.GET['electric_data_end']
+    print(electric_data_start, electric_data_end)
+
+    result = "1"
+    directory = os.path.join(BASE_DIR,'static\\excel\\excel_template\\custom_173') 
+
+    files = os.listdir(directory) 
+    # Фильтруем только Excel файлы
+    excel_files = [f for f in files if f.lower().endswith(('.xlsx'))]
+    
+    if len(excel_files) > 1:
+        result += "В директории должен быть только один Excel файл с расширение xlsx. Работа с более ранними версиями excel(.xls) не поддерживается, пересохраните файл в новой версии."
+        response = HttpResponse(result, content_type="text/plain")
+        output_name = 'error'
+        file_ext = 'txt'    
+        response['Content-Disposition'] = 'attachment;filename="%s.%s"' % (output_name.replace('"', '\"'), file_ext)  
+        return response
+    
+    try:
+        # Загружаем книгу Excel с data_only=True, чтобы получить значения
+        file_path = os.path.join(directory, excel_files[0])
+        wb = load_workbook(file_path, data_only=True)
+        
+        # Обрабатываем каждый лист
+        for sheet_name in wb.sheetnames:
+            ws = wb[sheet_name]
+            
+            # Лист с приборами учета
+            if "Приборы учета" in sheet_name:
+                print(f'Обработка листа: {sheet_name}')                
+                ws['F1'].value = f'Показания на {electric_data_start}'
+                ws['G1'].value = f'Показания на {electric_data_end}'
+                
+                for row_idx, row in enumerate(ws.iter_rows(min_row=2), start=2):
+                    meter = row[2].value  # Колонка C (индекс 2)
+                    type_res = row[3].value  # Колонка D (индекс 3)
+                    
+                    if not meter or not type_res:
+                        continue
+                        
+                    meter = extract_device_number(meter)
+                    
+                    val_start = common_sql.get_val_by_num_meter_and_date_and_resource(meter, type_res, electric_data_start)
+                    val_end = common_sql.get_val_by_num_meter_and_date_and_resource(meter, type_res, electric_data_end)
+                    
+                    # Запись начала
+                    if val_start and len(val_start) > 0 and val_start[0][0] is not None:
+                        row[5].value = float(val_start[0][0])  # Колонка F (индекс 5)
+                        row[5].number_format = f'0.{"0" * ROUND_SIZE}'
+                    else:
+                        row[5].value = 0
+                    
+                    # Запись конца
+                    if val_end and len(val_end) > 0 and val_end[0][0] is not None:
+                        row[6].value = float(val_end[0][0])  # Колонка G (индекс 6)
+                        row[6].number_format = f'0.{"0" * ROUND_SIZE}'
+                    else:
+                        row[6].value = 0
+                        
+                    # Формула потребление - используем прямые ссылки на ячейки
+                    row[7].value = f"=G{row_idx}-F{row_idx}"  # Колонка H (индекс 7)
+                
+            elif 'Электроэнергия' in sheet_name:
+                print(f'Обработка листа: {sheet_name}')                
+                ws['B1'].value = f'Показания на {electric_data_start}'
+                ws['C1'].value = f'Показания на {electric_data_end}'
+                
+                for row_idx, row in enumerate(ws.iter_rows(min_row=2), start=2):
+                    meter = row[0].value  # Колонка A (индекс 0)
+                    
+                    if not meter:
+                        continue
+                        
+                    type_res = 'Электричество'
+                    meter = extract_device_number(meter)
+                    
+                    val_start = common_sql.get_val_by_num_meter_and_date_and_resource(meter, type_res, electric_data_start)
+                    val_end = common_sql.get_val_by_num_meter_and_date_and_resource(meter, type_res, electric_data_end)
+                    
+                    if val_start and len(val_start) > 0 and val_start[0][0] is not None:
+                        row[1].value = float(val_start[0][0])  # Колонка B (индекс 1)
+                        row[1].number_format = f'0.{"0" * ROUND_SIZE}'
+                    else:
+                        row[1].value = 0
+                    
+                    if val_end and len(val_end) > 0 and val_end[0][0] is not None:
+                        row[2].value = float(val_end[0][0])  # Колонка C (индекс 2)
+                        row[2].number_format = f'0.{"0" * ROUND_SIZE}'
+                    else:
+                        row[2].value = 0
+                        
+                    # Формула потребление с коэф
+                    row[4].value = f"=D{row_idx}*(C{row_idx}-B{row_idx})"  # Колонка E (индекс 4)
+                
+                # Итоговые формулы
+                ws['E115'] = f"=SUM(E2:E111)"
+                ws['E117'] = f"=SUM(E2:E14)"
+                ws['E119'] = f"=E16+E22+E25+E33+E39+E41+E44+E47+E48+E51+E55+E56+E58+E61+E62+E65+E66+E68+E70+E71+E74+E76+E77+E79+E82+E89+E90+E94+E96+E111"
+                ws['E121'] = f"=E117+E119"
+                ws['E123'] = f"=E115-E121"
+            
+            elif 'ХВС' in sheet_name:
+                print(f'Обработка листа: {sheet_name}')                
+                ws['B1'].value = f'Показания на {electric_data_start}'
+                ws['C1'].value = f'Показания на {electric_data_end}'
+                
+                for row_idx, row in enumerate(ws.iter_rows(min_row=2), start=2):
+                    meter = row[0].value  # Колонка A (индекс 0)
+                    
+                    if not meter:
+                        continue
+                        
+                    type_res = 'ХВС'
+                    meter = extract_device_number(meter)
+                    
+                    val_start = common_sql.get_val_by_num_meter_and_date_and_resource(meter, type_res, electric_data_start)
+                    val_end = common_sql.get_val_by_num_meter_and_date_and_resource(meter, type_res, electric_data_end)
+                    
+                    if val_start and len(val_start) > 0 and val_start[0][0] is not None:
+                        row[1].value = float(val_start[0][0])  # Колонка B (индекс 1)
+                        row[1].number_format = f'0.{"0" * ROUND_SIZE}'
+                    else:
+                        row[1].value = 0
+                    
+                    if val_end and len(val_end) > 0 and val_end[0][0] is not None:
+                        row[2].value = float(val_end[0][0])  # Колонка C (индекс 2)
+                        row[2].number_format = f'0.{"0" * ROUND_SIZE}'
+                    else:
+                        row[2].value = 0
+                        
+                    # Формула потребление
+                    row[3].value = f"=C{row_idx}-B{row_idx}"  # Колонка D (индекс 3)
+                
+                # Итоговые формулы
+                ws['D177'] = f"=SUM(D2:D172)"
+                ws['D179'] = f"=SUM(D2:D10)"
+                ws['D181'] = f"=D12+D18+D21+D35+D43+D47+D51+D52+D54+D57+D58+D68+D69+D71+D72+D73+D74+D75+D76+D77+D81+D90+D94+D95+D99+D100+D104+D107+D108+D122+D136+D147+D168+D172"
+                ws['D183'] = f"=D179+D181"
+                ws['D185'] = f"=D177-D183"
+            
+            elif 'ГВС' in sheet_name:
+                print(f'Обработка листа: {sheet_name}')                
+                ws['B1'].value = f'Показания на {electric_data_start}'
+                ws['C1'].value = f'Показания на {electric_data_end}'
+                
+                for row_idx, row in enumerate(ws.iter_rows(min_row=2), start=2):
+                    meter = row[0].value  # Колонка A (индекс 0)
+                    
+                    if not meter:
+                        continue
+                        
+                    type_res = 'ГВС'
+                    meter = extract_device_number(meter)
+                    
+                    val_start = common_sql.get_val_by_num_meter_and_date_and_resource(meter, type_res, electric_data_start)
+                    val_end = common_sql.get_val_by_num_meter_and_date_and_resource(meter, type_res, electric_data_end)
+                    
+                    if val_start and len(val_start) > 0 and val_start[0][0] is not None:
+                        row[1].value = float(val_start[0][0])  # Колонка B (индекс 1)
+                        row[1].number_format = f'0.{"0" * ROUND_SIZE}'
+                    else:
+                        row[1].value = 0
+                    
+                    if val_end and len(val_end) > 0 and val_end[0][0] is not None:
+                        row[2].value = float(val_end[0][0])  # Колонка C (индекс 2)
+                        row[2].number_format = f'0.{"0" * ROUND_SIZE}'
+                    else:
+                        row[2].value = 0
+                        
+                    # Формула потребление
+                    row[3].value = f"=C{row_idx}-B{row_idx}"  # Колонка D (индекс 3)
+                
+                # Итоговые формулы
+                ws['D176'] = f"=SUM(D2:D171)"
+                ws['D178'] = f"=SUM(D2:D9)"
+                ws['D177'] = f"=SUM(D2:D172)"
+                ws['D180'] = f"=D17+D20+D34+D46+D50+D51+D53+D56+D67+D69+D74+D75+D78+D79+D84+D87+D93+D94+D98+D99+D103+D105+D106+D121+D129+D130+D135+D145+D146+D171"
+                ws['D182'] = f"=D178+D180"
+                ws['D184'] = f"=D176-D182"
+
+        # Сохраняем результат
+        response = HttpResponse(content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+        output_name = f'report_173_{electric_data_start}_{electric_data_end}'
+        response['Content-Disposition'] = f'attachment; filename="{output_name}.xlsx"'
+        
+        # Сохраняем книгу в response
+        wb.save(response)
+        return response
+        
+    except Exception as e:
+        import traceback
+        error_detail = traceback.format_exc()
+        result += f"Ошибка при открытии файла: {str(e)}\n\nДетали:\n{error_detail}"
+        response = HttpResponse(result, content_type="text/plain")
+        output_name = 'error'
         file_ext = 'txt'    
         response['Content-Disposition'] = 'attachment;filename="%s.%s"' % (output_name.replace('"', '\"'), file_ext)  
         return response

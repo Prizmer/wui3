@@ -5806,9 +5806,13 @@ def delete_meters_by_excel(sPath, sheet):
         count = meters.count()
         
         if count > 0:
-            # Дополнительная информация о типах найденных приборов
-            meter_types = list(meters.values_list('meter_type', flat=True).distinct())
-            meter_info = f" (типы: {', '.join(map(str, meter_types))})" if meter_types else ""
+            # Получаем информацию о типах найденных приборов через связанное поле
+            meter_types_info = []
+            for m in meters:
+                if hasattr(m, 'guid_types_meters') and m.guid_types_meters:
+                    meter_types_info.append(str(m.guid_types_meters))
+            
+            meter_info = f" (тип: {', '.join(meter_types_info)})" if meter_types_info else ""
             
             meters.delete()  # Удаляем ВСЕ найденные приборы
             deleted_count += count

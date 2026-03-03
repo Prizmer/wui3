@@ -154,7 +154,7 @@ urlpatterns = [
     url(r'^116/$', views.report_stk_heat_daily, name = '116'), # Показание на дату с теплосчётчиков Пульс СТК
 
     url(r'^118/$', views.report_pulsar_frost_daily, name = '118'), # Показание на дату с холодосчётчика Пульсар
-    url(r'^117/$', views.report_pulsar_frost_period, name = '117'), # Потребление за период с холодосчётчиков Пульсар
+    url(r'^117/$', views.report_pulsar_frost_period_v2, name = '117'), # Потребление за период с холодосчётчиков Пульсар
 
     url(r'^120/$', views.report_electric_by_day_for_year, name = '120'), # Показание на выбранный день за каждый месяц в течении года по электрике'. Цифровые приборы(!)
     url(r'^122/$', views.report_water_by_day_for_year, name = '122'), # Показание на выбранный день за каждый месяц в течении года по всем воде. Цифровые приборы(!)
@@ -194,7 +194,7 @@ urlpatterns = [
 
     url(r'^152/$', views.report_pulsar_water_daily_floors, name = '152'), # Показание на дату с водосчётчиков Пульсар
     url(r'^144/$', views.report_pulsar_heat_daily_floors, name = '144'), # Показание на дату с теплосчётчиков Пульсар
-    url(r'^154/$', views.report_pulsar_frost_daily_floors, name = '154'), # Показание на дату с холодосчётчика Пульсар
+    url(r'^154/$', views.report_pulsar_frost_daily_floors_v2, name = '154'), # Показание на дату с холодосчётчика Пульсар
 
     url(r'^155/$', views.report_impulse_heat_consumption, name = '155'), #показания по теплу, сидящему на РИ Пульсар
     url(r'^156/$', views.report_impulse_heat_by_date, name = '156'), #показания по теплу, сидящему на РИ Пульсар
@@ -221,6 +221,6 @@ urlpatterns = [
     
     url(r'^172/$', views.report_electr_integral_from_template, name = '172'), #электрика инетегр.показания из шаблона
     
-    url(r'^173/$', views.report_custom_173, name = '173'), #электрика, вода, тепло
+    url(r'^173/$', views.report_custom_173_v2, name = '173'), #электрика, вода, тепло
 
 ]

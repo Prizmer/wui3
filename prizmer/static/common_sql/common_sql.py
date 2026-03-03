@@ -16705,25 +16705,64 @@ def get_data_table_water_consumption_mosvodokanal2(obj_parent_title, obj_title, 
     data_table = cursor.fetchall()
     return data_table
 
+def check_type_meter(meter):
+    cursor = connection.cursor()
+    data_table=[]
+    sQuery = """
+        SELECT 
+  resources.name, 
+  meters.name
+FROM 
+  public.meters, 
+  public.types_meters, 
+  public.resources, 
+  public.names_params, 
+  public.taken_params, 
+  public.params
+WHERE 
+  names_params.guid_resources = resources.guid AND
+  taken_params.guid_meters = meters.guid AND
+  taken_params.guid_params = params.guid AND
+  params.guid_names_params = names_params.guid
+AND 
+address = '%s'
+AND resources.name not like '%%Служебные%%'
+group by 
+  resources.name, 
+  meters.name
+    """%(meter)
+    #print(sQuery)
+    cursor.execute(sQuery)
+    data_table = cursor.fetchall()
+    return data_table
+
+
 def get_value_by_meter_by_date(uzel_attr2, electric_data_end, field, round_num):
     cursor = connection.cursor()
     data_table=[]
     sQuery = """
-    SELECT 
-  round(daily_values.value::numeric,%s)
-FROM 
-  public.meters, 
-  public.taken_params, 
-  public.daily_values
-WHERE 
-  taken_params.guid_meters = meters.guid AND
-  daily_values.id_taken_params = taken_params.id AND
-  daily_values.date = '%s' 
-  AND 
-  %s = '%s'
-GROUP BY  daily_values.value
+      SELECT 
+        round(daily_values.value::numeric,%s)
+      FROM 
+        public.meters, 
+        public.taken_params, 
+        public.daily_values
+      WHERE 
+        taken_params.guid_meters = meters.guid AND
+        daily_values.id_taken_params = taken_params.id AND
+        daily_values.date = '%s'
+          and taken_params.name like '%%Объем%%' 
+        AND 
+        %s = '%s'
+      GROUP BY  daily_values.value
     """%(round_num, electric_data_end, field, uzel_attr2)
     #print(sQuery)
+    
+    # if (uzel_attr2 == '3517623'):
+    #    print(uzel_attr2, electric_data_end, field, round_num)
+    #    print(sQuery)
+    
+
     cursor.execute(sQuery)
     data_table = cursor.fetchall()
     return data_table
@@ -17991,7 +18030,7 @@ def get_heat_count_for_all_objects(electric_data_end):
         JOIN resources r ON r.guid = np.guid_resources
         LEFT JOIN daily_values dv ON dv.id_taken_params = tp.id
             AND dv.date = %s
-            AND np.name IN ('Энергия', 'Энергия1', 'Энергия2', 'Объем', 'Ti', 'To')
+            AND np.name IN ('Энергия', 'Энергия1', 'Энергия2', 'Объем', 'Энергия_тепло', 'Ti', 'To')
         WHERE r.name = 'Тепло'
         GROUP BY o.name, m.factory_number_manual
     )
@@ -18058,7 +18097,7 @@ def get_heat_no_data_for_all_objects(electric_data_end):
     
     LEFT JOIN daily_values dv ON dv.id_taken_params = tp.id
         AND dv.date = %s
-        AND np.name IN ('Энергия', 'Энергия1', 'Энергия2', 'Объем', 'Ti', 'To')
+        AND np.name IN ('Энергия', 'Энергия1', 'Энергия2', 'Объем', 'Энергия_тепло', 'Ti', 'To')
         
     WHERE r.name = 'Тепло'
     GROUP BY 
