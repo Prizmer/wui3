@@ -13401,3 +13401,127 @@ def water_custom_173(request):
     args['electric_data_end'] = electric_data_end
 
     return render(request, "data_table/173.html", args)
+
+
+
+
+
+
+def pulsar_heat_error(request):
+    args = {}
+    is_abonent_level = re.compile(r'abonent')
+    is_object_level = re.compile(r'level')
+    is_object_level_1 = re.compile(r'level1')
+    is_object_level_2 = re.compile(r'level2')
+    
+
+    electric_data_end   = ""         
+    obj_key             = ""
+    obj_title = 'Не выбран'
+    obj_parent_title = 'Не выбран'
+
+    if request.is_ajax():
+        if request.method == 'GET':
+            request.session["obj_parent_title"]    = obj_parent_title         = request.GET['obj_parent_title']
+            request.session["obj_title"]           = obj_title         = request.GET['obj_title']
+            request.session["electric_data_end"]   = electric_data_end   = request.GET['electric_data_end']           
+            request.session["obj_key"]             = obj_key             = request.GET['obj_key']
+    data_table = []
+    
+    dm = 'daily'
+    if (bool(is_abonent_level.search(obj_key))):
+        data_table = common_sql.get_data_table_by_date_daily_pulsar_teplo(obj_parent_title, obj_title, electric_data_end, True, dm)
+    elif (bool(is_object_level_2.search(obj_key))):
+        data_table = common_sql.get_data_table_by_date_daily_pulsar_teplo(obj_parent_title, obj_title, electric_data_end, False, dm)
+     # расшифровка значения ошибок        
+    result_data_table = []
+    if len(data_table) > 0:
+        for row in data_table:
+            # Создаем копию строки, чтобы не изменять исходную
+            new_row = list(row)            
+            
+            error_code = row[12]  
+            
+            # Дешифруем ошибки с помощью функции pulsar_heatmeter_error
+            if error_code == 0:
+                new_row[12] = f'Ошибок нет: {error_code}'
+            elif error_code is not None:
+                try:
+                    # Преобразуем в int, если это строка
+                    if isinstance(error_code, str):
+                        error_code = int(error_code)
+                    error_messages = common_sql.pulsar_heatmeter_error(error_code)
+                    # Объединяем список ошибок в строку через запятую
+                    new_row[12] = ', '.join(error_messages) if error_messages else 'Ошибок не найдено'
+                except (ValueError, TypeError):
+                    # Если не удалось преобразовать в число, оставляем как есть
+                    new_row[12] = f'Некорректный код ошибки: {error_code}'
+            
+            
+            result_data_table.append(new_row)
+    
+    args['data_table'] = result_data_table
+    args['electric_data_end'] = electric_data_end
+    args['obj_title'] = obj_title
+    return render(request, "data_table/heat/174.html", args)
+
+def pulsar_water_error(request):
+    args = {}
+    is_abonent_level = re.compile(r'abonent')
+    is_object_level = re.compile(r'level')
+    is_object_level_1 = re.compile(r'level1')
+    is_object_level_2 = re.compile(r'level2')
+    
+    meters_name         = request.GET['obj_title']
+    electric_data_end   = request.GET['electric_data_end']            
+    obj_key             = request.GET['obj_key']
+    obj_title = 'Не выбран'
+    obj_parent_title = 'Не выбран'
+
+    if request.is_ajax():
+        if request.method == 'GET':
+            request.session["obj_parent_title"]    = obj_parent_title         = request.GET['obj_parent_title']
+            request.session["obj_title"]           = obj_title         = request.GET['obj_title']
+            request.session["electric_data_end"]   = electric_data_end   = request.GET['electric_data_end']           
+            request.session["obj_key"]             = obj_key             = request.GET['obj_key']
+    data_table = []
+    
+    if (bool(is_abonent_level.search(obj_key))):
+        data_table = common_sql.get_water_pulsar_error_code(obj_parent_title, obj_title, electric_data_end, True)
+    elif (bool(is_object_level_2.search(obj_key))):
+        data_table = common_sql.get_water_pulsar_error_code(obj_parent_title, obj_title, electric_data_end, False)
+     # расшифровка значения ошибок        
+    result_data_table = []
+    if len(data_table) > 0:
+        for row in data_table:
+            # Создаем копию строки, чтобы не изменять исходную
+            new_row = list(row)                       
+            error_code = row[5]
+            error_cur =  row[6]             
+            # Дешифруем ошибки с помощью функции pulsar_watermeter_error
+        
+            if error_code is not None:
+                try:
+                    # Преобразуем в int, если это строка
+                    if isinstance(error_code, str):
+                        error_code = int(error_code)
+                    if isinstance(error_cur, str):
+                        error_cur = int(error_cur)
+                    error_messages = common_sql.pulsar_watermeter_error(error_code)
+                    # Объединяем список ошибок в строку через запятую
+                    new_row[5] = ', '.join(error_messages) if error_messages else 'Ошибок не найдено'
+                    error_messages2 = common_sql.pulsar_watermeter_error(error_cur)
+                    # Объединяем список ошибок в строку через запятую
+                    new_row[6] = ', '.join(error_messages2) if error_messages else 'Ошибок не найдено'                    
+                    
+                except (ValueError, TypeError):
+                    # Если не удалось преобразовать в число, оставляем как есть
+                    new_row[5] = f'Некорректный код ошибки: {error_code}'
+                    new_row[6] = f'Некорректный код ошибки: {error_cur}'
+            
+            result_data_table.append(new_row)
+    
+    args['data_table'] = result_data_table
+    args['electric_data_end'] = electric_data_end
+    args['obj_title'] = meters_name
+    return render(request, "data_table/water/176.html", args)

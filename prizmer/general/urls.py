@@ -256,4 +256,7 @@ urlpatterns = [
     url(r'^172/$', views.electric_integral_from_template, name = 'electric_integral_from_template'), # water с приборов vzlet
     
     url(r'^173/$', views.water_custom_173, name = 'water_custom_173'), # отчёт по шаблону на 2 даты
+    
+    url(r'^174/$', views.pulsar_heat_error, name = 'pulsar_heat_error'), # отчёт об ошибках и батарейке теплосчётчика пульсар
+    url(r'^176/$', views.pulsar_water_error, name = 'pulsar_water_error'), # отчёт об ошибках и батарейке водосчётчика пульсар
 ]

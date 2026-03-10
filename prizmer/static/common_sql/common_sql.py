@@ -6013,14 +6013,18 @@ round(z2.t_out::numeric,1),
 heat_abons.comment,
 heat_abons.ab_guid,
 round((z2.energy::numeric*0.0008604206500956)::numeric,3) as energy_gkal,
-heat_abons.attr4
+heat_abons.attr4,
+ round((z2.battery_voltage/1000)::numeric,2),
+ z2.error_code::int
 from heat_abons
 left join
 (SELECT z1.daily_date, z1.name_objects, z1.name_abonents, z1.number_manual, 
             MAX(Case when z1.params_name = '%s' then z1.value_daily  end) as energy,
             MAX(Case when z1.params_name = '%s' then z1.value_daily  end) as volume,
             MAX(Case when z1.params_name = '%s' then z1.value_daily  end) as t_in,
-            MAX(Case when z1.params_name = '%s' then z1.value_daily  end) as t_out
+            MAX(Case when z1.params_name = '%s' then z1.value_daily  end) as t_out,
+            MAX(Case when z1.params_name = '%s' then z1.value_daily  end) as battery_voltage,
+            MAX(Case when z1.params_name = '%s' then z1.value_daily  end) as error_code
             
                                     FROM
                                     (SELECT 
@@ -6067,9 +6071,9 @@ left join
             order by z1.name_abonents) as z2
 on z2.number_manual=heat_abons.factory_number_manual
 where heat_abons.obj_name='%s' and heat_abons.ab_name  = '%s' and heat_abons.type_meter  like '%%%s%%'
-order by heat_abons.ab_name""" % (params[0],params[1],params[2],params[3], obj_parent_title, obj_title,params[4], electric_data,obj_parent_title, obj_title, params[4] )
+order by heat_abons.ab_name""" % (params[0],params[1],params[2],params[3], params[5], params[6] , obj_parent_title, obj_title,params[4], electric_data,obj_parent_title, obj_title, params[4])
     sQuery = sQuery.replace('daily', dm)
-    #print(sQuery)
+    # print(sQuery)
     return sQuery
 
 def makeSqlQuery_heat_daily_pulsar_teplo_all(obj_title, electric_data, params, dm):
@@ -6083,14 +6087,18 @@ heat_abons.comment,
 heat_abons.ab_guid,
 
 round((z2.energy::numeric*0.0008604206500956)::numeric,3) as energy_gkal,
- heat_abons.attr4
+ heat_abons.attr4,
+ round((z2.battery_voltage/1000)::numeric,2),
+ z2.error_code::int
 from heat_abons
 left join
 (SELECT z1.daily_date, z1.name_objects, z1.name_abonents, z1.number_manual, 
             MAX(Case when z1.params_name = '%s' then z1.value_daily  end) as energy,
             MAX(Case when z1.params_name = '%s' then z1.value_daily  end) as volume,
             MAX(Case when z1.params_name = '%s' then z1.value_daily  end) as t_in,
-            MAX(Case when z1.params_name = '%s' then z1.value_daily  end) as t_out
+            MAX(Case when z1.params_name = '%s' then z1.value_daily  end) as t_out,
+            MAX(Case when z1.params_name = '%s' then z1.value_daily  end) as battery_voltage,
+            MAX(Case when z1.params_name = '%s' then z1.value_daily  end) as error_code
             
                                     FROM
                                     (SELECT 
@@ -6136,7 +6144,7 @@ left join
             order by z1.name_abonents) as z2
 on z2.number_manual=heat_abons.factory_number_manual
 where heat_abons.obj_name='%s' and heat_abons.type_meter  like '%%%s%%'
-order by heat_abons.ab_name""" % (params[0],params[1],params[2],params[3], obj_title,params[4], electric_data, obj_title, params[4])
+order by heat_abons.ab_name""" % (params[0],params[1],params[2],params[3], params[5], params[6] , obj_title,params[4], electric_data, obj_title, params[4])
     sQuery = sQuery.replace('daily', dm)
     #print(sQuery)    
     return sQuery
@@ -6145,7 +6153,7 @@ order by heat_abons.ab_name""" % (params[0],params[1],params[2],params[3], obj_t
 
 def get_data_table_by_date_daily_pulsar_teplo(obj_parent_title, obj_title, electric_data, isAbon, dm):
     data_table = []
-    params=['Энергия','Объем','Ti','To', 'Теплосчётчик']
+    params=['Энергия','Объем','Ti','To', 'Теплосчётчик', 'battery_voltage', 'Тепло_Error_code']
     cursor = connection.cursor()
     if isAbon:
         cursor.execute(makeSqlQuery_heat_daily_pulsar_teplo_abon(obj_parent_title,obj_title, electric_data, params, dm))
@@ -6158,7 +6166,7 @@ def get_data_table_by_date_daily_pulsar_teplo(obj_parent_title, obj_title, elect
 
 def get_data_table_by_date_daily_pulsar_frost(obj_parent_title, obj_title, electric_data, isAbon):
     data_table = []
-    params=['Энергия','Объем','Ti','To', 'Холодосчётчик']
+    params=['Энергия','Объем','Ti','To', 'Холодосчётчик', 'battery_voltage', 'Тепло_Error_code']
     dm = 'daily'
     cursor = connection.cursor()
     if isAbon:
@@ -18379,3 +18387,288 @@ def get_val_by_num_meter_and_date_and_resource(meter, type_res, electric_data_en
     data_table = cursor.fetchall()
     return data_table
   
+def makeSqlQuery_water_with_error_abon(obj_parent_title,obj_title, electric_data, params):
+    sQuery="""
+WITH last_comment AS (
+    SELECT DISTINCT ON (comments.name) 
+        comments.date,
+        comments.name,
+        comments.comment,
+        comments.guid_abonents,
+        comments.date AS date_comment,
+        comments.guid_resources
+    FROM comments
+    WHERE comments.guid_resources IN (
+        '47f0b64c-2bf6-45b4-972b-601f473a3752'::uuid, 
+        '57ec8f42-69c6-4f79-81bb-8ea139407aa9'::uuid
+    )
+    ORDER BY comments.name, comments.date DESC
+),
+abonents_data AS (
+    SELECT 
+        objects.guid AS obj_guid,
+        objects.name AS obj_name,
+        abonents.guid AS ab_guid,
+        abonents.name AS ab_name,
+        meters.name AS meter_name,
+        meters.factory_number_manual,
+        types_meters.name,
+        CASE
+            WHEN types_meters.name IN ('Пульс СТК ХВС', 'Пульс СТК ГВС') 
+                THEN SUBSTRING(types_meters.name FROM 11 FOR 13)
+            ELSE SUBSTRING(types_meters.name FROM 9 FOR 11)
+        END AS type_meter,
+        meters.attr1,
+        meters.attr2,
+        meters.attr3,
+        meters.attr4,
+        abonents.account_1,
+        abonents.account_2
+    FROM abonents
+    JOIN objects ON abonents.guid_objects = objects.guid
+    JOIN link_abonents_taken_params ON link_abonents_taken_params.guid_abonents = abonents.guid
+    JOIN taken_params ON link_abonents_taken_params.guid_taken_params = taken_params.guid
+    JOIN meters ON taken_params.guid_meters = meters.guid
+    JOIN types_meters ON meters.guid_types_meters = types_meters.guid
+    WHERE types_meters.name LIKE 'Пульс%%ГВС' OR types_meters.name LIKE 'Пульс%%ХВС'
+    GROUP BY 
+        objects.guid, objects.name, 
+        abonents.guid, abonents.name, 
+        meters.name, meters.factory_number_manual, 
+        types_meters.name, 
+        meters.attr1, meters.attr2, meters.attr3, meters.attr4, 
+        abonents.account_1, abonents.account_2
+),
+daily_values_pivot AS (
+    SELECT 
+        dv.date AS daily_date,
+        dv.value AS value_daily,
+        m.factory_number_manual AS number_manual,
+        np.name AS params_name
+    FROM daily_values dv
+    JOIN taken_params tp ON dv.id_taken_params = tp.id
+    JOIN params p ON tp.guid_params = p.guid
+    JOIN names_params np ON p.guid_names_params = np.guid
+    JOIN meters m ON tp.guid_meters = m.guid
+    JOIN types_meters tm ON m.guid_types_meters = tm.guid
+    JOIN link_abonents_taken_params latp ON latp.guid_taken_params = tp.guid
+    JOIN abonents a ON latp.guid_abonents = a.guid
+    JOIN objects o ON a.guid_objects = o.guid
+    WHERE o.name = '%s'
+        AND a.name = '%s'
+        AND tm.name LIKE '%%Пульсар%%ВС%%'
+        AND dv.date = '%s'
+),
+aggregated_daily AS (
+    SELECT 
+        daily_date,
+        number_manual,
+        MAX(CASE WHEN params_name LIKE '%%%s%%' THEN value_daily END) as volume,
+        MAX(CASE WHEN params_name like '%%%s%%' THEN value_daily END) as accumulated_error,
+        MAX(CASE WHEN params_name like '%%%s%%' THEN value_daily END) as current_error
+    FROM daily_values_pivot
+    GROUP BY daily_date, number_manual
+)
+SELECT 
+    adv.daily_date, 
+    ad.ab_name,
+    ad.type_meter,
+    ad.factory_number_manual,
+    ROUND(adv.volume::numeric, 7) as volume,
+    adv.accumulated_error::int,
+    adv.current_error::int,
+    lc.comment,
+    ad.attr1,
+    ad.attr2,
+    ad.attr3,
+    ad.attr4
+FROM abonents_data ad
+LEFT JOIN aggregated_daily adv ON adv.number_manual = ad.factory_number_manual
+LEFT JOIN last_comment lc ON lc.guid_abonents = ad.ab_guid
+WHERE ad.obj_name = '%s' 
+    AND ad.ab_name = '%s'
+ORDER BY ad.ab_name;""" % ( obj_parent_title, obj_title, electric_data,  params[0],params[1] ,params[2] , obj_parent_title, obj_title)
+
+    # print(sQuery)
+    return sQuery
+
+def makeSqlQuery_water_with_error_all(obj_title, electric_data, params):
+    sQuery="""
+WITH last_comment AS (
+    SELECT DISTINCT ON (comments.name) 
+        comments.date,
+        comments.name,
+        comments.comment,
+        comments.guid_abonents,
+        comments.date AS date_comment,
+        comments.guid_resources
+    FROM comments
+    WHERE comments.guid_resources IN (
+        '47f0b64c-2bf6-45b4-972b-601f473a3752'::uuid, 
+        '57ec8f42-69c6-4f79-81bb-8ea139407aa9'::uuid
+    )
+    ORDER BY comments.name, comments.date DESC
+),
+abonents_data AS (
+    SELECT 
+        objects.guid AS obj_guid,
+        objects.name AS obj_name,
+        abonents.guid AS ab_guid,
+        abonents.name AS ab_name,
+        meters.name AS meter_name,
+        meters.factory_number_manual,
+        types_meters.name,
+        CASE
+            WHEN types_meters.name IN ('Пульс СТК ХВС', 'Пульс СТК ГВС') 
+                THEN SUBSTRING(types_meters.name FROM 11 FOR 13)
+            ELSE SUBSTRING(types_meters.name FROM 9 FOR 11)
+        END AS type_meter,
+        meters.attr1,
+        meters.attr2,
+        meters.attr3,
+        meters.attr4,
+        abonents.account_1,
+        abonents.account_2
+    FROM abonents
+    JOIN objects ON abonents.guid_objects = objects.guid
+    JOIN link_abonents_taken_params ON link_abonents_taken_params.guid_abonents = abonents.guid
+    JOIN taken_params ON link_abonents_taken_params.guid_taken_params = taken_params.guid
+    JOIN meters ON taken_params.guid_meters = meters.guid
+    JOIN types_meters ON meters.guid_types_meters = types_meters.guid
+    WHERE types_meters.name LIKE 'Пульс%%ГВС' OR types_meters.name LIKE 'Пульс%%ХВС'
+    GROUP BY 
+        objects.guid, objects.name, 
+        abonents.guid, abonents.name, 
+        meters.name, meters.factory_number_manual, 
+        types_meters.name, 
+        meters.attr1, meters.attr2, meters.attr3, meters.attr4, 
+        abonents.account_1, abonents.account_2
+),
+daily_values_pivot AS (
+    SELECT 
+        dv.date AS daily_date,
+        dv.value AS value_daily,
+        m.factory_number_manual AS number_manual,
+        np.name AS params_name
+    FROM daily_values dv
+    JOIN taken_params tp ON dv.id_taken_params = tp.id
+    JOIN params p ON tp.guid_params = p.guid
+    JOIN names_params np ON p.guid_names_params = np.guid
+    JOIN meters m ON tp.guid_meters = m.guid
+    JOIN types_meters tm ON m.guid_types_meters = tm.guid
+    JOIN link_abonents_taken_params latp ON latp.guid_taken_params = tp.guid
+    JOIN abonents a ON latp.guid_abonents = a.guid
+    JOIN objects o ON a.guid_objects = o.guid
+    WHERE o.name = '%s'
+      
+        AND tm.name LIKE '%%Пульсар%%ВС%%'
+        AND dv.date = '%s'
+),
+aggregated_daily AS (
+    SELECT 
+        daily_date,
+        number_manual,
+        MAX(CASE WHEN params_name LIKE '%%%s%%' THEN value_daily END) as volume,
+        MAX(CASE WHEN params_name like '%%%s%%' THEN value_daily END) as accumulated_error,
+        MAX(CASE WHEN params_name like '%%%s%%' THEN value_daily END) as current_error
+    FROM daily_values_pivot
+    GROUP BY daily_date, number_manual
+)
+SELECT 
+    adv.daily_date, 
+    ad.ab_name,
+    ad.type_meter,
+    ad.factory_number_manual,
+    ROUND(adv.volume::numeric, 7) as volume,
+    adv.accumulated_error::int,
+    adv.current_error::int,
+    lc.comment,
+    ad.attr1,
+    ad.attr2,
+    ad.attr3,
+    ad.attr4
+FROM abonents_data ad
+LEFT JOIN aggregated_daily adv ON adv.number_manual = ad.factory_number_manual
+LEFT JOIN last_comment lc ON lc.guid_abonents = ad.ab_guid
+WHERE ad.obj_name = '%s' 
+  
+ORDER BY ad.ab_name;""" % (  obj_title, electric_data, params[0],params[1] ,params[2] , obj_title)
+
+    # print(sQuery)
+    return sQuery
+
+
+
+def get_water_pulsar_error_code(obj_parent_title, obj_title, electric_data, isAbon):
+    data_table = []
+    params=['Объем','accumulated_error', 'current_error']
+    cursor = connection.cursor()
+    if isAbon:
+        cursor.execute(makeSqlQuery_water_with_error_abon(obj_parent_title,obj_title, electric_data, params))
+    else:
+        cursor.execute(makeSqlQuery_water_with_error_all(obj_title, electric_data, params))
+    data_table = cursor.fetchall()   
+    
+    if len(data_table)>0: data_table=ChangeNull_and_LeaveEmptyCol(data_table, electric_data, 7) 
+    return data_table
+  
+def pulsar_watermeter_error(error_code: int) -> list | None:
+    '''Преобразование кода ошибок в список для __Пульсар модуль счетчика воды v1.9__'''
+    error_tuple = ('Резерв', 
+            'Резерв', 
+            'Выход значения добротности за допустимые пределы (L2MAX)', 
+            'Выход значения добротности за допустимые пределы (L2MIN)', 
+            'Выход значения добротности за допустимые пределы (L1MAX)', 
+            'Выход значения добротности за допустимые пределы (L1MIN)', 
+            'Указывает на снятие модуля с проливной части (L1MAX)', 
+            'Косвенно указывает на поднесённый магнит (L1MIN)', 
+            'Резерв', 
+            'Неисправность часового кварца (XTAL)', 
+            'Неисправность трансивера (радио) (RF)', 
+            'Замкнут геркон (MAGSV)', 
+            'Ошибка направления течения жидкости (обратный поток) (DIR)', 
+            'Ошибка чтения/записи EEPROM (EEPROM)', 
+            'Разрядилась батарея питания(BATTREY)', 
+            'Произошел сброс всех значений счётчика(RESET)')
+    meter_errors = ['Ошибок не найдено.']
+    res_bin = ((bin(error_code)).removeprefix('0b')).zfill(16)
+    print(res_bin)
+    for i, j in enumerate(res_bin):
+        if j == '1':
+            meter_errors.append(error_tuple[i])
+    if len(meter_errors) > 1:
+        meter_errors.remove('Ошибок не найдено.')
+    return meter_errors
+
+def pulsar_heatmeter_error(error_code: int) -> list | None:
+    '''Преобразование кода ошибок в список для __Пульсар теплосчётчик механический v15__'''
+    error_tuple = ('Резерв 31.', 'Резерв 30.', 'Резерв 29.', 
+    'Резерв 28.', 'Резерв 27.', 'Резерв 26.', 'Резерв 25.', 'Резерв 24.', 
+    'Резерв 23.', 'Резерв 22.', 'Резерв 21.', 'Резерв 20.', 
+    'Перепад температур меньше настраиваемого порога (параметр 0x0055).', 
+    'Зафиксирован расход выше настраиваемого порога (параметр 0x0054).', 
+    'Зафиксирован расход ниже настраиваемого порога (параметр 0x0053).', 
+    'Неисправность измерителя расхода.', 
+    'Неисправность измерителя расхода.', 
+    'Неисправность измерителя расхода.', 
+    'Неисправность измерителя расхода.', 
+    'Неисправность измерителя расхода.', 
+    'Неисправность измерителя расхода.', 
+    'Неисправность измерителя расхода.', 
+    'Неисправность измерителя расхода.', 
+    'Температура подачи меньше температуры обратки.', 
+    'Неисправность термометра в обратном трубопроводе.', 
+    'Неисправность термометра в подающем трубопроводе.', 
+    'Неисправность RF трансивера.', 
+    'Неисправность часового кварца.', 
+    'Произошел сброс даты, времени, всех значений счетчиков.', 
+    'Ошибка чтения/записи EEPROM.', 
+    'Разрядилась батарея питания.')
+    meter_errors = ['Ошибок не найдено.']
+    res_bin = ((bin(error_code)).removeprefix('0b')).zfill(32)
+    for i, j in enumerate(res_bin):
+        if j == '1':
+            meter_errors.append(error_tuple[i])
+    if len(meter_errors) > 1:
+        meter_errors.remove('Ошибок не найдено.')
+    return meter_errors

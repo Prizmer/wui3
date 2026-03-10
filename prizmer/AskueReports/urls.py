@@ -222,5 +222,8 @@ urlpatterns = [
     url(r'^172/$', views.report_electr_integral_from_template, name = '172'), #электрика инетегр.показания из шаблона
     
     url(r'^173/$', views.report_custom_173_v2, name = '173'), #электрика, вода, тепло
+    
+    url(r'^174/$', views.report_pulsar_heat_error, name = '174'), # отчёт об ошибках и батарейке теплосчётчика пульсар
+    url(r'^176/$', views.report_pulsar_water_error, name = '176'), # отчёт об ошибках и батарейке водосчётчика пульсар
 
 ]

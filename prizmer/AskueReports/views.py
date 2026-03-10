@@ -45,6 +45,24 @@ def get_val_by_round(val, ROUND_SIZE, separator):
     new_val = str(new_val).replace('.',separator)
     return new_val
 
+def format_1(val):
+        """ с 1 знаком после запятой"""
+        if val is None or val == 'N/D':
+            return 'N/D'
+        try:
+            return round(float(val), 1)
+        except:
+            return val
+    
+def format_2(val):
+        """ с 2 знаками после запятой"""
+        if val is None or val == 'N/D':
+            return 'N/D'
+        try:
+            return round(float(val), 2)
+        except:
+            return val
+        
 def get_val_as_number(val, ROUND_SIZE):
     """Возвращает отформатированное число (не строку)"""
     # Округляем число, но сохраняем как float
@@ -23645,7 +23663,7 @@ def pulsar_heat_consumption_from_template(request):
                                 row[ord('G') - ord('A')].value = electric_data_end
                         except:
                             continue
-                    elif (real_type_meter == 'ГВС'):  # ГВС Индивидуальный
+                    elif (real_type_meter == 'ГВС' or real_type_meter == 'ХВС'):  # ГВС Индивидуальный
                         try:
                             # print('gvs')
                             round_num = 0
@@ -27116,6 +27134,154 @@ def report_water_by_date_v2(request):
 
 
 def export_to_excel_hybrid_simple(data_table, headers, columns_config, sheet_title="Report", 
+                                  round_size=3, num_is_string=False, freeze_panes=None,
+                                  precision_config=None):  # Новый параметр с значением по умолчанию
+    """
+    Упрощенная функция для экспорта в Excel.
+    
+    headers: список кортежей (merge_range, cell_ref, value, style, width)
+    columns_config: список кортежей (column_letter, data_index, style, is_numeric, calculation_func)
+    precision_config: словарь {column_letter: precision} для индивидуальной точности колонок
+                     если None, то используется round_size для всех числовых колонок
+    """
+    HVS_NAME = getattr(settings, 'HVS_NAME', 'ХВС')
+    GVS_NAME = getattr(settings, 'GVS_NAME', 'ГВС')
+    
+    # Если precision_config не передан, создаем пустой словарь
+    if precision_config is None:
+        precision_config = {}
+    
+    wb = Workbook()
+    ws = wb.active
+    ws.title = sheet_title
+    
+    # Добавляем все стили (они уже определены)
+    wb.add_named_style(ali_grey)
+    wb.add_named_style(ali_white)
+    wb.add_named_style(ali_yellow)
+    wb.add_named_style(ali_pink)
+    wb.add_named_style(ali_blue)
+    wb.add_named_style(ali_green)
+    wb.add_named_style(ali_yellow_header)
+    wb.add_named_style(ali_green_header)
+    wb.add_named_style(ali_green_title)
+    
+    # Создаем заголовки
+    for header in headers:
+        merge_range, cell_ref, value, style, width = header
+        
+        if merge_range:
+            ws.merge_cells(merge_range)
+            
+            # После мерджа нужно применить стиль ко всем ячейкам в диапазоне
+            start_cell, end_cell = merge_range.split(':')
+            start_col = start_cell[0]
+            start_row = int(start_cell[1:])
+            end_col = end_cell[0]
+            end_row = int(end_cell[1:])
+            
+            # Применяем стиль ко всем ячейкам в мердж-диапазоне
+            for row in range(start_row, end_row + 1):
+                for col in range(column_index_from_string(start_col), column_index_from_string(end_col) + 1):
+                    cell = ws.cell(row=row, column=col)
+                    if style:
+                        cell.style = style
+        
+        # Основная ячейка
+        cell = ws[cell_ref]
+        cell.value = value
+        
+        if style:
+            cell.style = style
+        
+        if width and cell_ref[0].isalpha():
+            col_letter = cell_ref[0]
+            ws.column_dimensions[col_letter].width = width
+    
+    # Определяем строку начала данных (последняя строка заголовков + 1)
+    max_header_row = 1
+    for header in headers:
+        cell_ref = header[1]
+        row_num = int(''.join(filter(str.isdigit, cell_ref)))
+        max_header_row = max(max_header_row, row_num)
+    
+    data_start_row = max_header_row + 1
+    
+    # Заполняем данные с чередованием строк
+    for row_idx, data_row in enumerate(data_table, start=data_start_row):
+        # Определяем стиль строки (чередование: четные - зеленые, нечетные - белые)
+        is_even = (row_idx - data_start_row) % 2 == 0
+        
+        for col_letter, data_idx, style, is_numeric, calc_func in columns_config:
+            cell = ws.cell(row=row_idx, column=column_index_from_string(col_letter))
+            
+            # Устанавливаем стиль
+            if style:
+                cell.style = style
+            else:
+                # Чередование строк: четные - зеленые, нечетные - белые
+                cell.style = ali_green if is_even else ali_white
+            
+            # Получаем значение
+            value = None
+            try:
+                if calc_func:
+                    value = calc_func(data_row)
+                elif data_idx is not None and data_idx < len(data_row):
+                    value = data_row[data_idx]
+                
+                # Обрабатываем значение
+                if value is not None:
+                    # ОСОБАЯ ОБРАБОТКА для "Н/Д" - всегда как текст
+                    if str(value).strip() == 'Н/Д':
+                        cell.value = 'Н/Д'
+                    # Обработка для "ХВС" и "ГВС" - раскрашиваем
+                    elif str(value).strip() == 'ХВС' or str(value).strip() == 'Холодное водоснабжение':
+                        cell.value = HVS_NAME
+                        cell.style = ali_blue
+                    elif str(value).strip() == 'ГВС' or str(value).strip() == 'Горячее водоснабжение':
+                        cell.value =  GVS_NAME
+                        cell.style = ali_pink
+                    elif is_numeric:
+                        try:
+                            num_val = float(str(value).replace(',', '.'))
+                            
+                            # Определяем точность для этой колонки
+                            # Сначала проверяем есть ли индивидуальная точность в precision_config
+                            col_precision = precision_config.get(col_letter, round_size)
+                            
+                            if col_precision == 0:
+                                rounded_val = round(num_val)
+                                cell.value = rounded_val
+                                cell.number_format = '0'
+                            else:
+                                # Округляем до нужного количества знаков
+                                rounded_val = round(num_val, col_precision)
+                                cell.value = rounded_val
+                                # Формат для отображения
+                                cell.number_format = f'0.{"0" * col_precision}'
+                                
+                        except:
+                            cell.value = str(value)
+                    else:
+                        cell.value = str(value)
+                else:
+                    cell.value = ''
+            except Exception as e:
+                print(f"Error in cell {col_letter}{row_idx}: {e}")
+                cell.value = ''
+    
+    # Фиксируем шапку если нужно
+    if freeze_panes:
+        ws.freeze_panes = freeze_panes
+    else:
+        # По умолчанию фиксируем строку с данными
+        ws.freeze_panes = f'A{data_start_row}'
+    
+    return wb
+
+
+def export_to_excel_hybrid_simple_older(data_table, headers, columns_config, sheet_title="Report", 
                                   round_size=3, num_is_string=False, freeze_panes=None):
     """
     Упрощенная функция для экспорта в Excel.
@@ -27754,7 +27920,7 @@ def report_electric_potreblenie_3_zones_v4(request):
             {'range': 'AD4:AD5', 'value': 'Лицевой номер абонента', 'style': 'ali_green_header', 'width': 17}
         )
 
-    # 3. Конфигурация колонок данных - ТОЧНО как в старой функции
+    # 3. Конфигурация колонок данных
     column_config = [
         # (column_letter, data_index, style, is_numeric, calculation_func)
         ('A', 0, None, False, None),  # Наименование абонента
@@ -28683,7 +28849,7 @@ def report_custom_173_v2(request):
 
     electric_data_start = request.GET['electric_data_start']
     electric_data_end   = request.GET['electric_data_end']
-    print(electric_data_start, electric_data_end)
+    # print(electric_data_start, electric_data_end)
 
     result = "1"
     directory = os.path.join(BASE_DIR,'static\\excel\\excel_template\\custom_173') 
@@ -28880,3 +29046,240 @@ def report_custom_173_v2(request):
         file_ext = 'txt'    
         response['Content-Disposition'] = 'attachment;filename="%s.%s"' % (output_name.replace('"', '\"'), file_ext)  
         return response
+    
+def report_pulsar_heat_error(request):  
+    ROUND_SIZE = getattr(settings, 'ROUND_SIZE', 3)
+    NUM_IS_STRING = getattr(settings, 'NUM_IS_STRING', 'False')
+    
+    # Запрашиваем данные для отчета
+    is_abonent_level = re.compile(r'abonent')
+    is_object_level_2 = re.compile(r'level2')
+    
+    obj_parent_title = request.GET['obj_parent_title']
+    obj_title = request.GET['obj_title']
+    electric_data_end = request.GET['electric_data_end']            
+    obj_key = request.GET['obj_key']  
+
+    # Получение данных       
+    data_table = []
+    
+    dm = 'daily'
+    if (bool(is_abonent_level.search(obj_key))):
+        data_table = common_sql.get_data_table_by_date_daily_pulsar_teplo(obj_parent_title, obj_title, electric_data_end, True, dm)
+    elif (bool(is_object_level_2.search(obj_key))):
+        data_table = common_sql.get_data_table_by_date_daily_pulsar_teplo(obj_parent_title, obj_title, electric_data_end, False, dm)
+    
+    # Заменяем None на N/D везде
+    if len(data_table) > 0: 
+        data_table = common_sql.ChangeNull(data_table, None)
+    
+    # расшифровка значения ошибок        
+    result_data_table = []
+    if len(data_table) > 0:
+        for row in data_table:
+            # Создаем копию строки, чтобы не изменять исходную
+            new_row = list(row)            
+            
+            error_code = row[12]  
+            
+            # Дешифруем ошибки с помощью функции pulsar_heatmeter_error
+            if error_code == 0 or error_code == '0':
+                new_row[12] = 'Ошибок нет'
+            elif error_code is not None and error_code != '' and error_code != 'N/D':
+                try:
+                    # Преобразуем в int, если это строка
+                    if isinstance(error_code, str):
+                        error_code = int(error_code)
+                    error_messages = common_sql.pulsar_heatmeter_error(error_code)
+                    # Объединяем список ошибок в строку через запятую
+                    new_row[12] = ', '.join(error_messages) if error_messages else 'Ошибок не найдено'
+                except (ValueError, TypeError):
+                    # Если не удалось преобразовать в число, оставляем как есть
+                    new_row[12] = f'Некорректный код ошибки: {error_code}'
+            else:
+                new_row[12] = 'Нет данных'
+            
+            result_data_table.append(new_row)
+
+    # Конфигурация заголовков в формате для hybrid_simple
+    # (merge_range, cell_ref, value, style, width)
+    headers = [
+        ('A2:I2', 'A2', f'{obj_title}. Показания по теплу (Пульсар) на {electric_data_end}', 'ali_green_title', None),
+        ('A3:D3', 'A3', obj_parent_title, 'ali_green_title', None),
+        ('A4:A4', 'A4', 'Дата', 'ali_green_header', 17),
+        ('B4:B4', 'B4', 'Абонент', 'ali_green_header', 30),
+        ('C4:C4', 'C4', 'Счётчик', 'ali_green_header', 20),
+        ('D4:D4', 'D4', 'Энергия, Гкал', 'ali_green_header', 15),
+        ('E4:E4', 'E4', 'Объем, м³', 'ali_green_header', 12),
+        ('F4:F4', 'F4', 'Температура входа, °C', 'ali_green_header', 18),
+        ('G4:G4', 'G4', 'Температура выхода, °C', 'ali_green_header', 18),
+        ('H4:H4', 'H4', 'Напряжение батарейки, В', 'ali_green_header', 18),
+        ('I4:I4', 'I4', 'Ошибки', 'ali_green_header', 50),
+    ]
+
+    # Конфигурация колонок данных 
+    # (column_letter, data_index, style, is_numeric, calculation_func)
+    columns_config = [
+        ('A', 0, None, False, None),  # Дата
+        ('B', 1, None, False, None),  # Абонент
+        ('C', 2, None, False, None),  # Счётчик
+        ('D', 3, None, True, None),   # Энергия, Гкал
+        ('E', 4, None, True, None),   # Объем, м3
+        ('F', 5, None, True, lambda row: format_1(row[5])), # Температура входа
+        ('G', 6, None, True, lambda row: format_1(row[6])), # Температура выхода
+        ('H', 11, None, True, lambda row: format_2(row[11])),   # Напряжение батарейки
+        ('I', 12, None, False, None), # Расшифровка ошибки
+    ]
+
+      # Конфигурация точности для разных колонок
+    precision_config = {
+        'D': ROUND_SIZE,  # Энергия - из настроек
+        'E': ROUND_SIZE,  # Объем - из настроек
+        'F': 1,           # Температура входа - 1 знак
+        'G': 1,           # Температура выхода - 1 знак
+        'H': 2,           # Напряжение батарейки - 2 знака
+    }
+
+    # Создаем Excel через упрощенную функцию hybrid_simple
+    wb = export_to_excel_hybrid_simple(
+        data_table=result_data_table,
+        headers=headers,
+        columns_config=columns_config,
+        sheet_title="Тепло Пульсар",
+        round_size=ROUND_SIZE,           # Значение по умолчанию для колонок без индивидуальной точности
+        num_is_string=NUM_IS_STRING,
+        freeze_panes='A5',
+        precision_config=precision_config  # Передаем индивидуальные настройки точности
+    )
+    
+
+    # Сохраняем в excel  
+    response = HttpResponse(save_virtual_workbook(wb), content_type="application/vnd.ms-excel")
+    output_name = 'heat_error_pulsar_' + translate(obj_parent_title) + '_' + translate(obj_title) + '_' + electric_data_end
+    # Очищаем имя файла от недопустимых символов
+    output_name = ''.join(c for c in output_name if c.isalnum() or c in '._- ')
+    response['Content-Disposition'] = f'attachment;filename="{output_name}.xlsx"'
+    
+    return response
+
+
+def report_pulsar_water_error(request):  
+    ROUND_SIZE = getattr(settings, 'ROUND_SIZE', 3)
+    NUM_IS_STRING = getattr(settings, 'NUM_IS_STRING', 'False')
+    
+    # Запрашиваем данные для отчета
+    is_abonent_level = re.compile(r'abonent')
+    is_object_level_2 = re.compile(r'level2')
+    
+    obj_parent_title = request.GET['obj_parent_title']
+    obj_title = request.GET['obj_title']
+    electric_data_end = request.GET['electric_data_end']            
+    obj_key = request.GET['obj_key']  
+
+    # Получение данных       
+    data_table = []
+    
+    if (bool(is_abonent_level.search(obj_key))):
+        data_table = common_sql.get_water_pulsar_error_code(obj_parent_title, obj_title, electric_data_end, True)
+    elif (bool(is_object_level_2.search(obj_key))):
+        data_table = common_sql.get_water_pulsar_error_code(obj_parent_title, obj_title, electric_data_end, False)
+    
+    # Заменяем None на N/D везде
+    if len(data_table) > 0: 
+        data_table = common_sql.ChangeNull(data_table, None)
+    
+    # расшифровка значения ошибок        
+    result_data_table = []
+    if len(data_table) > 0:
+        for row in data_table:
+            # Создаем копию строки, чтобы не изменять исходную
+            new_row = list(row)                       
+            error_code = row[5]      # Ошибки накопленные
+            error_cur = row[6]       # Ошибки текущие
+             
+            # Дешифруем ошибки с помощью функции pulsar_watermeter_error
+            if error_code is not None and error_code != '' and error_code != 'N/D':
+                try:
+                    # Преобразуем в int, если это строка
+                    if isinstance(error_code, str):
+                        error_code = int(error_code)
+                    if isinstance(error_cur, str):
+                        error_cur = int(error_cur)
+                    
+                    error_messages = common_sql.pulsar_watermeter_error(error_code)
+                    new_row[5] = ', '.join(error_messages) if error_messages else 'Ошибок не найдено'
+                    
+                    error_messages2 = common_sql.pulsar_watermeter_error(error_cur)
+                    new_row[6] = ', '.join(error_messages2) if error_messages2 else 'Ошибок не найдено'                    
+                    
+                except (ValueError, TypeError):
+                    # Если не удалось преобразовать в число, оставляем как есть
+                    new_row[5] = f'Некорректный код ошибки: {error_code}'
+                    new_row[6] = f'Некорректный код ошибки: {error_cur}'
+            else:
+                new_row[5] = 'Нет данных об ошибках'
+                new_row[6] = 'Нет данных об ошибках'
+            
+            # Форматируем показания счетчика с нужной точностью
+            if new_row[4] is not None and new_row[4] != 'N/D':
+                try:
+                    val = float(str(new_row[4]).replace(',', '.'))
+                    new_row[4] = round(val, ROUND_SIZE)
+                except:
+                    pass
+            
+            result_data_table.append(new_row)
+
+    # Конфигурация заголовков
+    # (merge_range, cell_ref, value, style, width)
+    headers = [
+        ('A2:H2', 'A2', f'{obj_title}. Показания по воде (Пульсар) на {electric_data_end}', 'ali_green_title', None),
+        ('A3:D3', 'A3', obj_parent_title, 'ali_green_title', None),
+        ('A4:A4', 'A4', 'Абонент', 'ali_green_header', 30),
+        ('B4:B4', 'B4', 'Тип', 'ali_green_header', 15),
+        ('C4:C4', 'C4', 'Стояк', 'ali_green_header', 15),
+        ('D4:D4', 'D4', 'Счётчик', 'ali_green_header', 20),
+        ('E4:E4', 'E4', 'Значение, м³', 'ali_green_header', 15),
+        ('F4:F4', 'F4', 'Накопленные ошибки', 'ali_green_header', 50),
+        ('G4:G4', 'G4', 'Текущие ошибки', 'ali_green_header', 50),
+        ('H4:H4', 'H4', 'Комментарий', 'ali_green_header', 30),
+    ]
+
+    # Конфигурация колонок данных
+    # (column_letter, data_index, style, is_numeric, calculation_func)
+    columns_config = [
+        ('A', 1, None, False, None),  # Абонент
+        ('B', 2, None, False, None),  # Тип
+        ('C', 8, None, False, None),  # Стояк
+        ('D', 3, None, False, None),  # Счётчик
+        ('E', 4, None, True, None),   # Значение, м3 (числовое)
+        ('F', 5, None, False, None),  # Ошибки накопленные (уже расшифрованы)
+        ('G', 6, None, False, None),  # Ошибки текущие (уже расшифрованы)
+        ('H', 7, None, False, None),  # Комментарий
+    ]
+
+    # Конфигурация точности для разных колонок
+    precision_config = {
+        'E': ROUND_SIZE,  # Значение - из настроек
+    }
+
+    # Создаем Excel через упрощенную функцию hybrid_simple
+    wb = export_to_excel_hybrid_simple(
+        data_table=result_data_table,
+        headers=headers,
+        columns_config=columns_config,
+        sheet_title="Вода Пульсар",
+        round_size=ROUND_SIZE,
+        num_is_string=NUM_IS_STRING,
+        freeze_panes='A5',
+        precision_config=precision_config
+    )
+
+    # Сохраняем в excel  
+    response = HttpResponse(save_virtual_workbook(wb), content_type="application/vnd.ms-excel")
+    output_name = 'water_error_pulsar_' + translate(obj_parent_title) + '_' + translate(obj_title) + '_' + electric_data_end
+    # Очищаем имя файла от недопустимых символов
+    output_name = ''.join(c for c in output_name if c.isalnum() or c in '._- ')
+    response['Content-Disposition'] = f'attachment;filename="{output_name}.xlsx"'
+    
+    return response
