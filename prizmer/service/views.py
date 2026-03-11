@@ -5077,8 +5077,8 @@ def change_meters_v2(request):
             else:
                 change_meter_status=ChangeMeters_v2(old_meter, new_meter)                
     if old_meter is None or new_meter is None or change_meter_status.find('Счётчик заменён')>-1:
-        old_meter=' '
-        new_meter=' '
+        old_meter=''
+        new_meter=''
     args["change_meter_status"]=change_meter_status
     args["old_meter"] = old_meter
     args["new_meter"] = new_meter
@@ -5156,8 +5156,8 @@ def replace_electric_meters_v2(request):
                 replace_meter_status=ReplaceMeters_v2(meter1, meter2)
     
     if meter1 is None or meter2 is None or replace_meter_status.find('успешно')>-1:
-        meter1=' '
-        meter2=' '
+        meter1=''
+        meter2=''
         
     args["change_meter_status"]=change_meter_status
     args["replace_meter_status"]=replace_meter_status
@@ -5991,3 +5991,231 @@ def load_impulse_devices_sequentially(request):
     args["sequential_results"] = sequential_results
     
     return render(request,"service/service_water.html", args)
+
+
+def change_type_to_gvs(meter):
+    result = ""
+    cursor = connection.cursor()
+    
+    try:
+        # Обновление meters - для varchar НЕ нужны кавычки вокруг %s
+        update_meters_query = """
+            UPDATE public.meters
+            SET name = replace(name, 'ХВС', 'ГВС'), 
+                guid_types_meters = 'a1a349ba-e070-4ec9-975d-9f39e61c34da'
+            WHERE factory_number_manual = %s
+            RETURNING factory_number_manual
+        """
+        
+        cursor.execute(update_meters_query, [meter])
+        updated_meters = cursor.fetchone()
+        
+        if updated_meters:
+            result = f"Обновлен meters: {meter}. "
+        else:
+            result = f"Прибор с заводским номером {meter} не найден в таблице meters. "
+            connection.rollback()
+            return result
+        
+        # Обновление таблицы taken_params (Объем)
+        # Двойные проценты остаются для экранирования в Python
+        update_params_query = """
+            UPDATE public.taken_params
+            SET name = replace(name, 'ХВС', 'ГВС'), 
+                guid_params = '209894a8-8d19-4e4d-bad8-1767eec4fedf'
+            WHERE guid IN (
+                SELECT tp.guid
+                FROM public.taken_params tp
+                JOIN public.meters m ON tp.guid_meters = m.guid
+                WHERE m.factory_number_manual = %s
+                AND tp.name LIKE '%%Пульсар%%ХВС%%Объем%%'
+            )
+        """
+        
+        cursor.execute(update_params_query, [meter])
+        if cursor.rowcount > 0:
+            result += f"Обновлен taken_params: Объем ({cursor.rowcount} записей). "
+        else:
+            result += f"Taken_param Объем не найден. "
+        
+        # Текущие ошибки
+        update_params_query = """
+            UPDATE public.taken_params
+            SET name = replace(name, 'ХВС', 'ГВС'), 
+                guid_params = '6ca83dce-dcc9-4e2d-94ca-e22ec855a65d'  
+            WHERE guid IN (
+                SELECT tp.guid
+                FROM public.taken_params tp
+                JOIN public.meters m ON tp.guid_meters = m.guid
+                WHERE m.factory_number_manual = %s
+                AND tp.name LIKE '%%ХВС_current_error%%'
+            )
+        """
+        
+        cursor.execute(update_params_query, [meter])
+        if cursor.rowcount > 0:
+            result += f"Обновлен taken_params: current_error ({cursor.rowcount} записей). "
+        else:
+            result += f"Taken_param current_error не найден. "
+        
+        # Накопленные ошибки
+        update_params_query = """
+            UPDATE public.taken_params
+            SET name = replace(name, 'ХВС', 'ГВС'), 
+                guid_params = '3c066109-31bf-4256-83de-40ccd02e20fd'    
+            WHERE guid IN (
+                SELECT tp.guid
+                FROM public.taken_params tp
+                JOIN public.meters m ON tp.guid_meters = m.guid
+                WHERE m.factory_number_manual = %s
+                AND tp.name LIKE '%%ХВС_accumulated_error%%'
+            )
+        """
+        
+        cursor.execute(update_params_query, [meter])
+        if cursor.rowcount > 0:
+            result += f"Обновлен taken_params: accumulated_error ({cursor.rowcount} записей)."
+        else:
+            result += f"Taken_param accumulated_error не найден."
+        
+        connection.commit()
+        
+    except Exception as e:
+        connection.rollback()
+        result = f"ОШИБКА: {str(e)}"
+        print(f"Error in change_type_to_gvs: {e}")
+    
+    return result
+
+def change_type_to_hvs(meter):
+    result = ""
+    cursor = connection.cursor()
+    
+    try:
+        # Обновление meters - для varchar НЕ нужны кавычки вокруг %s
+        update_meters_query = """
+            UPDATE public.meters
+            SET name = replace(name, 'ГВС', 'ХВС'), 
+                guid_types_meters = 'f1789bb7-7fcd-4124-8432-40320559890f'
+            WHERE factory_number_manual = %s
+            RETURNING factory_number_manual
+        """
+        
+        cursor.execute(update_meters_query, [meter])
+        updated_meters = cursor.fetchone()
+        
+        if updated_meters:
+            result = f"Обновлен meters: {meter}. "
+        else:
+            result = f"Прибор с заводским номером {meter} не найден в таблице meters. "
+            connection.rollback()
+            return result
+        
+        # Обновление таблицы taken_params (Объем)
+        # Двойные проценты остаются для экранирования в Python
+        update_params_query = """
+            UPDATE public.taken_params
+            SET name = replace(name, 'ГВС', 'ХВС'), 
+                guid_params = '209894a8-8d19-4e4d-bad8-1767eec4fedf'
+            WHERE guid IN (
+                SELECT tp.guid
+                FROM public.taken_params tp
+                JOIN public.meters m ON tp.guid_meters = m.guid
+                WHERE m.factory_number_manual = %s
+                AND tp.name LIKE '%%Пульсар%%ГВС%%Объем%%'
+            )
+        """
+        
+        cursor.execute(update_params_query, [meter])
+        if cursor.rowcount > 0:
+            result += f"Обновлен taken_params: Объем ({cursor.rowcount} записей). "
+        else:
+            result += f"Taken_param Объем не найден. "
+        
+        # Текущие ошибки
+        update_params_query = """
+            UPDATE public.taken_params
+            SET name = replace(name, 'ГВС', 'ХВС'), 
+                guid_params = '6ca83dce-dcc9-4e2d-94ca-e22ec855a65d'  
+            WHERE guid IN (
+                SELECT tp.guid
+                FROM public.taken_params tp
+                JOIN public.meters m ON tp.guid_meters = m.guid
+                WHERE m.factory_number_manual = %s
+                AND tp.name LIKE '%%ГВС_current_error%%'
+            )
+        """
+        
+        cursor.execute(update_params_query, [meter])
+        if cursor.rowcount > 0:
+            result += f"Обновлен taken_params: current_error ({cursor.rowcount} записей). "
+        else:
+            result += f"Taken_param current_error не найден. "
+        
+        # Накопленные ошибки
+        update_params_query = """
+            UPDATE public.taken_params
+            SET name = replace(name, 'ГВС', 'ХВС'), 
+                guid_params = '3c066109-31bf-4256-83de-40ccd02e20fd'    
+            WHERE guid IN (
+                SELECT tp.guid
+                FROM public.taken_params tp
+                JOIN public.meters m ON tp.guid_meters = m.guid
+                WHERE m.factory_number_manual = %s
+                AND tp.name LIKE '%%ГВС_accumulated_error%%'
+            )
+        """
+        
+        cursor.execute(update_params_query, [meter])
+        if cursor.rowcount > 0:
+            result += f"Обновлен taken_params: accumulated_error ({cursor.rowcount} записей)."
+        else:
+            result += f"Taken_param accumulated_error не найден."
+        
+        connection.commit()
+        
+    except Exception as e:
+        connection.rollback()
+        result = f"ОШИБКА: {str(e)}"
+        print(f"Error in change_type_to_hvs: {e}")
+    
+    return result
+
+
+def service_replace_hvs_gvs(request):
+    args = {}
+
+    meter_gvs = ''
+    meter_hvs = ''
+    replace_hvs_status = ""
+    replace_gvs_status = ""
+    # print('!!!!!!!!!!!!!!!!!!!!!!')
+    if request.is_ajax():
+        if request.method == 'GET':                        
+            request.session["meter_gvs"]    = meter_gvs = request.GET.get('meter_gvs', '').strip()
+            request.session["meter_hvs"]    = meter_hvs = request.GET.get('meter_hvs', '').strip()
+            # print(meter_gvs, meter_hvs)
+            if meter_gvs:
+                replace_gvs_status = change_type_to_gvs(meter_gvs)
+                # print(replace_hvs_gvs_status)
+            if meter_hvs:
+                replace_hvs_status += change_type_to_hvs(meter_hvs)
+                # print(replace_hvs_gvs_status)
+    
+
+    # if meter1 and meter2 and 'не найден' not in replace_hvs_gvs_status:
+    #     replace_hvs_gvs_status = 'Успешно выполнено'
+    # elif replace_hvs_gvs_status:
+    #     replace_hvs_gvs_status = 'Не удалось поменять тип'
+    
+    if 'Обновлен' in replace_gvs_status:
+        meter_gvs = ''
+    if 'Обновлен' in replace_hvs_status:
+        meter_hvs = ''
+    
+    args["replace_hvs_status"] = replace_hvs_status
+    args["replace_gvs_status"] = replace_gvs_status
+    args["meter_hvs"] = meter_hvs
+    args["meter_gvs"] = meter_gvs
+    
+    return render(request, "service/service_change_electric.html", args)

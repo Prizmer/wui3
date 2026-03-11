@@ -1,7 +1,7 @@
 {% load static %}
 
 <div class="form-card" style="max-width: 1000px; margin: 1rem auto;">
-    <div class="form-card-title">🔁 Замена счётчика</div>
+    <div class="form-card-title">➡️ Замена счётчика</div>
     <p class="status-display" style="text-align: center; margin-bottom: 1.5rem;">Старый номер будет удалён, новый — добавлен.</p>
 
     <div class="row align-items-end mb-3">
@@ -45,5 +45,31 @@
     <div class="centered-action">
         <button onclick="load_service('service_replace_electric')" class="btn btn-primary">Заменить</button>
         <div class="status-display status-ok">{{replace_meter_status}}</div>
+    </div>
+</div>
+
+
+<div class="form-card" style="max-width: 1000px; margin: 2rem auto 1rem auto;">
+    <div class="form-card-title">🔀 Поменять тип прибора Пульсар водосчётчик ГВС-ХВС</div>
+    <p class="status-display" style="text-align: center; margin-bottom: 1.5rem;">Поменять типы приборов (может быть заполнена только одна ячейка)</p>
+
+    <div class="row align-items-end mb-3">
+        <div class="col">
+            <label for="meter_gvs">🩸 Сделать ГВС</label>
+            <input id="meter_gvs" name="meter_gvs" type="text" value="{{meter_gvs}}" class="form-control">
+        </div>
+        <div class="col-auto">
+            <div class="form-arrow">↔</div>
+        </div>
+        <div class="col">
+            <label for="meter_hvs">💧 Сделать ХВС</label>
+            <input id="meter_hvs" name="meter_hvs" type="text" value="{{meter_hvs}}" class="form-control">
+        </div>
+    </div>
+
+    <div class="centered-action">
+        <button onclick="load_service('service_replace_hvs_gvs')" class="btn btn-primary">Заменить</button>
+        <div class="status-display status-ok">{{replace_gvs_status}}</div>
+		<div class="status-display status-ok">{{replace_hvs_status}}</div>
     </div>
 </div>

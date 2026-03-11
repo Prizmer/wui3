@@ -58,4 +58,5 @@ urlpatterns = [
 
     url(r'^del_various30/$', views.del_various30, name = 'del_various30'), #Удаление получасовок по конкретному прибору на выбранную дату
     
+    url(r'^service_replace_hvs_gvs/$', views.service_replace_hvs_gvs, name = 'service_replace_hvs_gvs'), #поменять тип прибора для водосчётчиков пульсар ГВ - ХВ 
 ]

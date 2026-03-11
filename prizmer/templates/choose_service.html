@@ -146,6 +146,8 @@
             new_meter=$("#new_meter").val();
             meter1=$("#meter1").val();
             meter2=$("#meter2").val();
+			meter_hvs=$("#meter_hvs").val();
+            meter_gvs=$("#meter_gvs").val();
             file30=$("#direct30").val();
             date_del30 = $('#datepickerDel').datepicker().val();
             num_del30 = $("#num_del30").val();
@@ -156,7 +158,7 @@
                 type: "GET",
                 url: "/service/"+page,
                 beforeSend: function(){show_loader();},
-                data:{ choice_file:choice_file, choice_sheet:choice_sheet, tcp_ip_status:tcp_ip_status, object_status:object_status, counter_status:counter_status, old_meter:old_meter, new_meter:new_meter, meter1:meter1,meter2:meter2, balance_status:balance_status, file30:file30, num_del30:num_del30, date_del30:date_del30 },
+                data:{ choice_file:choice_file, choice_sheet:choice_sheet, tcp_ip_status:tcp_ip_status, object_status:object_status, counter_status:counter_status, old_meter:old_meter, new_meter:new_meter, meter1:meter1,meter2:meter2, meter_hvs:meter_hvs,meter_gvs:meter_gvs,balance_status:balance_status, file30:file30, num_del30:num_del30, date_del30:date_del30 },
             }).done(function( msg ) {
                 $('#data-table').html(msg);
                 if (document.getElementById("datepickerDel") != null) {
