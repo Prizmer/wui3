@@ -1,5 +1,6 @@
 <html>
     <head>
+     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 		<script>
 		// var net_addr = '';
 		var load_current = function(page){
@@ -22,7 +23,7 @@
 
 		var power_on = function(page){
 			factory_number=$('#factory_number').text();
-			$('#status_info').html('>>>');
+			$('#load_management_status_info').html('>>>').show();
 			$("#power_state").val("");
 			$.ajax({
 				type: "GET",
@@ -31,14 +32,14 @@
 			   })
 			   
 		   .done(function( msg ) {
-			$('#status_info').html(msg); // Пишем в div ответ от страницы 
+			$('#load_management_status_info').html(msg).delay(3000).fadeOut('slow'); 
 			//hide_loader();
 			});			
 		};
 
 		var power_off = function(page){
 			factory_number=$('#factory_number').text();
-			$('#status_info').html('>>>');
+			$('#load_management_status_info').html('>>>').show();
 			$("#power_state").val("");
 			$.ajax({
 				type: "GET",
@@ -47,7 +48,7 @@
 			   })
 			   
 		   .done(function( msg ) {
-			$('#status_info').html(msg); // Пишем в div ответ от страницы 
+			$('#load_management_status_info').html(msg).delay(3000).fadeOut('slow');
 			//hide_loader();
 			});	
 		};
@@ -57,7 +58,7 @@
 			power_value=$("#power_value").val();
 			control_state=$("#inputGroupSelectLimitStatus").val();
 
-			$('#status_info').html('>>>');
+			$('#load_management_status_info').html('>>>').show();
 			$.ajax({
 				type: "GET",
 				url: "/polling/set_active_power_limit_value",
@@ -65,14 +66,14 @@
 			   })
 			   
 		   .done(function( msg ) {
-			$('#status_info').html(msg); // Пишем в div ответ от страницы 
+			$('#load_management_status_info').html(msg).delay(3000).fadeOut('slow'); 
 			});
 		};
 
 		var get_active_power_value = function(page){
 			factory_number=$('#factory_number').text();
 
-			$('#status_info').html('>>>');
+			$('#load_management_status_info').html('>>>').show();
 			$("#power_value").val('');
 			$.ajax({
 				type: "GET",
@@ -84,9 +85,9 @@
 			msg_arr = msg.split(',');
 			if (Number.isInteger(Number(msg_arr[0]))){
 				$("#power_value").val(msg_arr[0]);
-				$('#status_info').html('Запрос выполнен');
+				$('#load_management_status_info').html('Запрос выполнен').delay(3000).fadeOut('slow');
 			} else {
-				$('#status_info').html(msg_arr[0]); // Пишем в div ответ от страницы
+				$('#load_management_status_info').html(msg_arr[0]).delay(3000).fadeOut('slow'); // Пишем в div ответ от страницы
 			}
 			if(msg_arr[1]=='0'){
 				$("#inputGroupSelectLimitStatus").val(1)
@@ -100,7 +101,7 @@
 		var get_power_state = function(page){
 			factory_number=$('#factory_number').text();
 			$("#power_state").val("");
-			$('#status_info').html('>>>');
+			$('#load_management_status_info').html('>>>').show();
 			$.ajax({
 				type: "GET",
 				url: "/polling/get_power_state",
@@ -111,14 +112,57 @@
 			
 			if (msg == '1'){ 
 			    $("#power_state").val("Выключена!");
-				$('#status_info').html('Запрос выполнен');
+				$('#load_management_status_info').html('Запрос выполнен').delay(3000).fadeOut('slow');
 			} else if (msg == '0'){
 				$("#power_state").val("Включена!");
-				$('#status_info').html('Запрос выполнен');
+				$('#load_management_status_info').html('Запрос выполнен').delay(3000).fadeOut('slow');
 			} else {
-                $('#status_info').html(msg); // Пишем в div ответ от страницы
+                $('#load_management_status_info').html(msg).delay(3000).fadeOut('slow'); // Пишем в div ответ от страницы
 			}
 			});		
+		};
+
+
+		// === Векторная диаграмма: чтение + отрисовка ===
+		var load_vector_diagrams = function(page){
+			factory_number = $('#factory_number').text();
+			
+			// Индикатор загрузки
+			$('#data-display-field').html('<div style="padding:20px;text-align:center;color:#666;">⏳ Чтение данных и построение диаграмм...</div>');
+			
+			$.ajax({
+				type: "GET",
+				url: "/polling/get_vector_diagrams/",
+				data: {factory_number: factory_number},
+			})
+			.done(function(response) {
+				if (response.status === 'ok') {
+					// 1. Вставляем таблицу данных в левую колонку
+					$('#data-display-field').html(response.data_table_html);
+					
+					// 2. Рисуем диаграммы в правых блоках
+					var phaseDiagram = JSON.parse(response.phase_diagram);
+					var powerDiagram = JSON.parse(response.power_diagram);
+					
+					Plotly.newPlot('phase-diagram-block', phaseDiagram.data, phaseDiagram.layout, {
+						responsive: true,
+						displayModeBar: true,
+						displaylogo: false,
+					});
+					
+					Plotly.newPlot('full-power-vector-diagram-block', powerDiagram.data, powerDiagram.layout, {
+						responsive: true,
+						displayModeBar: true,
+						displaylogo: false,
+					});
+				} else {
+					$('#data-display-field').html('<div style="padding:10px;color:red;">❌ Ошибка: ' + (response.message || 'неизвестная') + '</div>');
+				}
+			})
+			.fail(function(xhr, status, error) {
+				console.error('Vector diagrams error:', error);
+				$('#data-display-field').html('<div style="padding:10px;color:red;">❌ Ошибка соединения</div>');
+			});
 		};
       </script>
     </head>
@@ -126,208 +170,244 @@
 <script src="/static/libs/liHighLight.js" type=text/javascript></script>
 <br>
 <br>
-<div class="col-11">
-	<div class="row justify-content-center radius"  style="border-radius: 10px 40px" >
-		<div class="col-md-1" > 
-		{% load static %} <img src="{%static "images/device-ico64.png" %}">
+<div style="margin: 0 auto; width: 99%;">
+<div id="meter-info-container">
+	<div id="meter-summary-block" class="radius" style="border-radius: 10px 40px;">
+		<div class="device-info-container" style="padding-bottom: 15px;">
+			<div class="device-icon-container">
+				{% load static %} <img src="{%static "images/device-ico64.png" %}">
+			</div>
+			<div class="device-details-container">
+				<div class="factory-number-info">
+					<div class="label"> Заводской №:
+					</div>
+					<div class="value"><strong id="factory_number">{{factory_number}}</strong>
+					</div>
+					<div class="extra-info"><strong>{{data_table.0.5}}</strong>
+					</div>
+				</div>
+				<div class="serial-number-info">
+					<div class="label"> № считанный:
+					</div>
+					<div class="value"><strong>{{data_table.0.7}}</strong>
+					</div>
+					<div class="extra-info"> сет. №: <strong id="setevoi">{{data_table.0.6}}</strong>
+					</div>
+				</div>
+			</div>
 		</div>
-		<div class="col-md-11" >
-			<div class="row">
-				<div class="col-md-2" > Заводской №:
-				</div>
-				<div class="col-md-6" ><strong id="factory_number">{{factory_number}}</strong>
-				</div>
-				<div class="col-md-4"><strong>{{data_table.0.5}}</strong>
-				</div>
+		<div class="location-info-container" style="align-items: center;">
+			<div class="location-icon-container">
+				<img src="{%static "images/place-ico64.png" %}">
 			</div>
-			
-			<div class="row">
-				<div class="col-md-2"> № считанный:
-				</div>
-				<div class="col-md-6"><strong>{{data_table.0.7}}</strong>
-				</div>
-				<div class="col-md-4"> сет. №: <strong id="setevoi">{{data_table.0.6}}</strong>
-				</div>
+			<div class="location-details-container">
+				<strong>{{data_table.0.0}}<img src="{%static "images/right-ico20.png" %}">  {{data_table.0.1}} </strong>
 			</div>
-		</div>		
+		</div>
 	</div>
 
-	<br>
-	
-	<!-- Информация о приборе. Запрос текущих показаний -->
-	<div class="row justify-content-center radius"  style="border-radius: 10px 40px">
-		<div class="col-1" > 
-		{% load static %} <img src="{%static "images/place-ico64.png" %}">
-		</div>
-		<div class="col-11 align-self-center"  > 
-			<strong>{{data_table.0.0}}<img src="{%static "images/right-ico20.png" %}">  {{data_table.0.1}} </strong>
-			<div id = "status_info"> Состояние счётчика</div>
-			<div class="row">			
-				<div class="col-md-3">
-					<div class="row justify-content-center radius"  id="current values" style="border-radius: 20px 20px">
-						
-						<div class="col-12"><strong>Запрос данных</strong> </div>
-						<div class="col-12"><strong></strong> </div>
-						<div id = "current">			
-						</div>
-						<p>
-						<div class="col-12">
-						<button onclick="load_current('service_replace_electric')" class="btn btn-outline-primary btn-sm" type="button" id="button-addon1">Текущие</button>
-						</div>
+    <div style="margin-top: 15px;">
+        <div class="collapsible-container">
+            <div class="collapsible-toggle" data-target="#current-readings-content">+</div>
+            <span class="collapsible-title">Текущие</span>
+        </div>
+        <div id="current-readings-content" class="collapsible-content hidden content-styled" style="min-height: 50px;">
+            <div class="current-readings-container">
+                <div class="current-readings-icon-container">
+                    {% load static %} <img src="{%static "images/rocket-ico64.png" %}">
+                </div>
+                <div class="current-readings-details-container">
+                    <div class="status-container">
+                        
+                        <div id="current-data-request-container" style="border: 0px">
+                            <div class="data-request-title"><strong>Запрос данных</strong> </div>
+                           
+                            <p>
+                            <div class="data-request-button-container">
+                            <button onclick="load_current('service_replace_electric')" class="btn btn-outline-primary btn-sm" type="button" id="button-addon1">Текущие</button>
+                            </div>
+                            <!-- <span onclick="load_current('service_replace_electric')" class="button" id="polling_current_values"><b>Текущие</b></span> -->
+                            <div id = "status_info" style="margin-top: 10px;"> Состояние счётчика</div>
+                        </div>
+                    </div>
+                    <div class="result-container">
+                        <div id="new-result-block" class="radius">
+                            <div id = "current">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
-						<!-- <span onclick="load_current('service_replace_electric')" class="button" id="polling_current_values"><b>Текущие</b></span> -->
-					
-				</div>
-				</div>
-		<div class="col-md-4">
-			<div class="row justify-content-center radius"  style="border-radius: 20px 20px">
-				<!-- <div class = "col-12"> -->
-					
-					<div class="row">
-						<div class="col-12 align-items-center "> 
-							<strong>Лимит мощности, Вт</strong>
-						</div>
-						<p>						
-						<div class = "col-12">
-							<div class="input-group mb-3">								
-								<input type="text" class="form-control btn-sm" id="power_value" placeholder="0000" aria-label="Статус лимита мощности" aria-describedby="button-addon1">
-								<select class="form-select btn-sm" id="inputGroupSelectLimitStatus">
-									<option selected><b>Не определён</b></option>
-									<option value="1">Отключен</option>
-									<option value="2">Включен</option>								
-								  </select>
-							</div>
-						</div>
-					<p>
-					
-						<div class = "col-5 offset-2">
-							<button onclick="get_active_power_value('')" class="btn btn-outline-primary btn-sm" type="button" id="button-addon1">Прочитать</button>
-						</div> 			
-					
-						<div class = "col-5">
-							<button onclick="set_active_power_value('')" class="btn btn-outline-primary btn-sm" type="button" id="button-addon1">Записать</button>							
-						</div>
-					</div>
-				<br>
-				<!-- </div> -->
-			</div>
-		</div>
+<div style="margin-top: 15px;">
+    <div class="collapsible-container">
+        <div class="collapsible-toggle" data-target="#vector-diagram-content">+</div>
+        <span class="collapsible-title">Векторная диаграмма</span>
+    </div>
+    <div id="vector-diagram-content" class="collapsible-content hidden content-styled" style="min-height: 50px;">
+        
+        <!-- Кнопка -->
+        <div style="display: flex; gap: 10px; margin-bottom: 5px; justify-content: center;">
+            <button onclick="load_vector_diagrams('service_replace_electric')" class="btn btn-outline-primary btn-sm" type="button" id="diagram-button">Прочитать</button>                       
+        </div>
+        
+        <!-- Таблица на всю ширину -->
+        <div id="data-display-field" class="radius" style="min-height: 200px; margin-bottom: 20px;">
+            <!-- Здесь будут выводиться данные -->
+        </div>
+        
+        <!-- Диаграммы в одну строку -->
+        <div style="display: flex; gap: 5px; justify-content: space-between;">
+    <!-- Левый блок - шире (60%) -->
+    <div id="phase-diagram-block" class="radius" style="flex: 0 0 55%; min-height: 450px;">
+        <strong style="display: block; text-align: center; margin-bottom: 10px;">Пофазная векторная диаграмма</strong>
+    </div>
+    <!-- Правый блок - уже (40%) -->
+    <div id="full-power-vector-diagram-block" class="radius" style="flex: 0 0 43%; min-height: 450px;">
+	<br>
+        <strong style="display: block; text-align: center; margin-bottom: 10px;">Вектор полной мощности</strong>
+    </div>
+</div>
+        
+    </div>
+</div>
+
+    <div style="margin-top: 15px; margin-bottom: 15px;">
+        <div class="collapsible-container">
+            <div class="collapsible-toggle" data-target="#power-management-content">+</div>
+            <span class="collapsible-title">Управление мощностью</span>
+        </div>
+        <div id="power-management-content" class="collapsible-content hidden content-styled" style="min-height: 50px; position: relative;">
+            <div id="power-management-controls">			
+				<div class="power-limit-column">
+                    <div id="power-limit-section" class="radius" style="border-radius: 20px;">
+                        <div id="power-limit-form">
+                            <div class="form-title"> 
+                                <strong>Лимит мощности, Вт</strong>
+                            </div>
+                            <div class="input-group" style="margin-top: 10px;">								
+                                <input type="text" class="form-control btn-sm" id="power-limit-value-input" placeholder="0000">
+                                <select class="form-select btn-sm" id="power-limit-status-select" style="margin-left: 10px;">
+                                    <option selected><b>Не определён</b></option>
+                                    <option value="1">Отключен</option>
+                                    <option value="2">Включен</option>								
+                                </select>
+                            </div>
+                            <div id="power-limit-buttons">
+                                <button onclick="get_active_power_value('')" class="btn btn-outline-primary btn-sm" type="button" id="read-power-limit-button">Прочитать</button>
+                                <button onclick="set_active_power_value('')" class="btn btn-outline-primary btn-sm" type="button" id="write-power-limit-button">Записать</button>							
+                            </div>
+                        </div>
+                    </div>
+		        </div>
 			
-			<div class="col-md-5">
-				
-				<div class="row justify-content-center radius"  style="border-radius: 20px 20px">
-					<!-- <div class="row align-items-center"> -->
-						<div class="col-12 align-self-center"> 
+				<div class="load-status-column">
+                    <div id="load-status-section" class="radius" style="border-radius: 20px;">
+						<div class="form-title"> 
 							<strong>Состояние нагрузки</strong>
 						</div>
-					<!-- </div>									 -->
-					<p>
-					<!-- <div class="row justify-content-center">						 -->
-						<p>
-						<div class = "col-12">
-							<div class="input-group mb-3">								
-								<input type="text" class="form-control btn-sm" aria-label="Активно"  placeholder="Не определено" aria-describedby="button-addon1" id="power_state">
-								<button  onclick="get_power_state('')" class="btn btn-outline-primary btn-sm" type="button" id="button-addon1">Прочитать</button>
-							</div>
+						<div class="input-group" style="margin-top: 10px;">								
+							<input type="text" class="form-control btn-sm" placeholder="Не определено" id="load-status-input">
+							<button  onclick="get_power_state('')" class="btn btn-outline-primary btn-sm" type="button" id="read-load-status-button" style="margin-left: 10px;">Прочитать</button>
 						</div>
-					<!-- </div> -->
 
-					<div class ="col-12"> <strong>Ручное управление нагрузкой</strong> </div>
+					<div class="form-title"> <strong>Ручное управление нагрузкой</strong> </div>
 					
-					<div class ="col-12">  </div>
-					
-					<div class ="col-6 ">
-						<button onclick="power_on('service_replace_electric')" class="btn btn-outline-primary btn-sm" type="button" id="button-addon1">&nbsp;Включить нагрузку &nbsp;</button>
-					</div>				
-			
-				<div class ="col-6 ">
-				<button onclick="power_off('service_replace_electric')" class="btn btn-outline-primary btn-sm"  type="button" id="button-addon1">Выключить нагрузку</button>
-				</div>
+					<div id="manual-load-buttons">
+						<button onclick="power_on('service_replace_electric')" class="btn btn-outline-primary btn-sm" type="button" id="turn-on-load-button">&nbsp;Включить нагрузку &nbsp;</button>
+						<button onclick="power_off('service_replace_electric')" class="btn btn-outline-primary btn-sm"  type="button" id="turn-off-load-button">Выключить нагрузку</button>
+					</div>
 				</div>
 			</div>
 		</div>
-	</div>
+		<div id = "load_management_status_info"></div>
+        </div>
+    </div>
 
-	</div>
-	<br>
-	<div class="row justify-content-center radius" style="border-radius: 10px 60px" >
-		<div class="col-1" > 
+	<div id="connection-info-container" class="radius" style="margin-top: 15px; border-radius: 10px 60px; margin-left: 0; margin-right: 0;" >
+		<div class="connection-icon-container" > 
 		{% load static %} <img src="{%static "images/cable-ico64.png" %}">
 		</div>		
-		<div class="col-5 align-self-center"> <strong>TCP/IP</strong> {{tcp_status}}
+		<div class="tcp-ip-container"> <strong>TCP/IP</strong> {{tcp_status}}
 		{% if dt_tcp %} 		
-		<div class="row">
-			<div class="col-md-6"><strong>IP-пор</strong></div>
-			<div  class="col-md-6"><strong>{{dt_tcp.0.2}}</strong></div>
-			<div class="col-md-6">IP-адрес</div>
-			<div  class="col-md-6"><strong>{{dt_tcp.0.3}}</strong></div>
-			<div class="col-md-6">Write timeout</div>
-			<div  class="col-md-6">{{dt_tcp.0.4}}</div>
-			<div class="col-md-6">Read timeout</div>
-			<div  class="col-md-6">{{dt_tcp.0.5}}</div>
-			<div class="col-md-6">Attempts</div>
-			<div  class="col-md-6">{{dt_tcp.0.6}}</div>
-			<div class="col-md-6">Delay between sending</div>
-			<div  class="col-md-6">{{dt_tcp.0.7}}</div>
+		<div id="tcp-ip-details-grid">
+			<div><strong>IP-пор</strong></div>
+			<div><strong>{{dt_tcp.0.2}}</strong></div>
+			<div>IP-адрес</div>
+			<div><strong>{{dt_tcp.0.3}}</strong></div>
+			<div>Write timeout</div>
+			<div>{{dt_tcp.0.4}}</div>
+			<div>Read timeout</div>
+			<div>{{dt_tcp.0.5}}</div>
+			<div>Attempts</div>
+			<div>{{dt_tcp.0.6}}</div>
+			<div>Delay between sending</div>
+			<div>{{dt_tcp.0.7}}</div>
 		</div>
 		{% endif%}
 		</div>	
 
 		
-		<div class="col-5 align-self-center offset-md-1"> <strong>COM </strong>{{com_status}}
+		<div class="com-port-container"> <strong>COM </strong>{{com_status}}
 		{% if dt_com %} 		
-		<div class="row">					
-			<div class="col-md-3">Номер</div>
-			<div  class="col-md-2"><strong>{{dt_com.0.2}}</strong></div>
-			<div class="col-md-1">||</div>
-			<div class="col-md-3">Baudrate</div>
-			<div  class="col-md-2"><strong>{{dt_com.0.3}}</strong></div>
-			<div class="col-md-1"></div>
-			<div class="col-md-3">Data bits</div>
-			<div  class="col-md-2"><strong>{{dt_com.0.4}}</strong></div>
-			<div class="col-md-1">||</div>
-			<div class="col-md-3">Parity</div>
-			<div  class="col-md-2">{{dt_com.0.5}}</div>
-			<div class="col-md-1"></div>
-			<div class="col-md-3">Stop bits</div>
-			<div  class="col-md-2"><strong>{{dt_com.0.6}}</strong></div>
-			<div  class="col-md-1">||</div>
-			<div class="col-md-3">Write, ms</div>
-			<div  class="col-md-2">{{dt_com.0.7}}</div>
-			<div class="col-md-1"></div>
-			<div class="col-md-3">Read, ms</div>
-			<div  class="col-md-2">{{dt_com.0.8}}</div>
-			<div class="col-md-1">||</div>
-			<div class="col-md-3">Attempts</div>
-			<div  class="col-md-2">{{dt_com.0.9}}</div>
-			<div class="col-md-1"></div>
-			<div class="col-md-3">Delay</div>
-			<div  class="col-md-2">{{dt_com.0.10}}</div>
-			<div class="col-md-1">||</div>
-			<div class="col-md-3">Use GSM</div>
-			<div  class="col-md-2">{{dt_com.0.11}}</div>
-			<div class="col-md-1"></div>
-			<div class="col-md-3">GSM ном.</div>
-			<div  class="col-md-2">{{dt_com.0.12}}</div>
-			<div class="col-md-1">||</div>
-			<div class="col-md-3">GSM init</div>
-			<div  class="col-md-2">{{dt_com.0.13}}</div>
-			<div class="col-md-1"></div>
-			
-		</div>
+		<div id="com-port-details-grid">
+    <div class="com-port-detail-row">
+        <div>Номер</div>
+        <div><strong>{{dt_com.0.2}}</strong></div>
+        <div>||</div>
+        <div>Baudrate</div>
+        <div><strong>{{dt_com.0.3}}</strong></div>
+    </div>
+    <div class="com-port-detail-row">
+        <div>Data bits</div>
+        <div><strong>{{dt_com.0.4}}</strong></div>
+        <div>||</div>
+        <div>Parity</div>
+        <div>{{dt_com.0.5}}</div>
+    </div>
+    <div class="com-port-detail-row">
+        <div>Stop bits</div>
+        <div><strong>{{dt_com.0.6}}</strong></div>
+        <div>||</div>
+        <div>Write, ms</div>
+        <div>{{dt_com.0.7}}</div>
+    </div>
+    <div class="com-port-detail-row">
+        <div>Read, ms</div>
+        <div>{{dt_com.0.8}}</div>
+        <div>||</div>
+        <div>Attempts</div>
+        <div>{{dt_com.0.9}}</div>
+    </div>
+    <div class="com-port-detail-row">
+        <div>Delay</div>
+        <div>{{dt_com.0.10}}</div>
+        <div>||</div>
+        <div>Use GSM</div>
+        <div>{{dt_com.0.11}}</div>
+    </div>
+    <div class="com-port-detail-row">
+        <div>GSM ном.</div>
+        <div>{{dt_com.0.12}}</div>
+        <div>||</div>
+        <div>GSM init</div>
+        <div>{{dt_com.0.13}}</div>
+    </div>
+</div>
 		{% endif%}
 		</div>			
 	</div>
-	<br>
-	<div class="row justify-content-center radius" style="border-radius: 10px 60px">
-		<div class="col-md-1" > 
+	<div id="readable-parameters-container" class="radius" style="margin-top: 15px; border-radius: 10px 60px">
+		<div class="parameters-icon-container" > 
 		{% load static %} <img src="{%static "images/dev-ico64.png" %}">
 		</div>
-		<div class="col-11 align-self-center" > <strong>Считываемые параметры</strong>
-			<div class="row">
+		<div class="parameters-list-container" > <strong>Считываемые параметры</strong>
+			<div id="parameters-grid">
 			{% if data_table %}
 			{% for value in data_table %}
-			<div class="col-md-10">{{value.2}}</div>
+			<div class="parameter-item">{{value.2}}</div>
 			
 			{% endfor %}
 			{% else %}
@@ -339,8 +419,7 @@
 	</div>
 		
 </div>
-
-<br>
-<br>
+</div>
+</div>
 </body>
 </html>

@@ -1,0 +1,61 @@
+{% load static %}
+<div class="vector-data-table">
+    <div class="table-header">
+        <strong>📊 Данные счётчика</strong>
+        {% if timestamp %}<small class="text-muted">| {{ timestamp }}</small>{% endif %}
+        {% if frequency %}<small class="text-muted">| f={{ frequency }} Гц</small>{% endif %}
+    </div>
+    
+    <table class="table table-sm table-striped">
+        <thead>
+            <tr>
+                <th>Фаза</th>
+                <th>U, В</th>
+                <th>I, А</th>
+                <th>P, Вт</th>
+                <th>Q, вар</th>
+                <th>Cos φ</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in rows %}
+            <tr>
+                <td>
+                    <span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:{{row.color}};margin-right:5px;"></span>
+                    {{ row.phase }}
+                </td>
+                <td>{{ row.U|floatformat:2 }}</td>
+                <td>{{ row.I|floatformat:2 }}</td>
+                <td>{{ row.P|floatformat:2 }}</td>
+                <td>{{ row.Q|floatformat:2 }}</td>
+                <td>{{ row.cos_phi|floatformat:3 }}</td>
+            </tr>
+            {% endfor %}
+            <!-- Итого -->
+            <tr class="table-secondary fw-bold">
+                <td>Σ</td>
+                <td>-</td>
+                <td>-</td>
+                <td>{{ total.P|floatformat:2 }}</td>
+                <td>{{ total.Q|floatformat:2 }}</td>
+                <td>{{ total.cos_phi|floatformat:3 }}</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<style>
+.vector-data-table .table-header {
+    margin-bottom: 10px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #eee;
+}
+.vector-data-table table {
+    font-size: 13px;
+    margin-bottom: 0;
+}
+.vector-data-table td, .vector-data-table th {
+    vertical-align: middle;
+    padding: 6px 8px;
+}
+</style>

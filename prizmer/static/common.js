@@ -80,7 +80,28 @@ $("#choice_report").selectmenu({
     {
         $("#datepickerEnd").css('visibility', 'visible');
         $("#datepickerStart").css('visibility', 'hidden');
-        		$("#export_report").html('<button type="button" class="btn btn-primary" onclick="window.location.href=\'../../report/'+$(this).val()+'?electric_data_end='+electric_data_end_1+'&electric_data_start='+electric_data_start_1+'&obj_key='+obj_key+'&is_electric_monthly='+is_electric_monthly+'&is_electric_daily='+is_electric_daily+'&is_electric_current='+is_electric_current+'&is_electric_delta='+is_electric_delta+'&is_electric_period='+is_electric_period+'&obj_parent_title='+obj_parent_title+'&obj_title='+obj_title+'\'">Экспорт</button>')		<!-- $("#export_report_archive").html('<a class="button" href ='+'"../../report/'+$(this).val()+'_arch"'+'>Экспорт в Архив</a>') -->
+        
+        // Исправленная строка для экспорта
+        var exportButton = $('<button>', {
+            type: 'button',
+            class: 'btn btn-primary',
+            click: function() {
+                var url = '../../report/' + $(this).val() + 
+                    '?electric_data_end=' + encodeURIComponent(electric_data_end_1) +
+                    '&electric_data_start=' + encodeURIComponent(electric_data_start_1) +
+                    '&obj_key=' + encodeURIComponent(obj_key) +
+                    '&is_electric_monthly=' + encodeURIComponent(is_electric_monthly) +
+                    '&is_electric_daily=' + encodeURIComponent(is_electric_daily) +
+                    '&is_electric_current=' + encodeURIComponent(is_electric_current) +
+                    '&is_electric_delta=' + encodeURIComponent(is_electric_delta) +
+                    '&is_electric_period=' + encodeURIComponent(is_electric_period) +
+                    '&obj_parent_title=' + encodeURIComponent(obj_parent_title) +
+                    '&obj_title=' + encodeURIComponent(obj_title);
+                window.location.href = url;
+            },
+            text: 'Экспорт'
+        });
+        $("#export_report").html(exportButton);
         refresh_data_table($(this).val());
     }
     else
@@ -88,15 +109,28 @@ $("#choice_report").selectmenu({
         $("#datepickerEnd").css('visibility', 'visible');
         $("#datepickerStart").css('visibility', 'visible');
         $("#title-date-start").show();
-		
-		
-		<!-- $("#export_report").html('<a class="button" href ='+'"../../report/'+$(this).val()+'/"'+'>Экспорт</a>') -->
-		<!-- $("#export_report").html('<a class="button" href ='+'"../../report/'+$(this).val()+'"'+'>Экспорт</a>') -->
-        <!-- $("#export_report").html('<a class="button" href ='+'"../../report/'+$(this).val()+'?electric_data_end='+$('#datepickerEnd').datepicker().val()+'&electric_data_start='+$('#datepickerStart').datepicker().val()+'&test=Test'+'"'+'>Экспорт</a>') -->
-<!-- 	$("#export_report").html('<a class="button" href ='+'"../../report/'+$(this).val()+'?electric_data_end='+electric_data_end+'&electric_data_start='+electric_data_start+'&test=Test'+'"'+'>Экспорт</a>') -->
-		<!-- $("#export_report").html('<a class="button" href ='+'"../../report/'+$(this).val()+'?electric_data_end='+electric_data_end+'"'+'>Экспорт</a>') -->
-		$("#export_report").html('<button type="button" class="btn btn-primary" onclick="window.location.href=\'../../report/'+$(this).val()+'?electric_data_end='+electric_data_end_1+'&electric_data_start='+electric_data_start_1+'&obj_key='+obj_key+'&is_electric_monthly='+is_electric_monthly+'&is_electric_daily='+is_electric_daily+'&is_electric_current='+is_electric_current+'&is_electric_delta='+is_electric_delta+'&is_electric_period='+is_electric_period+'&obj_parent_title='+obj_parent_title+'&obj_title='+obj_title+'\'">Экспорт</button>')
-		<!-- $("#export_report_archive").html('<a class="button" href ='+'"../../report/'+$(this).val()+'_arch"'+'>Экспорт в Архив</a>') -->
+        
+        // Исправленная строка для экспорта
+        var exportButton = $('<button>', {
+            type: 'button',
+            class: 'btn btn-primary',
+            click: function() {
+                var url = '../../report/' + $(this).val() + 
+                    '?electric_data_end=' + encodeURIComponent(electric_data_end_1) +
+                    '&electric_data_start=' + encodeURIComponent(electric_data_start_1) +
+                    '&obj_key=' + encodeURIComponent(obj_key) +
+                    '&is_electric_monthly=' + encodeURIComponent(is_electric_monthly) +
+                    '&is_electric_daily=' + encodeURIComponent(is_electric_daily) +
+                    '&is_electric_current=' + encodeURIComponent(is_electric_current) +
+                    '&is_electric_delta=' + encodeURIComponent(is_electric_delta) +
+                    '&is_electric_period=' + encodeURIComponent(is_electric_period) +
+                    '&obj_parent_title=' + encodeURIComponent(obj_parent_title) +
+                    '&obj_title=' + encodeURIComponent(obj_title);
+                window.location.href = url;
+            },
+            text: 'Экспорт'
+        });
+        $("#export_report").html(exportButton);
         refresh_data_table($(this).val());
     }
         }   
@@ -132,13 +166,31 @@ $( "#tree" ).mouseleave(function() {
                 else{obj_title = "Не выбран";
                      obj_key = "Не выбран";
                      obj_parent_title = "Не выбран";}
-		//console.log(obj_parent_title);
-		//console.log(obj_title);
-        var menuItem_1=$("#choice_report").val()		
+        var menuItem_1=$("#choice_report").val();		
         var electric_data_start_1 = $('#datepickerStart').datepicker().val();
         var electric_data_end_1 = $('#datepickerEnd').datepicker().val();  	
-        <!-- $("#export_report").html('<a class="button" href ='+'"../../report/'+$(this).val()+'?electric_data_end='+electric_data_end+'"'+'>Экспорт</a>') -->
-		$("#export_report").html('<button type="button" class="btn btn-primary" onclick="window.location.href=\'../../report/'+menuItem_1+'?electric_data_end='+electric_data_end_1+'&electric_data_start='+electric_data_start_1+'&obj_key='+obj_key+'&is_electric_monthly='+is_electric_monthly+'&is_electric_daily='+is_electric_daily+'&is_electric_current='+is_electric_current+'&is_electric_delta='+is_electric_delta+'&is_electric_period='+is_electric_period+'&obj_parent_title='+obj_parent_title+'&obj_title='+obj_title+'\'">Экспорт</button>')
+        
+        // Исправленная строка для экспорта
+        var exportButton = $('<button>', {
+            type: 'button',
+            class: 'btn btn-primary',
+            click: function() {
+                var url = '../../report/' + menuItem_1 + 
+                    '?electric_data_end=' + encodeURIComponent(electric_data_end_1) +
+                    '&electric_data_start=' + encodeURIComponent(electric_data_start_1) +
+                    '&obj_key=' + encodeURIComponent(obj_key) +
+                    '&is_electric_monthly=' + encodeURIComponent(is_electric_monthly) +
+                    '&is_electric_daily=' + encodeURIComponent(is_electric_daily) +
+                    '&is_electric_current=' + encodeURIComponent(is_electric_current) +
+                    '&is_electric_delta=' + encodeURIComponent(is_electric_delta) +
+                    '&is_electric_period=' + encodeURIComponent(is_electric_period) +
+                    '&obj_parent_title=' + encodeURIComponent(obj_parent_title) +
+                    '&obj_title=' + encodeURIComponent(obj_title);
+                window.location.href = url;
+            },
+            text: 'Экспорт'
+        });
+        $("#export_report").html(exportButton);
 });
 $( "#datepickerStart" ).mouseleave(function() {
          var obj_parent_title="";
@@ -151,13 +203,31 @@ $( "#datepickerStart" ).mouseleave(function() {
                 else{obj_title = "Не выбран";
                      obj_key = "Не выбран";
                      obj_parent_title = "Не выбран";}
-		//console.log(obj_parent_title);
-		//console.log(obj_title);
-        var menuItem_1=$("#choice_report").val()		
+        var menuItem_1=$("#choice_report").val();		
         var electric_data_start_1 = $('#datepickerStart').datepicker().val();
         var electric_data_end_1 = $('#datepickerEnd').datepicker().val();  	
-        <!-- $("#export_report").html('<a class="button" href ='+'"../../report/'+$(this).val()+'?electric_data_end='+electric_data_end+'"'+'>Экспорт</a>') -->
-		$("#export_report").html('<button type="button" class="btn btn-primary" onclick="window.location.href=\'../../report/'+menuItem_1+'?electric_data_end='+electric_data_end_1+'&electric_data_start='+electric_data_start_1+'&obj_key='+obj_key+'&is_electric_monthly='+is_electric_monthly+'&is_electric_daily='+is_electric_daily+'&is_electric_current='+is_electric_current+'&is_electric_delta='+is_electric_delta+'&is_electric_period='+is_electric_period+'&obj_parent_title='+obj_parent_title+'&obj_title='+obj_title+'\'">Экспорт</button>')
+        
+        // Исправленная строка для экспорта
+        var exportButton = $('<button>', {
+            type: 'button',
+            class: 'btn btn-primary',
+            click: function() {
+                var url = '../../report/' + menuItem_1 + 
+                    '?electric_data_end=' + encodeURIComponent(electric_data_end_1) +
+                    '&electric_data_start=' + encodeURIComponent(electric_data_start_1) +
+                    '&obj_key=' + encodeURIComponent(obj_key) +
+                    '&is_electric_monthly=' + encodeURIComponent(is_electric_monthly) +
+                    '&is_electric_daily=' + encodeURIComponent(is_electric_daily) +
+                    '&is_electric_current=' + encodeURIComponent(is_electric_current) +
+                    '&is_electric_delta=' + encodeURIComponent(is_electric_delta) +
+                    '&is_electric_period=' + encodeURIComponent(is_electric_period) +
+                    '&obj_parent_title=' + encodeURIComponent(obj_parent_title) +
+                    '&obj_title=' + encodeURIComponent(obj_title);
+                window.location.href = url;
+            },
+            text: 'Экспорт'
+        });
+        $("#export_report").html(exportButton);
 });
 $( "#datepickerEnd" ).mouseleave(function() {
          var obj_parent_title="";
@@ -173,8 +243,28 @@ $( "#datepickerEnd" ).mouseleave(function() {
                 else{obj_title = "Не выбран";
                      obj_key = "Не выбран";
                      obj_parent_title = "Не выбран";}
-       <!-- $("#export_report").html('<a class="button" href ='+'"../../report/'+$(this).val()+'?electric_data_end='+electric_data_end+'"'+'>Экспорт</a>') -->
-		$("#export_report").html('<button type="button" class="btn btn-primary" onclick="window.location.href=\'../../report/'+menuItem_1+'?electric_data_end='+electric_data_end_1+'&electric_data_start='+electric_data_start_1+'&obj_key='+obj_key+'&is_electric_monthly='+is_electric_monthly+'&is_electric_daily='+is_electric_daily+'&is_electric_current='+is_electric_current+'&is_electric_delta='+is_electric_delta+'&is_electric_period='+is_electric_period+'&obj_parent_title='+obj_parent_title+'&obj_title='+obj_title+'\'">Экспорт</button>')
+       
+        // Исправленная строка для экспорта
+        var exportButton = $('<button>', {
+            type: 'button',
+            class: 'btn btn-primary',
+            click: function() {
+                var url = '../../report/' + menuItem_1 + 
+                    '?electric_data_end=' + encodeURIComponent(electric_data_end_1) +
+                    '&electric_data_start=' + encodeURIComponent(electric_data_start_1) +
+                    '&obj_key=' + encodeURIComponent(obj_key) +
+                    '&is_electric_monthly=' + encodeURIComponent(is_electric_monthly) +
+                    '&is_electric_daily=' + encodeURIComponent(is_electric_daily) +
+                    '&is_electric_current=' + encodeURIComponent(is_electric_current) +
+                    '&is_electric_delta=' + encodeURIComponent(is_electric_delta) +
+                    '&is_electric_period=' + encodeURIComponent(is_electric_period) +
+                    '&obj_parent_title=' + encodeURIComponent(obj_parent_title) +
+                    '&obj_title=' + encodeURIComponent(obj_title);
+                window.location.href = url;
+            },
+            text: 'Экспорт'
+        });
+        $("#export_report").html(exportButton);
 		
 });
 
@@ -251,6 +341,21 @@ $("#datepickerEnd").datepicker({onSelect:function(){refresh_data_table($("#choic
         
     $("#electric-mnemoschema").click(function(){
         refresh_data_table_viz_new_window();
+    });
+
+    // Use event delegation for dynamically loaded collapsible content
+    $(document).on('click', '.collapsible-container', function() {
+        var $toggle = $(this).find('.collapsible-toggle');
+        var targetSelector = $toggle.data('target');
+        var $content = $(targetSelector);
+        
+        $content.toggleClass('hidden');
+        
+        if ($content.hasClass('hidden')) {
+            $toggle.text('+');
+        } else {
+            $toggle.text('-');
+        }
     });
 
  });
@@ -356,7 +461,6 @@ var refresh_data_table = function(xyz){
     setTimeout(function() {
      var electric_data_start = $('#datepickerStart').datepicker().val();
      var electric_data_end = $('#datepickerEnd').datepicker().val();
-	 <!-- $("#export_report").html('<a class="button" href ='+'"../../report/'+$(this).val()+'?electric_data_end='+electric_data_end+'&electric_data_start='+electric_data_start+'&test=Test'+'"'+'>Экспорт</a>') -->
      var node = $("#tree").fancytree("getActiveNode");
 	     if(node){obj_title = node.title;
               obj_key = node.key;
@@ -636,15 +740,3 @@ var guid_comment=$(this).attr('id');
 	});	
 	     
 };
-
-
-
-
-
-
-
-
-
-
-
-

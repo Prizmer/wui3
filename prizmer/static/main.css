@@ -211,7 +211,7 @@ min-height: 501px;
 border-style: solid;
 border-width: 1px 0 0 ;
 border-top-color: #004C79;
-max-height:900px;
+max-height:100%;
 overflow-y: scroll;
 }
 
@@ -852,7 +852,12 @@ color: #004C79;
     border: 1.5px solid #2860AA; /* Параметры рамки */
     padding: 15px; /* Поля вокруг текста */
     margin-bottom: 10px; /* Отступ снизу */
+    border-radius: 20px;
    }
+
+#new-result-block {
+    min-height: 120px;
+}
 
 .a{width: 33%; height: 500px; background-color: #F5F5DC; float: left; background-position: top left; overflow-y:scroll;}
 .b{width: 33%; height: 500px; background-color: #FAF0E6; float: left; background-position: top left; overflow-y:scroll;}
@@ -1258,4 +1263,347 @@ color: #004C79;
 
 ul.fancytree-container {
     border: none;
+}
+/* Styles for meter_info.html */
+#power-management-controls {
+    display: flex;
+    justify-content: space-between;
+}
+
+#power-limit-section, #load-status-section {
+    flex-basis: 48%; /* Or any other width that works for you */
+    height: 100%;
+}
+
+#power-limit-form .input-group,
+#load-status-section .input-group {
+    display: flex;
+    width: 100%;
+}
+
+#power-limit-value-input,
+#power-limit-status-select,
+#load-status-input,
+#read-load-status-button {
+    flex: 1;
+}
+
+#power-limit-buttons,
+#manual-load-buttons {
+    display: flex;
+    justify-content: space-around;
+    width: 100%;
+    margin-top: 10px;
+}
+
+.device-info-container,
+.location-info-container,
+.factory-number-info,
+.serial-number-info,
+.current-readings-container,
+#power-management-controls,
+#connection-info-container,
+#readable-parameters-container
+ {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+#tcp-ip-details-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 5px 10px;
+}
+
+.com-port-detail-row {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+}
+
+.com-port-detail-row > div {
+    padding: 2px 5px;
+}
+
+
+.device-icon-container,
+.location-icon-container,
+.connection-icon-container,
+.parameters-icon-container,
+.current-readings-icon-container {
+    flex: 0 0 8.333333%;
+    max-width: 8.333333%;
+    padding-right: 15px;
+    padding-left: 15px;
+    align-self: center;
+}
+
+.device-details-container,
+.location-details-container,
+.parameters-list-container,
+.current-readings-details-container {
+    flex: 0 0 91.666667%;
+    max-width: 91.666667%;
+    padding-right: 15px;
+    padding-left: 15px;
+    align-self: center;
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.tcp-ip-container,
+.com-port-container {
+    flex: 0 0 41.666667%;
+    max-width: 41.666667%;
+    padding-right: 15px;
+    padding-left: 15px;
+    align-self: center;
+}
+
+
+.factory-number-info .label,
+.serial-number-info .label {
+    flex: 0 0 16.666667%;
+    max-width: 16.666667%;
+}
+
+.factory-number-info .value,
+.serial-number-info .value {
+    flex: 0 0 50%;
+    max-width: 50%;
+}
+
+.factory-number-info .extra-info,
+.serial-number-info .extra-info {
+    flex: 0 0 33.333333%;
+    max-width: 33.333333%;
+}
+
+.status-container {
+    flex: 0 0 33.333333%;
+    max-width: 33.333333%;
+    padding-right: 15px;
+    padding-left: 15px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.result-container {
+    flex: 0 0 66.666667%;
+    max-width: 66.666667%;
+    padding-right: 15px;
+    padding-left: 15px;
+}
+
+#current-data-request-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.data-request-title {
+    margin-bottom: 10px;
+}
+
+.data-request-button-container {
+    width: 100%;
+    text-align: center;
+}
+
+.power-limit-column,
+.load-status-column {
+    flex: 0 0 50%;
+    max-width: 50%;
+    padding-right: 15px;
+    padding-left: 15px;
+}
+
+.form-title {
+    width: 100%;
+}
+
+.input-group {
+    position: relative;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: stretch;
+    width: 100%;
+}
+
+.form-control {
+    display: block;
+    width: 100%;
+    height: calc(1.5em + .75rem + 2px);
+    padding: .375rem .75rem;
+    font-size: 1rem;
+    font-weight: 400;
+    line-height: 1.5;
+    color: #495057;
+    background-color: #fff;
+    background-clip: padding-box;
+    border: 1px solid #ced4da;
+    border-radius: .25rem;
+    transition: border-color .15s ease-in-out,box-shadow .15s ease-in-out;
+}
+
+.form-select {
+    display: block;
+    width: 100%;
+    height: calc(1.5em + .75rem + 2px);
+    padding: .375rem .75rem;
+    font-size: 1rem;
+    font-weight: 400;
+    line-height: 1.5;
+    color: #495057;
+    background-color: #fff;
+    border: 1px solid #ced4da;
+    border-radius: .25rem;
+}
+
+.btn {
+    display: inline-block;
+    font-weight: 400;
+    color: #212529;
+    text-align: center;
+    vertical-align: middle;
+    cursor: pointer;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    background-color: transparent;
+    border: 1px solid transparent;
+    padding: .375rem .75rem;
+    font-size: 1rem;
+    line-height: 1.5;
+    border-radius: .25rem;
+    transition: color .15s ease-in-out,background-color .15s ease-in-out,border-color .15s ease-in-out,box-shadow .15s ease-in-out;
+}
+
+.btn-sm {
+    padding: .25rem .5rem;
+    font-size: .875rem;
+    line-height: 1.5;
+    border-radius: .2rem;
+}
+
+.btn-outline-primary {
+    color: #007bff;
+    border-color: #007bff;
+}
+
+.btn-outline-primary:hover {
+    color: #fff;
+    background-color: #007bff;
+    border-color: #007bff;
+}
+
+.collapsible-container {
+    display: flex;
+    align-items: center;
+    background-color: #f8f9fa;
+    border: 1.5px solid #2860AA;
+    border-bottom: none;
+    border-radius: 10px 40px 0 0;
+    padding: 8px 15px;
+    cursor: pointer;
+}
+
+.collapsible-title {
+    font-weight: bold;
+    color: #004C79;
+    margin-left: 10px;
+}
+
+.collapsible-toggle {
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 1.2em;
+    color: #007bff;
+    padding: 0 5px;
+}
+
+.collapsible-toggle:hover {
+    color: #0056b3;
+}
+
+.collapsible-content {
+    border: 1.5px solid #2860AA;
+    border-top: none;
+    padding: 15px;
+    margin-top: -1.5px; /* Precisely overlap the borders */
+    border-radius: 0 0 10px 40px;
+}
+
+.hidden {
+    display: none;
+}
+
+#parameters-grid {
+    flex: 0 0 100%; /* Ensure it takes full width */
+    max-width: 100%; /* Ensure it takes full width */
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2px;
+}
+
+
+#load_management_status_info {
+    position: absolute;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: rgba(0, 0, 0, 0.7);
+    color: white;
+    padding: 10px;
+    border-radius: 5px;
+    z-index: 10;
+    display: none; /* Initially hidden */
+}
+
+.parameter-item {
+    padding: 2px;
+    background-color: #f8f9fa;
+    border-radius: 4px;
+}
+
+.device-details-container > .factory-number-info,
+.device-details-container > .serial-number-info {
+    flex: 0 0 100%;
+    max-width: 100%;
+    padding: 0 15px;
+    box-sizing: border-box;
+}
+
+.vector-data-table .table {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    width: 100% !important;
+}
+
+/* Таблица на всю ширину */
+#data-display-field {
+    width: 100%;
+    padding: 15px;
+}
+
+/* Контейнер диаграмм */
+#phase-diagram-block,
+#full-power-vector-diagram-block {
+    flex: 1;
+    min-width: 0; /* Важно для flex */
+    padding: 5px;
+}
+
+/* Адаптив для маленьких экранов */
+@media (max-width: 1024px) {
+    #vector-diagram-content > div[style*="display: flex"]:last-child {
+        flex-direction: column;
+    }
+    
+    #phase-diagram-block,
+    #full-power-vector-diagram-block {
+        width: 100% !important;
+    }
 }

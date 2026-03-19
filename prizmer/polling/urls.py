@@ -13,4 +13,5 @@ urlpatterns = [
     url(r'^set_active_power_limit_value/$', views.set_active_power_limit_value, name = 'set_active_power_limit_value'), #Установка значения на ограничение мощности
     url(r'^get_active_power_limit_value/$', views.get_active_power_limit_value, name = 'get_active_power_limit_value'), #Чтение значения на ограничение мощности
     url(r'^get_power_state/$', views.get_power_state, name = 'get_power_state'), #Чтение значения на ограничение мощности
+    url(r'^get_vector_diagrams/$', views.get_vector_diagrams, name = 'get_vector_diagrams'), #считываем данные и формируем векторные диаграммы
 ]

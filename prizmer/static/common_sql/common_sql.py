@@ -12978,6 +12978,7 @@ def makeSqlQuery_electric_by_date(obj_parent_title, obj_title, electric_data, pa
     electric_abons_2.ab_guid,
     electric_abons_2.name_parent,
     electric_abons_2.lic_num
+     
 from electric_abons_2
 LEFT JOIN 
 (SELECT z1.monthly_date, z1.name_objects, z1.name_abonents, z1.number_manual, 
@@ -13037,12 +13038,18 @@ group by z1.name_objects, z1.monthly_date, z1.name_objects, z1.name_abonents, z1
 ) z2
 on electric_abons_2.factory_number_manual=z2.number_manual
 where electric_abons_2.obj_name='%s' and %s='%s'
-ORDER BY electric_abons_2.ab_name ASC;
+ORDER BY 
+    CASE 
+        WHEN electric_abons_2.order_num IS NULL OR electric_abons_2.order_num = '' OR electric_abons_2.order_num = 'None'
+        THEN 1 
+        ELSE electric_abons_2.order_num::numeric 
+    END, 
+    electric_abons_2.ab_name ASC;
 """%sFormat
     
     if dm=='monthly' or dm=='daily' or dm=='current':
         sQuery=sQuery.replace('monthly',dm)
-        #print(sQuery)
+        # print(sQuery)
         return sQuery    
     else: return """Select 'Н/Д'"""
     return sQuery

@@ -11,3 +11,4 @@ libscrc
 pyserial
 pyperclip
 djangorestframework==3.14.0
+plotly==6.6.0
