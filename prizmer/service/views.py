@@ -333,7 +333,7 @@ def SimpleCheckIfExist(table1,fieldName1, value1, table2, fieldName2, value2):
         %s.%s='%s' and
         %s.%s='%s'
         """%(table1,table2, table2, table1,table1, table1, fieldName1, value1,table2, fieldName2, value2)
-    #print sQuery
+    #print(sQuery)
     #print bool(dt)
     cursor.execute(sQuery)
     dt = cursor.fetchall()
@@ -3603,13 +3603,13 @@ def LoadObjectsAndAbons_water(sPath, sheet):
     kv=0
     for i in range(2,len(dtAll)):
         obj_l0='Вода' # всегда будет Вода как объект-родитель
-        obj_l1=dtAll[i][0] #корпус
-        obj_l2=dtAll[i][1] #квартира
+        obj_l1=str(dtAll[i][0]).strip() #корпус
+        obj_l2=str(dtAll[i][1]).strip()  #квартира
         if not dtAll[i][1] or dtAll[i][1]==None:
             j=i
             while not obj_l2 or obj_l2==None:
                 j-=1
-                obj_l2=dtAll[j][1]
+                obj_l2=str(dtAll[j][1]).strip()
         abon=dtAll[i][2] #абонент он же счётчик по воде
         isNewObj_l0=SimpleCheckIfExist('objects','name',obj_l0,"","","")#вода
         isNewObj_l1=SimpleCheckIfExist('objects','name',obj_l1,"","","")#корпус
@@ -3718,20 +3718,12 @@ def LoadWaterPulsar(sPath, sSheet):
     for i in range(2,len(dtAll)):
         obj_l0='Вода' # всегда будет Вода как объект-родитель
         obj_l1=str(dtAll[i][0]).strip() #корпус
-        #obj_l2=str(dtAll[i][1]).strip() #квартира
-        #print(str(dtAll[i][1]), dtAll[i][1] != None)
         if (dtAll[i][1] != None):
-            #print('change ', obj_l2, ' to ', str(dtAll[i][1]).strip())
             obj_l2=str(dtAll[i][1]).strip()
-        # if not dtAll[i][1] or dtAll[i][1]==None:
-        #     j=i
-        #     while not obj_l2 or obj_l2==None:
-        #         j-=1
-        #         obj_l2=dtAll[j][1]
         abon=str(dtAll[i][2]).strip() #абонент он же счётчик по воде
         numPulsar=str(dtAll[i][5]).strip() #номер пульсара
         typePulsar=str(dtAll[i][6]).strip() #тип пульсара
-        #print(obj_l1, obj_l2)
+        print(obj_l1, obj_l2)
         num_meter_mzta = str(dtAll[i][3]).strip() #при загрузке пульсара поле не импользуется, при загруке мзта - это уникальный заводской номер, а поле str(dtAll[i][3]).strip() - сетевой
         #print(num_meter_mzta)
         isNewAbon=SimpleCheckIfExist('objects','name', obj_l2,'abonents', 'name', abon)
@@ -3740,7 +3732,9 @@ def LoadWaterPulsar(sPath, sSheet):
             isNewPulsar=SimpleCheckIfExist('meters','factory_number_manual', num_meter_mzta,'','','')
         #print(u'пульсар существует ',str(isNewPulsar),typePulsar,numPulsar)
         if not (isNewAbon):
+            print('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
             return "Нет структуры объектов и счётчиков для "+ obj_l2 + " " +abon
+
         if not (isNewPulsar):
             #print (u'Обрабатываем строку ',obj_l2,numPulsar)
             if str(typePulsar) == 'Пульсар 10M':
