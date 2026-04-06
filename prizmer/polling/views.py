@@ -616,13 +616,32 @@ def create_power_vector_diagram(data):
 
 def get_vector_diagrams(request):
     """AJAX endpoint: диаграммы + таблица данных"""
+    data = None
     if request.is_ajax():
         if request.method == 'GET':
             # print("Запрос на чтение значения контроля мощности")
             factory_number = request.GET.get('factory_number')
             print(factory_number)
-    # Тестовые данные (потом заменишь на реальные)
-    data = get_test_data()
+            try:
+                factory_number = int(factory_number)
+                conn = get_connection_by_serial_number(factory_number)
+                if conn and len(conn) > 0:
+                    host = conn[0][0]
+                    port = int(conn[0][1])
+                    net_addr = int(conn[0][2])
+                    # Запршиваем реальные данные
+                    data = m23x_driver.get_real_vector_data(host, port, net_addr)
+                else:
+                    print("Не найдены настройки для заводского номера:", factory_number)
+            except Exception as e:
+                print(f"Ошибка получения данных для вектора: {e}")
+
+    # Проверка, что данные получены и не пустые
+    if not data or data.get('frequency', 0.0) == 0.0:
+        return HttpResponse(
+            json.dumps({'status': 'error', 'message': 'Не удалось опросить счётчик (нет ответа или связи)'}),
+            content_type='application/json'
+        )
     
     # Строим диаграммы
     phase_fig = create_phase_vector_diagram(data)
