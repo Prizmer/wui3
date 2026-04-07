@@ -377,6 +377,13 @@ def get_real_vector_data(host: str, port: int, address: int, passw: str = "22222
                 
             send_and_recv(sock, build_packet(address, 0x01, b'\x02' + pwd_bytes))
 
+            # Активация/инициализация блока мгновенных значений (CMD=0x03, param=0x08).
+            # Анализ Wireshark-логов показал: без этой команды прибор возвращает
+            # нулевые токи. Эталонная программа всегда выполняет её перед чтением.
+            # Один байт данных 0x08 — одинаков для всех приборов, CRC считается автоматически.
+            send_and_recv(sock, build_packet(address, 0x03, b'\x08'))
+            time.sleep(0.2)
+
             # Спец. операция фиксации значений вектора (08 14 E0)
             send_and_recv(sock, build_packet(address, 0x08, b'\x14\xE0'))
             time.sleep(0.1)
