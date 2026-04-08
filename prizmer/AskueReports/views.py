@@ -30,6 +30,7 @@ import zipfile
 import random 
 from datetime import datetime, timedelta
 from openpyxl.utils import column_index_from_string
+import re 
 
 import os
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
@@ -23836,6 +23837,128 @@ def report_analize_water_consumption(request):
     file_ext = 'xlsx'    
     response['Content-Disposition'] = 'attachment;filename="%s.%s"' % (output_name.replace('"', '\"'), file_ext)   
     return response
+
+
+
+def extract_device_number_v2(device_str):
+    """
+    Извлекает чистый номер прибора, автоматически отсекая год установки 
+    и любые разделители (№, _, -). Не привязано к конкретным годам.
+    """
+    if not device_str:
+        return None
+        
+    s = str(device_str).strip()
+    
+    # 1. Убираем всё до 2-значного префикса (год), сам префикс и возможный разделитель
+    # ^[^\d]*  -> любые нецифры в начале (например, "№", буквы, пробелы)
+    # \d{2}    -> ровно 2 цифры (год: 20, 21, 24, 30 и т.д.)
+    # [-_]?    -> возможный разделитель после года
+    cleaned = re.sub(r'^[^\d]*\d{2}[-_]?', '', s)
+    
+    # 2. На случай остаточного мусора в конце строки, оставляем только цифры
+    core_num = re.sub(r'\D', '', cleaned)
+    
+    # 3. Возвращаем результат, если он не пустой
+    return core_num if core_num else None
+
+def pulsar_water_consumption_mosvodokanal_from_template_by_2_date_v2(request):
+    ROUND_SIZE = getattr(settings, 'ROUND_SIZE', 2)
+    
+    electric_data_end   = request.session.get('electric_data_end', '')
+    electric_data_start = request.session.get('electric_data_start', '')
+
+    # Предполагаем, что BASE_DIR доступен в глобальной области или импортирован из settings
+    # Если BASE_DIR нет в глобальной области, замените на settings.BASE_DIR
+    try:
+        base_dir = BASE_DIR
+    except NameError:
+        base_dir = settings.BASE_DIR
+
+    directory = os.path.join(base_dir, 'static', 'excel', 'excel_template', 'water')
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+
+    files = os.listdir(directory)
+    excel_files = [f for f in files if f.lower().endswith('.xlsx')]
+
+    if len(excel_files) == 0:
+        return HttpResponse("В директории нет Excel файлов (.xlsx)", content_type="text/plain")
+    elif len(excel_files) > 1:
+        return HttpResponse("В директории должен быть только один Excel файл", content_type="text/plain")
+    
+    try:
+        wb = load_workbook(os.path.join(directory, excel_files[0]))
+        ws = wb.active
+
+        # Создаем один курсор на весь файл
+        with connection.cursor() as curs:
+            # iter_rows возвращает кортежи ячеек. min_row=2 пропускает заголовок.
+            for row in ws.iter_rows(min_row=2, max_row=ws.max_row):
+                # Проверка на пустую строку
+                if not any(cell.value for cell in row):
+                    break
+
+                # Индексы колонок: A=0, B=1, C=2, D=3, E=4, H=7, I=8, J=9
+                col_type       = row[2].value   # Тип воды (C)
+                col_uzel       = row[3].value   # Узел учета (D)
+                col_meter_raw  = row[4].value   # № счётчика (E)
+                col_date_prev  = row[6].value   # Дата следующей поверки (H)
+                col_date_next  = row[7].value   # Дата следующей поверки (H)
+                col_prev_val   = row[8].value   # Предыдущее показание (I)
+
+                if not col_meter_raw or not col_uzel:
+                    continue
+
+                meter_clean = extract_device_number_v2(col_meter_raw)
+                # print(meter_clean)
+                if not meter_clean:
+                    continue
+
+                # 1. Обновление атрибутов счётчиков (meters)
+                # SET attr2 = Узел, attr3 = Дата поверки, attr4 = Пред. показание
+                try:
+                    curs.execute("""
+                        UPDATE meters 
+                        SET attr2 = %s, attr3 = %s, attr4 = %s 
+                        WHERE address = %s
+                    """, (str(col_uzel), col_date_prev, col_date_next, meter_clean))
+                except Exception as e:
+                    # Логируем ошибку, но не прерываем цикл обработки файла
+                    print(f"[WARN] Ошибка обновления meters для {meter_clean}: {e}")
+
+                # 3. Получение и запись Текущего показания (Колонка J - индекс 9)
+                if col_uzel:
+                    try:
+                        round_num = 0
+                        target_date = electric_data_end if col_type == 'ХВ' else electric_data_start
+                        
+                        # Вызов вашей функции получения данных
+                        val = common_sql.get_value_by_meter_by_date(col_uzel, target_date, 'meters.attr2', round_num)
+                        
+                        if val and len(val) > 0:
+                            current_val = float(val[0][0])
+                            prev_val_float = float(col_prev_val) if col_prev_val else 0.0
+
+                            # Защита от "убывающих" показаний
+                            row[9].value = prev_val_float if current_val < prev_val_float else current_val
+                    except Exception as e:
+                        print(f"[WARN] Ошибка получения показаний для {meter_clean}: {e}")
+
+            # Фиксируем все изменения в БД после обработки всех строк
+            connection.commit()
+        
+        # Возвращаем сформированный Excel
+        response = HttpResponse(save_virtual_workbook(wb), content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+        response['Content-Disposition'] = f'attachment;filename="report_mosvodokanal_{electric_data_end}.xlsx"'
+        return response
+
+    except Exception as e:
+        # В случае фатальной ошибки (например, битый файл)
+        # Если транзакция не была закоммичена, Django обычно делает откат сам, 
+        # но можно явно откатить, если нужно.
+        return HttpResponse(f"Ошибка при обработке файла: {str(e)}", content_type="text/plain")
+
 
 def pulsar_water_consumption_mosvodokanal_from_template_by_2_date(request):
     ROUND_SIZE = getattr(settings, 'ROUND_SIZE', 2)
