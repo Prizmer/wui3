@@ -10662,14 +10662,113 @@ WHERE
 on z_count.factory_number_manual=z_info.factory_number_manual
     """%(electric_data_start, my_params[0],group_name, group_name, electric_data_end, my_params[0], group_name,group_name, electric_data_start,electric_data_end,
     electric_data_start,electric_data_end,my_params[1],electric_data_start,electric_data_end, group_name)
-    #print sQuery
+    # print(sQuery)
+    return sQuery
+
+def MakeQuery_80020_statistic_2(group_name,electric_data_start,electric_data_end, my_params):
+    sQuery = """
+WITH 
+-- 1. Показания за начальную и конечную дату (T0 A+)
+daily_readings AS (
+    SELECT 
+        m.factory_number_manual,
+        dv.date::date AS reading_date,
+        dv.value
+    FROM daily_values dv
+    JOIN taken_params tp ON dv.id_taken_params = tp.id
+    JOIN meters m ON tp.guid_meters = m.guid
+    JOIN params p ON tp.guid_params = p.guid
+    JOIN names_params np ON p.guid_names_params = np.guid
+    WHERE dv.date::date IN ('%s', '%s')  -- 1: start, 2: end
+      AND np.name = 'T0 A+'
+),
+-- 2. Значения за старт и конец периода по каждому счётчику
+meter_values AS (
+    SELECT 
+        factory_number_manual,
+        MAX(CASE WHEN reading_date = '%s' THEN value END) AS val_start,  -- 3: start
+        MAX(CASE WHEN reading_date = '%s' THEN value END) AS val_end     -- 4: end
+    FROM daily_readings
+    GROUP BY factory_number_manual
+),
+-- 3. Основная информация + дельта
+z_info AS (
+    SELECT 
+        r.name_sender, r.inn_sender, r.dogovor_number, r.factory_number_manual, 
+        r.measuringpoint_name, r.measuringpoint_code, r.dt_last_read,
+        mv.val_start, mv.val_end,
+        ROUND((mv.val_end - mv.val_start)::numeric, 2) AS delta
+    FROM report_80020 r
+    LEFT JOIN meter_values mv ON r.factory_number_manual = mv.factory_number_manual
+    WHERE r.group_name = '%s'  -- 5: group
+),
+-- 4. Агрегация профильных данных за период (A+ Профиль)
+profile_agg AS (
+    SELECT 
+        m.factory_number_manual,
+        vv.date::date AS val_date,
+        SUM(vv.value) AS summa,
+        COUNT(*) AS count_48  -- Считаем все записи за день (до 48)
+    FROM various_values vv
+    JOIN taken_params tp ON vv.id_taken_params = tp.id
+    JOIN meters m ON tp.guid_meters = m.guid
+    JOIN params p ON tp.guid_params = p.guid
+    JOIN names_params np ON p.guid_names_params = np.guid
+    JOIN link_groups_80020_meters lg ON lg.guid_meters = m.guid
+    JOIN groups_80020 g ON lg.guid_groups_80020 = g.guid
+    WHERE np.name = 'A+ Профиль'
+      AND g.name = '%s'  -- 6: group
+      AND vv.date::date BETWEEN '%s' AND '%s'  -- 7: start, 8: end
+    GROUP BY m.factory_number_manual, vv.date::date
+),
+-- 5. Суммы и фактическое количество чтений по счётчикам
+z_count AS (
+    SELECT 
+        factory_number_manual,
+        SUM(summa) AS sum_30,
+        SUM(count_48) AS total_readings  -- Суммируем получасовки за все дни
+    FROM profile_agg
+    GROUP BY factory_number_manual
+)
+-- 6. Финальная выборка
+SELECT 
+    z_info.name_sender, 
+    z_info.inn_sender, 
+    z_info.dogovor_number, 
+    z_info.factory_number_manual, 
+    z_info.measuringpoint_name, 
+    z_info.measuringpoint_code, 
+    z_info.dt_last_read,
+    ROUND(z_info.val_start::numeric, 2) AS val_start,
+    ROUND(z_info.val_end::numeric, 2) AS val_end,
+    z_info.delta,
+    COALESCE(ROUND(z_count.sum_30::numeric, 2), 0) AS sum_30,
+    CASE 
+        WHEN z_count.factory_number_manual IS NOT NULL THEN
+            ROUND(
+                (z_count.total_readings * 100.0) / 
+                (('%s'::date - '%s'::date + 1) * 48),  -- 9: end, 10: start
+            1)
+        ELSE 0 
+    END AS percent
+FROM z_info
+LEFT JOIN z_count ON z_info.factory_number_manual = z_count.factory_number_manual;
+""" % (
+    electric_data_start, electric_data_end,   # 1, 2: daily_readings IN
+    electric_data_start, electric_data_end,   # 3, 4: meter_values CASE
+    group_name,                               # 5: z_info filter
+    group_name,                               # 6: profile_agg filter
+    electric_data_start, electric_data_end,   # 7, 8: profile_agg date range
+    electric_data_end, electric_data_start    # 9, 10: percent formula (КОНЕЦ - НАЧАЛО + 1)
+)
+    # print(sQuery)
     return sQuery
 
 def get_80020_statistic(group_name,electric_data_start,electric_data_end):
     my_params=['T0 A+','A+ Профиль']
     cursor = connection.cursor()
     data_table=[]      
-    cursor.execute(MakeQuery_80020_statistic(group_name,electric_data_start,electric_data_end, my_params))  
+    cursor.execute(MakeQuery_80020_statistic_2(group_name,electric_data_start,electric_data_end, my_params))  
     data_table = cursor.fetchall()      
     return data_table
 
@@ -10699,6 +10798,7 @@ group by   meters.factory_number_manual,
   measuringpoint_name
   order by measuringpoint_name
     """%('T0 A+','T0 R+', group_name)
+    # print(sQuery)
     cursor = connection.cursor()
     data_table=[]      
     cursor.execute(sQuery)  
@@ -10756,7 +10856,7 @@ WHERE
   order by  dd
     """%(electric_data_start,electric_data_end,factory_number_manual,electric_data_start,electric_data_end, name_param)
    
-    #print sQuery
+    # print(sQuery)
     cursor = connection.cursor()
     data_table=[]      
     cursor.execute(sQuery)  
@@ -13151,7 +13251,7 @@ ORDER BY electric_abons_2.obj_name, electric_abons_2.ab_name ASC;
     """%( res, electric_data, obj_title)
     if ((dm =='monthly') or (dm=='daily') or (dm=='current')):
         sQuery=sQuery.replace('daily',dm)
-        #print(sQuery)
+        # print(sQuery)
         #print(dm, dm=='monthly')
         return sQuery    
     else: return """Select 'Н/Д'"""
@@ -13249,7 +13349,7 @@ group by z2.date,
     electric_groups.type
 order by electric_groups.type DESC, electric_groups.name_abonents
 """%(params[0],params[1],params[2],params[3], electric_data, obj_title)
-    #print sQuery
+    # print(sQuery)
     if dm=='monthly' or dm=='current' or dm=='daily':
         sQuery=sQuery.replace('daily',dm)
         return sQuery    

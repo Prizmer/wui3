@@ -27525,13 +27525,13 @@ def report_electric_3_zones_v4(request):
         ('E', 8, None, False, None),  # Ктт
         ('F', 10, None, False, None), # Ка
         ('G', 3, None, True, None),   # Сумма показания
-        ('H', None, ali_yellow, True, lambda row: row[3] * row[8] * row[9]),  # Энергия Сумма
+        ('H', None, ali_yellow, True, lambda row: float(row[3]) * float(row[8]) * float(row[9])),  # Энергия Сумма
         ('I', 4, None, True, None),   # Тариф 1 показания
-        ('J', None, ali_yellow, True, lambda row: row[4] * row[8] * row[9]),  # Энергия Тариф 1
+        ('J', None, ali_yellow, True, lambda row: float(row[4]) * float(row[8]) * float(row[9])),  # Энергия Тариф 1
         ('K', 5, None, True, None),   # Тариф 2 показания
-        ('L', None, ali_yellow, True, lambda row: row[5] * row[8] * row[9]),  # Энергия Тариф 2
+        ('L', None, ali_yellow, True, lambda row: float(row[5]) * float(row[8]) * float(row[9])),  # Энергия Тариф 2
         ('M', 6, None, True, None),   # Тариф 3 показания
-        ('N', None, ali_yellow, True, lambda row: row[6] * row[8] * row[9]),  # Энергия Тариф 3
+        ('N', None, ali_yellow, True, lambda row: float(row[6]) * float(row[8]) * float(row[9])),  # Энергия Тариф 3
     ]
     
     # Динамически добавляем колонки данных
