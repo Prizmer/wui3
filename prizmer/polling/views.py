@@ -314,31 +314,90 @@ def polar_to_cartesian(magnitude, angle_degrees):
     return x, y
 
 
-# ============================================================================
-# ПОФАЗНАЯ ВЕКТОРНАЯ ДИАГРАММА (левая на скрине)
-# ============================================================================
+def draw_arrowhead(fig, x_tip, y_tip, angle_deg, size, color, legendgroup=None):
+    """
+    Рисует закрашенный треугольный наконечник стрелки на конце вектора.
+
+    Все координаты в пространстве данных — независимо от масштаба и версии Plotly.
+
+    Args:
+        x_tip, y_tip  — конец вектора (остриё наконечника)
+        angle_deg     — направление вектора в градусах (стандарт: 0=вправо, 90=вверх)
+        size          — длина наконечника в единицах данных
+        color         — цвет заливки
+    """
+    angle_rad = math.radians(angle_deg)
+    perp_rad  = angle_rad + math.pi / 2
+
+    # Центр основания треугольника (отступаем назад от острия)
+    bx = x_tip - size * math.cos(angle_rad)
+    by = y_tip - size * math.sin(angle_rad)
+
+    # Полуширина основания
+    hw = size * 0.45
+
+    x1 = bx + hw * math.cos(perp_rad)
+    y1 = by + hw * math.sin(perp_rad)
+    x2 = bx - hw * math.cos(perp_rad)
+    y2 = by - hw * math.sin(perp_rad)
+
+    kwargs = dict(legendgroup=legendgroup) if legendgroup else {}
+    fig.add_trace(go.Scatter(
+        x=[x1, x_tip, x2, x1],
+        y=[y1, y_tip, y2, y1],
+        mode='lines',
+        fill='toself',
+        fillcolor=color,
+        line=dict(color=color, width=0),
+        showlegend=False,
+        hoverinfo='skip',
+        **kwargs,
+    ))
+
+
 
 def create_phase_vector_diagram(data):
     fig = go.Figure()
     
     base_angle = 90
+    
+    # Получаем реальные углы между фазами из данных (f1_f2 и f1_f3)
+    # По умолчанию используем идеальные 120 и 240 градусов
+    angles_data = data.get('angles', {})
+    angle12 = angles_data.get('f1_f2', 120.0)
+    angle13 = angles_data.get('f1_f3', 240.0)
+    
+    # Если прибор вернул нули или данные некорректны, используем идеал
+    if angle12 <= 0: angle12 = 120.0
+    if angle13 <= 0: angle13 = 240.0
+
     voltage_angles = {
         'phase1': base_angle,
-        'phase2': base_angle - 120,
-        'phase3': base_angle - 240,
+        'phase2': base_angle - angle12,
+        'phase3': base_angle - angle13,
     }
     
     max_U = max(p['U'] for p in data['phases'].values())
     max_I = max(p['I'] for p in data['phases'].values())
-    
-    TARGET_CURRENT_RATIO = 0.6
-    MIN_VISIBLE_CURRENT = 1.5
-    
+
+    # Токи масштабируются так, чтобы максимальный ток занимал
+    # TARGET_CURRENT_RATIO от максимального напряжения.
+    # Таким образом ни один вектор тока не выйдет за пределы осей.
+    TARGET_CURRENT_RATIO = 0.75   # максимальный ток = 75% от max_U
+    MIN_I_RATIO = 0.10            # минимально видимый ток = 10% от max_U
+
     if max_I > 0:
         CURRENT_SCALE_FACTOR = (max_U * TARGET_CURRENT_RATIO) / max_I
     else:
-        CURRENT_SCALE_FACTOR = 100
-    
+        CURRENT_SCALE_FACTOR = 1.0
+
+    min_I_length = max_U * MIN_I_RATIO  # минимальная длина вектора тока в единицах U
+
+    # Размеры наконечников стрелок: увеличены в 2 раза
+    axis_range  = max_U * 1.2
+    arrow_size_U = axis_range * 0.09   # наконечник напряжения
+    arrow_size_I = axis_range * 0.07   # наконечник тока
+
     for phase_key, angle in voltage_angles.items():
         phase_data = data['phases'][phase_key]
         U = phase_data['U']
@@ -347,85 +406,65 @@ def create_phase_vector_diagram(data):
         Q = phase_data['Q']
         color = phase_data['color']
         name = phase_data['name']
-        
+
         # === ВЕКТОР НАПРЯЖЕНИЯ ===
         x_end_U, y_end_U = polar_to_cartesian(U, angle)
-        
+
+        # Формируем текст для легенды напряжения (угол относительно Фазы-1)
+        if phase_key == 'phase1':
+            v_name = f'{name} U={U:.1f}В'
+        elif phase_key == 'phase2':
+            v_name = f'{name} U={U:.1f}В ∠{angle12:.1f}°'
+        else: # phase3
+            v_name = f'{name} U={U:.1f}В ∠{angle13:.1f}°'
+
         fig.add_trace(go.Scatter(
             x=[0, x_end_U],
             y=[0, y_end_U],
             mode='lines',
             line=dict(color=color, width=3),
-            name=f'{name} U={U:.1f}В',
+            name=v_name,
             legendgroup=f'{name}',
             showlegend=True,
             hoverinfo='text',
             text=f'{name}<br>U={U:.2f}В',
         ))
-        
-        # === СТРЕЛКА напряжения ===
-        fig.add_annotation(
-            x=x_end_U,
-            y=y_end_U,
-            ax=x_end_U * 0.85,  # Начало стрелки (85% от длины)
-            ay=y_end_U * 0.85,
-            xref="x",
-            yref="y",
-            axref="x",
-            ayref="y",
-            showarrow=True,
-            arrowhead=2,
-            arrowsize=1.5,
-            arrowwidth=3,
-            arrowcolor=color,
-        )
-        
+
+        # СТРЕЛКА напряжения: закрашенный треугольник в координатах данных
+        draw_arrowhead(fig, x_end_U, y_end_U, angle, arrow_size_U, color, legendgroup=name)
+
         # === ВЕКТОР ТОКА ===
         phi = calculate_phi(cos_phi, Q)
         if Q < 0:
             current_angle = angle + phi
         else:
             current_angle = angle - phi
-        
-        if I < MIN_VISIBLE_CURRENT:
-            I_for_scale = MIN_VISIBLE_CURRENT
-        else:
-            I_for_scale = I
-        
-        I_scaled = I_for_scale * CURRENT_SCALE_FACTOR
+
+        # Масштабируем ток: применяем единый коэффициент,
+        # затем ограничиваем сверху напряжением этой фазы (U),
+        # снизу — минимально видимой длиной.
+        I_scaled = I * CURRENT_SCALE_FACTOR
+        I_scaled = max(I_scaled, min_I_length)   # не меньше минимума
+        I_scaled = min(I_scaled, U * TARGET_CURRENT_RATIO)  # не больше U*ratio данной фазы
+
         x_end_I, y_end_I = polar_to_cartesian(I_scaled, current_angle)
-        
+
         fig.add_trace(go.Scatter(
             x=[0, x_end_I],
             y=[0, y_end_I],
             mode='lines',
             line=dict(color=color, width=2, dash='dash'),
-            name=f'{name} I={I:.2f}А',
+            name=f'{name} I={I:.2f}А φ={phi:.1f}°',
             legendgroup=f'{name}',
             showlegend=True,
             hoverinfo='text',
             text=f'{name}<br>I={I:.2f}А<br>φ={phi:.1f}°',
         ))
-        
-        # === СТРЕЛКА тока ===
-        fig.add_annotation(
-            x=x_end_I,
-            y=y_end_I,
-            ax=x_end_I * 0.85,  # Начало стрелки (85% от длины)
-            ay=y_end_I * 0.85,
-            xref="x",
-            yref="y",
-            axref="x",
-            ayref="y",
-            showarrow=True,
-            arrowhead=2,
-            arrowsize=1.2,
-            arrowwidth=2,
-            arrowcolor=color,
-        )
-    
-    axis_range = max_U * 1.2
-    
+
+        # СТРЕЛКА тока: закрашенный треугольник в координатах данных
+        draw_arrowhead(fig, x_end_I, y_end_I, current_angle, arrow_size_I, color, legendgroup=name)
+
+    # axis_range уже вычислен выше (= max_U * 1.2)
     fig.update_layout(
         title='',
         width=500,
@@ -531,38 +570,15 @@ def create_power_vector_diagram(data):
         mode='lines',
         line=dict(color='red', width=3),
         showlegend=True,
-        name=f'S={S:.2f} ВА',
+        name=f'S={S:.1f} ВА',
         hoverinfo='text',
-        text=f'P={P:.2f} Вт<br>Q={Q:.2f} вар<br>S={S:.2f} ВА',
+        text=f'P={P:.1f} Вт<br>Q={Q:.1f} вар<br>S={S:.1f} ВА',
     ))
 
-    # === Наконечник стрелки (треугольник из линий) ===
-    # Вычисляем угол вектора
-    vector_angle = math.atan2(Q, P)
+    # СТРЕЛКА: закрашенный треугольник в координатах данных (размер увеличен в 2 раза)
+    power_angle_deg = math.degrees(math.atan2(Q, P))
+    draw_arrowhead(fig, P, Q, power_angle_deg, max_range * 0.12, 'red')
 
-    # Размер наконечника
-    arrow_head_size = 30  # пикселей
-
-    # Координаты двух сторон наконечника
-    arrow_angle = math.pi / 6  # 30 градусов угол наконечника
-
-    # Точка 1 наконечника (левая сторона)
-    x1 = P - arrow_head_size * math.cos(vector_angle - arrow_angle)
-    y1 = Q - arrow_head_size * math.sin(vector_angle - arrow_angle)
-
-    # Точка 2 наконечника (правая сторона)  
-    x2 = P - arrow_head_size * math.cos(vector_angle + arrow_angle)
-    y2 = Q - arrow_head_size * math.sin(vector_angle + arrow_angle)
-
-    # Рисуем наконечник (две линии)
-    fig.add_trace(go.Scatter(
-        x=[x1, P, x2],
-        y=[y1, Q, y2],
-        mode='lines',
-        line=dict(color='red', width=3),
-        showlegend=False,
-        hoverinfo='skip',
-    ))
     
     # === Квадранты ===
     quadrant_size = max_range * 0.6
