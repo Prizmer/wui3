@@ -9781,7 +9781,7 @@ def load_comment(request):
             Comments.guid_abonents = Abonents.objects.get(guid=guid_abonent)
             if len(guid_resource) > 0:
                 Comments.guid_resources = Resources.objects.get(guid=guid_resource)  
-            Comments.date=datetime.datetime.now()          
+            Comments.date = datetime.now()          
             Comments.save()           
             comment_status = 'Комментарий добавлен'
     #return redirect('..')
