@@ -48,6 +48,7 @@ $(function () {
 $("#choice_report").selectmenu({ width: 383 });
 $("#choice_report").selectmenu({
      select: function( event, ui ) {
+	 var report_id = ui.item.value;
 	 var electric_data_start_1 = $('#datepickerStart').datepicker().val();
      var electric_data_end_1 = $('#datepickerEnd').datepicker().val(); 
 	 var obj_parent_title="";
@@ -62,7 +63,7 @@ $("#choice_report").selectmenu({
                      obj_key = "Не выбран";
                      obj_parent_title = "Не выбран";}	
 	
-	if ($(this).val()==56 || $(this).val()==59)
+	if (report_id==56 || report_id==59)
     {
         var heat_dm_block_el = document.getElementById('heat_dm_block');
         if (heat_dm_block_el) {
@@ -76,7 +77,7 @@ $("#choice_report").selectmenu({
     		heat_dm_block_el.style.display = 'none';
         }
 	}
-    if ($(this).val()%2==0)
+    if (report_id%2==0)
     {
         $("#datepickerEnd").css('visibility', 'visible');
         $("#datepickerStart").css('visibility', 'hidden');
@@ -86,7 +87,7 @@ $("#choice_report").selectmenu({
             type: 'button',
             class: 'btn btn-primary',
             click: function() {
-                var url = '../../report/' + $(this).val() + 
+                var url = '../../report/' + report_id + 
                     '?electric_data_end=' + encodeURIComponent(electric_data_end_1) +
                     '&electric_data_start=' + encodeURIComponent(electric_data_start_1) +
                     '&obj_key=' + encodeURIComponent(obj_key) +
@@ -102,7 +103,7 @@ $("#choice_report").selectmenu({
             text: 'Экспорт'
         });
         $("#export_report").html(exportButton);
-        refresh_data_table($(this).val());
+        refresh_data_table(report_id);
     }
     else
     { //для нечётного отображаем 2 календарь
@@ -115,7 +116,7 @@ $("#choice_report").selectmenu({
             type: 'button',
             class: 'btn btn-primary',
             click: function() {
-                var url = '../../report/' + $(this).val() + 
+                var url = '../../report/' + report_id + 
                     '?electric_data_end=' + encodeURIComponent(electric_data_end_1) +
                     '&electric_data_start=' + encodeURIComponent(electric_data_start_1) +
                     '&obj_key=' + encodeURIComponent(obj_key) +
@@ -131,7 +132,7 @@ $("#choice_report").selectmenu({
             text: 'Экспорт'
         });
         $("#export_report").html(exportButton);
-        refresh_data_table($(this).val());
+        refresh_data_table(report_id);
     }
         }   
     });
