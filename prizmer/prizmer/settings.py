@@ -116,14 +116,15 @@ DATABASES = {
         #'NAME': 'vzlet',
         #'NAME': 'ridan',
         # 'NAME': 'yakovlevo',
-        'NAME': 'hov_sev',
+        # 'NAME': 'hov_sev',
         # 'NAME': 'reka',
         # 'NAME': 'serdce_jd_5-6',
         #'NAME': 'k10',
+        'NAME': 'template',
         'USER': 'postgres',
         'PASSWORD': '1',
         'HOST': 'localhost',
-        'PORT': '5432',
+        'PORT': '8888',
         'OPTIONS': {
             'client_encoding': 'UTF8',            
             }

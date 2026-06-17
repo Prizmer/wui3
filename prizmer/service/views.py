@@ -757,6 +757,8 @@ def LoadElectricMeters(sPath, sSheet):
                     add_meter = Meters(name = str(type_meter) + ' ' + str(meter), address = str(adr), factory_number_manual = str(meter), attr1 = str(attr1), guid_types_meters = TypesMeters.objects.get(guid = "84244574-8fee-47a6-a546-15b01c82f778") )
                 elif str(type_meter) == 'МИРТЕК-32-РУ-D37':
                     add_meter = Meters(name = str(type_meter) + ' ' + str(meter), address = str(adr), factory_number_manual = str(meter), attr1 = str(attr1), guid_types_meters = TypesMeters.objects.get(guid = "2d99741f-b22e-4926-af61-056e956b24b0") )
+                elif str(type_meter) == 'Пульсар 405 Теплосчётчик':
+                    add_meter = Meters(name = str(type_meter) + ' ' + str(meter), address = str(adr), factory_number_manual = str(meter), attr1 = str(attr1), guid_types_meters = TypesMeters.objects.get(guid = "a91aa386-0de1-4dd3-a702-db980e788fcd") )
                 else:
                     errors.append(f"Тип счётчика '{type_meter}' (зав. номер '{meter}') не поддерживается для автоматической загрузки.")
                     continue
@@ -3370,6 +3372,37 @@ def add_taken_param_no_signals(instance, isR, isHalfs, is_ridan_impulse=False): 
         #-------------Мощность        
         #А+ Профиль   
         #R+ Профиль
+
+    elif instance.guid_types_meters.name == 'Пульсар 405 Теплосчётчик':
+        #Добавляем параметры для Теплосчётчика Пульсар 405.
+        #------------Суточные
+        # "Показание Энергии" Q, Гкал
+        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "9036e603-7b32-4759-8653-4eb48535bd6c"))
+        add_param.save()
+        # "Показание Расход воды" Объем, м3
+        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "ab892f72-f26c-40c4-bf4f-c5f81fb16ecb"))
+        add_param.save()
+        # "Показание Температура подачи" Ti, C0
+        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "0688928a-bf26-4aa8-8e50-e3fe31f8ae8c"))
+        add_param.save()
+        # "Показание Температура выхода" To, C0
+        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "0ee60478-1024-4281-a9f7-0e93f118d8d9"))
+        add_param.save()
+        # "Пульсар 405 Gпод Суточный" Gi, тонны
+        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "72f7e34e-a6e7-4ab7-a72f-eb391220662a"))
+        add_param.save()
+        # "Пульсар 405 Gобр Суточный" Go, тонны  
+        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "fb9c55b4-cb27-4f20-aa2c-b25b7d18c73d"))
+        add_param.save()
+        # "Пульсар 405 Pпод Суточный" Pi, атмосферы
+        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "6766e7ad-dd9c-445e-b163-e2a06b408313"))
+        add_param.save()
+        # "Пульсар 405 Pобр Суточный" Po, атмосферы 
+        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "0d534194-dc81-4500-b7b5-0ea8162777e4"))
+        add_param.save()
+        # "Пульсар 405 Время наработки" operating_hours, часы
+        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "bd26a158-e8cf-4038-b7c9-e0b6b6d3dc93"))
+        add_param.save()
 
     else:
         pass
