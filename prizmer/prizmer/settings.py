@@ -122,12 +122,13 @@ DATABASES = {
         # 'NAME': 'reka',
         # 'NAME': 'serdce_jd_5-6',
         #'NAME': 'k10',
-        'NAME': 'stories',
+        # 'NAME': 'stories',
         'NAME': 'template',
         'USER': 'postgres',
         'PASSWORD': '1',
         'HOST': 'localhost',
         'PORT': '8888',
+        # 'PORT': '5432',
         'OPTIONS': {
             'client_encoding': 'UTF8',            
             }
