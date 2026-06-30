@@ -759,7 +759,7 @@ def LoadElectricMeters(sPath, sSheet):
                     add_meter = Meters(name = str(type_meter) + ' ' + str(meter), address = str(adr), factory_number_manual = str(meter), attr1 = str(attr1), guid_types_meters = TypesMeters.objects.get(guid = "2d99741f-b22e-4926-af61-056e956b24b0") )
                 elif str(type_meter) == 'Пульсар 405 Теплосчётчик':
                     add_meter = Meters(name = str(type_meter) + ' ' + str(meter), address = str(adr), factory_number_manual = str(meter), attr1 = str(attr1), guid_types_meters = TypesMeters.objects.get(guid = "a91aa386-0de1-4dd3-a702-db980e788fcd") )
-                elif str(type_meter) == 'Вис.Т':
+                elif str(type_meter) == 'Вис.Т-ТС':
                     add_meter = Meters(name = str(type_meter) + ' ' + str(meter), address = str(adr), factory_number_manual = str(meter), attr1 = str(attr1), guid_types_meters = TypesMeters.objects.get(guid = "ce1acf72-1660-4fee-bedf-a36777a41702") )
                 else:
                     errors.append(f"Тип счётчика '{type_meter}' (зав. номер '{meter}') не поддерживается для автоматической загрузки.")
@@ -3406,8 +3406,8 @@ def add_taken_param_no_signals(instance, isR, isHalfs, is_ridan_impulse=False): 
         add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "bd26a158-e8cf-4038-b7c9-e0b6b6d3dc93"))
         add_param.save()
 
-    elif instance.guid_types_meters.name == 'Вис.Т':
-        #Добавляем параметры для Теплосчётчика Вис.Т.
+    elif instance.guid_types_meters.name == 'Вис.Т-ТС':
+        #Добавляем параметры для Теплосчётчика Вис.Т-ТС.
         #------------Часовые
         # "Показание Энергии" Q, Гкал
         add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "4f50e1c1-f7f7-43f3-befd-748e78fba47e"))
