@@ -225,5 +225,7 @@ urlpatterns = [
     
     url(r'^174/$', views.report_pulsar_heat_error, name = '174'), # отчёт об ошибках и батарейке теплосчётчика пульсар
     url(r'^176/$', views.report_pulsar_water_error, name = '176'), # отчёт об ошибках и батарейке водосчётчика пульсар
+    
+    url(r'^175/$', views.report_heat_monthly_VIST, name = '175'), # отчёт месячный протокол учёта тепловой энергии за месяц
 
 ]

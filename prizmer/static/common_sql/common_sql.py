@@ -6006,7 +6006,11 @@ def get_30_min_value_by_meters_number_param_names_and_datetime(meters_number, pa
 def makeSqlQuery_heat_daily_pulsar_teplo_abon(obj_parent_title,obj_title, electric_data, params, dm):
     sQuery="""
            Select z2.daily_date, heat_abons.ab_name, heat_abons.factory_number_manual, 
-round(z2.energy::numeric,7),
+CASE when z2.meter_type ='Пульсар Холодосчётчик' then
+round((z2.energy*1163::numeric)::numeric,3) -- кВт·ч
+else
+round(z2.energy::numeric,7)
+end,
 round(z2.volume::numeric,7),
 round(z2.t_in::numeric,1),
 round(z2.t_out::numeric,1),
@@ -6024,8 +6028,8 @@ left join
             MAX(Case when z1.params_name = '%s' then z1.value_daily  end) as t_in,
             MAX(Case when z1.params_name = '%s' then z1.value_daily  end) as t_out,
             MAX(Case when z1.params_name = '%s' then z1.value_daily  end) as battery_voltage,
-            MAX(Case when z1.params_name = '%s' then z1.value_daily  end) as error_code
-            
+            MAX(Case when z1.params_name = '%s' then z1.value_daily  end) as error_code,
+            meter_type
                                     FROM
                                     (SELECT 
             			  daily_values.date as daily_date, 
@@ -6067,7 +6071,7 @@ left join
             			  names_params.name, 
             			  types_meters.name
                                     ) z1
-            group by z1.name_abonents, z1.daily_date, z1.name_objects, z1.number_manual
+            group by z1.name_abonents, z1.daily_date, z1.name_objects, z1.number_manual, z1.meter_type
             order by z1.name_abonents) as z2
 on z2.number_manual=heat_abons.factory_number_manual
 where heat_abons.obj_name='%s' and heat_abons.ab_name  = '%s' and heat_abons.type_meter  like '%%%s%%'
@@ -6079,13 +6083,16 @@ order by heat_abons.ab_name""" % (params[0],params[1],params[2],params[3], param
 def makeSqlQuery_heat_daily_pulsar_teplo_all(obj_title, electric_data, params, dm):
     sQuery="""
            Select z2.daily_date, heat_abons.ab_name, heat_abons.factory_number_manual, 
-round(z2.energy::numeric,7),
+CASE when z2.meter_type ='Пульсар Холодосчётчик' then
+round((z2.energy*1163::numeric)::numeric,3)
+else
+round(z2.energy::numeric,7)
+end,
 round(z2.volume::numeric,7),
 round(z2.t_in::numeric,1),
 round(z2.t_out::numeric,1),
 heat_abons.comment,
 heat_abons.ab_guid,
-
 round((z2.energy::numeric*0.0008604206500956)::numeric,3) as energy_gkal,
  heat_abons.attr4,
  round((z2.battery_voltage/1000)::numeric,2),
@@ -6098,7 +6105,8 @@ left join
             MAX(Case when z1.params_name = '%s' then z1.value_daily  end) as t_in,
             MAX(Case when z1.params_name = '%s' then z1.value_daily  end) as t_out,
             MAX(Case when z1.params_name = '%s' then z1.value_daily  end) as battery_voltage,
-            MAX(Case when z1.params_name = '%s' then z1.value_daily  end) as error_code
+            MAX(Case when z1.params_name = '%s' then z1.value_daily  end) as error_code,
+            meter_type
             
                                     FROM
                                     (SELECT 
@@ -6140,13 +6148,13 @@ left join
             			  names_params.name, 
             			  types_meters.name
                                     ) z1
-            group by z1.name_abonents, z1.daily_date, z1.name_objects, z1.number_manual
+            group by z1.name_abonents, z1.daily_date, z1.name_objects, z1.number_manual, z1.meter_type
             order by z1.name_abonents) as z2
 on z2.number_manual=heat_abons.factory_number_manual
 where heat_abons.obj_name='%s' and heat_abons.type_meter  like '%%%s%%'
 order by heat_abons.ab_name""" % (params[0],params[1],params[2],params[3], params[5], params[6] , obj_title,params[4], electric_data, obj_title, params[4])
     sQuery = sQuery.replace('daily', dm)
-    #print(sQuery)    
+    # print(sQuery)    
     return sQuery
 
 
@@ -6167,6 +6175,7 @@ def get_data_table_by_date_daily_pulsar_teplo(obj_parent_title, obj_title, elect
 def get_data_table_by_date_daily_pulsar_frost(obj_parent_title, obj_title, electric_data, isAbon):
     data_table = []
     params=['Энергия','Объем','Ti','To', 'Холодосчётчик', 'battery_voltage', 'Тепло_Error_code']
+    #!!! Энергия в базе хранится в Гкал, здесь будет в запросе преобразование в кВт*ч
     dm = 'daily'
     cursor = connection.cursor()
     if isAbon:
@@ -6194,9 +6203,23 @@ def get_data_table_by_date_daily_pulsar_error_code(obj_parent_title, obj_title, 
 def makeSqlQuery_heat_pulsar_teplo_abon_period(obj_parent_title,obj_title, electric_data_end, electric_data_start, params, dm):
     sQuery="""
    Select  ab_name,factory_number_manual,
-round((z5.energy_start)::numeric,7) as energy_st,
-round(z5.energy_end::numeric,7)as energy_e,
-round((z5.energy_end-z5.energy_start)::numeric,7) as energy_delta,
+CASE when z5.meter_type ='Пульсар Холодосчётчик' then
+round((round((z5.energy_start)::numeric,7)*1163::numeric)::numeric,3) -- кВт·ч
+else
+round((z5.energy_start)::numeric,7)
+end as energy_st,
+
+CASE when z5.meter_type ='Пульсар Холодосчётчик' then
+round((round((z5.energy_end)::numeric,7)*1163::numeric)::numeric,3) -- кВт·ч
+else
+round((z5.energy_end)::numeric,7)
+end as energy_end,
+
+CASE when z5.meter_type ='Пульсар Холодосчётчик' then
+round((round((z5.energy_end-z5.energy_start)::numeric,7)*1163::numeric)::numeric,3) -- кВт·ч
+else
+round((z5.energy_end-z5.energy_start)::numeric,7)
+end as energy_delta,
 round((z5.volume_start)::numeric,7),
 round((z5.volume_end)::numeric,7),
 round((z5.volume_end-z5.volume_start)::numeric,7) as volume_delta,
@@ -6205,17 +6228,18 @@ round((z5.energy_start::numeric*0.0008604206500956)::numeric,3) as energy_st_gka
 round((z5.energy_end::numeric*0.0008604206500956)::numeric,3)as energy_e_gkal,
 round(((z5.energy_end-z5.energy_start)::numeric*0.0008604206500956)::numeric,3) as energy_delta_gkal
 FROM
-(Select z3.obj_name, z3.ab_name,z3.factory_number_manual, z3.energy_start,z3.volume_start , z4.energy_end,z4.volume_end
+(Select z3.obj_name, z3.ab_name,z3.factory_number_manual, z3.energy_start,z3.volume_start , z4.energy_end,z4.volume_end, z3.meter_type
 from
-(Select z2.daily_date, heat_abons.obj_name, heat_abons.ab_name, heat_abons.factory_number_manual, z2.energy as energy_start,z2.volume as volume_start,z2.t_in as t_in_start,z2.t_out as t_out_start
+(Select z2.daily_date, heat_abons.obj_name, heat_abons.ab_name, heat_abons.factory_number_manual, z2.energy as energy_start,z2.volume as volume_start,z2.t_in as t_in_start,z2.t_out as t_out_start,
+z2.meter_type
 from heat_abons
 left join
 (SELECT z1.daily_date, z1.name_objects, z1.name_abonents, z1.number_manual, 
             MAX(Case when z1.params_name = '%s' then z1.value_daily  end) as energy,
             MAX(Case when z1.params_name = '%s' then z1.value_daily  end) as volume,
             MAX(Case when z1.params_name = '%s' then z1.value_daily  end) as t_in,
-            MAX(Case when z1.params_name = '%s' then z1.value_daily  end) as t_out
-            
+            MAX(Case when z1.params_name = '%s' then z1.value_daily  end) as t_out,
+            meter_type
                                     FROM
                                     (SELECT 
             			  daily_values.date as daily_date, 
@@ -6257,7 +6281,7 @@ left join
             			  names_params.name, 
             			  types_meters.name
                                     ) z1
-            group by z1.name_abonents, z1.daily_date, z1.name_objects, z1.number_manual
+            group by z1.name_abonents, z1.daily_date, z1.name_objects, z1.number_manual, z1.meter_type
             order by z1.name_abonents) as z2
 on z2.number_manual=heat_abons.factory_number_manual
 where heat_abons.obj_name='%s' and heat_abons.ab_name = '%s' and heat_abons.type_meter  like '%%%s%%') as z3,
@@ -6268,7 +6292,8 @@ left join
             MAX(Case when z1.params_name = '%s' then z1.value_daily  end) as energy,
             MAX(Case when z1.params_name = '%s' then z1.value_daily  end) as volume,
             MAX(Case when z1.params_name = '%s' then z1.value_daily  end) as t_in,
-            MAX(Case when z1.params_name = '%s' then z1.value_daily  end) as t_out
+            MAX(Case when z1.params_name = '%s' then z1.value_daily  end) as t_out,
+            meter_type
             
                                     FROM
                                     (SELECT 
@@ -6311,7 +6336,7 @@ left join
             			  names_params.name, 
             			  types_meters.name
                                     ) z1
-            group by z1.name_abonents, z1.daily_date, z1.name_objects, z1.number_manual
+            group by z1.name_abonents, z1.daily_date, z1.name_objects, z1.number_manual, z1.meter_type
             order by z1.name_abonents) as z2
 on z2.number_manual=heat_abons.factory_number_manual
 where heat_abons.obj_name='%s' and heat_abons.ab_name = '%s' and heat_abons.type_meter  like '%%%s%%') as z4
@@ -6328,9 +6353,24 @@ order by ab_name
 def makeSqlQuery_heat_pulsar_teplo_all_period(obj_title, electric_data_end,electric_data_start, params, dm):
     sQuery="""
    Select  ab_name,factory_number_manual,
-round((z5.energy_start)::numeric,7) as energy_st,
-round(z5.energy_end::numeric,7)as energy_e,
-round((z5.energy_end-z5.energy_start)::numeric,7) as energy_delta,
+CASE when z5.meter_type ='Пульсар Холодосчётчик' then
+round((round((z5.energy_start)::numeric,7)*1163::numeric)::numeric,3) -- кВт·ч
+else
+round((z5.energy_start)::numeric,7)
+end as energy_st,
+
+CASE when z5.meter_type ='Пульсар Холодосчётчик' then
+round((round((z5.energy_end)::numeric,7)*1163::numeric)::numeric,3) -- кВт·ч
+else
+round((z5.energy_end)::numeric,7)
+end as energy_end,
+
+CASE when z5.meter_type ='Пульсар Холодосчётчик' then
+round((round((z5.energy_end-z5.energy_start)::numeric,7)*1163::numeric)::numeric,3) -- кВт·ч
+else
+round((z5.energy_end-z5.energy_start)::numeric,7)
+end as energy_delta,
+
 round((z5.volume_start)::numeric,7),
 round((z5.volume_end)::numeric,7),
 round((z5.volume_end-z5.volume_start)::numeric,7) as volume_delta,
@@ -6339,16 +6379,18 @@ round((z5.energy_start::numeric*0.0008604206500956)::numeric,3) as energy_st_gka
 round((z5.energy_end::numeric*0.0008604206500956)::numeric,3)as energy_e_gkal,
 round(((z5.energy_end-z5.energy_start)::numeric*0.0008604206500956)::numeric,3) as energy_delta_gkal
 FROM
-(Select z3.obj_name, z3.ab_name,z3.factory_number_manual, z3.energy_start,z3.volume_start , z4.energy_end,z4.volume_end
+(Select z3.obj_name, z3.ab_name,z3.factory_number_manual, z3.energy_start,z3.volume_start , z4.energy_end,z4.volume_end, z3.meter_type
 from
-(Select z2.daily_date, heat_abons.obj_name, heat_abons.ab_name, heat_abons.factory_number_manual, z2.energy as energy_start,z2.volume as volume_start,z2.t_in as t_in_start,z2.t_out as t_out_start
+(Select z2.daily_date, heat_abons.obj_name, heat_abons.ab_name, heat_abons.factory_number_manual, z2.energy as energy_start,z2.volume as volume_start,z2.t_in as t_in_start,z2.t_out as t_out_start,
+z2.meter_type
 from heat_abons
 left join
 (SELECT z1.daily_date, z1.name_objects, z1.name_abonents, z1.number_manual, 
             MAX(Case when z1.params_name = '%s' then z1.value_daily  end) as energy,
             MAX(Case when z1.params_name = '%s' then z1.value_daily  end) as volume,
             MAX(Case when z1.params_name = '%s' then z1.value_daily  end) as t_in,
-            MAX(Case when z1.params_name = '%s' then z1.value_daily  end) as t_out
+            MAX(Case when z1.params_name = '%s' then z1.value_daily  end) as t_out,
+            meter_type
             
                                     FROM
                                     (SELECT 
@@ -6390,7 +6432,7 @@ left join
             			  names_params.name, 
             			  types_meters.name
                                     ) z1
-            group by z1.name_abonents, z1.daily_date, z1.name_objects, z1.number_manual
+            group by z1.name_abonents, z1.daily_date, z1.name_objects, z1.number_manual, z1.meter_type
             order by z1.name_abonents) as z2
 on z2.number_manual=heat_abons.factory_number_manual
 where heat_abons.obj_name='%s' and heat_abons.type_meter  like '%%%s%%') as z3,
@@ -18779,3 +18821,432 @@ def pulsar_heatmeter_error(error_code: int) -> list | None:
     if len(meter_errors) > 1:
         meter_errors.remove('Ошибок не найдено.')
     return meter_errors
+  
+  
+def get_heat_daily_info_between_2_dates(obj_parent_title, obj_title, heat_data_start, heat_data_end):
+    cursor = connection.cursor()
+    
+    sQuery = """
+        WITH date_range AS (
+            SELECT 
+                to_char(d::date, 'DD.MM') as daily_date,
+                d::date as date_real
+            FROM generate_series(
+                to_date(%s, 'DD.MM.YYYY'),
+                to_date(%s, 'DD.MM.YYYY') - interval '1 day',
+                '1 day'::interval
+            ) d
+        ),
+        ab_data AS (
+            SELECT factory_number_manual
+            FROM heat_abons
+            WHERE obj_name = %s
+              AND ab_name = %s
+              AND type_meter LIKE '%%Теплосчётчик%%'
+        ),
+        daily_pivoted AS (
+            SELECT 
+                z1.daily_date,
+                z1.number_manual,
+                MAX(CASE WHEN z1.params_name = 'Энергия' THEN z1.value_daily END) as energy,
+                MAX(CASE WHEN z1.params_name = 'Ti' THEN z1.value_daily END) as t_in,
+                MAX(CASE WHEN z1.params_name = 'To' THEN z1.value_daily END) as t_out,
+                MAX(CASE WHEN z1.params_name = 'Gi' THEN z1.value_daily END) as G_i,
+                MAX(CASE WHEN z1.params_name = 'Go' THEN z1.value_daily END) as G_o,
+                MAX(CASE WHEN z1.params_name = 'Pi' THEN z1.value_daily END) as P_i,
+                MAX(CASE WHEN z1.params_name = 'Po' THEN z1.value_daily END) as P_o,
+                MAX(CASE WHEN z1.params_name = 'operating_hours' THEN z1.value_daily END) as operating_hours
+            FROM (
+                SELECT 
+                    daily_values.date as daily_date,
+                    daily_values.value as value_daily,
+                    meters.factory_number_manual as number_manual,
+                    names_params.name as params_name
+                FROM public.daily_values
+                JOIN public.taken_params ON daily_values.id_taken_params = taken_params.id
+                JOIN public.params ON taken_params.guid_params = params.guid
+                JOIN public.meters ON taken_params.guid_meters = meters.guid
+                JOIN public.names_params ON params.guid_names_params = names_params.guid
+                WHERE daily_values.date BETWEEN %s AND %s
+            ) z1
+            GROUP BY z1.daily_date, z1.number_manual
+        ),
+        daily_with_next AS (
+            SELECT 
+                dp.daily_date,
+                dp.number_manual,
+                dp.energy, dp.t_in, dp.t_out, dp.G_i, dp.G_o, dp.P_i, dp.P_o, dp.operating_hours,
+                LEAD(dp.energy) OVER (PARTITION BY dp.number_manual ORDER BY dp.daily_date) as energy_next,
+                LEAD(dp.G_i) OVER (PARTITION BY dp.number_manual ORDER BY dp.daily_date) as G_i_next,
+                LEAD(dp.G_o) OVER (PARTITION BY dp.number_manual ORDER BY dp.daily_date) as G_o_next,
+                LEAD(dp.operating_hours) OVER (PARTITION BY dp.number_manual ORDER BY dp.daily_date) as hours_next
+            FROM daily_pivoted dp
+        ),
+        daily_data AS (
+            SELECT 
+                dr.daily_date,
+                dr.date_real,
+                round((dwn.energy_next - dwn.energy)::numeric, 4) as energy_gkal,
+                round(dwn.t_in::numeric, 1) as t_in,
+                round(dwn.t_out::numeric, 1) as t_out,
+                round((dwn.G_i_next - dwn.G_i)::numeric, 2) as G_i,
+                round((dwn.G_o_next - dwn.G_o)::numeric, 2) as G_o,
+                round(((dwn.G_i_next - dwn.G_i) - (dwn.G_o_next - dwn.G_o))::numeric, 2) as G_p,
+                round(((dwn.G_i_next - dwn.G_i) - (dwn.G_o_next - dwn.G_o))::numeric, 2) as G_diff,
+                round(dwn.P_i::numeric, 1) as P_i,
+                round(dwn.P_o::numeric, 1) as P_o,
+                round((dwn.hours_next - dwn.operating_hours)::numeric, 2) as operating_hours,
+                ab.factory_number_manual
+            FROM date_range dr
+            CROSS JOIN ab_data ab
+            LEFT JOIN daily_with_next dwn 
+                ON dwn.daily_date = dr.date_real 
+                AND dwn.number_manual = ab.factory_number_manual
+        )
+        
+        SELECT 
+            daily_date, energy_gkal, t_in, t_out, G_i, G_o, G_p, G_diff, P_i, P_o, operating_hours, factory_number_manual
+        FROM (
+            SELECT 
+                daily_date, date_real, 0 as sort_idx,
+                energy_gkal, t_in, t_out, G_i, G_o, G_p, G_diff, P_i, P_o, operating_hours, factory_number_manual
+            FROM daily_data
+            
+            UNION ALL
+            
+            SELECT 
+                'Итого' as daily_date,
+                NULL::date as date_real,
+                1 as sort_idx,
+                round(SUM(energy_gkal)::numeric, 4),
+                round(AVG(t_in)::numeric, 1),
+                round(AVG(t_out)::numeric, 1),
+                round(SUM(G_i)::numeric, 2),
+                round(SUM(G_o)::numeric, 2),
+                round(SUM(G_p)::numeric, 2),
+                round(SUM(G_diff)::numeric, 2),
+                round(AVG(P_i)::numeric, 1),
+                round(AVG(P_o)::numeric, 1),
+                round(SUM(operating_hours::numeric), 2),
+                NULL
+            FROM daily_data
+        ) AS final_result
+        ORDER BY sort_idx, date_real
+    """
+    
+    cursor.execute(sQuery, [
+        heat_data_start,             # 1. start для generate_series (02.07)
+        heat_data_end,               # 2. end для generate_series (07.07 - 1 = 06.07)
+        obj_parent_title,            # 3. obj_name
+        obj_title,                   # 4. ab_name
+        heat_data_start,             # 5. start для BETWEEN (02.07)
+        heat_data_end                # 6. end для BETWEEN (07.07) — нужен для LEAD последнего дня
+    ])
+    
+    data_table = cursor.fetchall()
+    return data_table
+  
+  
+def get_heat_cumulative_data(obj_parent_title, obj_title, heat_data_start, heat_data_end):
+    cursor = connection.cursor()
+    sQuery = """
+        WITH ab_data AS (
+            SELECT abonents.guid AS ab_guid,
+                abonents.name AS ab_name,
+                objects.name AS obj_name,
+                meters.factory_number_manual,
+                types_meters.name AS type_meter
+            FROM abonents
+            JOIN objects ON abonents.guid_objects = objects.guid
+            JOIN link_abonents_taken_params ON link_abonents_taken_params.guid_abonents = abonents.guid
+            JOIN taken_params ON link_abonents_taken_params.guid_taken_params = taken_params.guid
+            JOIN params ON taken_params.guid_params = params.guid
+            JOIN meters ON taken_params.guid_meters = meters.guid
+            JOIN names_params ON params.guid_names_params = names_params.guid
+            JOIN resources ON names_params.guid_resources = resources.guid
+            JOIN types_meters ON meters.guid_types_meters = types_meters.guid
+            WHERE resources.name = 'Тепло'
+                AND objects.name = %s
+                AND abonents.name = %s
+                AND types_meters.name LIKE '%%Теплосчётчик%%'
+            GROUP BY abonents.guid, abonents.name, objects.name, meters.factory_number_manual,
+                    types_meters.name
+        ),
+        daily_pivoted AS (
+            SELECT 
+                z1.daily_date,
+                z1.number_manual,
+                MAX(CASE WHEN z1.params_name = 'Энергия' THEN z1.value_daily END) as energy,
+                MAX(CASE WHEN z1.params_name = 'Gi' THEN z1.value_daily END) as G_i,
+                MAX(CASE WHEN z1.params_name = 'Go' THEN z1.value_daily END) as G_o,
+                MAX(CASE WHEN z1.params_name = 'operating_hours' THEN z1.value_daily END) as operating_hours
+            FROM (
+                SELECT 
+                    daily_values.date as daily_date,
+                    daily_values.value as value_daily,
+                    meters.factory_number_manual as number_manual,
+                    names_params.name as params_name
+                FROM public.daily_values
+                JOIN public.taken_params ON daily_values.id_taken_params = taken_params.id
+                JOIN public.params ON taken_params.guid_params = params.guid
+                JOIN public.meters ON taken_params.guid_meters = meters.guid
+                JOIN public.names_params ON params.guid_names_params = names_params.guid
+                WHERE daily_values.date BETWEEN %s AND %s
+            ) z1
+            GROUP BY z1.daily_date, z1.number_manual
+        )
+        SELECT
+            ab.factory_number_manual,
+            -- Конечные значения (на heat_data_end, первая строка в отчёте)
+            (SELECT dp.daily_date FROM daily_pivoted dp WHERE dp.number_manual = ab.factory_number_manual AND dp.energy IS NOT NULL AND dp.daily_date = %s LIMIT 1),
+            (SELECT dp.energy FROM daily_pivoted dp WHERE dp.number_manual = ab.factory_number_manual AND dp.energy IS NOT NULL AND dp.daily_date = %s LIMIT 1),
+            (SELECT dp.G_i FROM daily_pivoted dp WHERE dp.number_manual = ab.factory_number_manual AND dp.G_i IS NOT NULL AND dp.daily_date = %s LIMIT 1),
+            (SELECT dp.G_o FROM daily_pivoted dp WHERE dp.number_manual = ab.factory_number_manual AND dp.G_o IS NOT NULL AND dp.daily_date = %s LIMIT 1),
+            (SELECT dp.operating_hours FROM daily_pivoted dp WHERE dp.number_manual = ab.factory_number_manual AND dp.operating_hours IS NOT NULL AND dp.daily_date = %s LIMIT 1),
+            -- Начальные значения (на heat_data_start, вторая строка в отчёте)
+            (SELECT dp.daily_date FROM daily_pivoted dp WHERE dp.number_manual = ab.factory_number_manual AND dp.energy IS NOT NULL AND dp.daily_date = %s LIMIT 1),
+            (SELECT dp.energy FROM daily_pivoted dp WHERE dp.number_manual = ab.factory_number_manual AND dp.energy IS NOT NULL AND dp.daily_date = %s LIMIT 1),
+            (SELECT dp.G_i FROM daily_pivoted dp WHERE dp.number_manual = ab.factory_number_manual AND dp.G_i IS NOT NULL AND dp.daily_date = %s LIMIT 1),
+            (SELECT dp.G_o FROM daily_pivoted dp WHERE dp.number_manual = ab.factory_number_manual AND dp.G_o IS NOT NULL AND dp.daily_date = %s LIMIT 1),
+            (SELECT dp.operating_hours FROM daily_pivoted dp WHERE dp.number_manual = ab.factory_number_manual AND dp.operating_hours IS NOT NULL AND dp.daily_date = %s LIMIT 1)
+        FROM ab_data ab
+    """
+    
+    cursor.execute(sQuery, [
+        obj_parent_title,
+        obj_title,
+        heat_data_start,
+        heat_data_end,
+        heat_data_end,
+        heat_data_end,
+        heat_data_end,
+        heat_data_end,
+        heat_data_end,
+        heat_data_start,
+        heat_data_start,
+        heat_data_start,
+        heat_data_start,
+        heat_data_start
+    ])
+    row = cursor.fetchone()
+    return row
+  
+def get_meter_type(obj_parent_title, obj_title):
+    cursor = connection.cursor()
+    sQuery = """
+        SELECT 
+            types_meters.name
+        FROM 
+            public.abonents, 
+            public.objects, 
+            public.link_abonents_taken_params, 
+            public.taken_params, 
+            public.meters, 
+            public.types_meters
+        WHERE 
+            abonents.guid_objects = objects.guid AND
+            link_abonents_taken_params.guid_taken_params = taken_params.guid AND
+            link_abonents_taken_params.guid_abonents = abonents.guid AND
+            taken_params.guid_meters = meters.guid AND
+            meters.guid_types_meters = types_meters.guid
+            AND objects.name = '%s'
+            AND abonents.name = '%s'
+        LIMIT 1
+    """ % (obj_parent_title, obj_title)
+    
+    cursor.execute(sQuery)
+    row = cursor.fetchone()
+    
+    if row:
+        meter_type = row[0]
+    else:
+        meter_type = 'Не определён'
+    
+    return meter_type
+  
+def get_heat_daily_info_vist(obj_parent_title, obj_title, heat_data_start, heat_data_end, channel=1):
+    """Ежедневные данные для ВИСТ (прямое суммирование/усреднение часовых архивов various_values)"""
+    cursor = connection.cursor()
+    
+    sQuery = """
+        WITH date_range AS (
+            SELECT 
+                to_char(d::date, 'DD.MM') as daily_date,
+                d::date as date_real
+            FROM generate_series(
+                to_date(%s, 'DD.MM.YYYY'),
+                to_date(%s, 'DD.MM.YYYY'),
+                '1 day'::interval
+            ) d
+        ),
+        ab_data AS (
+            SELECT DISTINCT meters.factory_number_manual
+            FROM public.abonents
+            JOIN public.objects ON abonents.guid_objects = objects.guid
+            JOIN public.link_abonents_taken_params ON link_abonents_taken_params.guid_abonents = abonents.guid
+            JOIN public.taken_params ON link_abonents_taken_params.guid_taken_params = taken_params.guid
+            JOIN public.meters ON taken_params.guid_meters = meters.guid
+            WHERE objects.name = %s
+              AND abonents.name = %s
+              AND taken_params.name LIKE %s
+        ),
+        daily_aggregated AS (
+            SELECT 
+                vv.date as daily_date,
+                MAX(m.factory_number_manual) as number_manual,
+                SUM(CASE WHEN np.name = 'Энергия' THEN vv.value ELSE 0 END) as energy,
+                AVG(CASE WHEN np.name = 'Ti' THEN vv.value END) as t_in,
+                AVG(CASE WHEN np.name = 'To' THEN vv.value END) as t_out,
+                SUM(CASE WHEN np.name = 'Gi' THEN vv.value ELSE 0 END) as G_i,
+                SUM(CASE WHEN np.name = 'Go' THEN vv.value ELSE 0 END) as G_o,
+                AVG(CASE WHEN np.name = 'Pi' THEN vv.value END) as P_i,
+                AVG(CASE WHEN np.name = 'Po' THEN vv.value END) as P_o,
+                SUM(CASE WHEN np.name = 'operating_hours' THEN vv.value ELSE 0 END) as operating_hours
+            FROM public.various_values vv
+            JOIN public.taken_params tp ON vv.id_taken_params = tp.id
+            JOIN public.params p ON tp.guid_params = p.guid
+            JOIN public.meters m ON tp.guid_meters = m.guid
+            JOIN public.names_params np ON p.guid_names_params = np.guid
+            JOIN public.link_abonents_taken_params latp ON latp.guid_taken_params = tp.guid
+            JOIN public.abonents a ON latp.guid_abonents = a.guid
+            JOIN public.objects o ON a.guid_objects = o.guid
+            WHERE vv.date BETWEEN %s AND %s
+                AND o.name = %s
+                AND a.name = %s
+                AND tp.name LIKE %s
+            GROUP BY vv.date, m.factory_number_manual
+        ),
+        daily_data AS (
+            SELECT 
+                dr.daily_date,
+                dr.date_real,
+                round(da.energy::numeric, 4) as energy_gkal,
+                round(da.t_in::numeric, 1) as t_in,
+                round(da.t_out::numeric, 1) as t_out,
+                round(da.G_i::numeric, 3) as G_i,
+                round(da.G_o::numeric, 3) as G_o,
+                round((da.G_i - da.G_o)::numeric, 3) as G_p,
+                round((da.G_i - da.G_o)::numeric, 3) as G_diff,
+                round(da.P_i::numeric, 1) as P_i,
+                round(da.P_o::numeric, 1) as P_o,
+                round(da.operating_hours::numeric, 2) as operating_hours,
+                ab.factory_number_manual
+            FROM date_range dr
+            CROSS JOIN ab_data ab
+            LEFT JOIN daily_aggregated da 
+                ON da.daily_date = dr.date_real 
+                AND da.number_manual = ab.factory_number_manual
+        )
+        
+        SELECT 
+            daily_date, energy_gkal, t_in, t_out, G_i, G_o, G_p, G_diff, P_i, P_o, operating_hours, factory_number_manual
+        FROM (
+            SELECT daily_date, date_real, 0 as sort_idx,
+                energy_gkal, t_in, t_out, G_i, G_o, G_p, G_diff, P_i, P_o, operating_hours, factory_number_manual
+            FROM daily_data
+            
+            UNION ALL
+            
+            SELECT 'Итого' as daily_date, NULL::date as date_real, 1 as sort_idx,
+                round(SUM(energy_gkal)::numeric, 4),
+                round(AVG(t_in)::numeric, 1),
+                round(AVG(t_out)::numeric, 1),
+                round(SUM(G_i)::numeric, 3),
+                round(SUM(G_o)::numeric, 3),
+                round(SUM(G_p)::numeric, 3),
+                round(SUM(G_diff)::numeric, 3),
+                round(AVG(P_i)::numeric, 1),
+                round(AVG(P_o)::numeric, 1),
+                round(SUM(operating_hours::numeric), 2),
+                NULL
+            FROM daily_data
+        ) AS final_result
+        ORDER BY sort_idx, date_real
+    """
+    
+    channel_pattern = f'%channel: {channel}%'
+    
+    cursor.execute(sQuery, [
+        heat_data_start,              # 1. generate_series start (ровно с выбранной даты)
+        heat_data_end,                # 2. generate_series end
+        obj_parent_title,             # 3. obj_name для ab_data
+        obj_title,                    # 4. ab_name для ab_data
+        channel_pattern,              # 5. фильтр канала для ab_data
+        heat_data_start,              # 6. BETWEEN start (ровно с выбранной даты, без -1 дня!)
+        heat_data_end,                # 7. BETWEEN end
+        obj_parent_title,             # 8. o.name
+        obj_title,                    # 9. a.name
+        channel_pattern               # 10. фильтр канала
+    ])
+    
+    return cursor.fetchall()
+
+
+def get_heat_cumulative_data_vist(obj_parent_title, obj_title, heat_data_start, heat_data_end, channel=1):
+    """Нарастающий итог для ВИСТ (сумма приращений за период)"""
+    cursor = connection.cursor()
+    
+    sQuery = """
+        WITH ab_data AS (
+            SELECT DISTINCT meters.factory_number_manual
+            FROM public.abonents
+            JOIN public.objects ON abonents.guid_objects = objects.guid
+            JOIN public.link_abonents_taken_params ON link_abonents_taken_params.guid_abonents = abonents.guid
+            JOIN public.taken_params ON link_abonents_taken_params.guid_taken_params = taken_params.guid
+            JOIN public.meters ON taken_params.guid_meters = meters.guid
+            WHERE objects.name = %s
+              AND abonents.name = %s
+              AND taken_params.name LIKE %s
+        ),
+        period_sums AS (
+            SELECT 
+                SUM(CASE WHEN np.name = 'Энергия' THEN vv.value ELSE 0 END) as sum_energy,
+                SUM(CASE WHEN np.name = 'Gi' THEN vv.value ELSE 0 END) as sum_G_i,
+                SUM(CASE WHEN np.name = 'Go' THEN vv.value ELSE 0 END) as sum_G_o,
+                SUM(CASE WHEN np.name = 'operating_hours' THEN vv.value ELSE 0 END) as sum_hours
+            FROM public.various_values vv
+            JOIN public.taken_params tp ON vv.id_taken_params = tp.id
+            JOIN public.params p ON tp.guid_params = p.guid
+            JOIN public.names_params np ON p.guid_names_params = np.guid
+            JOIN public.link_abonents_taken_params latp ON latp.guid_taken_params = tp.guid
+            JOIN public.abonents a ON latp.guid_abonents = a.guid
+            JOIN public.objects o ON a.guid_objects = o.guid
+            WHERE vv.date BETWEEN %s AND %s
+                AND o.name = %s
+                AND a.name = %s
+                AND tp.name LIKE %s
+        )
+        SELECT
+            ab.factory_number_manual,
+            -- Конечные значения (сумма за период)
+            to_date(%s, 'DD.MM.YYYY') as end_date,
+            COALESCE(ps.sum_energy, 0) as end_energy,
+            COALESCE(ps.sum_G_i, 0) as end_G_i,
+            COALESCE(ps.sum_G_o, 0) as end_G_o,
+            COALESCE(ps.sum_hours, 0) as end_hours,
+            -- Начальные значения (нули, т.к. это приращения)
+            to_date(%s, 'DD.MM.YYYY') as start_date,
+            0 as start_energy,
+            0 as start_G_i,
+            0 as start_G_o,
+            0 as start_hours
+        FROM ab_data ab
+        CROSS JOIN period_sums ps
+    """
+    
+    channel_pattern = f'%channel: {channel}%'
+    
+    cursor.execute(sQuery, [
+        obj_parent_title,             # 1. obj_name для ab_data
+        obj_title,                    # 2. ab_name для ab_data
+        channel_pattern,              # 3. фильтр канала
+        heat_data_start,              # 4. BETWEEN start
+        heat_data_end,                # 5. BETWEEN end
+        obj_parent_title,             # 6. o.name
+        obj_title,                    # 7. a.name
+        channel_pattern,              # 8. фильтр канала
+        heat_data_end,                # 9. end_date
+        heat_data_start               # 10. start_date
+    ])
+    
+    return cursor.fetchone()

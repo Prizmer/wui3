@@ -1,0 +1,617 @@
+
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Месячный протокол учета тепловой энергии (ВИСТ)</title>
+    <style>
+        /* === ОБЩИЕ СТИЛИ === */
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 12px;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+        
+        .protocol-container {
+            width: 99%;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .title {
+            text-align: center;
+            font-weight: bold;
+            font-size: 14px;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+        }
+        
+        /* === СТИЛИ ДЛЯ ТАБОВ === */
+        .tabs-container {
+            margin-bottom: 20px;
+        }
+        
+        .tabs-nav {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 0;
+            border-bottom: 2px solid #ddd;
+        }
+        
+        .tab-button {
+            padding: 10px 20px;
+            background-color: #e0e0e0;
+            border: none;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: bold;
+            border-radius: 5px 5px 0 0;
+            transition: all 0.3s;
+            color: #333;
+        }
+        
+        .tab-button:hover {
+            background-color: #d0d0d0;
+        }
+        
+        .tab-button.active {
+            background-color: #0066cc;
+            color: white;
+        }
+        
+        .tab-content {
+            display: none;
+            padding: 20px;
+            background-color: white;
+            border: 1px solid #ddd;
+            border-top: none;
+            border-radius: 0 0 5px 5px;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        /* === ОБЩИЕ СТИЛИ ДЛЯ ТАБЛИЦ === */
+        .form-table,
+        .data-table,
+        .formula-table,
+        .cumulative-table {
+            margin-left: 0px !important;
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+            table-layout: fixed;
+        }
+        
+        .form-table td {
+            padding: 2px 8px;
+            vertical-align: bottom;
+            height: 20px;
+            text-align: left;
+        }
+        
+        /* === ПЕРВАЯ ТАБЛИЦА === */
+        .header-table .col-label-left  { width: 20%; }
+        .header-table .col-value-left  { width: 45%; }
+        .header-table .col-label-right { width: 10%; }
+        .header-table .col-value-right { width: 25%; }
+        
+        .header-table .label {
+            font-weight: bold;
+            white-space: nowrap;
+        }
+        
+        .header-table .value {
+            border-bottom: 1px solid black;
+        }
+
+        /* === ВТОРАЯ ТАБЛИЦА === */
+        .meter-info-table td {
+            height: auto !important;
+            vertical-align: bottom !important;
+            padding-top: 0px;
+        }
+
+        .meter-info-table .col-block-1 { width: 30%; padding-right: 10px; }
+        .meter-info-table .col-block-2 { width: 30%; padding-right: 10px; }
+        .meter-info-table .col-block-3 { width: 40%; }
+        
+        .flow-row {
+            display: flex;
+            align-items: flex-end;
+            gap: 15px;
+            margin-bottom: 12px;
+        }
+        .flow-row:last-child {
+            margin-bottom: 0;
+        }
+        
+        .flow-row .flow-item {
+            width: 60%;
+            flex-shrink: 0;
+        }
+        
+        .flow-row .du-item {
+            width: 35%;
+            flex-shrink: 0;
+        }
+
+        .field-group {
+            display: flex;
+            align-items: flex-end;
+        }
+        
+        .field-group .label {
+            font-weight: bold;
+            white-space: nowrap;
+            margin-right: 6px;
+            flex-shrink: 0;
+        }
+        
+        .field-group .value {
+            border-bottom: 1px solid black;
+            width: 100%;
+            box-sizing: border-box;
+            text-align: center;
+            padding-bottom: 2px;
+            min-height: 14px;
+        }
+
+        /* === ТРЕТЬЯ ТАБЛИЦА === */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            font-size: 11px;
+            table-layout: fixed;
+        }
+        
+        .data-table th, 
+        .data-table td {
+            border: 1px solid black;
+            padding: 4px 2px;
+            text-align: center;
+            vertical-align: middle;
+        }
+        
+        .data-table th {
+            background-color: #f0f0f0;
+            font-weight: bold;
+            white-space: normal;
+            line-height: 1.2;
+        }
+        
+        .data-table .total-row {
+            font-weight: bold;
+            background-color: #f9f9f9;
+        }
+
+        /* === ФОРМУЛА === */
+        .formula-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            font-size: 12px;
+            table-layout: fixed;
+        }
+
+        .formula-table td {
+            padding: 2px 4px;
+            vertical-align: bottom;
+        }
+
+        .formula-table .label-cell {
+            font-weight: bold;
+            white-space: nowrap;
+            text-align: center;
+        }
+
+        .formula-table .value-cell {
+            border-top: 1px solid black;
+            padding-top: 4px;
+            text-align: center;
+        }
+
+        .formula-table .operator-cell {
+            text-align: center;
+            font-weight: normal;
+        }
+
+        .formula-table .note-cell {
+            text-align: left;
+            white-space: normal;
+            padding-left: 0;
+        }
+
+        .formula-table .note-value-cell {
+            text-align: left;
+            padding-left: 0;
+        }
+
+        /* === ЧЕТВЁРТАЯ ТАБЛИЦА === */
+        .cumulative-section {
+            margin-top: 20px;
+            display: flex;
+            gap: 30px;
+            align-items: flex-start;
+        }
+
+        .cumulative-table {
+            flex-grow: 1;
+            border-collapse: collapse;
+            font-size: 11px;
+            table-layout: fixed;
+        }
+
+        .cumulative-table th,
+        .cumulative-table td {
+            border: 1px solid black;
+            padding: 4px 3px;
+            text-align: center;
+            vertical-align: middle;
+        }
+
+        .cumulative-table th {
+            background-color: #f0f0f0;
+            font-weight: bold;
+            white-space: normal;
+            line-height: 1.2;
+        }
+
+        .cumulative-table .total-row {
+            font-weight: bold;
+            background-color: #f9f9f9;
+        }
+
+        .error-decode {
+            width: 200px;
+            flex-shrink: 0;
+            font-size: 11px;
+            line-height: 1.6;
+        }
+
+        .error-decode-title {
+            font-weight: bold;
+            margin-bottom: 5px;
+            text-align: center;
+        }
+
+        .error-decode-list {
+            margin: 0;
+            padding: 0;
+            list-style: none;
+        }
+
+        .error-decode-list li {
+            margin-bottom: 2px;
+        }
+        
+        /* === ИНФОРМАЦИЯ О КАНАЛЕ === */
+        .channel-info {
+            background-color: #e3f2fd;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: bold;
+            color: #1565c0;
+        }
+    </style>
+</head>
+<body>
+<br>
+    <div class="protocol-container">
+        <!-- Заголовок -->
+        <div class="title">
+            Месячный протокол учета тепловой энергии и теплоносителя за {{ month }} мес {{ year }} г.
+        </div>
+        
+        <!-- Навигация по табам -->
+        <div class="tabs-container">
+            <div class="tabs-nav">
+                {% for sys in vist_systems %}
+                <button class="tab-button {% if forloop.first %}active{% endif %}" 
+                        onclick="openTab(event, 'tab{{ forloop.counter }}')">
+                    {{ sys.system_name }}
+                </button>
+                {% endfor %}
+            </div>
+            
+            <!-- Контент табов -->
+            {% for sys in vist_systems %}
+            <div id="tab{{ forloop.counter }}" class="tab-content {% if forloop.first %}active{% endif %}">
+                
+                <!-- Информация о канале -->
+                <div class="channel-info">
+                    {{ sys.system_name }} | Серийный номер: {{ serial_number }}
+                </div>
+                
+                <!-- === ПЕРВАЯ ТАБЛИЦА === -->
+                <table class="form-table header-table">
+                    <colgroup>
+                        <col class="col-label-left">
+                        <col class="col-value-left">
+                        <col class="col-label-right">
+                        <col class="col-value-right">
+                    </colgroup>
+                    <tbody>
+                        <tr>
+                            <td class="label">Название потребителя:</td>
+                            <td class="value">{{ consumer_name }}</td>
+                            <td class="label">Абонент</td>
+                            <td class="value">{{ abonent_name }}</td>
+                        </tr>
+                        <tr>
+                            <td class="label">Адрес потребителя</td>
+                            <td class="value">{{ consumer_address }}</td>
+                            <td class="label">Телефон</td>
+                            <td class="value">{{ phone }}</td>
+                        </tr>
+                        <tr>
+                            <td class="label">Ответственное лицо</td>
+                            <td class="value">{{ responsible_person }}</td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                    </tbody>
+                </table>
+                
+                <!-- === ВТОРАЯ ТАБЛИЦА === -->
+                <table class="form-table meter-info-table">
+                    <colgroup>
+                        <col class="col-block-1">
+                        <col class="col-block-2">
+                        <col class="col-block-3">
+                    </colgroup>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <div class="field-group">
+                                    <span class="label">Вычислитель</span>
+                                    <span class="value">{{ calculator_name }}</span>
+                                </div>
+                                <div class="field-group">
+                                    <span class="label">Отчетное число месяца</span>
+                                    <span class="value">{{ report_day }}</span>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="field-group">
+                                    <span class="label">Сер.ном.</span>
+                                    <span class="value">{{ serial_number }}</span>
+                                </div>
+                                <div class="field-group">
+                                    <span class="label">Отчетное время</span>
+                                    <span class="value">{{ report_time }}</span>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="flow-row">
+                                    <div class="flow-item field-group">
+                                        <span class="label">Расход под</span>
+                                        <span class="value">{{ flow_supply }}</span>
+                                    </div>
+                                    <div class="du-item field-group">
+                                        <span class="label">ДУ</span>
+                                        <span class="value">{{ flow_supply_du }} мм</span>
+                                    </div>
+                                </div>
+                                <div class="flow-row">
+                                    <div class="flow-item field-group">
+                                        <span class="label">Расход обр</span>
+                                        <span class="value">{{ flow_return }}</span>
+                                    </div>
+                                    <div class="du-item field-group">
+                                        <span class="label">ДУ</span>
+                                        <span class="value">{{ flow_return_du }} мм</span>
+                                    </div>
+                                </div>
+                                <div class="flow-row">
+                                    <div class="flow-item field-group">
+                                        <span class="label">Расход подп.</span>
+                                        <span class="value">{{ flow_loose }}</span>
+                                    </div>
+                                    <div class="du-item field-group">
+                                        <span class="label">ДУ</span>
+                                        <span class="value">{{ flow_loose_du }} мм</span>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <!-- === ТРЕТЬЯ ТАБЛИЦА: Ежедневные данные === -->
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 7%;">Дата</th>
+                            <th style="width: 8%;">Qтеп [Гкал]</th>
+                            <th style="width: 8%;">tпод [°C]</th>
+                            <th style="width: 8%;">tобр [°C]</th>
+                            <th style="width: 8%;">Gпод [тонн]</th>
+                            <th style="width: 8%;">Gобр [тонн]</th>
+                            <th style="width: 10%;">Gп [тонн]</th>
+                            <th style="width: 10%;">Gпод-Gобр [тонн]</th>
+                            <th style="width: 10%;">Pпод [ат]</th>
+                            <th style="width: 10%;">Pобр [ат]</th>
+                            <th style="width: 13%;">Tнар [ч]</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in sys.daily_data %}
+                        <tr>
+                            <td>{{ row.0 }}</td>
+                            <td>{{ row.1 }}</td>
+                            <td>{{ row.2 }}</td>
+                            <td>{{ row.3 }}</td>
+                            <td>{{ row.4 }}</td>
+                            <td>{{ row.5 }}</td>
+                            <td>{{ row.6 }}</td>
+                            <td>{{ row.7 }}</td>
+                            <td>{{ row.8 }}</td>
+                            <td>{{ row.9 }}</td>
+                            <td>{{ row.10 }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="11" style="padding: 20px;">Нет данных за выбранный период</td>
+                        </tr>
+                        {% endfor %}
+                        
+                        <!-- Итоговая строка -->
+                        {% if sys.total %}
+                        <tr class="total-row">
+                            <td>Итого</td>
+                            <td>{{ sys.total.0 }}</td>
+                            <td>{{ sys.total.1 }}</td>
+                            <td>{{ sys.total.2 }}</td>
+                            <td>{{ sys.total.3 }}</td>
+                            <td>{{ sys.total.4 }}</td>
+                            <td>{{ sys.total.5 }}</td>
+                            <td>{{ sys.total.6 }}</td>
+                            <td>{{ sys.total.7 }}</td>
+                            <td>{{ sys.total.8 }}</td>
+                            <td>{{ sys.total.9 }}</td>
+                        </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+                
+                <!-- Формула Tотч.пер. -->
+                <table class="formula-table">
+                    <colgroup>
+                        <col style="width: 12%;">
+                        <col style="width: 3%;">
+                        <col style="width: 10%;">
+                        <col style="width: 3%;">
+                        <col style="width: 10%;">
+                        <col style="width: 3%;">
+                        <col style="width: 10%;">
+                        <col style="width: 3%;">
+                        <col style="width: 12%;">
+                        <col style="width: 3%;">
+                        <col style="width: 12%;">
+                        <col style="width: 5%;">
+                        <col style="width: 15%;">
+                    </colgroup>
+                    <tbody>
+                        <tr>
+                            <td class="label-cell">Тотч.пер.</td>
+                            <td class="operator-cell">=</td>
+                            <td class="label-cell">Тнар</td>
+                            <td class="operator-cell">+</td>
+                            <td class="label-cell">Тмакс</td>
+                            <td class="operator-cell">+</td>
+                            <td class="label-cell">Тмин</td>
+                            <td class="operator-cell">+</td>
+                            <td class="label-cell">Тэл.пит</td>
+                            <td class="operator-cell">+</td>
+                            <td class="label-cell note-cell">Тпроч.ав. </td>
+                            <td class="operator-cell"></td>
+                            <td class="label-cell">Тмин = {{ t_min }} ч</td>
+                        </tr>
+                        <tr>
+                            <td class="value-cell">{{ t_otch_per }}</td>
+                            <td></td>
+                            <td class="value-cell">{{ t_nar }}</td>
+                            <td></td>
+                            <td class="value-cell">{{ t_max }}</td>
+                            <td></td>
+                            <td class="value-cell">{{ t_min }}</td>
+                            <td></td>
+                            <td class="value-cell">{{ t_el_pit }}</td>
+                            <td></td>
+                            <td class="value-cell note-value-cell">{{ t_proch_av }}</td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                    </tbody>
+                </table>
+                
+                <!-- === ЧЕТВЁРТАЯ ТАБЛИЦА: Нарастающим итогом === -->
+                <div class="cumulative-section">
+                    <table class="cumulative-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 20%;">T/C Отопление<br>нарастающим итогом</th>
+                                <th style="width: 16%;">Qтеп [Гкал]</th>
+                                <th style="width: 16%;">Gпод [тонн]</th>
+                                <th style="width: 16%;">Gобр [тонны]</th>
+                                <th style="width: 16%;">Gп [тонн]</th>
+                                <th style="width: 16%;">Тнар [час]</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for row in sys.cumulative_data %}
+                            <tr>
+                                <td>{{ row.0 }}</td>
+                                <td>{{ row.1 }}</td>
+                                <td>{{ row.2 }}</td>
+                                <td>{{ row.3 }}</td>
+                                <td>{{ row.4 }}</td>
+                                <td>{{ row.5 }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="6" style="padding: 20px;">Нет данных</td>
+                            </tr>
+                            {% endfor %}
+                            
+                            <!-- Итоговая строка -->
+                            <tr class="total-row">
+                                <td>Итого</td>
+                                <td>{{ sys.total_q }}</td>
+                                <td>{{ sys.total_g_pod }}</td>
+                                <td>{{ sys.total_g_obr }}</td>
+                                <td>{{ sys.total_g_p }}</td>
+                                <td>{{ sys.total_t_nar }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    
+                    <!-- Расшифровка ошибок -->
+                    <div class="error-decode">
+                        <div class="error-decode-title">Расшифровка ошибок:</div>
+                        <ul class="error-decode-list">
+                            <li>(&lt;) параметр &lt; min</li>
+                            <li>(&gt;) параметр &gt; max</li>
+                            <li>(X) обрыв датчика</li>
+                            <li>(T) delta_t &lt; min</li>
+                            <li>(R) перезапуск</li>
+                            <li>(C) коррекц.часов</li>
+                            <li>(#) электропитание</li>
+                        </ul>
+                    </div>
+                </div>
+                
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    
+    <script>
+        function openTab(evt, tabName) {
+            // Скрываем все табы
+            var tabContents = document.getElementsByClassName("tab-content");
+            for (var i = 0; i < tabContents.length; i++) {
+                tabContents[i].classList.remove("active");
+            }
+            
+            // Убираем active со всех кнопок
+            var tabButtons = document.getElementsByClassName("tab-button");
+            for (var i = 0; i < tabButtons.length; i++) {
+                tabButtons[i].classList.remove("active");
+            }
+            
+            // Показываем текущий таб и делаем кнопку активной
+            document.getElementById(tabName).classList.add("active");
+            evt.currentTarget.classList.add("active");
+        }
+    </script>
+</body>
+</html>

@@ -24727,7 +24727,7 @@ def report_pulsar_frost_daily_floors_v2(request):
         ('A5:A5', 'A5', 'Абонент', ali_green_header, 20),
         ('B5:B5', 'B5', 'Счётчик', ali_green_header, 23),
         ('C5:C5', 'C5', 'Этаж', ali_green_header, None),
-        ('D5:D5', 'D5', 'Энергия, Гкал', ali_green_header, 17),
+        ('D5:D5', 'D5', 'Энергия, кВт·ч', ali_green_header, 17),
         ('E5:E5', 'E5', 'Объем, м3', ali_green_header, 17),
         ('F5:F5', 'F5', 'Температура входа, С', ali_green_header, 17),
         ('G5:G5', 'G5', 'Температура выхода, С', ali_green_header, 17),
@@ -24858,9 +24858,9 @@ def report_pulsar_frost_period_v2(request):
         (f'A2:{last_col}2', 'A2', f'Пульсар. Потребление холода с {electric_data_start} по {electric_data_end}', ali_green_title, None),
         ('A5:A5', 'A5', 'Абонент', ali_green_header, 30),
         ('B5:B5', 'B5', 'Счётчик', ali_green_header, 20),
-        ('C5:C5', 'C5', f'Показания Энергии на {electric_data_start}, Гкал', ali_green_header, 17),
-        ('D5:D5', 'D5', f'Показания Энергии на {electric_data_end}, Гкал', ali_green_header, 17),
-        ('E5:E5', 'E5', 'Потребление Энергии, Гкал', ali_green_header, 17),
+        ('C5:C5', 'C5', f'Показания Энергии на {electric_data_start}, кВт·ч', ali_green_header, 17),
+        ('D5:D5', 'D5', f'Показания Энергии на {electric_data_end}, кВт·ч', ali_green_header, 17),
+        ('E5:E5', 'E5', 'Потребление Энергии, кВт·ч', ali_green_header, 17),
         ('F5:F5', 'F5', f'Показания Объёма на {electric_data_start}, м3', ali_green_header, 17),
         ('G5:G5', 'G5', f'Показания Объёма на {electric_data_end}, м3', ali_green_header, 17),
         ('H5:H5', 'H5', 'Потребление Объёма, м3', ali_green_header, 17),
@@ -29404,5 +29404,776 @@ def report_pulsar_water_error(request):
     # Очищаем имя файла от недопустимых символов
     output_name = ''.join(c for c in output_name if c.isalnum() or c in '._- ')
     response['Content-Disposition'] = f'attachment;filename="{output_name}.xlsx"'
+    
+    return response
+
+
+
+def format_cell_by_param(cell, value, param_name, precision_config=None, round_size=3, num_is_string=False):
+    if value is None or value == '':
+        cell.value = ''
+        return
+    try:
+        num_val = float(str(value).replace(',', '.'))
+        col_precision = precision_config.get(param_name, round_size) if precision_config else round_size
+        if col_precision == 0:
+            cell.value = round(num_val)
+            cell.number_format = '0'
+        else:
+            cell.value = round(num_val, col_precision)
+            cell.number_format = f'0.{"0" * col_precision}'
+    except (ValueError, TypeError):
+        cell.value = str(value)
+
+
+def transliterate(text):
+    translit_map = {
+        'а': 'a', 'б': 'b', 'в': 'v', 'г': 'g', 'д': 'd', 'е': 'e', 'ё': 'e',
+        'ж': 'zh', 'з': 'z', 'и': 'i', 'й': 'y', 'к': 'k', 'л': 'l', 'м': 'm',
+        'н': 'n', 'о': 'o', 'п': 'p', 'р': 'r', 'с': 's', 'т': 't', 'у': 'u',
+        'ф': 'f', 'х': 'h', 'ц': 'ts', 'ч': 'ch', 'ш': 'sh', 'щ': 'sch',
+        'ъ': '', 'ы': 'y', 'ь': '', 'э': 'e', 'ю': 'yu', 'я': 'ya',
+        ' ': '_', '-': '_', '/': '_', '\\': '_', '.': '_', ',': '_', ':': '_',
+    }
+    result = []
+    for char in text.lower():
+        result.append(translit_map.get(char, char))
+    return ''.join(result)
+
+import re
+from datetime import datetime
+from django.http import HttpResponse
+from django.conf import settings
+from openpyxl import Workbook
+from openpyxl.styles import Font, Alignment, Border, Side, PatternFill
+from openpyxl.writer.excel import save_virtual_workbook
+from openpyxl.utils import get_column_letter
+from prizmer.heat_report_settings import get_config
+
+
+def format_cell_by_param(cell, value, param_name, precision_config=None, round_size=3, num_is_string=False):
+    if value is None or value == '':
+        cell.value = ''
+        return
+    try:
+        num_val = float(str(value).replace(',', '.'))
+        col_precision = precision_config.get(param_name, round_size) if precision_config else round_size
+        if col_precision == 0:
+            cell.value = round(num_val)
+            cell.number_format = '0'
+        else:
+            cell.value = round(num_val, col_precision)
+            cell.number_format = f'0.{"0" * col_precision}'
+    except (ValueError, TypeError):
+        cell.value = str(value)
+
+
+def transliterate(text):
+    translit_map = {
+        'а': 'a', 'б': 'b', 'в': 'v', 'г': 'g', 'д': 'd', 'е': 'e', 'ё': 'e',
+        'ж': 'zh', 'з': 'z', 'и': 'i', 'й': 'y', 'к': 'k', 'л': 'l', 'м': 'm',
+        'н': 'n', 'о': 'o', 'п': 'p', 'р': 'r', 'с': 's', 'т': 't', 'у': 'u',
+        'ф': 'f', 'х': 'h', 'ц': 'ts', 'ч': 'ch', 'ш': 'sh', 'щ': 'sch',
+        'ъ': '', 'ы': 'y', 'ь': '', 'э': 'e', 'ю': 'yu', 'я': 'ya',
+        ' ': '_', '-': '_', '/': '_', '\\': '_', '.': '_', ',': '_', ':': '_',
+    }
+    result = []
+    for char in text.lower():
+        result.append(translit_map.get(char, char))
+    return ''.join(result)
+
+def report_heat_monthly_VIST(request):
+    ROUND_SIZE = getattr(settings, 'ROUND_SIZE', 3)
+    NUM_IS_STRING = getattr(settings, 'NUM_IS_STRING', False)
+    
+    precision_config = {
+        'default': ROUND_SIZE, 'temperature': 1, 'pressure': 1,
+        'energy': 4, 'flow': 3, 'time': 2,
+    }
+    
+    # === Получаем параметры из GET или сессии ===
+    obj_title = request.GET.get('obj_title', '')
+    obj_key = request.GET.get('obj_key', '')
+    obj_parent_title = request.GET.get('obj_parent_title', '')
+    heat_data_start = request.GET.get('electric_data_start', '')
+    heat_data_end = request.GET.get('electric_data_end', '')
+    
+    if not obj_title:
+        obj_title = request.session.get('obj_title', 'Не выбран')
+    if not obj_key:
+        obj_key = request.session.get('obj_key', 'Не выбран')
+    if not obj_parent_title:
+        obj_parent_title = request.session.get('obj_parent_title', 'Не выбран')
+    if not heat_data_start:
+        heat_data_start = request.session.get('heat_data_start', '')
+    if not heat_data_end:
+        heat_data_end = request.session.get('heat_data_end', '')
+    
+    if obj_title and obj_title != 'Не выбран':
+        request.session['obj_title'] = obj_title
+    if obj_key and obj_key != 'Не выбран':
+        request.session['obj_key'] = obj_key
+    if obj_parent_title and obj_parent_title != 'Не выбран':
+        request.session['obj_parent_title'] = obj_parent_title
+    if heat_data_start:
+        request.session['heat_data_start'] = heat_data_start
+    if heat_data_end:
+        request.session['heat_data_end'] = heat_data_end
+    
+    print(f"=== Параметры: obj_title='{obj_title}', obj_parent_title='{obj_parent_title}', obj_key='{obj_key}' ===")
+    print(f"=== Даты: start='{heat_data_start}', end='{heat_data_end}' ===")
+    
+    if obj_title == 'Не выбран' or obj_parent_title == 'Не выбран' or not obj_title or not obj_parent_title:
+        return HttpResponse(
+            """<!DOCTYPE html>
+            <html lang="ru">
+            <head>
+                <meta charset="UTF-8">
+                <title>Ошибка формирования отчёта</title>
+                <style>
+                    body { font-family: Arial, sans-serif; margin: 40px; }
+                    .error-box { 
+                        max-width: 600px; 
+                        margin: 0 auto; 
+                        padding: 30px; 
+                        border: 2px solid #cc0000; 
+                        border-radius: 8px;
+                        background-color: #fff5f5;
+                    }
+                    h2 { color: #cc0000; margin-top: 0; }
+                    p { font-size: 14px; line-height: 1.6; }
+                    .btn {
+                        display: inline-block;
+                        padding: 10px 20px;
+                        background-color: #0066cc;
+                        color: white;
+                        text-decoration: none;
+                        border-radius: 4px;
+                        margin-top: 20px;
+                    }
+                    .btn:hover { background-color: #0052a3; }
+                </style>
+            </head>
+            <body>
+                <div class="error-box">
+                    <h2>⚠️ Объект не выбран</h2>
+                    <p>Для формирования отчёта необходимо выбрать <strong>объект</strong> и <strong>абонента</strong> в веб-интерфейсе.</p>
+                    <p>Пожалуйста, вернитесь назад, выберите нужный объект в дереве и повторите попытку.</p>
+                    <a href="javascript:history.back()" class="btn">← Вернуться назад</a>
+                </div>
+            </body>
+            </html>""",
+            content_type="text/html; charset=utf-8",
+            status=400
+        )
+    
+    month = ''
+    year = ''
+    if heat_data_end:
+        try:
+            for fmt in ('%Y-%m-%d', '%d.%m.%Y', '%d-%m-%Y'):
+                try:
+                    dt = datetime.strptime(heat_data_end, fmt)
+                    month = str(dt.month)
+                    year = str(dt.year)[-2:]
+                    break
+                except ValueError:
+                    continue
+        except Exception:
+            pass
+    
+    is_abonent_level = re.compile(r'abonent', re.IGNORECASE)
+    is_object_level = re.compile(r'level', re.IGNORECASE)
+    
+    consumer_name = consumer_address = responsible_person = abonent_name = phone = ''
+    calculator_name = report_day = serial_number = report_time = ''
+    flow_supply = flow_supply_du = flow_return = flow_return_du = flow_loose = flow_loose_du = ''
+    
+    daily_data = []
+    total = ()
+    t_otch_per = t_nar = t_max = t_min = t_el_pit = t_proch_av = '—'
+    cumulative_data = []
+    total_q = total_g_pod = total_g_obr = total_g_p = total_t_nar = 0
+    
+    if bool(is_abonent_level.search(obj_key)):
+        try:
+            daily_data_full = common_sql.get_heat_daily_info_between_2_dates(
+                obj_parent_title, obj_title, heat_data_start, heat_data_end
+            )
+            
+            daily_data = []
+            total = ()
+            serial_number = ''
+            
+            for row_data in daily_data_full:
+                if row_data[0] == 'Итого':
+                    total = row_data[1:]
+                else:
+                    daily_data.append(row_data)
+                    if not serial_number and row_data[-1]:
+                        serial_number = row_data[-1]
+            
+            print(f"Получено {len(daily_data)} строк данных, serial_number={serial_number}")
+        except Exception as e:
+            print(f"ERROR daily_data: {e}")
+            import traceback
+            traceback.print_exc()
+        
+        try:
+            cum_row = common_sql.get_heat_cumulative_data(
+                obj_parent_title, obj_title, heat_data_start, heat_data_end
+            )
+            
+            if cum_row:
+                end_date_str = cum_row[1].strftime('%d-%m-%y 00:00') if cum_row[1] else ''
+                start_date_str = cum_row[6].strftime('%d-%m-%y 00:00') if cum_row[6] else ''
+                
+                end_energy = float(cum_row[2] or 0)
+                end_g_pod = float(cum_row[3] or 0)
+                end_g_obr = float(cum_row[4] or 0)
+                end_hours = float(cum_row[5] or 0)
+                
+                start_energy = float(cum_row[7] or 0)
+                start_g_pod = float(cum_row[8] or 0)
+                start_g_obr = float(cum_row[9] or 0)
+                start_hours = float(cum_row[10] or 0)
+                
+                cumulative_data.append((
+                    end_date_str,
+                    round(end_energy, 4),
+                    round(end_g_pod, 2),
+                    round(end_g_obr, 2),
+                    round(end_g_pod - end_g_obr, 2),
+                    round(end_hours, 2)
+                ))
+                cumulative_data.append((
+                    start_date_str,
+                    round(start_energy, 4),
+                    round(start_g_pod, 2),
+                    round(start_g_obr, 2),
+                    round(start_g_pod - start_g_obr, 2),
+                    round(start_hours, 2)
+                ))
+                
+                total_q = round(end_energy - start_energy, 4)
+                total_g_pod = round(end_g_pod - start_g_pod, 2)
+                total_g_obr = round(end_g_obr - start_g_obr, 2)
+                total_g_p = round(total_g_pod - total_g_obr, 2)
+                total_t_nar = round(end_hours - start_hours, 2)
+        except Exception as e:
+            print(f"ERROR cumulative_data: {e}")
+        
+        try:
+            config = get_config(meters=serial_number)
+            consumer_name = config.get('consumer_name', '')
+            consumer_address = config.get('consumer_address', '')
+            responsible_person = config.get('responsible_person', '')
+            phone = config.get('phone', '')
+            calculator_name = config.get('calculator_name', '')
+            flow_supply = config.get('flow_supply', '')
+            flow_supply_du = config.get('flow_supply_du', '')
+            flow_return = config.get('flow_return', '')
+            flow_return_du = config.get('flow_return_du', '')
+            flow_loose = config.get('flow_loose', '')
+            flow_loose_du = config.get('flow_loose_du', '')
+        except Exception as e:
+            print(f"ERROR config: {e}")
+        
+        report_day = getattr(settings, 'REPORT_DAY', '1')
+        report_time = getattr(settings, 'REPORT_TIME', '00:00')
+    
+    elif bool(is_object_level.search(obj_key)):
+        pass
+    
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Протокол"
+    
+    # === СТИЛИ ===
+    title_font = Font(size=12, name='Courier New')
+    normal_font = Font(size=8, name='Courier New')
+    small_font = Font(size=7, name='Courier New')
+    value_font = Font(size=8, name='Arial')
+    
+    data_border = Border(
+        left=Side(style='thin'),
+        right=Side(style='thin'),
+        top=Side(style='thin'),
+        bottom=Side(style='thin')
+    )
+    
+    header_total_border = Border(
+        left=Side(style='thin'),
+        right=Side(style='thin'),
+        top=Side(style='double'),
+        bottom=Side(style='double')
+    )
+    
+    bottom_border = Border(bottom=Side(style='thin'))
+    
+    center_align = Alignment(horizontal='center', vertical='center')
+    left_align = Alignment(horizontal='left', vertical='center')
+    right_align = Alignment(horizontal='right', vertical='center')
+    
+    for i in range(1, 23):
+        ws.column_dimensions[get_column_letter(i)].width = 6.0
+    ws.column_dimensions['B'].width = 9.0
+    ws.column_dimensions['G'].width = 9.0
+    ws.column_dimensions['O'].width = 10.0
+    ws.column_dimensions['P'].width = 10.0
+
+    # === ЗАГОЛОВОК ===
+    ws.merge_cells('A1:V1')
+    ws['A1'] = f"МЕСЯЧНЫЙ ПРОТОКОЛ УЧЕТА ТЕПЛОВОЙ ЭНЕРГИИ\nИ ТЕПЛОНОСИТЕЛЯ ЗА {month} мес {year} г."
+    ws['A1'].font = title_font
+    ws['A1'].alignment = Alignment(horizontal='center', vertical='center', wrap_text=True)
+    ws.row_dimensions[1].height = 35
+
+    # === ПЕРВАЯ ТАБЛИЦА ===
+    row = 3
+    ws.row_dimensions[3].height = 20
+    
+    ws.merge_cells(f'A{row}:D{row}')
+    ws[f'A{row}'] = 'Название потребителя:'
+    ws[f'A{row}'].font = normal_font
+    ws.merge_cells(f'E{row}:O{row}')
+    for c in range(5, 16):
+        ws.cell(row=row, column=c).border = bottom_border
+        ws.cell(row=row, column=c).alignment = left_align
+    ws[f'E{row}'] = consumer_name
+    ws[f'E{row}'].font = value_font
+
+    ws.merge_cells(f'P{row}:Q{row}')
+    ws[f'P{row}'] = 'Абонент'
+    ws[f'P{row}'].font = normal_font
+    ws.merge_cells(f'R{row}:V{row}')
+    for c in range(18, 23):
+        ws.cell(row=row, column=c).border = bottom_border
+        ws.cell(row=row, column=c).alignment = left_align
+    ws[f'R{row}'] = abonent_name if abonent_name else obj_title
+    ws[f'R{row}'].font = value_font
+
+    row += 1
+    ws.merge_cells(f'A{row}:D{row}')
+    ws[f'A{row}'] = 'Адрес потребителя'
+    ws[f'A{row}'].font = normal_font
+    ws.merge_cells(f'E{row}:O{row}')
+    for c in range(5, 16):
+        ws.cell(row=row, column=c).border = bottom_border
+        ws.cell(row=row, column=c).alignment = left_align
+    ws[f'E{row}'] = consumer_address
+    ws[f'E{row}'].font = value_font
+
+    ws.merge_cells(f'P{row}:Q{row}')
+    ws[f'P{row}'] = 'Телефон'
+    ws[f'P{row}'].font = normal_font
+    ws.merge_cells(f'R{row}:V{row}')
+    for c in range(18, 23):
+        ws.cell(row=row, column=c).border = bottom_border
+        ws.cell(row=row, column=c).alignment = left_align
+    ws[f'R{row}'] = phone
+    ws[f'R{row}'].font = value_font
+
+    row += 1
+    ws.merge_cells(f'A{row}:D{row}')
+    ws[f'A{row}'] = 'Ответственное лицо'
+    ws[f'A{row}'].font = normal_font
+    ws.merge_cells(f'E{row}:O{row}')
+    for c in range(5, 16):
+        ws.cell(row=row, column=c).border = bottom_border
+        ws.cell(row=row, column=c).alignment = left_align
+    ws[f'E{row}'] = responsible_person
+    ws[f'E{row}'].font = value_font
+
+    # === ВТОРАЯ ТАБЛИЦА ===
+    def apply_bottom_border(start_col, end_col, r):
+        for c in range(start_col, end_col + 1):
+            ws.cell(row=r, column=c).border = bottom_border
+            ws.cell(row=r, column=c).alignment = left_align
+
+    row = 6
+    ws.merge_cells(f'L{row}:M{row}')
+    ws[f'L{row}'] = 'Расход под'
+    ws[f'L{row}'].font = normal_font
+    ws.merge_cells(f'N{row}:Q{row}')
+    apply_bottom_border(14, 17, row)
+    ws[f'N{row}'] = flow_supply
+    ws[f'N{row}'].font = value_font
+    ws[f'R{row}'] = ''
+    ws[f'S{row}'] = 'ДУ'
+    ws[f'S{row}'].font = normal_font
+    ws.merge_cells(f'T{row}:U{row}')
+    apply_bottom_border(20, 21, row)
+    ws[f'T{row}'] = flow_supply_du
+    ws[f'T{row}'].font = value_font
+    ws[f'V{row}'] = 'мм'
+    ws[f'V{row}'].font = small_font
+
+    row += 1
+    ws.merge_cells(f'A{row}:B{row}')
+    ws[f'A{row}'] = 'Вычислитель'
+    ws[f'A{row}'].font = normal_font
+    ws.merge_cells(f'C{row}:E{row}')
+    ws[f'C{row}'] = calculator_name
+    ws[f'C{row}'].font = value_font
+    ws[f'C{row}'].alignment = center_align
+
+    ws.merge_cells(f'F{row}:G{row}')
+    ws[f'F{row}'] = 'Сер.ном.'
+    ws[f'F{row}'].font = normal_font
+    ws.merge_cells(f'H{row}:J{row}')
+    ws[f'H{row}'] = serial_number
+    ws[f'H{row}'].font = value_font
+    ws[f'H{row}'].alignment = center_align
+
+    ws[f'K{row}'] = ''
+    ws.merge_cells(f'L{row}:M{row}')
+    ws[f'L{row}'] = 'Расход обр'
+    ws[f'L{row}'].font = normal_font
+    ws.merge_cells(f'N{row}:Q{row}')
+    apply_bottom_border(14, 17, row)
+    ws[f'N{row}'] = flow_return
+    ws[f'N{row}'].font = value_font
+    ws[f'R{row}'] = ''
+    ws[f'S{row}'] = 'ДУ'
+    ws[f'S{row}'].font = normal_font
+    ws.merge_cells(f'T{row}:U{row}')
+    apply_bottom_border(20, 21, row)
+    ws[f'T{row}'] = flow_return_du
+    ws[f'T{row}'].font = value_font
+    ws[f'V{row}'] = 'мм'
+    ws[f'V{row}'].font = small_font
+
+    row += 1
+    ws.merge_cells(f'A{row}:B{row}')
+    ws[f'A{row}'] = 'Отчетное число'
+    ws[f'A{row}'].font = normal_font
+    ws.merge_cells(f'C{row}:E{row}')
+    apply_bottom_border(3, 5, row)
+    ws[f'C{row}'] = report_day
+    ws[f'C{row}'].font = value_font
+    ws[f'C{row}'].alignment = center_align
+
+    ws.merge_cells(f'F{row}:G{row}')
+    ws[f'F{row}'] = 'Отчетное время'
+    ws[f'F{row}'].font = normal_font
+    ws.merge_cells(f'H{row}:J{row}')
+    apply_bottom_border(8, 10, row)
+    ws[f'H{row}'] = report_time
+    ws[f'H{row}'].font = value_font
+    ws[f'H{row}'].alignment = center_align
+
+    ws[f'K{row}'] = ''
+    ws.merge_cells(f'L{row}:M{row}')
+    ws[f'L{row}'] = 'Расход подп.'
+    ws[f'L{row}'].font = normal_font
+    ws.merge_cells(f'N{row}:Q{row}')
+    apply_bottom_border(14, 17, row)
+    ws[f'N{row}'] = flow_loose
+    ws[f'N{row}'].font = value_font
+    ws[f'R{row}'] = ''
+    ws[f'S{row}'] = 'ДУ'
+    ws[f'S{row}'].font = normal_font
+    ws.merge_cells(f'T{row}:U{row}')
+    apply_bottom_border(20, 21, row)
+    ws[f'T{row}'] = flow_loose_du
+    ws[f'T{row}'].font = value_font
+    ws[f'V{row}'] = 'мм'
+    ws[f'V{row}'].font = small_font
+
+    # === ТРЕТЬЯ ТАБЛИЦА (Ежедневные данные) ===
+    row += 2
+    headers = [
+        ('Дата', None),
+        ('Qтеп\n[Гкал]', 'energy'),
+        ('tпод\n[оС]', 'temperature'),
+        ('tобр\n[оС]', 'temperature'),
+        ('Gпод\n[тонн]', 'flow'),
+        ('Gобр\n[тонн]', 'flow'),
+        ('Gп\n[тонн]', 'flow'),
+        ('Gпод-Gобр\n[тонн]', 'flow'),
+        ('рпод\n[ат]', 'pressure'),
+        ('pобр\n[ат]', 'pressure'),
+        ('Тнар\n[час]', 'time')
+    ]
+    
+    double_right_cols = {1, 8}  # Дата (idx=1), Gпод-Gобр (idx=8)
+    
+    # Заголовки
+    for col_idx, (header_text, param_name) in enumerate(headers, start=1):
+        start_col = col_idx * 2 - 1
+        end_col = col_idx * 2
+        
+        right_side = Side(style='double') if col_idx in double_right_cols else Side(style='thin')
+        
+        cell_border = Border(
+            left=Side(style='thin'),
+            right=right_side,
+            top=Side(style='double'),
+            bottom=Side(style='double')
+        )
+        right_cell_border = Border(
+            left=Side(style='thin'),
+            right=right_side,
+            top=Side(style='double'),
+            bottom=Side(style='double')
+        )
+        
+        ws.merge_cells(start_row=row, start_column=start_col, end_row=row, end_column=end_col)
+        cell = ws.cell(row=row, column=start_col, value=header_text)
+        cell.font = normal_font
+        cell.alignment = Alignment(horizontal='center', vertical='center', wrap_text=True)
+        cell.border = cell_border
+        ws.cell(row=row, column=end_col).border = right_cell_border
+    
+    ws.row_dimensions[row].height = 30
+    
+    # Данные
+    for data_row in daily_data:
+        row += 1
+        ws.row_dimensions[row].height = 15
+        for col_idx, (header_text, param_name) in enumerate(headers, start=1):
+            start_col = col_idx * 2 - 1
+            end_col = col_idx * 2
+            
+            right_side = Side(style='double') if col_idx in double_right_cols else Side(style='thin')
+            
+            cell_border = Border(
+                left=Side(style='thin'),
+                right=right_side,
+                top=Side(style='thin'),
+                bottom=Side(style='thin')
+            )
+            right_cell_border = Border(
+                left=Side(style='thin'),
+                right=right_side,
+                top=Side(style='thin'),
+                bottom=Side(style='thin')
+            )
+            
+            ws.merge_cells(start_row=row, start_column=start_col, end_row=row, end_column=end_col)
+            cell = ws.cell(row=row, column=start_col)
+            value = data_row[col_idx - 1] if col_idx - 1 < len(data_row) else ''
+            if param_name is None:
+                cell.value = value
+                cell.alignment = center_align
+            else:
+                format_cell_by_param(cell, value, param_name, precision_config, ROUND_SIZE, NUM_IS_STRING)
+                cell.alignment = right_align
+            cell.font = normal_font
+            cell.border = cell_border
+            ws.cell(row=row, column=end_col).border = right_cell_border
+    
+    # Итоговая строка
+    row += 1
+    ws.merge_cells(start_row=row, start_column=1, end_row=row, end_column=2)
+    cell = ws.cell(row=row, column=1, value='Итого')
+    cell.font = normal_font
+    cell.alignment = center_align
+    cell.border = Border(
+        left=Side(style='thin'), right=Side(style='double'),
+        top=Side(style='double'), bottom=Side(style='double')
+    )
+    ws.cell(row=row, column=2).border = Border(
+        left=Side(style='thin'), right=Side(style='double'),
+        top=Side(style='double'), bottom=Side(style='double')
+    )
+    
+    for col_idx, (header_text, param_name) in enumerate(headers[1:], start=2):
+        start_col = col_idx * 2 - 1
+        end_col = col_idx * 2
+        
+        right_side = Side(style='double') if col_idx in double_right_cols else Side(style='thin')
+        total_border = Border(
+            left=Side(style='thin'), right=right_side,
+            top=Side(style='double'), bottom=Side(style='double')
+        )
+        
+        ws.merge_cells(start_row=row, start_column=start_col, end_row=row, end_column=end_col)
+        cell = ws.cell(row=row, column=start_col)
+        value = total[col_idx - 2] if col_idx - 2 < len(total) else ''
+        if param_name:
+            format_cell_by_param(cell, value, param_name, precision_config, ROUND_SIZE, NUM_IS_STRING)
+        else:
+            cell.value = value
+        cell.font = normal_font
+        cell.alignment = right_align
+        cell.border = total_border
+        ws.cell(row=row, column=end_col).border = Border(
+            left=Side(style='thin'), right=right_side,
+            top=Side(style='double'), bottom=Side(style='double')
+        )
+
+    # === ФОРМУЛА ===
+    row += 2
+    formula_layout = [
+        (1, 2, 'Тотч.пер.'), (3, 3, '='), (4, 5, 'Тнар'), (6, 6, '+'), 
+        (7, 8, 'Тмакс'), (9, 9, '+'), (10, 11, 'Тмин'), (12, 12, '+'), 
+        (13, 14, 'Тэл.пит'), (15, 15, '+'), (16, 17, 'Тпроч.ав.'), (18, 22, f'Тмин = {t_min}ч')
+    ]
+    for start_c, end_c, val in formula_layout:
+        if start_c != end_c:
+            ws.merge_cells(start_row=row, start_column=start_c, end_row=row, end_column=end_c)
+        cell = ws.cell(row=row, column=start_c, value=val)
+        cell.font = normal_font
+        cell.alignment = center_align if start_c > 1 else left_align
+
+    row += 1
+    formula_values = [
+        (1, 2, t_otch_per), (3, 3, ''), (4, 5, t_nar), (6, 6, ''), 
+        (7, 8, t_max), (9, 9, ''), (10, 11, t_min), (12, 12, ''), 
+        (13, 14, t_el_pit), (15, 15, ''), (16, 17, t_proch_av), (18, 22, '')
+    ]
+    for start_c, end_c, val in formula_values:
+        if start_c != end_c:
+            ws.merge_cells(start_row=row, start_column=start_c, end_row=row, end_column=end_c)
+        cell = ws.cell(row=row, column=start_c, value=val)
+        cell.alignment = center_align if start_c > 1 else left_align
+
+    # === ЧЕТВЁРТАЯ ТАБЛИЦА (Нарастающим итогом) ===
+    row += 2
+    cum_start_row = row
+    ws.row_dimensions[cum_start_row].height = 30 
+    
+    cum_headers = [
+        ('T/C Отопление\nнарастающим итогом', None),
+        ('Qтеп\n[Гкал]', 'energy'),
+        ('Gпод\n[тонн]', 'flow'),
+        ('Gобр\n[тонны]', 'flow'),
+        ('Gп\n[тонн]', 'flow'),
+        ('Тнар\n[час]', 'time')
+    ]
+    
+    double_right_cols_cum = {1, 2, 5}  # Дата (idx=1), Qтеп (idx=2), Gп (idx=5)
+    
+    # Заголовки
+    for col_idx, (header_text, param_name) in enumerate(cum_headers, start=1):
+        start_col = (col_idx - 1) * 3 + 1
+        end_col = col_idx * 3
+        
+        right_side = Side(style='double') if col_idx in double_right_cols_cum else Side(style='thin')
+        
+        ws.merge_cells(start_row=row, start_column=start_col, end_row=row, end_column=end_col)
+        for c in range(start_col, end_col + 1):
+            cell = ws.cell(row=row, column=c)
+            cell.font = normal_font
+            cell.alignment = Alignment(horizontal='center', vertical='center', wrap_text=True)
+            cell.border = Border(
+                left=Side(style='thin'),
+                right=right_side,
+                top=Side(style='double'),
+                bottom=Side(style='double')
+            )
+        ws.cell(row=row, column=start_col, value=header_text)
+    
+    error_start_row = cum_start_row
+    error_end_row = cum_start_row + 6
+    ws.merge_cells(f'S{error_start_row}:V{error_end_row}')
+    
+    error_text = "Расшифровка ошибок:\n(<) параметр < min\n(>) параметр > max\n(X) обрыв датчика\n(T) delta_t < min\n(R) перезапуск\n(C) коррекц.часов\n(#) электропитание"
+    
+    cell = ws[f'S{error_start_row}']
+    cell.value = error_text
+    cell.font = normal_font
+    cell.alignment = Alignment(horizontal='left', vertical='top', wrap_text=True)
+    
+    # Данные
+    for data_row in cumulative_data:
+        row += 1
+        for col_idx, (header_text, param_name) in enumerate(cum_headers, start=1):
+            start_col = (col_idx - 1) * 3 + 1
+            end_col = col_idx * 3
+            
+            right_side = Side(style='double') if col_idx in double_right_cols_cum else Side(style='thin')
+            
+            ws.merge_cells(start_row=row, start_column=start_col, end_row=row, end_column=end_col)
+            cell = ws.cell(row=row, column=start_col)
+            value = data_row[col_idx - 1] if col_idx - 1 < len(data_row) else ''
+            if param_name is None:
+                cell.value = value
+            else:
+                format_cell_by_param(cell, value, param_name, precision_config, ROUND_SIZE, NUM_IS_STRING)
+            cell.font = normal_font
+            cell.alignment = center_align
+            cell.border = Border(
+                left=Side(style='thin'),
+                right=right_side,
+                top=Side(style='thin'),
+                bottom=Side(style='thin')
+            )
+            for c in range(start_col, end_col + 1):
+                ws.cell(row=row, column=c).border = Border(
+                    left=Side(style='thin'),
+                    right=right_side,
+                    top=Side(style='thin'),
+                    bottom=Side(style='thin')
+                )
+    
+    # Итоговая строка (ячейка "Итого")
+    row += 1
+    ws.merge_cells(start_row=row, start_column=1, end_row=row, end_column=3)
+    cell = ws.cell(row=row, column=1, value='Итого')
+    cell.font = normal_font
+    cell.alignment = center_align
+    cell.border = header_total_border
+    for c in range(1, 4):
+        ws.cell(row=row, column=c).border = header_total_border
+    
+    # Итоговая строка (значения)
+    total_values = [total_q, total_g_pod, total_g_obr, total_g_p, total_t_nar]
+    for col_idx, (header_text, param_name) in enumerate(cum_headers[1:], start=2):
+        start_col = (col_idx - 1) * 3 + 1
+        end_col = col_idx * 3
+        
+        right_side = Side(style='double') if col_idx in double_right_cols_cum else Side(style='thin')
+        
+        ws.merge_cells(start_row=row, start_column=start_col, end_row=row, end_column=end_col)
+        cell = ws.cell(row=row, column=start_col)
+        value = total_values[col_idx - 2] if col_idx - 2 < len(total_values) else ''
+        if param_name:
+            format_cell_by_param(cell, value, param_name, precision_config, ROUND_SIZE, NUM_IS_STRING)
+        else:
+            cell.value = value
+        cell.font = normal_font
+        cell.alignment = center_align
+        cell.border = Border(
+            left=Side(style='thin'),
+            right=right_side,
+            top=Side(style='double'),
+            bottom=Side(style='double')
+        )
+        for c in range(start_col, end_col + 1):
+            ws.cell(row=row, column=c).border = Border(
+                left=Side(style='thin'),
+                right=right_side,
+                top=Side(style='double'),
+                bottom=Side(style='double')
+            )
+
+    # === ПОДВАЛ ===
+    max_content_row = max(row, error_end_row)
+    row = max_content_row + 1
+
+    ws.merge_cells(start_row=row, start_column=1, end_row=row, end_column=15)
+    ws.cell(row=row, column=1, value=f'Тобщ = {total_t_nar}ч').font = normal_font
+    
+    row += 1
+    ws.merge_cells(start_row=row, start_column=1, end_row=row, end_column=15)
+    
+    ws.merge_cells(start_row=row, start_column=16, end_row=row, end_column=22)
+    ws.cell(row=row, column=16, value='Подпись _______________').font = normal_font
+
+    obj_parent_translit = transliterate(obj_parent_title) if obj_parent_title != 'Не выбран' else 'default'
+    obj_title_translit = transliterate(obj_title) if obj_title != 'Не выбран' else 'protocol'
+    heat_data_end_clean = heat_data_end.replace('.', '-').replace('/', '-') if heat_data_end else 'unknown'
+    
+    output_name = f'heat_monthly_{obj_parent_translit}_{obj_title_translit}_{heat_data_end_clean}'
+    output_name = ''.join(c for c in output_name if c.isalnum() or c in '._-')
+    if not output_name or output_name.strip() == '':
+        output_name = 'heat_monthly_protocol'
+    
+    response = HttpResponse(save_virtual_workbook(wb), content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+    response['Content-Disposition'] = f'attachment; filename="{output_name}.xlsx"'
+    response['Content-Length'] = len(response.content)
     
     return response

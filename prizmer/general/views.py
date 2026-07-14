@@ -25,6 +25,8 @@ import calendar
 import common_sql
 from django.shortcuts import redirect
 
+from prizmer.heat_report_settings import get_config #Для отчёта 175 по теплу месячного, как у ВИСТов
+
 #---------
 
 from general.models import Objects, Abonents, BalanceGroups, Meters, LinkBalanceGroupsMeters, Comments, Resources
@@ -13525,3 +13527,200 @@ def pulsar_water_error(request):
     args['electric_data_end'] = electric_data_end
     args['obj_title'] = meters_name
     return render(request, "data_table/water/176.html", args)
+
+def heat_monthly_VIST(request):
+    # === 1. Параметры запроса ===
+    obj_title = 'Не выбран'
+    obj_parent_title = 'Не выбран'
+
+    if request.is_ajax():
+        if request.method == 'GET':
+            request.session["obj_parent_title"] = obj_parent_title = request.GET['obj_parent_title']
+            request.session["obj_title"] = obj_title = request.GET['obj_title']
+            request.session["electric_data_start"] = heat_data_start = request.GET['electric_data_start']
+            request.session["electric_data_end"] = heat_data_end = request.GET['electric_data_end']
+            request.session["obj_key"] = obj_key = request.GET['obj_key']
+    
+    # === 2. Определяем тип прибора ===
+    meter_type = common_sql.get_meter_type(obj_parent_title, obj_title)
+    print(f"=== Тип прибора: {meter_type} ===")
+    
+    # Вычисляем месяц и год
+    month = ''
+    year = ''
+    if heat_data_end:
+        try:
+            dt = datetime.strptime(heat_data_end, '%d.%m.%Y')
+            month = str(dt.month)
+            year = str(dt.year)[-2:]
+        except ValueError:
+            pass
+    
+    # === Инициализация общих переменных ===
+    daily_data = []
+    total = ()
+    serial_number = ''
+    cumulative_data = []
+    total_q = total_g_pod = total_g_obr = total_g_p = total_t_nar = 0
+    vist_systems = []  # Список из 3 систем для ВИСТ
+    
+    # === 3. Получение данных в зависимости от типа прибора ===
+    if 'Пульсар' in meter_type:
+        # --- ПУЛЬСАР ---
+        daily_data_full = common_sql.get_heat_daily_info_between_2_dates(
+            obj_parent_title, obj_title, heat_data_start, heat_data_end
+        )
+        for row in daily_data_full:
+            if row[0] == 'Итого':
+                total = row[1:]
+            else:
+                daily_data.append(row)
+                if not serial_number and row[-1]:
+                    serial_number = row[-1]
+
+        cum_row = common_sql.get_heat_cumulative_data(
+            obj_parent_title, obj_title, heat_data_start, heat_data_end
+        )
+        if cum_row:
+            end_date_str = cum_row[1].strftime('%d-%m-%y 00:00') if cum_row[1] else ''
+            start_date_str = cum_row[6].strftime('%d-%m-%y 00:00') if cum_row[6] else ''
+            end_energy, end_g_pod, end_g_obr, end_hours = float(cum_row[2] or 0), float(cum_row[3] or 0), float(cum_row[4] or 0), float(cum_row[5] or 0)
+            start_energy, start_g_pod, start_g_obr, start_hours = float(cum_row[7] or 0), float(cum_row[8] or 0), float(cum_row[9] or 0), float(cum_row[10] or 0)
+            
+            cumulative_data = [
+                (end_date_str, round(end_energy, 4), round(end_g_pod, 2), round(end_g_obr, 2), round(end_g_pod - end_g_obr, 2), round(end_hours, 2)),
+                (start_date_str, round(start_energy, 4), round(start_g_pod, 2), round(start_g_obr, 2), round(start_g_pod - start_g_obr, 2), round(start_hours, 2))
+            ]
+            total_q = round(end_energy - start_energy, 4)
+            total_g_pod = round(end_g_pod - start_g_pod, 2)
+            total_g_obr = round(end_g_obr - start_g_obr, 2)
+            total_g_p = round(total_g_pod - total_g_obr, 2)
+            total_t_nar = round(end_hours - start_hours, 2)
+    
+    elif 'Вис' in meter_type or meter_type == 'Вис.Т-ТС':
+        # --- ВИСТ (3 канала = 3 системы) ---
+        # Названия систем — заглушки, можно потом поменять на реальные
+        system_names = {1: 'Система 1 (канал 1)', 2: 'Система 2 (канал 2)', 3: 'Система 3 (канал 3)'}
+        
+        for channel in [1, 2, 3]:
+            # Ежедневные данные
+            daily_full = common_sql.get_heat_daily_info_vist(
+                obj_parent_title, obj_title, heat_data_start, heat_data_end, channel
+            )
+            ch_daily = []
+            ch_total = ()
+            ch_serial = ''
+            for row in daily_full:
+                if row[0] == 'Итого':
+                    ch_total = row[1:]
+                else:
+                    ch_daily.append(row)
+                    if not ch_serial and row[-1]:
+                        ch_serial = row[-1]
+            
+            # Серийник берём из первого канала (у всех одинаковый)
+            if channel == 1 and ch_serial:
+                serial_number = ch_serial
+            
+            # Нарастающий итог
+            cum_row = [] #common_sql.get_heat_cumulative_data_vist(
+            #     obj_parent_title, obj_title, heat_data_start, heat_data_end, channel
+            # )
+            ch_cumulative = []
+            ch_total_q = ch_total_g_pod = ch_total_g_obr = ch_total_g_p = ch_total_t_nar = 0
+            
+            if cum_row:
+                end_date_str = cum_row[1].strftime('%d-%m-%y 00:00') if cum_row[1] else ''
+                start_date_str = cum_row[6].strftime('%d-%m-%y 00:00') if cum_row[6] else ''
+                end_energy, end_g_pod, end_g_obr, end_hours = float(cum_row[2] or 0), float(cum_row[3] or 0), float(cum_row[4] or 0), float(cum_row[5] or 0)
+                start_energy, start_g_pod, start_g_obr, start_hours = float(cum_row[7] or 0), float(cum_row[8] or 0), float(cum_row[9] or 0), float(cum_row[10] or 0)
+                
+                ch_cumulative = [
+                    (end_date_str, round(end_energy, 4), round(end_g_pod, 2), round(end_g_obr, 2), round(end_g_pod - end_g_obr, 2), round(end_hours, 2)),
+                    (start_date_str, round(start_energy, 4), round(start_g_pod, 2), round(start_g_obr, 2), round(start_g_pod - start_g_obr, 2), round(start_hours, 2))
+                ]
+                ch_total_q = round(end_energy - start_energy, 4)
+                ch_total_g_pod = round(end_g_pod - start_g_pod, 2)
+                ch_total_g_obr = round(end_g_obr - start_g_obr, 2)
+                ch_total_g_p = round(ch_total_g_pod - ch_total_g_obr, 2)
+                ch_total_t_nar = round(end_hours - start_hours, 2)
+            
+            vist_systems.append({
+                'channel': channel,
+                'system_name': system_names[channel],
+                'daily_data': ch_daily,
+                'total': ch_total,
+                'cumulative_data': ch_cumulative,
+                'total_q': ch_total_q,
+                'total_g_pod': ch_total_g_pod,
+                'total_g_obr': ch_total_g_obr,
+                'total_g_p': ch_total_g_p,
+                'total_t_nar': ch_total_t_nar,
+            })
+    
+    else:
+        print(f"=== Неизвестный тип прибора: {meter_type} ===")
+    
+    # === 4. Статические параметры из конфига ===
+    if serial_number:
+        config = get_config(meters=serial_number)
+    else:
+        config = {}
+    
+    consumer_name = config.get('consumer_name', '')
+    consumer_address = config.get('consumer_address', '')
+    responsible_person = config.get('responsible_person', '')
+    phone = config.get('phone', '')
+    calculator_name = config.get('calculator_name', '')
+    flow_supply = config.get('flow_supply', '')
+    flow_supply_du = config.get('flow_supply_du', '')
+    flow_return = config.get('flow_return', '')
+    flow_return_du = config.get('flow_return_du', '')
+    flow_loose = config.get('flow_loose', '')
+    flow_loose_du = config.get('flow_loose_du', '')
+    
+    report_day = getattr(settings, 'REPORT_DAY', '1')
+    report_time = getattr(settings, 'REPORT_TIME', '00:00')
+    
+    t_otch_per = t_nar = t_max = t_min = t_el_pit = t_proch_av = '—'
+
+    # === 5. Сборка контекста ===
+    args = {
+        'month': month, 'year': year,
+        'consumer_name': consumer_name, 'consumer_address': consumer_address,
+        'responsible_person': responsible_person, 'abonent_name': obj_title, 'phone': phone,
+        'calculator_name': calculator_name, 'serial_number': serial_number,
+        'report_day': report_day, 'report_time': report_time,
+        'flow_supply': flow_supply, 'flow_supply_du': flow_supply_du,
+        'flow_return': flow_return, 'flow_return_du': flow_return_du,
+        'flow_loose': flow_loose, 'flow_loose_du': flow_loose_du,
+        't_otch_per': t_otch_per, 't_nar': t_nar, 't_max': t_max,
+        't_min': t_min, 't_el_pit': t_el_pit, 't_proch_av': t_proch_av,
+        'obj_title': obj_title, 'obj_key': obj_key, 'obj_parent_title': obj_parent_title,
+        'heat_data_start': heat_data_start, 'heat_data_end': heat_data_end,
+        'meter_type': meter_type,
+    }
+    
+    # === 6. Выбираем шаблон в зависимости от типа прибора ===
+    if 'Пульсар' in meter_type:
+        # Для Пульсара добавляем обычные переменные
+        args.update({
+            'daily_data': daily_data,
+            'total': total,
+            'cumulative_data': cumulative_data,
+            'total_q': total_q,
+            'total_g_pod': total_g_pod,
+            'total_g_obr': total_g_obr,
+            'total_g_p': total_g_p,
+            'total_t_nar': total_t_nar,
+        })
+        return render(request, "data_table/heat/175.html", args)
+    
+    elif 'Вис' in meter_type or meter_type == 'Вис.Т-ТС':
+        # Для ВИСТ передаём список систем
+        args['vist_systems'] = vist_systems
+        return render(request, "data_table/heat/175_vist.html", args)
+    
+    else:
+        # Заглушка
+        return render(request, "data_table/heat/175.html", args)
