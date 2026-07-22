@@ -1,5 +1,20 @@
 from django.contrib import admin
 from general.models import Objects, Abonents, Comments, TypesAbonents, Meters, MonthlyValues, DailyValues, CurrentValues, VariousValues, TypesParams, Params, TakenParams, LinkAbonentsTakenParams, Resources, TypesMeters, Measurement, NamesParams, BalanceGroups, LinkMetersComportSettings, LinkMetersTcpipSettings, ComportSettings, TcpipSettings, LinkBalanceGroupsMeters, Groups80020, LinkGroups80020Meters, LinkAbonentsAuthUser
+from django.conf import settings
+
+# === КАСТОМИЗАЦИЯ ЗАГОЛОВКОВ АДМИНКИ ===
+from django.contrib import admin
+from django.conf import settings
+
+# === КАСТОМИЗАЦИЯ ЗАГОЛОВКОВ АДМИНКИ ===
+if settings.IS_RIDAN:
+    admin.site.site_header = 'РИДАН'        
+    admin.site.site_title = 'РИДАН'
+    admin.site.index_title = 'Панель администрирования'
+else:
+    admin.site.site_header = 'ПАК "Правильные Измерения"'
+    admin.site.site_title = 'ПАК "Правильные Измерения"'
+    admin.site.index_title = 'Панель администрирования'
 
 # Register your models here.
 class LinkAbonentsTakenParamsAdmin(admin.ModelAdmin):

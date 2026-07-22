@@ -1,0 +1,10 @@
+-- таблица names_params
+-- ошибки текущие
+INSERT INTO public.names_params(
+	guid, name, guid_measurement, guid_resources)
+	VALUES ('06f68849-3e99-4f36-9650-a2687a82f468','battery_voltage', '06f68849-3e99-4f36-9650-a2687a82f465', 'c0534604-4cf3-4286-8428-8b846270e16f');
+	
+-- ошибки накопленные
+INSERT INTO public.names_params(
+	guid, name, guid_measurement, guid_resources)
+	VALUES ('06f68849-3e99-4f36-9650-a2687a82f468','battery_voltage', '06f68849-3e99-4f36-9650-a2687a82f465', 'c0534604-4cf3-4286-8428-8b846270e16f');
