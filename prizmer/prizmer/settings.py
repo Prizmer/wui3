@@ -128,7 +128,7 @@ DATABASES = {
         # 'NAME': 'tishinka',
         # 'NAME': 'vist_test',
         # 'NAME': 'vist_test',
-        'NAME': 'ostrov_5',
+        # 'NAME': 'ostrov_5',
         # 'NAME': 'pogod22',
         'USER': 'postgres',
         'PASSWORD': '1',
