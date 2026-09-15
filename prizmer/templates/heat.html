@@ -12,7 +12,23 @@
                 <div class="spinner-grow text-warning" style="width: 1rem; height: 1rem;"  role="status" id="fadingBarsG_3"><span class="sr-only">Выполняется...</span></div>
             </div>
         </div>
-        <div class="report-selector">
+		<br>
+		<div class="report-selector">
+			<div class="report-dropdown">
+				<select id="choice_report" style="width:100%;">
+					<option value="0"><strong>Выберите отчёт...</strong></option>
+					
+					{% for report in heat_reports %}
+						<option value="{{ report.number }}">{{ report.number }}. {{ report.name }}</option>
+					{% empty %}
+						<option value="0" disabled>Нет доступных отчётов</option>
+					{% endfor %}
+					
+				</select>
+			</div>
+			<div class="report-export" id="export_report"></div>
+		</div>
+        <!-- div class="report-selector">
 			<div class="report-dropdown">
 				<select id="choice_report" style="width:100%;">
 					<option value="0"><strong>Выберите отчёт...</strong></option>
@@ -33,7 +49,7 @@
 					<!-- <option value="32">32. Показания по теплу. Саяны. Отчет 2</option> -->
 					<!-- <option value="33">33. Расход тепла. Саяны</option> -->
 					<!-- <option value="50">50. Показания по теплу. Текон</option> -->
-					<!-- <option value="51">51. Потребление по теплу. Текон</option> -->
+					<!-- <option value="51">51. Потребление по теплу. Текон</option> 
 					<option value="56">56. Показания по теплу. Теплосчётчик Пульсар/ЭкоНом</option>
 					<option value="59">59. Потребление по теплу. Теплосчётчик Пульсар/ЭкоНом</option>
 					<option value="61">61. Потребление по энергии. Теплосчётчик Пульсар/ЭкоНом</option>
@@ -51,7 +67,7 @@
 					<!-- <option value="111">111. Потребеление по теплу за период (ТЭМ-104)</option> -->
 					<!-- <option value="116">116. Показания по теплу. Теплосчётчик Пульс СТК</option> -->
 					<!-- <option value="115">115. Потребление по теплу. Теплосчётчик Пульс СТК</option> -->
-					<!-- <option value="118">118. Показания по холоду. Холодосчётчик Пульсар</option> -->
+					<!-- <option value="118">118. Показания по холоду. Холодосчётчик Пульсар</option> 
 					<option value="117">117. Потребление по холоду. Холодосчётчик Пульсар</option>
 					<option value="154">154. Показания по холоду. Холодосчётчик Пульсар</option>				
 				
@@ -62,14 +78,14 @@
 					<option value="164">164. Показания по Ридан-теплосчётчикам</option>
 					<option value="165">165. Потребление по Ридан-теплосчётчикам</option>
 					<option value="168">168. Показания по ВЗЛЕТ-теплосчётчикам</option>
-					<option value="169">169. Потребление по ВЗЛЕТ-теплосчётчикам</option> -->
+					<option value="169">169. Потребление по ВЗЛЕТ-теплосчётчикам</option>
 					<option value="130">130. Коды ошибок с теплосчётчика</option>
 					<option value="174">174. Показания по теплочётчикам пульсар с ошибками и напряжением батарейки</option>
-					<option value="175">175. Месячный протокол учета тепловой энергии и теплоносителяр</option>
+					<option value="175">175. Месячный протокол учета тепловой энергии и теплоносителя</option>
 				</select>
 			</div>			
 			<div class="report-export" id ="export_report"></div>	
-		</div>
+		</div -->
     </div>
     <div class="control-side-panel">
         <div class="date-picker-row">

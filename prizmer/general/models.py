@@ -500,6 +500,116 @@ class LinkGroups80020Meters(models.Model):
     def __str__(self):
         return '%s - %s' % (self.guid_groups_80020.name, self.guid_meters.name )
         
+# Новая модель для отчётов - настройки отчёта индивидуальные+формирование инструкций
+class ReportConfig(models.Model):
+    """Настройки отчёта по его номеру. Глобальные для всего сервера."""
+    
+    SEPARATOR_CHOICES = [
+        (',', 'Запятая (123,45)'),
+        ('.', 'Точка (123.45)'),
+    ]
+    
+    ORDER_DIRECTION_CHOICES = [
+        ('asc', 'По возрастанию'),
+        ('desc', 'По убыванию'),
+    ]
+    
+    # === Идентификация ===
+    guid = models.UUIDField(primary_key=True, default=uuid.uuid4)
+    number = models.PositiveIntegerField(
+        unique=True,
+        verbose_name='Номер отчёта',
+        help_text='Уникальный номер отчёта (91, 102, 152 и т.д.)'
+    )
+    name = models.CharField(
+        max_length=200,
+        verbose_name='Название отчёта',
+        help_text='Краткое описание отчёта'
+    )
+    guid_resources = models.ForeignKey(
+        'Resources', 
+        db_column='guid_resources',
+        on_delete=models.CASCADE,
+        verbose_name='Ресурс',
+        help_text='К какому ресурсу относится отчёт'
+    )
+    
+    # === Настройки форматирования ===
+    show_lic_num = models.BooleanField(
+        default=False,
+        verbose_name='Показывать лицевой номер',
+        help_text='Актуально для 91, 102, 104, 106 и старше'
+    )
+    separator = models.CharField(
+        max_length=5,
+        choices=SEPARATOR_CHOICES,
+        default=',',
+        verbose_name='Разделитель'
+    )
+    round_size = models.PositiveSmallIntegerField(
+        default=3,
+        verbose_name='Знаков после запятой'
+    )
+    comment_to_excel = models.BooleanField(
+        default=False,
+        verbose_name='Выводить комментарии в Excel',
+        help_text='Для отчётов 114, 58, 56'
+    )
+    show_stoyak = models.BooleanField(
+        default=True,
+        verbose_name='Показывать стояк',
+        help_text='Для отчётов 152, 157, 158'
+    )
+    show_floors = models.BooleanField(
+        default=True,
+        verbose_name='Показывать этаж',
+        help_text='Для отчётов 152, 144'
+    )
+    num_is_string = models.BooleanField(
+        default=False,
+        verbose_name='Числа как строки',
+        help_text='Выводить ли числа в отчёты как строку'
+    )
+    null_field = models.CharField(
+        max_length=20,
+        default='Н/Д',
+        verbose_name='Обозначение отсутствующих данных',
+        help_text='Что выводить, если данные не считались с прибора'
+    )
+    
+    # === Сортировка ===
+    order_fields = models.CharField(
+        max_length=200,
+        blank=True,
+        default='',
+        verbose_name='Поля сортировки',
+        help_text='Поля через запятую, например: flat_number,name'
+    )
+    order_direction = models.CharField(
+        max_length=4,
+        choices=ORDER_DIRECTION_CHOICES,
+        default='asc',
+        verbose_name='Направление сортировки'
+    )
+    
+    # === Активность ===
+    is_active = models.BooleanField(
+        default=True,
+        verbose_name='Активен',
+        help_text='Отключите, если отчёт больше не используется'
+    )
+    
+    class Meta:
+        db_table = 'report_configs'
+        ordering = ['number']
+        verbose_name = 'Настройка отчёта'
+        verbose_name_plural = 'Настройки отчётов'
+    
+    def __str__(self):
+        return f'№{self.number} {self.name} ({self.guid_resources.name})'
+
+
+
 
 #-------------- Создаем различный набор считываемых парамтров, в зависимости от типа прибора учёта       
 def add_taken_param(sender, instance, created, **kwargs): # Добавляем считываемые параметры при создании счётчика

@@ -16,7 +16,8 @@ from openpyxl.writer.excel import save_virtual_workbook
 import os
 from django.db import connection
 #from general.models import Objects, Abonents, TypesAbonents, Meters, MonthlyValues, DailyValues, CurrentValues, VariousValues, TypesParams, Params, TakenParams, LinkAbonentsTakenParams, Resources, TypesMeters, Measurement, NamesParams, BalanceGroups, LinkMetersComportSettings, LinkMetersTcpipSettings, ComportSettings, TcpipSettings, LinkBalanceGroupsMeters, Groups80020, LinkGroups80020Meters
-from general.models import  Objects, Abonents, TcpipSettings, TypesAbonents, Meters, TypesMeters,LinkAbonentsTakenParams,LinkMetersComportSettings, LinkMetersTcpipSettings, ComportSettings,  TakenParams,Params, LinkAbonentsAuthUser, Groups80020, LinkGroups80020Meters
+from general.models import  Objects, Abonents, TcpipSettings, TypesAbonents, Meters, TypesMeters,LinkAbonentsTakenParams,LinkMetersComportSettings, LinkMetersTcpipSettings, ComportSettings,  TakenParams,Params, LinkAbonentsAuthUser, Groups80020, LinkGroups80020Meters, ReportConfig
+from django.db.models import Count, Q, Case, When, Value, CharField, F
 from django.db.models.signals import pre_save
 from django.db.models.signals import post_save
 from django.db.models import signals
@@ -25,6 +26,13 @@ from django.db.models import Max
 import uuid
 import io
 import sys
+import re
+from django.template.loader import get_template
+from django.template import TemplateDoesNotExist
+
+from django.shortcuts import render
+from django.utils import timezone
+from django.conf import settings
 
 import common_sql, AskueReports
 from html.parser import HTMLParser
@@ -5132,6 +5140,28 @@ def rename_taken_params_by_guid(guid_meter, old_met, new_met):
     except TakenParams.DoesNotExist:
         return False
 
+def extract_device_number_v2(device_str):
+    """
+    Извлекает чистый номер прибора, автоматически отсекая год установки 
+    и любые разделители (№, _, -). Не привязано к конкретным годам.
+    """
+    if not device_str:
+        return None
+        
+    s = str(device_str).strip()
+    
+    # 1. Убираем всё до 2-значного префикса (год), сам префикс и возможный разделитель
+    # ^[^\d]*  -> любые нецифры в начале (например, "№", буквы, пробелы)
+    # \d{2}    -> ровно 2 цифры (год: 20, 21, 24, 30 и т.д.)
+    # [-_]?    -> возможный разделитель после года
+    cleaned = re.sub(r'^[^\d]*\d{2}[-_]?', '', s)
+    
+    # 2. На случай остаточного мусора в конце строки, оставляем только цифры
+    core_num = re.sub(r'\D', '', cleaned)
+    
+    # 3. Возвращаем результат, если он не пустой
+    return core_num if core_num else None
+
 
 def ChangeMeters_v2(old_meter, new_meter):
     result=""
@@ -5143,18 +5173,19 @@ def ChangeMeters_v2(old_meter, new_meter):
     if isExistNewMeter:
         return "Замена невозможна. Новый счётчик уже существует в базе"
     
-    if not(isInt(old_meter)) or not(isInt(new_meter)):
-        return 'Замена невозможна. Номера счётчиков должны быть числами'
+    # if not(isInt(old_meter)) or not(isInt(new_meter)):
+    #     return 'Замена невозможна. Номера счётчиков должны быть числами'
     old_met_obj=Meters.objects.filter(factory_number_manual=old_meter)    
     #Просто меняем meters 
-    new_name = str(old_met_obj[0].name).replace(str(old_meter), str(new_meter))
+    clean_old_meter = extract_device_number_v2(str(old_meter))
+    clean_new_meter = extract_device_number_v2(str(new_meter))
+    new_name = str(old_met_obj[0].name).replace(clean_old_meter, clean_new_meter)
     new_num = str(old_met_obj[0].factory_number_manual).replace(str(old_meter), str(new_meter))
     #делаем проверку,если сетевой равен заводскому, то меняем, иначе не трогаем
     new_address = old_met_obj[0].address
 
-    if str(old_met_obj[0].address) == str(old_met_obj[0].factory_number_manual):
-                
-        new_address = str(old_met_obj[0].address).replace(str(old_meter), str(new_meter))
+    if str(old_met_obj[0].address) == clean_old_meter:
+        new_address = str(old_met_obj[0].address).replace(clean_old_meter, clean_new_meter)
     
     rename_taken_params_by_guid(old_met_obj[0].guid, old_meter, new_meter)
     old_met_obj.update(name=new_name, factory_number_manual = new_num, address = new_address)
@@ -5203,8 +5234,8 @@ def ReplaceMeters_v2(meter1, meter2):
     if not isExistNewMeter:
         return "Замена невозможна. Номера второго счётчика нет в базе"
     
-    if not(isInt(meter1)) or not(isInt(meter2)):
-        return 'Замена невозможна. Номера счётчиков должны быть числами'
+    # if not(isInt(meter1)) or not(isInt(meter2)):
+    #     return 'Замена невозможна. Номера счётчиков должны быть числами'
     
     obj1 = Meters.objects.filter(factory_number_manual = meter1)
     obj2 = Meters.objects.filter(factory_number_manual = meter2)
@@ -6036,7 +6067,7 @@ def change_type_to_gvs(meter):
         
         cursor.execute(update_meters_query, [meter])
         updated_meters = cursor.fetchone()
-        
+        # print('1', result)
         if updated_meters:
             result = f"Обновлен meters: {meter}. "
         else:
@@ -6046,25 +6077,45 @@ def change_type_to_gvs(meter):
         
         # Обновление таблицы taken_params (Объем)
         # Двойные проценты остаются для экранирования в Python
-        update_params_query = """
-            UPDATE public.taken_params
-            SET name = replace(name, 'ХВС', 'ГВС'), 
-                guid_params = '209894a8-8d19-4e4d-bad8-1767eec4fedf'
-            WHERE guid IN (
-                SELECT tp.guid
-                FROM public.taken_params tp
-                JOIN public.meters m ON tp.guid_meters = m.guid
-                WHERE m.factory_number_manual = %s
-                AND tp.name LIKE '%%Пульсар%%ХВС%%Объем%%'
-            )
-        """
+        # update_params_query = """
+        #     UPDATE public.taken_params
+        #     SET name = replace(name, 'ХВС', 'ГВС'), 
+        #         guid_params = '209894a8-8d19-4e4d-bad8-1767eec4fedf'
+        #     WHERE guid IN (
+        #         SELECT tp.guid
+        #         FROM public.taken_params tp
+        #         JOIN public.meters m ON tp.guid_meters = m.guid
+        #         WHERE m.factory_number_manual = %s
+        #         AND tp.name LIKE '%%Пульсар%%ХВС%%Объем%%'
+        #     )
+        # """
         
+        
+        update_params_query = """
+        UPDATE public.taken_params tp
+        SET name = replace(tp.name, 'ХВС', 'ГВС'), 
+            guid_params = (
+                SELECT tp2.guid_params
+                FROM public.taken_params tp2
+                JOIN public.params p ON tp2.guid_params = p.guid
+                JOIN public.names_params np ON p.guid_names_params = np.guid
+                JOIN public.resources r ON np.guid_resources = r.guid
+                WHERE r.name = 'ГВС' 
+                AND tp2.name ILIKE '%%Пульсар%%Объем%%' -- ILIKE игнорирует регистр (Объем/объем)
+                LIMIT 1
+            )
+        FROM public.meters m
+        WHERE tp.guid_meters = m.guid
+        AND m.factory_number_manual = %s
+        AND tp.name ILIKE '%%Пульсар%%ХВС%%Объем%%'
+        """
+        # print(update_params_query)
         cursor.execute(update_params_query, [meter])
         if cursor.rowcount > 0:
             result += f"Обновлен taken_params: Объем ({cursor.rowcount} записей). "
         else:
             result += f"Taken_param Объем не найден. "
-        
+        # print('2', result)
         # Текущие ошибки
         update_params_query = """
             UPDATE public.taken_params
@@ -6106,7 +6157,7 @@ def change_type_to_gvs(meter):
             result += f"Taken_param accumulated_error не найден."
         
         connection.commit()
-        
+        # print('3', result)
     except Exception as e:
         connection.rollback()
         result = f"ОШИБКА: {str(e)}"
@@ -6140,18 +6191,36 @@ def change_type_to_hvs(meter):
         
         # Обновление таблицы taken_params (Объем)
         # Двойные проценты остаются для экранирования в Python
-        update_params_query = """
-            UPDATE public.taken_params
-            SET name = replace(name, 'ГВС', 'ХВС'), 
-                guid_params = '209894a8-8d19-4e4d-bad8-1767eec4fedf'
-            WHERE guid IN (
-                SELECT tp.guid
-                FROM public.taken_params tp
-                JOIN public.meters m ON tp.guid_meters = m.guid
-                WHERE m.factory_number_manual = %s
-                AND tp.name LIKE '%%Пульсар%%ГВС%%Объем%%'
-            )
-        """
+        # update_params_query = """
+        #     UPDATE public.taken_params
+        #     SET name = replace(name, 'ГВС', 'ХВС'), 
+        #         guid_params = '209894a8-8d19-4e4d-bad8-1767eec4fedf'
+        #     WHERE guid IN (
+        #         SELECT tp.guid
+        #         FROM public.taken_params tp
+        #         JOIN public.meters m ON tp.guid_meters = m.guid
+        #         WHERE m.factory_number_manual = %s
+        #         AND tp.name LIKE '%%Пульсар%%ГВС%%Объем%%'
+        #     )
+        # """
+        
+        update_params_query = """UPDATE public.taken_params tp
+            SET name = replace(tp.name, 'ГВС', 'ХВС'), 
+                -- Динамически находим guid_params, который в словаре ссылается на ХВС
+                guid_params = (
+                    SELECT tp2.guid_params
+                    FROM public.taken_params tp2
+                    JOIN public.params p ON tp2.guid_params = p.guid
+                    JOIN public.names_params np ON p.guid_names_params = np.guid
+                    JOIN public.resources r ON np.guid_resources = r.guid
+                    WHERE r.name = 'ХВС' 
+                    AND tp2.name ILIKE '%%Пульсар%%Объем%%'
+                    LIMIT 1
+                )
+            FROM public.meters m
+            WHERE tp.guid_meters = m.guid
+            AND m.factory_number_manual = %s
+            AND tp.name ILIKE '%%Пульсар%%ГВС%%Объем%%'"""
         
         cursor.execute(update_params_query, [meter])
         if cursor.rowcount > 0:
@@ -6246,3 +6315,130 @@ def service_replace_hvs_gvs(request):
     args["meter_gvs"] = meter_gvs
     
     return render(request, "service/service_change_electric.html", args)
+
+
+def passport(request):
+    # Все корневые объекты (level=1) кроме "Вода" и "Группы"
+    root_objects = Objects.objects.filter(level=1).exclude(name__in=['Вода', 'Группы'])
+    
+    # Все активные отчёты (показываем ВСЕ, даже без инструкции)
+    all_reports = ReportConfig.objects.filter(
+        is_active=True
+    ).select_related('guid_resources').order_by('guid_resources__name', 'number')
+    
+    # Для каждого отчёта определяем, какой шаблон инструкции использовать
+    reports = []
+    for report in all_reports:
+        template_name = f'instruction/{report.number}.html'
+        try:
+            get_template(template_name)
+            report.instruction_template = template_name
+        except TemplateDoesNotExist:
+            report.instruction_template = 'instruction/placeholder.html'
+        reports.append(report)
+    
+    # Подсчёт приборов по ресурсам для каждого корневого объекта
+    devices_summary_list = []
+    for root_obj in root_objects:
+        devices_summary_list.append({
+            'root_obj': root_obj,
+            'summary': get_devices_summary_for_object(root_obj),
+        })
+    
+    context = {
+        'root_objects': root_objects,
+        'reports': reports,
+        'devices_summary_list': devices_summary_list,
+        'generated_at': timezone.now(),
+        'is_ridan': settings.IS_RIDAN,
+    }
+    return render(request, 'instruction/passport.html', context)
+
+
+def get_all_child_objects(parent_obj):
+    """Рекурсивно получает все дочерние объекты (включая сам объект)"""
+    all_objects = [parent_obj]
+    children = list(Objects.objects.filter(guid_parent=parent_obj))
+    
+    for child in children:
+        all_objects.extend(get_all_child_objects(child))
+    
+    return all_objects
+
+
+def get_devices_summary_for_object(root_obj):
+    """
+    Возвращает упорядоченный словарь: {имя_ресурса: кол-во_приборов}
+    для конкретного корневого объекта и всех его потомков.
+    """
+    # Получаем все объекты в дереве (включая корневой)
+    all_objects = get_all_child_objects(root_obj)
+    object_guids = [obj.guid for obj in all_objects]
+    
+    # Считаем цифровые и импульсные отдельно
+    summary = (
+        Meters.objects
+        .filter(
+            takenparams__linkabonentstakenparams__guid_abonents__guid_objects__guid__in=object_guids,
+            takenparams__guid_params__guid_names_params__guid_resources__name__in=[
+                'Электричество', 'Тепло', 'ХВС', 'ГВС', 'Холод'
+            ]
+        )
+        # Исключаем служебный счётчик электричества
+        .exclude(
+            Q(factory_number_manual='00000000') & Q(name='A')
+        )
+        .annotate(
+            resource_name=F('takenparams__guid_params__guid_names_params__guid_resources__name'),
+            is_impulse=Case(
+                When(guid_meters__isnull=False, then=Value('impulse')),
+                default=Value('digital'),
+                output_field=CharField()
+            )
+        )
+        .values('resource_name', 'is_impulse')
+        .annotate(count=Count('guid', distinct=True))
+        .order_by('resource_name', 'is_impulse')
+    )
+    
+    # Собираем сырые данные
+    raw_data = {}
+    for item in summary:
+        resource = item['resource_name']
+        is_impulse = item['is_impulse']
+        count = item['count']
+        
+        if resource not in raw_data:
+            raw_data[resource] = {'digital': 0, 'impulse': 0}
+        
+        raw_data[resource][is_impulse] = count
+    
+    # Формируем результат с переименованием и разделением воды
+    result = {}
+    
+    if 'Электричество' in raw_data:
+        result['Электричество'] = sum(raw_data['Электричество'].values())
+    
+    if 'Тепло' in raw_data:
+        result['Тепло'] = sum(raw_data['Тепло'].values())
+    
+    if 'ХВС' in raw_data:
+        digital = raw_data['ХВС']['digital']
+        impulse = raw_data['ХВС']['impulse']
+        if digital > 0:
+            result['Вода ХВС (цифровая)'] = digital
+        if impulse > 0:
+            result['Вода ХВС (импульс)'] = impulse
+    
+    if 'ГВС' in raw_data:
+        digital = raw_data['ГВС']['digital']
+        impulse = raw_data['ГВС']['impulse']
+        if digital > 0:
+            result['Вода ГВС (цифровая)'] = digital
+        if impulse > 0:
+            result['Вода ГВС (импульс)'] = impulse
+    
+    if 'Холод' in raw_data:
+        result['Холод'] = sum(raw_data['Холод'].values())
+    
+    return result

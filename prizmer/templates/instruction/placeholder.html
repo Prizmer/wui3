@@ -1,0 +1,111 @@
+{% load static %}
+
+<details class="instruction-section">
+    <summary class="instruction-header">
+        Инструкция в разработке
+    </summary>
+    
+    <div class="instruction-content">
+        <div class="note-block warning" style="text-align: center; padding: 30px 20px;">
+            <p style="font-size: 14pt; margin-bottom: 15px;">🚧 Инструкция в разработке</p>
+            <p>Инструкция для данного отчёта ещё не подготовлена.</p>
+            <p>По вопросам работы с этим отчётом обратитесь к разработчикам системы.</p>
+        </div>
+    </div>
+</details>
+
+<style>
+    .instruction-section {
+        background: #fff;
+        border: 1px solid #E3F2FD;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        overflow: hidden;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+    
+    .instruction-header {
+        background: linear-gradient(135deg, #FFF3E0 0%, #FFE0B2 100%);
+        color: #E65100;
+        padding: 16px 20px;
+        font-size: 16px;
+        font-weight: 700;
+        cursor: pointer;
+        list-style: none;
+        display: flex;
+        align-items: center;
+        transition: background 0.2s ease;
+    }
+    
+    .instruction-header:hover {
+        background: linear-gradient(135deg, #FFE0B2 0%, #FFCC80 100%);
+    }
+    
+    .instruction-header::after {
+        content: '▼';
+        margin-left: auto;
+        font-size: 12px;
+        transition: transform 0.3s ease;
+    }
+    
+    details[open] .instruction-header::after {
+        transform: rotate(180deg);
+    }
+    
+    .instruction-header::-webkit-details-marker {
+        display: none;
+    }
+
+    .instruction-content {
+        padding: 20px;
+        font-size: 11pt;
+        line-height: 1.6;
+        color: #333;
+    }
+
+    .note-block.warning {
+        background: #FFF3E0;
+        border-left: 4px solid #FF9800;
+        padding: 12px 16px;
+        margin: 20px 0;
+        border-radius: 4px;
+        font-size: 10.5pt;
+        line-height: 1.5;
+    }
+    
+    .note-block.warning strong {
+        color: #E65100;
+    }
+
+    @media print {
+        .instruction-section {
+            border: none;
+            box-shadow: none;
+            margin-bottom: 15px;
+            page-break-inside: avoid;
+        }
+        .instruction-header {
+            display: none;
+        }
+        .instruction-content {
+            display: block !important;
+            padding: 0;
+        }
+        .instruction-section::before {
+            content: "Инструкция в разработке";
+            display: block;
+            font-size: 14pt;
+            font-weight: bold;
+            color: #E65100;
+            border-bottom: 2px solid #FFE0B2;
+            padding-bottom: 5px;
+            margin-bottom: 15px;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+        .note-block.warning {
+            border: 1px solid #ccc;
+            background: #fff8e1 !important;
+        }
+    }
+</style>

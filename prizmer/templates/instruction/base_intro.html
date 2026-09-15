@@ -1,0 +1,219 @@
+{% load static %}
+
+<details class="instruction-section">
+    <summary class="instruction-header">
+        1.2 Запуск приложения и авторизация в системе
+    </summary>
+    
+    <div id="base-intro" class="instruction-content">
+        <p>Для запуска приложения Вам необходимо запустить интернет-браузер и в адресной строке ввести адрес и номер порта (к примеру, <code>http://127.0.0.1:8006/</code>).</p>
+        
+        <p>Для авторизации в системе необходимо ввести <strong>Имя пользователя</strong> и <strong>Пароль</strong> (можно получить у администратора) в соответствующие поля, а затем нажать кнопку «Войти»:</p>
+        
+        <figure class="screenshot">
+            <img src="{% static 'images/instruction-screenshots/auth_login.jpg' %}" alt="Окно авторизации">
+            <figcaption>Рисунок 1. Авторизация в системе</figcaption>
+        </figure>
+
+        <p>После успешной авторизации Вы получаете доступ к основному интерфейсу веб-приложения:</p>
+        
+        <figure class="screenshot">
+            <img src="{% static 'images/instruction-screenshots/main_interface.jpg' %}" alt="Основной интерфейс">
+            <figcaption>Рисунок 2. Основной интерфейс приложения</figcaption>
+        </figure>
+
+        <p>Слева на экране расположена панель с доступными ресурсами. Нажимая на значки, можно получить информацию по каждому конкретному ресурсу. Под панелью с ресурсами располагается дерево объектов. Перемещаясь по нему и выбирая объекты разного уровня, можно получить информацию по прибору, абоненту или группе объектов (корпусу) согласно выбранному отчёту.</p>
+        
+        <p>Нажатие кнопки <strong>«Выход»</strong> возвращает Вас к окну авторизации.</p>
+        
+        <p>Внизу слева, под деревом объектов, находятся:</p>
+        <ul class="feature-list">
+            <li><a href="#base-intro" class="internal-link">Инструкция</a> — общее описание системы;</li>
+            <li><a href="#admin-panel" class="internal-link">Панель администратора</a> — различные инструменты для внесения изменений в систему;</li>
+            <li><a href="#config-panel" class="internal-link">Панель конфигурирования</a> — загрузка новых приборов, удаление приборов, замена номеров приборов, получение списка приборов в системе и т.д.</li>
+        </ul>
+
+        <figure class="screenshot">
+            <img src="{% static 'images/instruction-screenshots/object_tree.jpg' %}" alt="Дерево объектов">
+            <figcaption>Рисунок 3. Дерево объектов</figcaption>
+        </figure>
+
+        <p>В системе предусмотрена возможность оставлять комментарии к абонентам в некоторых отчётах:</p>
+        
+        <figure class="screenshot">
+            <img src="{% static 'images/instruction-screenshots/comment_icon.jpg' %}" alt="Иконка комментария">
+            <figcaption>Рисунок 4. Иконка добавления комментария</figcaption>
+        </figure>
+
+        <p>Для того чтобы оставить комментарий, нажмите на значок 
+            <span class="icon-placeholder">💬</span>. 
+            Затем в появившемся окне оставьте Ваш комментарий и нажмите кнопку <strong>«Сохранить»</strong>:
+        </p>
+        
+        <figure class="screenshot">
+            <img src="{% static 'images/instruction-screenshots/comment_window.jpg' %}" alt="Окно комментария">
+            <figcaption>Рисунок 5. Окно комментария</figcaption>
+        </figure>
+
+        <p>Текст комментария отобразится в соответствующем поле (при добавлении нескольких комментариев отображается последний).</p>
+    </div>
+</details>
+
+<style>
+    .instruction-section {
+        background: #fff;
+        border: 1px solid #E3F2FD;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        overflow: hidden;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+    
+    .instruction-header {
+        background: linear-gradient(135deg, #E3F2FD 0%, #BBDEFB 100%);
+        color: #1976D2;
+        padding: 16px 20px;
+        font-size: 16px;
+        font-weight: 700;
+        cursor: pointer;
+        list-style: none;
+        display: flex;
+        align-items: center;
+        transition: background 0.2s ease;
+    }
+    
+    .instruction-header:hover {
+        background: linear-gradient(135deg, #BBDEFB 0%, #90CAF9 100%);
+    }
+    
+    .instruction-header::after {
+        content: '▼';
+        margin-left: auto;
+        font-size: 12px;
+        transition: transform 0.3s ease;
+    }
+    
+    details[open] .instruction-header::after {
+        transform: rotate(180deg);
+    }
+    
+    .instruction-header::-webkit-details-marker {
+        display: none;
+    }
+
+    .instruction-content {
+        padding: 20px;
+        font-size: 11pt;
+        line-height: 1.6;
+        color: #333;
+    }
+
+    .instruction-content p {
+        margin-bottom: 15px;
+        text-align: justify;
+    }
+
+    .instruction-content code {
+        background: #f4f4f4;
+        padding: 2px 6px;
+        border-radius: 4px;
+        font-family: monospace;
+        color: #d32f2f;
+    }
+
+    .feature-list {
+        margin: 15px 0 25px 20px;
+    }
+    .feature-list li {
+        margin-bottom: 8px;
+    }
+
+    .internal-link {
+        color: #1976D2;
+        text-decoration: none;
+        font-weight: 600;
+        border-bottom: 1px dashed #1976D2;
+        transition: all 0.2s ease;
+    }
+    .internal-link:hover {
+        color: #0D47A1;
+        border-bottom-style: solid;
+    }
+
+    .screenshot {
+        text-align: center;
+        margin: 25px auto;
+        padding: 0 10px;
+        page-break-inside: avoid;
+    }
+    
+    .screenshot img {
+        display: block;
+        margin: 0 auto;
+        max-width: 100%;
+        max-height: 600px;
+        width: auto;
+        height: auto;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        background: #fff;
+        object-fit: contain;
+    }
+    
+    .screenshot figcaption {
+        margin-top: 10px;
+        font-size: 10pt;
+        color: #666;
+        font-style: italic;
+        font-weight: 500;
+    }
+
+    .icon-placeholder {
+        display: inline-block;
+        vertical-align: middle;
+        background: #E3F2FD;
+        color: #1976D2;
+        width: 24px;
+        height: 24px;
+        line-height: 24px;
+        text-align: center;
+        border-radius: 4px;
+        font-size: 14px;
+        margin: 0 4px;
+    }
+
+    @media print {
+        .instruction-section {
+            border: none;
+            box-shadow: none;
+            margin-bottom: 15px;
+            page-break-inside: avoid;
+        }
+        .instruction-header {
+            display: none;
+        }
+        .instruction-content {
+            display: block !important;
+            padding: 0;
+        }
+        .instruction-section::before {
+            content: "1.2 Запуск приложения и авторизация в системе";
+            display: block;
+            font-size: 14pt;
+            font-weight: bold;
+            color: #1976D2;
+            border-bottom: 2px solid #E3F2FD;
+            padding-bottom: 5px;
+            margin-bottom: 15px;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+        .screenshot img {
+            box-shadow: none;
+            border: 1px solid #ccc;
+            max-width: 90%;
+            max-height: 500px;
+        }
+    }
+</style>

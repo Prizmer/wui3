@@ -13,7 +13,23 @@
             </div>
         </div>
 
-        <div class="report-selector">
+		<div class="report-selector">
+			<div class="report-dropdown">
+				<select id="choice_report" style="width:100%;">
+					<option value="0"><strong>Выберите отчёт...</strong></option>
+					
+
+					{% for report in water_reports %}
+						<option value="{{ report.number }}">{{ report.number }}. {{ report.name }}</option>
+					{% empty %}
+						<option value="0" disabled>Нет доступных отчётов</option>
+					{% endfor %}
+					
+				</select>
+			</div>
+			<div class="report-export" id="export_report"></div>
+		</div>
+        <!-- div class="report-selector">
 			<div class="report-dropdown">
 				<select id="choice_report" style="width:100%;">
 					<option value="0"><strong>Выберите отчёт...</strong></option>
@@ -32,17 +48,17 @@
 					<option value="34">34. Показания ХВС Текон</option>
 					<option value="35">35. Потребление за период ХВС Текон</option>
 					<option value="36">36. Показания ГВС Текон</option>
-					<option value="37">37. Потребление за период ГВС Текон</option>-->
+					<option value="37">37. Потребление за период ГВС Текон</option>
 					<option value="38">38. Показания по воде на дату с регистратора импульсов</option>
 					<option value="39">39. Потребление по воде за период с регистратора импульсов</option>
 					<!-- 
-					<option value="58">58. Показания по воде на дату (с водосчётчика Пульсар) ГВС-ХВС </option> -->
+					<option value="58">58. Показания по воде на дату (с водосчётчика Пульсар) ГВС-ХВС </option> 
                     <option value="60">60. Показания в строку по воде на дату (с водосчётчика Пульсар) </option> 
 					<option value="67">67. Потребление в строку ХВС, ГВС (с водосчётчика Пульсар) </option>
 					<option value="73">73. Потребление по воде за период(с водосчётчика Пульсар) ГВС-ХВС</option> 
 					<!-- <option value="133">133. Потребление за период (с теплосчётчика в качестве регистратора импульсов) </option>
 					<option value="134">134. Показания на дату (с теплосчётчика в качестве регистратора импульсов) </option> -->
-					<!-- <option value="136">136. Показания в строку по воде на дату (c теплосчётчиков) </option> -->
+					<!-- <option value="136">136. Показания в строку по воде на дату (c теплосчётчиков) </option> 
 					<option value="138">138. Показания по воде на дату(с водосчётчика Пульсар) ХВС-ГВС</option> 
 				<!-- 	<option value="140">140. Напряжение батареек прибора(с водосчётчика Пульсар)</option>
 					<option value="141">141. Потребление по воде за период(с водосчётчика ЭноНом) </option>
@@ -56,12 +72,12 @@
 					<option value="166">166. Показания по Ридан-водосчётчикам</option>
 					<option value="167">167. Потребление по Ридан-водосчётчикам</option>
 					<option value="170">170. Показания по ВЗЛЕТ-водосчётчикам</option>
-					<option value="171">171. Потребление по ВЗЛЕТ-водосчётчикам</option> -->
+					<option value="171">171. Потребление по ВЗЛЕТ-водосчётчикам</option> 
 					<option value="176">176. Показания по водосчётчикам пульсар с ошибками</option>
 				</select>
 			</div>			
 			<div class="report-export" id ="export_report"></div>	
-		</div>
+		</div -->
     </div>
     <div class="control-side-panel">
         <div class="date-picker-row">

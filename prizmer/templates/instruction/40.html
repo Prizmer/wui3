@@ -1,0 +1,233 @@
+{% load static %}
+
+<details class="instruction-section">
+    <summary class="instruction-header">
+        Отчёт №40: Сверка заводских номеров приборов
+    </summary>
+    
+    <div class="instruction-content">
+        <p><strong>Назначение отчёта:</strong> диагностика несовпадений заводских номеров приборов учёта. Отчёт позволяет выявить:</p>
+        <ul class="styled-list">
+            <li>Приборы, у которых заводской номер, считанный с самого прибора, не совпадает с номером, указанным в базе данных;</li>
+            <li>Случаи, когда необходимо перепрошить сетевой адрес счётчика;</li>
+            <li>Пересечения в линии связи (когда два прибора отвечают на один адрес).</li>
+        </ul>
+
+        <h4>Порядок работы:</h4>
+        <ol class="step-list">
+            <li>В панели ресурсов (слева) выберите <strong>«Электроэнергия»</strong> 
+                <img src="{% static 'images/new_ico/lamp2-ico48.png' %}" alt="Иконка электроэнергии" class="inline-icon">
+            </li>
+            <li>В выпадающем списке отчётов выберите <strong>«№40 — Сверка заводских номеров приборов»</strong>.</li>
+            <li>Отчёт формируется автоматически — выбор объекта и даты не требуется.</li>
+        </ol>
+
+        <figure class="screenshot">
+            <img src="{% static 'images/instruction-screenshots/report_40_result.jpg' %}" alt="Отчёт 40 - Сверка заводских номеров">
+            <figcaption>Рисунок 10. Отчёт «Сверка заводских номеров приборов»</figcaption>
+        </figure>
+
+        <div class="note-block">
+            <strong>Примечание:</strong> Для счётчиков <strong>Меркурий 230</strong> опрос выполняется не по заводскому номеру, а по сетевому адресу. В случае несовпадения данных может потребоваться перепрошивка сетевого адреса прибора на месте.
+        </div>
+
+        <div class="note-block warning">
+            <strong>Важно:</strong> В данном отчёте отсутствует возможность экспорта в Excel. Это связано с тем, что большинство выявленных несоответствий, как правило, устраняются непосредственно на месте.
+        </div>
+    </div>
+</details>
+
+<style>
+    /* === Стили для сворачиваемых разделов === */
+    .instruction-section {
+        background: #fff;
+        border: 1px solid #E3F2FD;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        overflow: hidden;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+    
+    .instruction-header {
+        background: linear-gradient(135deg, #E3F2FD 0%, #BBDEFB 100%);
+        color: #1976D2;
+        padding: 16px 20px;
+        font-size: 16px;
+        font-weight: 700;
+        cursor: pointer;
+        list-style: none;
+        display: flex;
+        align-items: center;
+        transition: background 0.2s ease;
+    }
+    
+    .instruction-header:hover {
+        background: linear-gradient(135deg, #BBDEFB 0%, #90CAF9 100%);
+    }
+    
+    .instruction-header::after {
+        content: '▼';
+        margin-left: auto;
+        font-size: 12px;
+        transition: transform 0.3s ease;
+    }
+    
+    details[open] .instruction-header::after {
+        transform: rotate(180deg);
+    }
+    
+    .instruction-header::-webkit-details-marker {
+        display: none;
+    }
+
+    .instruction-content {
+        padding: 20px;
+        font-size: 11pt;
+        line-height: 1.6;
+        color: #333;
+    }
+
+    .instruction-content h4 {
+        color: #1976D2;
+        margin-top: 25px;
+        margin-bottom: 10px;
+        font-size: 13pt;
+    }
+
+    .instruction-content p {
+        margin-bottom: 15px;
+        text-align: justify;
+    }
+
+    .styled-list {
+        margin: 10px 0 20px 20px;
+        padding: 0;
+    }
+
+    .styled-list li {
+        margin-bottom: 8px;
+    }
+
+    /* Нумерованный список шагов */
+    .step-list {
+        margin: 15px 0 20px 0;
+        padding-left: 25px;
+    }
+    
+    .step-list li {
+        margin-bottom: 12px;
+        line-height: 1.6;
+    }
+    
+    .step-list li::marker {
+        color: #1976D2;
+        font-weight: bold;
+    }
+
+    /* Иконка ресурса внутри текста */
+    .inline-icon {
+        display: inline-block;
+        vertical-align: middle;
+        width: 24px;
+        height: 24px;
+        margin: 0 4px;
+    }
+
+    /* Скриншоты */
+    .screenshot {
+        text-align: center;
+        margin: 25px auto;
+        padding: 0 10px;
+        page-break-inside: avoid;
+    }
+    
+    .screenshot img {
+        display: block;
+        margin: 0 auto;
+        max-width: 100%;
+        max-height: 600px;
+        width: auto;
+        height: auto;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        background: #fff;
+        object-fit: contain;
+    }
+    
+    .screenshot figcaption {
+        margin-top: 10px;
+        font-size: 10pt;
+        color: #666;
+        font-style: italic;
+        font-weight: 500;
+    }
+
+    /* Блоки примечаний */
+    .note-block {
+        background: #E3F2FD;
+        border-left: 4px solid #2196F3;
+        padding: 12px 16px;
+        margin: 20px 0;
+        border-radius: 4px;
+        font-size: 10.5pt;
+        line-height: 1.5;
+    }
+    
+    .note-block.warning {
+        background: #FFF3E0;
+        border-left-color: #FF9800;
+    }
+    
+    .note-block strong {
+        color: #1565C0;
+    }
+    
+    .note-block.warning strong {
+        color: #E65100;
+    }
+
+    /* === АДАПТАЦИЯ ДЛЯ ПЕЧАТИ === */
+    @media print {
+        .instruction-section {
+            border: none;
+            box-shadow: none;
+            margin-bottom: 15px;
+            page-break-inside: avoid;
+        }
+        .instruction-header {
+            display: none;
+        }
+        .instruction-content {
+            display: block !important;
+            padding: 0;
+        }
+        .instruction-section::before {
+            content: "Отчёт №40: Сверка заводских номеров приборов";
+            display: block;
+            font-size: 14pt;
+            font-weight: bold;
+            color: #1976D2;
+            border-bottom: 2px solid #E3F2FD;
+            padding-bottom: 5px;
+            margin-bottom: 15px;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+        .note-block {
+            border: 1px solid #ccc;
+            background: #f9f9f9 !important;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+        .note-block.warning {
+            background: #fff8e1 !important;
+        }
+        .screenshot img {
+            box-shadow: none;
+            border: 1px solid #ccc;
+            max-width: 90%;
+            max-height: 500px;
+        }
+    }
+</style>

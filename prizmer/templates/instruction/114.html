@@ -1,0 +1,148 @@
+{% load static %}
+
+<details class="instruction-section">
+    <summary class="instruction-header">
+        Отчёт №114: Показания на дату. 3 тарифа
+    </summary>
+    
+    <div class="instruction-content">
+        <p><strong>Назначение отчёта:</strong> формирование таблицы показаний по электроэнергии на выбранную дату с учётом трёх тарифов (T1, T2, T3) и автоматическим пересчётом в энергию с применением коэффициентов трансформации (КТТ, КТН).</p>
+
+        <h4>Порядок работы:</h4>
+        <ol class="step-list">
+            <li>В панели ресурсов (слева) выберите <strong>«Электроэнергия»</strong> 
+                <img src="{%static "images/new_ico/lamp2-ico48.png" %}" alt="Иконка электроэнергии" >
+            </li>
+            <li>В дереве объектов раскройте нужный объект (ЖК, корпус).</li>
+            <li>В выпадающем списке отчётов выберите <strong>«№114 — Показания на дату. 3 тарифа»</strong>.</li>
+            <li>В появившемся календаре справа укажите дату, за которую необходимы данные.</li>
+            <li>Дождитесь формирования таблицы в центральной области экрана.</li>
+            <li>Для выгрузки данных в файл Excel нажмите кнопку <strong>«Экспорт»</strong>, расположенную рядом с выпадающим списком отчётов.</li>
+        </ol>
+
+        <figure class="screenshot">
+            <img src="{% static 'images/instruction-screenshots/report_114_start.jpg' %}" alt="Начало работы с отчётом 114">
+            <figcaption>Рисунок 6. Выбор ресурса, объекта и отчёта</figcaption>
+        </figure>
+
+        <figure class="screenshot">
+            <img src="{% static 'images/instruction-screenshots/report_114_result.jpg' %}" alt="Результат отчёта 114">
+            <figcaption>Рисунок 7. Сформированный отчёт «Показания на дату. 3 тарифа»</figcaption>
+        </figure>
+
+        <div class="note-block">
+            <strong>Примечание:</strong> В данном отчёте выполняется пересчёт показаний приборов учёта в энергию с учётом коэффициентов трансформации (КТТ, КТН). Для квартирных приборов учёта указанные коэффициенты, как правило, равны единице.
+        </div>
+
+        <div class="note-block warning">
+            <strong>Важно:</strong> Если на выбранную дату в базе данных отсутствуют показания по одному или нескольким приборам учёта, в соответствующих ячейках таблицы будет отображено значение <code>Н/Д</code> (или иное значение, предусмотренное индивидуальными настройками отчёта).
+        </div>
+
+        <p>Сформированный файл отчёта будет сохранён в папку <strong>«Загрузки»</strong> (или иную директорию, заданную в настройках вашего браузера).</p>
+    </div>
+</details>
+
+<style>
+    /* === Дополнительные стили для инструкций по отчётам === */
+    
+    /* Нумерованный список шагов */
+    .step-list {
+        margin: 15px 0 20px 0;
+        padding-left: 25px;
+        counter-reset: step-counter;
+    }
+    
+    .step-list li {
+        margin-bottom: 12px;
+        line-height: 1.6;
+        position: relative;
+    }
+    
+    .step-list li::marker {
+        color: #1976D2;
+        font-weight: bold;
+    }
+
+    /* Иконка ресурса внутри текста */
+    .inline-icon {
+        display: inline-block;
+        vertical-align: middle;
+        width: 24px;
+        height: 24px;
+        margin: 0 4px;
+    }
+
+    /* Блоки примечаний */
+    .note-block {
+        background: #E3F2FD;
+        border-left: 4px solid #2196F3;
+        padding: 12px 16px;
+        margin: 20px 0;
+        border-radius: 4px;
+        font-size: 10.5pt;
+        line-height: 1.5;
+    }
+    
+    .note-block.warning {
+        background: #FFF3E0;
+        border-left-color: #FF9800;
+    }
+    
+    .note-block strong {
+        color: #1565C0;
+    }
+    
+    .note-block.warning strong {
+        color: #E65100;
+    }
+
+    .note-block code {
+        background: rgba(255, 255, 255, 0.7);
+        padding: 2px 6px;
+        border-radius: 3px;
+        font-family: 'Consolas', 'Monaco', monospace;
+        color: #d32f2f;
+        font-size: 10pt;
+    }
+
+    /* === АДАПТАЦИЯ ДЛЯ ПЕЧАТИ === */
+    @media print {
+        .instruction-section {
+            border: none;
+            box-shadow: none;
+            margin-bottom: 15px;
+            page-break-inside: avoid;
+        }
+        .instruction-header {
+            display: none;
+        }
+        .instruction-content {
+            display: block !important;
+            padding: 0;
+        }
+        .instruction-section::before {
+            content: "Отчёт №114: Показания на дату. 3 тарифа";
+            display: block;
+            font-size: 14pt;
+            font-weight: bold;
+            color: #1976D2;
+            border-bottom: 2px solid #E3F2FD;
+            padding-bottom: 5px;
+            margin-bottom: 15px;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+        .note-block {
+            border: 1px solid #ccc;
+            background: #f9f9f9 !important;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+        .note-block.warning {
+            background: #fff8e1 !important;
+        }
+        .screenshot img {
+            max-width: 85%;
+        }
+    }
+</style>

@@ -25,11 +25,12 @@ import calendar
 import common_sql
 from django.shortcuts import redirect
 
+
 from prizmer.heat_report_settings import get_config #Для отчёта 175 по теплу месячного, как у ВИСТов
 
 #---------
 
-from general.models import Objects, Abonents, BalanceGroups, Meters, LinkBalanceGroupsMeters, Comments, Resources
+from general.models import Objects, Abonents, BalanceGroups, Meters, LinkBalanceGroupsMeters, Comments, Resources, ReportConfig
 from django import forms
 from django.views.decorators.csrf import csrf_protect
 from django.views.decorators.csrf import csrf_exempt
@@ -938,6 +939,7 @@ def tree_data_json_all(request):
     
     #-------------- get data new tree
     max_level = Objects.objects.aggregate(Max('level'))['level__max'] # Max number of levels
+
     if max_level < 3:
         all_level_0 = Objects.objects.filter(level=0)
         tree_data = []
@@ -2870,42 +2872,72 @@ def get_data_table(request):
 
 @login_required(login_url='/auth/login/')  
 def electric(request):
-    args={}
+    args = {}
     args['ico_url_electric'] = "/static/images/electric-ico42.png"
     args['ico_url_water'] = "/static/images/water-ico36.png"
     args['ico_url_heat'] = "/static/images/heat-ico36.png"    
     args['ico_url_gas'] = "/static/images/gas-ico36.png"
     args['ico_url_economic'] = "/static/images/economic-ico36.png"
+    
+    # === НОВОЕ: Получаем только активные отчёты для Электричества ===
+    args['electric_reports'] = ReportConfig.objects.filter(
+        is_active=True,
+        guid_resources__name='Электричество'
+    ).select_related('guid_resources').order_by('number')
+    
     return render(request, 'control.html', args)
 
 @login_required(login_url='/auth/login/')
 def economic(request):
-    args={}
+    args = {}
+    args['ico_url_economic'] = "/static/images/economic-ico42.png"
     args['ico_url_electric'] = "/static/images/electric-ico36.png"
     args['ico_url_water'] = "/static/images/water-ico36.png"
     args['ico_url_heat'] = "/static/images/heat-ico36.png"    
     args['ico_url_gas'] = "/static/images/gas-ico36.png"
-    args['ico_url_economic'] = "/static/images/economic-ico42.png"
+    
+    # Отчёты только для ресурса "Экономика"
+    args['economic_reports'] = ReportConfig.objects.filter(
+        is_active=True,
+        guid_resources__name='Служебные'
+    ).order_by('number')
+    
     return render(request, 'economic.html', args)
+
 
 @login_required(login_url='/auth/login/')    
 def water(request):
-    args={}
-    args['ico_url_electric'] = "/static/images/electric-ico36.png"
+    args = {}
     args['ico_url_water'] = "/static/images/water-ico42.png"
+    args['ico_url_electric'] = "/static/images/electric-ico36.png"
     args['ico_url_heat'] = "/static/images/heat-ico36.png"    
     args['ico_url_gas'] = "/static/images/gas-ico36.png"
     args['ico_url_economic'] = "/static/images/economic-ico36.png"
+    
+    # Для воды берем и ХВС, и ГВС, так как это разные ресурсы в базе
+    args['water_reports'] = ReportConfig.objects.filter(
+        is_active=True,
+        guid_resources__name__in=['ХВС', 'ГВС']
+    ).order_by('number')
+    
     return render(request, 'water.html', args)
     
+
 @login_required(login_url='/auth/login/')    
 def heat(request):
-    args={}
+    args = {}
+    args['ico_url_heat'] = "/static/images/heat-ico42.png"    
     args['ico_url_electric'] = "/static/images/electric-ico36.png"
     args['ico_url_water'] = "/static/images/water-ico36.png"
-    args['ico_url_heat'] = "/static/images/heat-ico42.png"    
     args['ico_url_gas'] = "/static/images/gas-ico36.png"
     args['ico_url_economic'] = "/static/images/economic-ico36.png"
+    
+    # Отчёты только для ресурса "Тепло"
+    args['heat_reports'] = ReportConfig.objects.filter(
+        is_active=True,
+        guid_resources__name='Тепло'
+    ).order_by('number')
+    
     return render(request, 'heat.html', args)
     
 @login_required(login_url='/auth/login/')    

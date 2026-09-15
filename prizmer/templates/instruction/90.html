@@ -1,0 +1,269 @@
+{% load static %}
+
+<details class="instruction-section">
+    <summary class="instruction-header">
+        Отчёт №90: Статистика опросов. Вода импульсная
+    </summary>
+    
+    <div class="instruction-content">
+        <p><strong>Назначение отчёта:</strong> получение сводной статистики по опросу всех импульсных водосчётчиков за выбранную дату. Отчёт позволяет оценить качество сбора данных и выявить приборы, которые не были опрошены.</p>
+
+        <div class="note-block">
+            <strong>Примечание:</strong> Данный отчёт учитывает только импульсные приборы учёта воды, подключённые к регистраторам импульсов. Для статистики по цифровым водосчётчикам предназначен отдельный отчёт №94.
+        </div>
+
+        <h4>Порядок работы:</h4>
+        <ol class="step-list">
+            <li>В панели ресурсов (слева) выберите <strong>«Экономика»</strong> 
+                <img src="{% static 'images/new_ico/econom-ico48.png' %}" alt="Иконка экономики">
+            </li>
+            <li>В выпадающем списке отчётов выберите <strong>«№90 — Статистика опросов. Вода импульсная»</strong>.</li>
+            <li>В появившемся календаре укажите дату, за которую необходима статистика.</li>
+            <li>Дождитесь формирования отчёта в центральной области экрана.</li>
+            <li>Для выгрузки данных в файл Excel нажмите кнопку <strong>«Экспорт»</strong>, расположенную рядом с выпадающим списком отчётов.</li>
+        </ol>
+
+        <figure class="screenshot">
+            <img src="{% static 'images/instruction-screenshots/report_90_result.jpg' %}" alt="Отчёт 90 - Статистика опросов. Вода импульсная">
+            <figcaption>Рисунок 21. Отчёт «Статистика опросов. Вода импульсная»</figcaption>
+        </figure>
+
+        <h4>Состав отчёта:</h4>
+        <p>Отчёт состоит из двух таблиц:</p>
+
+        <p><strong>Первая таблица</strong> — общая статистика по всем импульсным водосчётчикам:</p>
+        <ul class="styled-list">
+            <li>Корпус;</li>
+            <li>Количество опрошенных приборов;</li>
+            <li>Общее количество счётчиков;</li>
+            <li>Процент опроса;</li>
+            <li>Количество счётчиков, которые не были опрошены.</li>
+        </ul>
+
+        <p><strong>Вторая таблица</strong> — подробная информация по приборам, которые не были опрошены:</p>
+        <ul class="styled-list">
+            <li>Имя абонента;</li>
+			<li>Номер прибора учёта;</li>
+            <li>Тип прибора учёта;</li>
+            <li>Номер регистратора импульсов;</li>
+            <li>Канал подключения;</li>
+            <li>IP-сокет.</li>
+        </ul>
+
+        <div class="note-block">
+            <strong>Примечание:</strong> При выгрузке отчёта в файл Excel каждая таблица размещается на отдельном листе: первая таблица — на первом листе, вторая таблица — на втором листе.
+        </div>
+
+        <p>Сформированный файл отчёта будет сохранён в папку <strong>«Загрузки»</strong> (или иную директорию, заданную в настройках вашего браузера).</p>
+    </div>
+</details>
+
+<style>
+    /* === Стили для сворачиваемых разделов === */
+    .instruction-section {
+        background: #fff;
+        border: 1px solid #E3F2FD;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        overflow: hidden;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+    
+    .instruction-header {
+        background: linear-gradient(135deg, #E3F2FD 0%, #BBDEFB 100%);
+        color: #1976D2;
+        padding: 16px 20px;
+        font-size: 16px;
+        font-weight: 700;
+        cursor: pointer;
+        list-style: none;
+        display: flex;
+        align-items: center;
+        transition: background 0.2s ease;
+    }
+    
+    .instruction-header:hover {
+        background: linear-gradient(135deg, #BBDEFB 0%, #90CAF9 100%);
+    }
+    
+    .instruction-header::after {
+        content: '▼';
+        margin-left: auto;
+        font-size: 12px;
+        transition: transform 0.3s ease;
+    }
+    
+    details[open] .instruction-header::after {
+        transform: rotate(180deg);
+    }
+    
+    .instruction-header::-webkit-details-marker {
+        display: none;
+    }
+
+    .instruction-content {
+        padding: 20px;
+        font-size: 11pt;
+        line-height: 1.6;
+        color: #333;
+    }
+
+    .instruction-content h4 {
+        color: #1976D2;
+        margin-top: 25px;
+        margin-bottom: 10px;
+        font-size: 13pt;
+    }
+
+    .instruction-content p {
+        margin-bottom: 15px;
+        text-align: justify;
+    }
+
+    .styled-list {
+        margin: 10px 0 20px 20px;
+        padding: 0;
+    }
+
+    .styled-list li {
+        margin-bottom: 8px;
+    }
+
+    .step-list {
+        margin: 15px 0 20px 0;
+        padding-left: 25px;
+    }
+    
+    .step-list li {
+        margin-bottom: 12px;
+        line-height: 1.6;
+    }
+    
+    .step-list li::marker {
+        color: #1976D2;
+        font-weight: bold;
+    }
+
+    .step-list ul {
+        margin: 8px 0 0 20px;
+        padding: 0;
+    }
+    
+    .step-list ul li {
+        margin-bottom: 6px;
+        font-size: 10.5pt;
+    }
+
+    .inline-icon,
+    .instruction-content img[alt^="Иконка"] {
+        display: inline-block;
+        vertical-align: middle;
+        width: 24px;
+        height: 24px;
+        margin: 0 4px;
+    }
+
+    .screenshot {
+        text-align: center;
+        margin: 25px auto;
+        padding: 0 10px;
+        page-break-inside: avoid;
+    }
+    
+    .screenshot img {
+        display: block;
+        margin: 0 auto;
+        max-width: 100%;
+        max-height: 600px;
+        width: auto;
+        height: auto;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        background: #fff;
+        object-fit: contain;
+    }
+    
+    .screenshot figcaption {
+        margin-top: 10px;
+        font-size: 10pt;
+        color: #666;
+        font-style: italic;
+        font-weight: 500;
+    }
+
+    .note-block {
+        background: #E3F2FD;
+        border-left: 4px solid #2196F3;
+        padding: 12px 16px;
+        margin: 20px 0;
+        border-radius: 4px;
+        font-size: 10.5pt;
+        line-height: 1.5;
+    }
+    
+    .note-block.warning {
+        background: #FFF3E0;
+        border-left-color: #FF9800;
+    }
+    
+    .note-block strong {
+        color: #1565C0;
+    }
+    
+    .note-block.warning strong {
+        color: #E65100;
+    }
+
+    .note-block code {
+        background: rgba(255, 255, 255, 0.7);
+        padding: 2px 6px;
+        border-radius: 3px;
+        font-family: 'Consolas', 'Monaco', monospace;
+        color: #d32f2f;
+        font-size: 10pt;
+    }
+
+    @media print {
+        .instruction-section {
+            border: none;
+            box-shadow: none;
+            margin-bottom: 15px;
+            page-break-inside: avoid;
+        }
+        .instruction-header {
+            display: none;
+        }
+        .instruction-content {
+            display: block !important;
+            padding: 0;
+        }
+        .instruction-section::before {
+            content: "Отчёт №90: Статистика опросов. Вода импульсная";
+            display: block;
+            font-size: 14pt;
+            font-weight: bold;
+            color: #1976D2;
+            border-bottom: 2px solid #E3F2FD;
+            padding-bottom: 5px;
+            margin-bottom: 15px;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+        .note-block {
+            border: 1px solid #ccc;
+            background: #f9f9f9 !important;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+        .note-block.warning {
+            background: #fff8e1 !important;
+        }
+        .screenshot img {
+            box-shadow: none;
+            border: 1px solid #ccc;
+            max-width: 90%;
+            max-height: 500px;
+        }
+    }
+</style>

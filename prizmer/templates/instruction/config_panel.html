@@ -1,0 +1,312 @@
+{% load static %}
+
+<details class="instruction-section">
+    <summary class="instruction-header">
+        2.3 Панель конфигурирования
+    </summary>
+    
+    <div class="instruction-content">
+        <p><strong>Назначение:</strong> панель конфигурирования предоставляет набор инструментов для управления приборами учёта, загрузки данных и обслуживания системы. Доступ к панели осуществляется через соответствующую кнопку в виде разводного ключа, расположенную под деревом объектов. Кнопки отображаются в нижней части экрана вне зависимости от выбранного ресурса.</p>
+
+        <figure class="screenshot">
+            <img src="{% static 'images/instruction-screenshots/config_panel_button.jpg' %}" alt="Кнопка панели конфигурирования">
+            <figcaption>Рисунок 26. Кнопка перехода к панели конфигурирования</figcaption>
+        </figure>
+
+        <figure class="screenshot">
+            <img src="{% static 'images/instruction-screenshots/config_panel_main.jpg' %}" alt="Панель конфигурирования">
+            <figcaption>Рисунок 27. Общий вид панели конфигурирования</figcaption>
+        </figure>
+
+        <h4>Доступные разделы панели:</h4>
+        <ol class="step-list">
+            <li><strong>Загрузка файла</strong> — загрузка произвольных файлов на сервер;</li>
+            <li><strong>Цифровые приборы</strong> — загрузка цифровых приборов учёта, а также данных для отчёта по форме 80020;</li>
+            <li><strong>Импульсные приборы</strong> — загрузка импульсных приборов учёта;</li>
+            <li><strong>Замена счётчиков</strong> — замена заводского номера, обмен приборами местами, смена типа прибора;</li>
+            <li><strong>Информация по объекту</strong> — экспорт данных о приборах в формате .xlsx по ресурсам;</li>
+            <li><strong>Балансные группы</strong> — загрузка балансных групп;</li>
+            <li><strong>Профили мощности</strong> — загрузка html-файлов с получасовыми профилями мощности, удаление накопленных данных;</li>
+            <li><strong>Удаление приборов</strong> — массовое удаление приборов из базы данных.</li>
+        </ol>
+
+        <h4>2.3.1 Загрузка файла</h4>
+        <p>Для загрузки файла на сервер перейдите в соответствующий раздел, выберите файл (или перетащите его в область загрузки) и нажмите кнопку <strong>«Загрузить»</strong>.</p>
+
+        <figure class="screenshot">
+            <img src="{% static 'images/instruction-screenshots/config_upload_file.jpg' %}" alt="Загрузка файла">
+            <figcaption>Рисунок 28. Загрузка файла на сервер</figcaption>
+        </figure>
+
+        <h4>2.3.2 Внесение данных о приборах учёта — цифровых и импульсных</h4>
+        <p>Данные разделы предназначены для загрузки информации о новых цифровых и импульсных приборах в систему. Образец файла в формате .xlsx для загрузки можно экспортировать в соответствующей вкладке.</p>
+
+        <figure class="screenshot">
+            <img src="{% static 'images/instruction-screenshots/config_digital_meters.jpg' %}" alt="Цифровые приборы">
+            <figcaption>Рисунок 29. Раздел «Цифровые приборы»</figcaption>
+        </figure>
+
+        <figure class="screenshot">
+            <img src="{% static 'images/instruction-screenshots/config_impulse_meters.jpg' %}" alt="Импульсные приборы">
+            <figcaption>Рисунок 30. Раздел «Импульсные приборы»</figcaption>
+        </figure>
+
+        <p>Для загрузки подготовленного файла необходимо:</p>
+        <ol class="step-list">
+            <li>Выбрать файл в соответствующей строке;</li>
+            <li>Указать лист документа;</li>
+            <li>Нажать кнопку <strong>«Загрузить … приборы из файла»</strong>.</li>
+        </ol>
+
+        <div class="note-block">
+            <strong>Примечание:</strong> После завершения процедуры на экране отобразится информация о количестве успешно загруженных счётчиков.
+        </div>
+
+        <h4>2.3.3 Замена счётчиков</h4>
+        <p>Данный раздел предназначен для замены заводского номера прибора, обмена двух счётчиков местами в базе данных, а также для смены типа (ГВС/ХВС) водосчётчика Пульсар.</p>
+
+        <figure class="screenshot">
+            <img src="{% static 'images/instruction-screenshots/config_replace_meters.jpg' %}" alt="Замена счётчиков">
+            <figcaption>Рисунок 31. Раздел «Замена счётчиков»</figcaption>
+        </figure>
+
+        <ul class="styled-list">
+            <li><strong>Замена заводского номера:</strong> введите старый и новый номера, затем нажмите кнопку <strong>«Заменить»</strong>;</li>
+            <li><strong>Обмен счётчиков местами:</strong> введите номера двух счётчиков одного типа и нажмите кнопку <strong>«Заменить»</strong>;</li>
+            <li><strong>Смена типа водосчётчика Пульсар:</strong> введите номер прибора в соответствующую ячейку и нажмите кнопку <strong>«Заменить»</strong>.</li>
+        </ul>
+
+        <h4>2.3.4 Информация по объекту</h4>
+        <p>В этом разделе можно экспортировать в формате .xlsx информацию о приборах учёта в системе, сгруппированную по ресурсам.</p>
+
+        <figure class="screenshot">
+            <img src="{% static 'images/instruction-screenshots/config_object_info.jpg' %}" alt="Информация по объекту">
+            <figcaption>Рисунок 32. Раздел «Информация по объекту»</figcaption>
+        </figure>
+
+        <p>Для экспорта файла нажмите на интересующий вас ресурс.</p>
+
+        <h4>2.3.5 Балансные группы</h4>
+        <p>Данный раздел предоставляет возможность загрузить балансную группу в систему.</p>
+
+        <figure class="screenshot">
+            <img src="{% static 'images/instruction-screenshots/config_balance_groups.jpg' %}" alt="Балансные группы">
+            <figcaption>Рисунок 33. Раздел «Балансные группы»</figcaption>
+        </figure>
+
+        <p>Для загрузки балансной группы необходимо выбрать файл и нажать кнопку <strong>«Загрузить»</strong>. Экспорт образца файла для загрузки осуществляется с помощью соответствующей кнопки.</p>
+
+        <h4>2.3.6 Профили мощности</h4>
+        <p>Этот раздел предназначен для загрузки в систему html-файлов, содержащих получасовые профили мощности, а также для удаления профилей прибора учёта из базы данных на определённую дату.</p>
+
+        <figure class="screenshot">
+            <img src="{% static 'images/instruction-screenshots/config_power_profiles.jpg' %}" alt="Профили мощности">
+            <figcaption>Рисунок 34. Раздел «Профили мощности»</figcaption>
+        </figure>
+
+        <ul class="styled-list">
+            <li><strong>Загрузка профилей:</strong> выберите директорию с файлами и нажмите кнопку <strong>«Загрузить»</strong>;</li>
+            <li><strong>Удаление профилей:</strong> введите заводской номер прибора учёта, выберите дату и нажмите кнопку <strong>«Удалить»</strong>.</li>
+        </ul>
+
+        <h4>2.3.7 Удаление приборов</h4>
+        <p>В этом разделе можно удалить сразу несколько приборов из базы данных с помощью файла.</p>
+
+        <figure class="screenshot">
+            <img src="{% static 'images/instruction-screenshots/config_delete_meters.jpg' %}" alt="Удаление приборов">
+            <figcaption>Рисунок 35. Раздел «Удаление приборов»</figcaption>
+        </figure>
+
+        <p>Порядок удаления:</p>
+        <ol class="step-list">
+            <li>Подготовьте ведомость (можно использовать файл, экспортированный из раздела «Информация по объекту»);</li>
+            <li>Выберите файл и укажите лист в документе;</li>
+            <li>Нажмите кнопку <strong>«Удалить»</strong>.</li>
+        </ol>
+
+        <div class="note-block warning">
+            <strong>Важно:</strong> После завершения процедуры на экране отобразится информация об удалённых приборах. Операция удаления необратима — убедитесь в корректности выбранных данных перед выполнением.
+        </div>
+    </div>
+</details>
+
+<style>
+    .instruction-section {
+        background: #fff;
+        border: 1px solid #E3F2FD;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        overflow: hidden;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+    
+    .instruction-header {
+        background: linear-gradient(135deg, #E3F2FD 0%, #BBDEFB 100%);
+        color: #1976D2;
+        padding: 16px 20px;
+        font-size: 16px;
+        font-weight: 700;
+        cursor: pointer;
+        list-style: none;
+        display: flex;
+        align-items: center;
+        transition: background 0.2s ease;
+    }
+    
+    .instruction-header:hover {
+        background: linear-gradient(135deg, #BBDEFB 0%, #90CAF9 100%);
+    }
+    
+    .instruction-header::after {
+        content: '▼';
+        margin-left: auto;
+        font-size: 12px;
+        transition: transform 0.3s ease;
+    }
+    
+    details[open] .instruction-header::after {
+        transform: rotate(180deg);
+    }
+    
+    .instruction-header::-webkit-details-marker {
+        display: none;
+    }
+
+    .instruction-content {
+        padding: 20px;
+        font-size: 11pt;
+        line-height: 1.6;
+        color: #333;
+    }
+
+    .instruction-content h4 {
+        color: #1976D2;
+        margin-top: 25px;
+        margin-bottom: 10px;
+        font-size: 13pt;
+    }
+
+    .instruction-content p {
+        margin-bottom: 15px;
+        text-align: justify;
+    }
+
+    .styled-list {
+        margin: 10px 0 20px 20px;
+        padding: 0;
+    }
+
+    .styled-list li {
+        margin-bottom: 8px;
+    }
+
+    .step-list {
+        margin: 15px 0 20px 0;
+        padding-left: 25px;
+    }
+    
+    .step-list li {
+        margin-bottom: 12px;
+        line-height: 1.6;
+    }
+    
+    .step-list li::marker {
+        color: #1976D2;
+        font-weight: bold;
+    }
+
+    .screenshot {
+        text-align: center;
+        margin: 25px auto;
+        padding: 0 10px;
+        page-break-inside: avoid;
+    }
+    
+    .screenshot img {
+        display: block;
+        margin: 0 auto;
+        max-width: 100%;
+        max-height: 600px;
+        width: auto;
+        height: auto;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        background: #fff;
+        object-fit: contain;
+    }
+    
+    .screenshot figcaption {
+        margin-top: 10px;
+        font-size: 10pt;
+        color: #666;
+        font-style: italic;
+        font-weight: 500;
+    }
+
+    .note-block {
+        background: #E3F2FD;
+        border-left: 4px solid #2196F3;
+        padding: 12px 16px;
+        margin: 20px 0;
+        border-radius: 4px;
+        font-size: 10.5pt;
+        line-height: 1.5;
+    }
+    
+    .note-block.warning {
+        background: #FFF3E0;
+        border-left-color: #FF9800;
+    }
+    
+    .note-block strong {
+        color: #1565C0;
+    }
+    
+    .note-block.warning strong {
+        color: #E65100;
+    }
+
+    @media print {
+        .instruction-section {
+            border: none;
+            box-shadow: none;
+            margin-bottom: 15px;
+            page-break-inside: avoid;
+        }
+        .instruction-header {
+            display: none;
+        }
+        .instruction-content {
+            display: block !important;
+            padding: 0;
+        }
+        .instruction-section::before {
+            content: "2.3 Панель конфигурирования";
+            display: block;
+            font-size: 14pt;
+            font-weight: bold;
+            color: #1976D2;
+            border-bottom: 2px solid #E3F2FD;
+            padding-bottom: 5px;
+            margin-bottom: 15px;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+        .note-block {
+            border: 1px solid #ccc;
+            background: #f9f9f9 !important;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+        .note-block.warning {
+            background: #fff8e1 !important;
+        }
+        .screenshot img {
+            box-shadow: none;
+            border: 1px solid #ccc;
+            max-width: 90%;
+            max-height: 500px;
+        }
+    }
+</style>

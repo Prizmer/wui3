@@ -1,5 +1,5 @@
 from django.contrib import admin
-from general.models import Objects, Abonents, Comments, TypesAbonents, Meters, MonthlyValues, DailyValues, CurrentValues, VariousValues, TypesParams, Params, TakenParams, LinkAbonentsTakenParams, Resources, TypesMeters, Measurement, NamesParams, BalanceGroups, LinkMetersComportSettings, LinkMetersTcpipSettings, ComportSettings, TcpipSettings, LinkBalanceGroupsMeters, Groups80020, LinkGroups80020Meters, LinkAbonentsAuthUser
+from general.models import Objects, Abonents, Comments, TypesAbonents, Meters, MonthlyValues, DailyValues, CurrentValues, VariousValues, TypesParams, Params, TakenParams, LinkAbonentsTakenParams, Resources, TypesMeters, Measurement, NamesParams, BalanceGroups, LinkMetersComportSettings, LinkMetersTcpipSettings, ComportSettings, TcpipSettings, LinkBalanceGroupsMeters, Groups80020, LinkGroups80020Meters, LinkAbonentsAuthUser, ReportConfig
 from django.conf import settings
 
 # === КАСТОМИЗАЦИЯ ЗАГОЛОВКОВ АДМИНКИ ===
@@ -57,10 +57,52 @@ class LinkMetersComportSettingsAdmin(admin.ModelAdmin):
 class LinkGroups80020MetersAdmin(admin.ModelAdmin):
     raw_id_fields = ('guid_meters', ) 
 
+@admin.register(ReportConfig)
+class ReportConfigAdmin(admin.ModelAdmin):
+    list_display = [
+        'number', 'is_active', 'name', 'guid_resources', 
+        'separator', 'round_size', 'null_field',
+        'show_lic_num'
+    ]
+    list_filter = ['guid_resources', 'is_active', 'separator']
+    search_fields = ['number', 'name']   # ← поиск по номеру И имени
+    list_editable = ['is_active']
+    
+    fieldsets = (
+        ('Основное', {
+            'fields': ('number', 'name', 'guid_resources', 'is_active')
+        }),
+        ('Форматирование', {
+            'fields': (
+                'separator', 'round_size', 
+                'num_is_string', 'show_lic_num', 'null_field'
+            )
+        }),
+        ('Отображение', {
+            'fields': ('show_stoyak', 'show_floors', 'comment_to_excel')
+        }),
+        ('Сортировка', {
+            'fields': ('order_fields', 'order_direction'),
+            'classes': ('collapse',)
+        }),
+    )
+    
+    # Только для суперпользователя
+    def has_add_permission(self, request):
+        return request.user.is_superuser
+    
+    def has_change_permission(self, request, obj=None):
+        return request.user.is_superuser
+    
+    def has_delete_permission(self, request, obj=None):
+        return request.user.is_superuser
+
+
+
 admin.site.register(Objects, ObjectsAdmin)
 admin.site.register(Abonents, AbonentsAdmin)
 admin.site.register(Comments, CommentsAdmin)
-admin.site.register(LinkAbonentsAuthUser, LinkAbonentsAuthUserAdmin)
+# admin.site.register(LinkAbonentsAuthUser, LinkAbonentsAuthUserAdmin)
 admin.site.register(TypesAbonents)
 admin.site.register(Meters, MetersAdmin)
 #admin.site.register(MonthlyValues)
