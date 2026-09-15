@@ -1,0 +1,195 @@
+{% load static %}
+
+<details class="instruction-section">
+    <summary class="instruction-header">
+        Отчёт №41: Отчёт по форме 80020
+    </summary>
+    
+    <div class="instruction-content">
+        <p><strong>Назначение отчёта:</strong> формирование отчёта по форме 80020 в соответствии с требованиями ПАО «Мосэнергосбыт». Сформированный файл соответствует установленным требованиям и отличается от данных, отображаемых в веб-интерфейсе системы (в веб-интерфейсе отображаются данные по юридическому лицу отправителя, ИНН, договору с Мосэнергосбытом).</p>
+
+        <h4>Порядок работы:</h4>
+        <ol class="step-list">
+            <li>В панели ресурсов (слева) выберите <strong>«Электроэнергия»</strong> 
+                <img src="{% static 'images/new_ico/lamp2-ico48.png' %}" alt="Иконка электроэнергии" class="inline-icon">
+            </li>
+            <li>В дереве объектов раскройте узел <strong>«Группы 80020»</strong>.</li>
+            <li>Выберите конкретную группу счётчиков (называется номером договора или юридическим лицом, на которое заключён договор).</li>
+            <li>В выпадающем списке отчётов выберите <strong>«№41 — Отчёт по форме 80020»</strong>.</li>
+            <li>В появившейся панели календарей укажите:
+                <ul>
+                    <li><strong>Начальную дату</strong> — дата начала периода;</li>
+                    <li><strong>Конечную дату</strong> — дата окончания периода.</li>
+                </ul>
+            </li>
+            <li>Дождитесь формирования отчёта в центральной области экрана.</li>
+            <li>Для выгрузки данных нажмите кнопку <strong>«Экспорт»</strong>, расположенную рядом с выпадающим списком отчётов.</li>
+        </ol>
+
+        <figure class="screenshot">
+            <img src="{% static 'images/instruction-screenshots/report_41_result.jpg' %}" alt="Отчёт 41 - Форма 80020">
+            <figcaption>Рисунок 9. Отчёт по форме 80020</figcaption>
+        </figure>
+
+        <h4>Состав отчёта:</h4>
+        <p>После формирования отчёт представлен в виде двух таблиц:</p>
+
+        <p><strong>Первая таблица</strong> содержит данные по счётчикам, принадлежащим выбранной группе:</p>
+        <ul class="styled-list">
+            <li>Список счётчиков;</li>
+            <li>Разница показаний по каждому прибору учёта;</li>
+            <li>Сумма получасовых профилей мощности;</li>
+            <li>Процент сбора получасовых профилей.</li>
+        </ul>
+
+        <p><strong>Вторая таблица</strong> позволяет оценить наличие данных по каждому прибору за каждый день выбранного периода:</p>
+        <ul class="styled-list">
+            <li>Дата;</li>
+            <li>№ ПУ T0 A+;</li>
+            <li>№ ПУ T0 R+;</li>
+            <li>Количество получасовок за каждый день.</li>
+        </ul>
+
+        <h4>Цветовая индикация второй таблицы:</h4>
+        <ul class="styled-list">
+            <li><strong style="color: #4CAF50;">Зелёный цвет</strong> — считаны все 48 получасовых профилей мощности;</li>
+            <li><strong style="color: #FF9800;">Жёлтый цвет</strong> — считано менее 48 получасовых профилей мощности;</li>
+            <li><strong style="color: #F44336;">Красный цвет</strong> — на данную дату нет данных о получасовых профилях мощности.</li>
+        </ul>
+
+        <div class="note-block warning">
+            <strong>Важно:</strong> Перед формированием отчёта необходимо проверить:
+            <ul style="margin: 10px 0 0 0;">
+                <li>Наличие получасовых значений в базе данных (100% опроса по каждому прибору, входящему в группу 80020);</li>
+                <li>Учётные данные (отправитель, ИНН, номер договора);</li>
+                <li>Сумма получасовых показаний должна примерно совпадать с разницей по показаниям счётчика между начальной и конечной датой.</li>
+            </ul>
+        </div>
+
+        <div class="note-block">
+            <strong>Примечание:</strong> При необходимости «дочитать» недостающие данные из счётчиков электроэнергии можно при помощи программы «Сервер опроса» в ручном режиме.
+        </div>
+
+        <p>После выбора необходимых параметров и первичного контроля учётных данных нажмите кнопку <strong>«Экспорт»</strong>. Результатом экспорта будет архив типа <b><code>80020_номер_договора_даты.zip</code></b>, содержащий XML-файлы, составленные в соответствии с отчётом по форме 80020.</p>
+
+        <p>Сформированный архив будет сохранён в папку <strong>«Загрузки»</strong> (или иную директорию, заданную в настройках вашего браузера).</p>
+    </div>
+</details>
+
+<style>
+    /* === Дополнительные стили для инструкций по отчётам === */
+    
+    /* Нумерованный список шагов */
+    .step-list {
+        margin: 15px 0 20px 0;
+        padding-left: 25px;
+        counter-reset: step-counter;
+    }
+    
+    .step-list li {
+        margin-bottom: 12px;
+        line-height: 1.6;
+        position: relative;
+    }
+    
+    .step-list li::marker {
+        color: #1976D2;
+        font-weight: bold;
+    }
+    
+    /* Вложенные списки в шагах */
+    .step-list ul {
+        margin: 8px 0 0 20px;
+        padding: 0;
+    }
+    
+    .step-list ul li {
+        margin-bottom: 6px;
+        font-size: 10.5pt;
+    }
+
+    /* Иконка ресурса внутри текста */
+    .inline-icon {
+        display: inline-block;
+        vertical-align: middle;
+        width: 24px;
+        height: 24px;
+        margin: 0 4px;
+    }
+
+    /* Блоки примечаний */
+    .note-block {
+        background: #E3F2FD;
+        border-left: 4px solid #2196F3;
+        padding: 12px 16px;
+        margin: 20px 0;
+        border-radius: 4px;
+        font-size: 10.5pt;
+        line-height: 1.5;
+    }
+    
+    .note-block.warning {
+        background: #FFF3E0;
+        border-left-color: #FF9800;
+    }
+    
+    .note-block strong {
+        color: #1565C0;
+    }
+    
+    .note-block.warning strong {
+        color: #E65100;
+    }
+
+    .note-block code {
+        background: rgba(255, 255, 255, 0.7);
+        padding: 2px 6px;
+        border-radius: 3px;
+        font-family: 'Consolas', 'Monaco', monospace;
+        color: #d32f2f;
+        font-size: 10pt;
+    }
+	
+	
+
+    /* === АДАПТАЦИЯ ДЛЯ ПЕЧАТИ === */
+    @media print {
+        .instruction-section {
+            border: none;
+            box-shadow: none;
+            margin-bottom: 15px;
+            page-break-inside: avoid;
+        }
+        .instruction-header {
+            display: none;
+        }
+        .instruction-content {
+            display: block !important;
+            padding: 0;
+        }
+        .instruction-section::before {
+            content: "Отчёт №41: Отчёт по форме 80020";
+            display: block;
+            font-size: 14pt;
+            font-weight: bold;
+            color: #1976D2;
+            border-bottom: 2px solid #E3F2FD;
+            padding-bottom: 5px;
+            margin-bottom: 15px;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+        .note-block {
+            border: 1px solid #ccc;
+            background: #f9f9f9 !important;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+        .note-block.warning {
+            background: #fff8e1 !important;
+        }
+        .screenshot img {
+            max-width: 85%;
+        }
+    }
+</style>

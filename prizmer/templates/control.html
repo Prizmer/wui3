@@ -34,6 +34,20 @@
 			<div class="report-dropdown">
 				<select id="choice_report" style="width:100%;">
 					<option value="0"><strong>Выберите отчёт...</strong></option>
+					
+					{# === ДИНАМИЧЕСКИЙ ВЫВОД ОТЧЁТОВ ИЗ АДМИНКИ === #}
+					{% for report in electric_reports %}
+						<option value="{{ report.number }}">{{ report.number }}. {{ report.name }}</option>
+					{% empty %}
+						<option value="0" disabled>Нет доступных отчётов</option>
+					{% endfor %}
+					
+				</select>
+			</div>
+			<div class="report-export" id="export_report"></div>
+		</div>
+				<!-- <select id="choice_report" style="width:100%;">
+					<option value="0"><strong>Выберите отчёт...</strong></option>
 					<!-- 	<option value="1">Потребление за период.</option>
 					<option value="2">Показания на дату.</option>
 					<option value="25">Профиль показаний за период</option>
@@ -46,7 +60,7 @@
 					<option value="16">16. Показания на дату. 3 Тарифа</option>
 					<option value="15">Потребление за период. 2 Тарифа</option>			   
 					<option value="31">Потребление за период. 2 Тарифа</option> 
-					<option value="17">17. Потребление за период. 3 Тарифа</option> -->
+					<option value="17">17. Потребление за период. 3 Тарифа</option> 
 					
 					<option value="40">40. Проверка соотвествия зав.номеров</option>
 			        <option value="41">41. Отчёт по форме 80020</option>
@@ -66,15 +80,15 @@
 					<option value="103">103. Потребление за период. 2 Тарифа</option>
 					<option value="105">105. Потребление за период. Сумма Тарифов</option>
 					<option value="108">108. Показания на дату для квартир. Подольск</option>
-					<option value="107">107. Потребление за период для квартир. Подольск</option> -->
+					<option value="107">107. Потребление за период для квартир. Подольск</option> 
 					<option value="113">113. Потребление за период. 3 Тарифа.</option>
 					<option value="114">114. Показания на дату. 3 Тарифа</option>
 					<!-- <option value="126">126. Почасовые показания за месяц. Интервальный акт</option>
-					<option value="128">128. Показаний ПУ за месяц. Интегральный акт </option> -->
-				</select>
-			</div>
+					<option value="128">128. Показаний ПУ за месяц. Интегральный акт </option> 
+				</select> 
+			</div> -->
 			<div class="report-export" id ="export_report"></div>
-		</div>
+		<!-- </div> -->
     </div>
 
     <div class="control-side-panel">

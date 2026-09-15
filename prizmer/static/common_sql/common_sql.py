@@ -18301,7 +18301,7 @@ def get_water_digital_pulsar_count_for_all_objects(electric_data_end):
     LEFT JOIN daily_values dv ON dv.id_taken_params = tp.id
         AND dv.date = %s
         
-    WHERE (tm.name LIKE 'Пульс%%ГВС%%' OR tm.name LIKE 'Пульс%%ХВС%%')
+    WHERE (tm.name LIKE '%%ГВС%%' OR tm.name LIKE '%%ХВС%%')
         AND r.name IN ('ГВС', 'ХВС')
     GROUP BY o.name
     ORDER BY o.name
@@ -18352,7 +18352,7 @@ def get_water_digital_pulsar_no_data_for_all_objects(electric_data_end):
     LEFT JOIN daily_values dv ON dv.id_taken_params = tp.id
         AND dv.date = %s
         
-    WHERE (tm.name LIKE 'Пульс%%ГВС%%' OR tm.name LIKE 'Пульс%%ХВС%%')
+    WHERE (tm.name LIKE '%%ГВС%%' OR tm.name LIKE '%%ХВС%%')
         AND r.name IN ('ГВС', 'ХВС')
     GROUP BY o.name, a.name, m.factory_number_manual, tm.name, m.name,
              m.address, ts.ip_address, ts.ip_port,

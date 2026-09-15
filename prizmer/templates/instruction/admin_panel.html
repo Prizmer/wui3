@@ -1,0 +1,800 @@
+{% load static %}
+
+<details class="instruction-section">
+    <summary class="instruction-header">
+        2.4 Панель администратора
+    </summary>
+    
+    <div class="instruction-content">
+        <p><strong>Назначение:</strong> панель администратора (Django Admin) предоставляет полный доступ ко всем данным системы. Доступ к панели разрешён только для суперпользователей.</p>
+
+        <h4>Вход в панель администратора</h4>
+        <p>Для перехода к панели администратора нажмите на кнопку <strong>«Панель администратора»</strong>, расположенную под деревом объектов, или перейдите по адресу <code>/admin/</code>.</p>
+
+        <figure class="screenshot">
+            <img src="{% static 'images/instruction-screenshots/main_interface.jpg' %}" alt="Вход в админку">
+            <figcaption>Рисунок 36. Вход в панель администратора</figcaption>
+        </figure>
+
+        <div class="note-block warning">
+            <strong>Важно:</strong> Доступ к панели администратора имеют только пользователи с правами суперпользователя. Обычные пользователи при попытке входа получат ошибку доступа.
+        </div>
+
+        <figure class="screenshot">
+            <img src="{% static 'images/instruction-screenshots/admin_main.jpg' %}" alt="Главная страница админки">
+            <figcaption>Рисунок 37. Главная страница панели администратора</figcaption>
+        </figure>
+
+        <h4>2.4.1 Com порты (ComportSettings)</h4>
+        <p>Настройка COM-портов для опроса счётчиков через последовательный интерфейс.</p>
+
+        <div class="screenshot-pair">
+            <figure class="screenshot-item">
+                <img src="{% static 'images/instruction-screenshots/admin_com_ports_list.jpg' %}" alt="Com порты - список">
+                <figcaption>Список COM-портов</figcaption>
+            </figure>
+            <div class="screenshot-arrow">↓</div>
+            <figure class="screenshot-item">
+                <img src="{% static 'images/instruction-screenshots/admin_com_ports_edit.jpg' %}" alt="Com порты - редактирование">
+                <figcaption>Редактирование COM-порта</figcaption>
+            </figure>
+        </div>
+        <p class="screenshot-pair-caption">Рисунки 38-39. Настройка COM-портов</p>
+
+        <p><strong>Поля для настройки:</strong></p>
+        <ul class="styled-list">
+            <li><strong>Name</strong> — номер COM-порта (например, COM1, COM2);</li>
+            <li><strong>Baudrate</strong> — скорость передачи данных (9600, 19200, 38400, 57600, 115200);</li>
+            <li><strong>Data bits</strong> — количество бит данных (обычно 8);</li>
+            <li><strong>Parity</strong> — чётность (0 — None, 1 — Odd, 2 — Even);</li>
+            <li><strong>Stop bits</strong> — стоповые биты (1 или 2);</li>
+            <li><strong>Write timeout</strong> — таймаут записи в секундах;</li>
+            <li><strong>Read timeout</strong> — таймаут чтения в секундах;</li>
+            <li><strong>Attempts</strong> — количество попыток опроса;</li>
+            <li><strong>Delay between sending</strong> — задержка между отправками команд (мс);</li>
+            <li><strong>Использовать CSD канал?</strong> — для GSM-модемов;</li>
+            <li><strong>GSM phone number</strong> — номер телефона модема;</li>
+            <li><strong>GSM init string</strong> — строка инициализации модема.</li>
+        </ul>
+
+        <h4>2.4.2 TCP/IP порты (TcpipSettings)</h4>
+        <p>Настройка сетевых подключений для опроса счётчиков через Ethernet/Wi-Fi.</p>
+
+        <div class="screenshot-pair">
+            <figure class="screenshot-item">
+                <img src="{% static 'images/instruction-screenshots/admin_tcpip_ports_list.jpg' %}" alt="TCP/IP порты - список">
+                <figcaption>Список TCP/IP портов</figcaption>
+            </figure>
+            <div class="screenshot-arrow">↓</div>
+            <figure class="screenshot-item">
+                <img src="{% static 'images/instruction-screenshots/admin_tcpip_ports_edit.jpg' %}" alt="TCP/IP порты - редактирование">
+                <figcaption>Редактирование TCP/IP порта</figcaption>
+            </figure>
+        </div>
+        <p class="screenshot-pair-caption">Рисунки 40-41. Настройка TCP/IP портов</p>
+
+        <p><strong>Поля для настройки:</strong></p>
+        <ul class="styled-list">
+            <li><strong>IP address</strong> — IP-адрес устройства (например, 192.168.1.100);</li>
+            <li><strong>IP port</strong> — порт подключения (обычно 502 для Modbus TCP);</li>
+            <li><strong>Write timeout</strong> — таймаут записи;</li>
+            <li><strong>Read timeout</strong> — таймаут чтения;</li>
+            <li><strong>Attempts</strong> — количество попыток опроса;</li>
+            <li><strong>Delay between sending</strong> — задержка между отправками (мс).</li>
+        </ul>
+
+        <h4>2.4.3 Абоненты (Abonents)</h4>
+        <p>Информация о квартирах, помещениях и абонентах, привязанных к объектам.</p>
+
+        <div class="screenshot-pair">
+            <figure class="screenshot-item">
+                <img src="{% static 'images/instruction-screenshots/admin_abonents_list.jpg' %}" alt="Абоненты - список">
+                <figcaption>Список абонентов</figcaption>
+            </figure>
+            <div class="screenshot-arrow">↓</div>
+            <figure class="screenshot-item">
+                <img src="{% static 'images/instruction-screenshots/admin_abonents_edit.jpg' %}" alt="Абоненты - редактирование">
+                <figcaption>Редактирование абонента</figcaption>
+            </figure>
+        </div>
+        <p class="screenshot-pair-caption">Рисунки 42-43. Управление абонентами</p>
+
+        <p><strong>Поля для настройки:</strong></p>
+        <ul class="styled-list">
+            <li><strong>Name</strong> — ФИО или название абонента;</li>
+            <li><strong>Account 1</strong> — лицевой счёт 1 (основной);</li>
+            <li><strong>Account 2</strong> — лицевой счёт 2 (дополнительный);</li>
+            <li><strong>Flat number</strong> — номер квартиры/помещения;</li>
+            <li><strong>Guid objects</strong> — привязка к объекту (ЖК, корпус);</li>
+            <li><strong>Guid types abonents</strong> — тип абонента (физическое/юридическое лицо).</li>
+        </ul>
+
+        <h4>2.4.4 Балансные Группы (BalanceGroups)</h4>
+        <p>Группы счётчиков для расчёта баланса (например, общедомовой и квартирными). Позволяет формировать отчёты для анализа расхода ресурса, сопоставляя вводные приборы и потребителей.</p>
+
+        <div class="screenshot-pair">
+            <figure class="screenshot-item">
+                <img src="{% static 'images/instruction-screenshots/admin_balance_groups_list.jpg' %}" alt="Балансные группы - список">
+                <figcaption>Список балансных групп</figcaption>
+            </figure>
+            <div class="screenshot-arrow">↓</div>
+            <figure class="screenshot-item">
+                <img src="{% static 'images/instruction-screenshots/admin_balance_groups_edit.jpg' %}" alt="Балансные группы - редактирование">
+                <figcaption>Редактирование балансной группы</figcaption>
+            </figure>
+        </div>
+        <p class="screenshot-pair-caption">Рисунки 44-45. Балансные группы</p>
+
+        <p><strong>Поля для настройки:</strong></p>
+        <ul class="styled-list">
+            <li><strong>Name</strong> — название балансной группы (например, "Дом 1 - Тепло").</li>
+        </ul>
+
+        <h4>2.4.5 Группы отчётов 80020 (Groups80020)</h4>
+        <p>Настройки для формирования отчётов по форме 80020 (отчётность для энергосбыта).</p>
+
+        <div class="screenshot-pair">
+            <figure class="screenshot-item">
+                <img src="{% static 'images/instruction-screenshots/admin_groups_80020_list.jpg' %}" alt="Группы 80020 - список">
+                <figcaption>Список групп 80020</figcaption>
+            </figure>
+            <div class="screenshot-arrow">↓</div>
+            <figure class="screenshot-item">
+                <img src="{% static 'images/instruction-screenshots/admin_groups_80020_edit.jpg' %}" alt="Группы 80020 - редактирование">
+                <figcaption>Редактирование группы 80020</figcaption>
+            </figure>
+        </div>
+        <p class="screenshot-pair-caption">Рисунки 46-47. Группы отчётов 80020</p>
+
+        <p><strong>Поля для настройки:</strong></p>
+        <ul class="styled-list">
+            <li><strong>Name</strong> — название группы;</li>
+            <li><strong>Name sender</strong> — наименование отправителя;</li>
+            <li><strong>Inn sender</strong> — ИНН отправителя;</li>
+            <li><strong>Name postavshik</strong> — наименование поставщика;</li>
+            <li><strong>Inn postavshik</strong> — ИНН поставщика;</li>
+            <li><strong>Dogovor number</strong> — номер договора.</li>
+        </ul>
+
+        <h4>2.4.6 Комментарии (Comments)</h4>
+        <p>Комментарии пользователей к абонентам (оставляются через интерфейс).</p>
+
+        <div class="screenshot-pair">
+            <figure class="screenshot-item">
+                <img src="{% static 'images/instruction-screenshots/admin_comments_list.jpg' %}" alt="Комментарии - список">
+                <figcaption>Список комментариев</figcaption>
+            </figure>
+            <div class="screenshot-arrow">↓</div>
+            <figure class="screenshot-item">
+                <img src="{% static 'images/instruction-screenshots/admin_comments_edit.jpg' %}" alt="Комментарии - редактирование">
+                <figcaption>Редактирование комментария</figcaption>
+            </figure>
+        </div>
+        <p class="screenshot-pair-caption">Рисунки 48-49. Комментарии</p>
+
+        <p><strong>Поля:</strong></p>
+        <ul class="styled-list">
+            <li><strong>Name</strong> — имя (автозаполнение);</li>
+            <li><strong>Comment</strong> — текст комментария;</li>
+            <li><strong>Date</strong> — дата создания;</li>
+            <li><strong>Guid abonents</strong> — абонент;</li>
+            <li><strong>Guid resources</strong> — ресурс (электричество, вода и т.д.).</li>
+        </ul>
+
+        <h4>2.4.7 Настройки отчётов (ReportConfig)</h4>
+        <p>Управление активностью и параметрами отчётов системы.</p>
+
+        <div class="screenshot-pair">
+            <figure class="screenshot-item">
+                <img src="{% static 'images/instruction-screenshots/admin_reports_list.jpg' %}" alt="Настройки отчётов - список">
+                <figcaption>Список настроек отчётов</figcaption>
+            </figure>
+            <div class="screenshot-arrow">↓</div>
+            <figure class="screenshot-item">
+                <img src="{% static 'images/instruction-screenshots/admin_report_edit.jpg' %}" alt="Настройки отчётов - редактирование">
+                <figcaption>Редактирование настроек отчёта</figcaption>
+            </figure>
+        </div>
+        <p class="screenshot-pair-caption">Рисунки 50-51. Настройки отчётов</p>
+
+        <p><strong>Поля для настройки:</strong></p>
+        <ul class="styled-list">
+            <li><strong>Number</strong> — уникальный номер отчёта;</li>
+            <li><strong>Name</strong> — название отчёта;</li>
+            <li><strong>Guid resources</strong> — ресурс (электричество, вода, тепло);</li>
+            <li><strong>Is active</strong> — активен/не активен (показывать в списке);</li>
+            <li><strong>Show lic num</strong> — показывать лицевой номер;</li>
+            <li><strong>Separator</strong> — разделитель (запятая или точка);</li>
+            <li><strong>Round size</strong> — знаков после запятой;</li>
+            <li><strong>Comment to excel</strong> — выводить комментарии в Excel;</li>
+            <li><strong>Show stoyak</strong> — показывать стояк;</li>
+            <li><strong>Show floors</strong> — показывать этаж;</li>
+            <li><strong>Num is string</strong> — числа как строки;</li>
+            <li><strong>Null field</strong> — обозначение пустых значений (Н/Д);</li>
+            <li><strong>Order fields</strong> — поля сортировки;</li>
+            <li><strong>Order direction</strong> — направление (asc/desc).</li>
+        </ul>
+
+        <h4>2.4.8 Объекты (Objects)</h4>
+        <p>Иерархия объектов: ЖК, корпуса, подъезды, этажи.</p>
+
+        <div class="screenshot-pair">
+            <figure class="screenshot-item">
+                <img src="{% static 'images/instruction-screenshots/admin_objects_list.jpg' %}" alt="Объекты - список">
+                <figcaption>Список объектов</figcaption>
+            </figure>
+            <div class="screenshot-arrow">↓</div>
+            <figure class="screenshot-item">
+                <img src="{% static 'images/instruction-screenshots/admin_objects_edit.jpg' %}" alt="Объекты - редактирование">
+                <figcaption>Редактирование объекта</figcaption>
+            </figure>
+        </div>
+        <p class="screenshot-pair-caption">Рисунки 52-53. Объекты</p>
+
+        <p><strong>Поля для настройки:</strong></p>
+        <ul class="styled-list">
+            <li><strong>Name</strong> — название объекта;</li>
+            <li><strong>Level</strong> — уровень вложенности (1 — корневой, 2 — корпус и т.д.);</li>
+            <li><strong>Guid parent</strong> — родительский объект.</li>
+        </ul>
+
+        <h4>2.4.9 Параметры (Params)</h4>
+        <p>Параметры считывания для различных типов счётчиков (адреса регистров, каналы).</p>
+		<div class="note-block critical">
+            <strong>⚠️ Критичный раздел:</strong> Изменение данных в данном разделе может привести к невозможности функционирования системы. Предназначен только для опытных пользователей и специалистов производителя. Не вносите изменения без консультации с технической поддержкой.
+        </div>
+        <div class="screenshot-pair">
+            <figure class="screenshot-item">
+                <img src="{% static 'images/instruction-screenshots/admin_params_list.jpg' %}" alt="Параметры - список">
+                <figcaption>Список параметров</figcaption>
+            </figure>
+            <div class="screenshot-arrow">↓</div>
+            <figure class="screenshot-item">
+                <img src="{% static 'images/instruction-screenshots/admin_params_edit.jpg' %}" alt="Параметры - редактирование">
+                <figcaption>Редактирование параметра</figcaption>
+            </figure>
+        </div>
+        <p class="screenshot-pair-caption">Рисунки 54-55. Параметры</p>
+
+        <p><strong>Поля для настройки:</strong></p>
+        <ul class="styled-list">
+            <li><strong>Name</strong> — название (автозаполнение);</li>
+            <li><strong>Param address</strong> — адрес параметра в счётчике;</li>
+            <li><strong>Channel</strong> — канал (для многоканальных счётчиков);</li>
+            <li><strong>Guid types meters</strong> — тип счётчика;</li>
+            <li><strong>Guid names params</strong> — наименование параметра;</li>
+            <li><strong>Guid types params</strong> — тип параметра.</li>
+        </ul>
+
+        <h4>2.4.10 Привязка Групп к счетчикам (LinkBalanceGroupsMeters)</h4>
+        <p>Связь балансных групп с конкретными счётчиками (вход/выход).</p>
+
+        <div class="screenshot-pair">
+            <figure class="screenshot-item">
+                <img src="{% static 'images/instruction-screenshots/admin_link_balance_meters_list.jpg' %}" alt="Привязка групп - список">
+                <figcaption>Список привязок</figcaption>
+            </figure>
+            <div class="screenshot-arrow">↓</div>
+            <figure class="screenshot-item">
+                <img src="{% static 'images/instruction-screenshots/admin_link_balance_meters_edit.jpg' %}" alt="Привязка групп - редактирование">
+                <figcaption>Редактирование привязки</figcaption>
+            </figure>
+        </div>
+        <p class="screenshot-pair-caption">Рисунки 56-57. Привязка групп к счётчикам</p>
+
+        <p><strong>Поля для настройки:</strong></p>
+        <ul class="styled-list">
+            <li><strong>Guid balance groups</strong> — балансная группа;</li>
+            <li><strong>Guid meters</strong> — счётчик;</li>
+            <li><strong>Type</strong> — знак входа в группу ('+' — приход, '-' — расход).</li>
+        </ul>
+
+        <h4>2.4.11 Привязки абонентов к параметрам (LinkAbonentsTakenParams)</h4>
+        <p>Связь абонентов с конкретными считываемыми параметрами.</p>
+
+        <div class="screenshot-pair">
+            <figure class="screenshot-item">
+                <img src="{% static 'images/instruction-screenshots/admin_link_abonents_params_list.jpg' %}" alt="Привязки абонентов - список">
+                <figcaption>Список привязок</figcaption>
+            </figure>
+            <div class="screenshot-arrow">↓</div>
+            <figure class="screenshot-item">
+                <img src="{% static 'images/instruction-screenshots/admin_link_abonents_params_edit.jpg' %}" alt="Привязки абонентов - редактирование">
+                <figcaption>Редактирование привязки</figcaption>
+            </figure>
+        </div>
+        <p class="screenshot-pair-caption">Рисунки 58-59. Привязки абонентов к параметрам</p>
+
+        <p><strong>Поля для настройки:</strong></p>
+        <ul class="styled-list">
+            <li><strong>Guid abonents</strong> — абонент;</li>
+            <li><strong>Guid taken params</strong> — считываемый параметр;</li>
+            <li><strong>Coefficient</strong> — коэффициент 1;</li>
+            <li><strong>Coefficient 2</strong> — коэффициент 2;</li>
+            <li><strong>Coefficient 3</strong> — коэффициент 3 (обычно 1000 для перевода в кВт*ч, м³).</li>
+        </ul>
+
+        
+        <h4>2.4.13 Привязки счётчиков к com портам (LinkMetersComportSettings)</h4>
+        <p>Связь счётчиков с COM-портами для опроса через последовательный интерфейс. Данный раздел используется редко — в основном для устаревших или специализированных счётчиков с RS-485 подключением.</p>
+
+        <div class="note-block">
+            <strong>Примечание:</strong> Настройка привязок счётчиков к COM-портам выполняется по аналогии с разделом «Привязки счётчиков к TCP/IP портам» (см. раздел 2.4.14). Принцип идентичен: выбирается счётчик и соответствующий ему COM-порт из списка.
+        </div>
+
+        <div class="note-block critical">
+            <strong>⚠️ Критичный раздел:</strong> Изменение данных в данном разделе может привести к невозможности функционирования системы. Предназначен только для опытных пользователей и специалистов производителя. Не вносите изменения без консультации с технической поддержкой.
+        </div>
+
+        <p><strong>Поля для настройки:</strong></p>
+        <ul class="styled-list">
+            <li><strong>Guid meters</strong> — счётчик;</li>
+            <li><strong>Guid comport settings</strong> — COM-порт.</li>
+        </ul>
+        
+        <h4>2.4.14 Привязки счётчиков к tcp/ip портам (LinkMetersTcpipSettings)</h4>
+        <p>Связь счётчиков с TCP/IP-портами для сетевого опроса.</p>
+
+        <div class="screenshot-pair">
+            <figure class="screenshot-item">
+                <img src="{% static 'images/instruction-screenshots/admin_link_meters_tcpip_list.jpg' %}" alt="Привязки к TCP/IP - список">
+                <figcaption>Список привязок</figcaption>
+            </figure>
+            <div class="screenshot-arrow">↓</div>
+            <figure class="screenshot-item">
+                <img src="{% static 'images/instruction-screenshots/admin_link_meters_tcpip_edit.jpg' %}" alt="Привязки к TCP/IP - редактирование">
+                <figcaption>Редактирование привязки</figcaption>
+            </figure>
+        </div>
+        <p class="screenshot-pair-caption">Рисунки 64-65. Привязки счётчиков к TCP/IP</p>
+
+        <p><strong>Поля для настройки:</strong></p>
+        <ul class="styled-list">
+            <li><strong>Guid meters</strong> — счётчик;</li>
+            <li><strong>Guid tcpip settings</strong> — TCP/IP-порт.</li>
+        </ul>
+
+        <h4>2.4.15 Связи счётчиков и Групп 80020 (LinkGroups80020Meters)</h4>
+        <p>Привязка счётчиков к группам отчётов 80020.</p>
+
+        <div class="screenshot-pair">
+            <figure class="screenshot-item">
+                <img src="{% static 'images/instruction-screenshots/admin_link_groups_meters_list.jpg' %}" alt="Связи с группами 80020 - список">
+                <figcaption>Список связей</figcaption>
+            </figure>
+            <div class="screenshot-arrow">↓</div>
+            <figure class="screenshot-item">
+                <img src="{% static 'images/instruction-screenshots/admin_link_groups_meters_edit.jpg' %}" alt="Связи с группами 80020 - редактирование">
+                <figcaption>Редактирование связи</figcaption>
+            </figure>
+        </div>
+        <p class="screenshot-pair-caption">Рисунки 66-67. Связи счётчиков и Групп 80020</p>
+
+        <p><strong>Поля для настройки:</strong></p>
+        <ul class="styled-list">
+			<li><strong>Name</strong> — имя привязки, содержит номер счётчика и группы 80020, которой он принадлежит;</li>
+            <li><strong>Guid groups 80020</strong> — группа отчётов;</li>
+            <li><strong>Guid meters</strong> — счётчик;</li>
+            <li><strong>Measuringpoint code</strong> — код точки измерения;</li>
+            <li><strong>Measuringpoint name</strong> — название точки измерения.</li>
+        </ul>
+
+        <h4>2.4.16 Считываемые параметры (TakenParams)</h4>
+        <p>Привязка параметров к конкретным счётчикам.</p>
+		<div class="note-block critical">
+            <strong>⚠️ Критичный раздел:</strong> Изменение данных в данном разделе может привести к невозможности функционирования системы. Предназначен только для опытных пользователей и специалистов производителя. Не вносите изменения без консультации с технической поддержкой.
+        </div>
+        <div class="screenshot-pair">
+            <figure class="screenshot-item">
+                <img src="{% static 'images/instruction-screenshots/admin_taken_params_list.jpg' %}" alt="Считываемые параметры - список">
+                <figcaption>Список параметров</figcaption>
+            </figure>
+            <div class="screenshot-arrow">↓</div>
+            <figure class="screenshot-item">
+                <img src="{% static 'images/instruction-screenshots/admin_taken_params_edit.jpg' %}" alt="Считываемые параметры - редактирование">
+                <figcaption>Редактирование параметра</figcaption>
+            </figure>
+        </div>
+        <p class="screenshot-pair-caption">Рисунки 68-69. Считываемые параметры</p>
+
+        <p><strong>Поля для настройки:</strong></p>
+        <ul class="styled-list">
+		    <li><strong>Name</strong> — имя считываемого параметра;</li>
+            <li><strong>Guid</strong> — уникальный идентификатор;</li>
+            <li><strong>Guid params</strong> — параметр;</li>
+            <li><strong>Guid meters</strong> — счётчик.</li>
+        </ul>
+
+        <h4>2.4.17 Счётчики (Meters)</h4>
+        <p>Все приборы учёта системы.</p>
+		<div class="note-block critical">
+            <strong>⚠️ Критичный раздел:</strong> Удаление прибора из системы делает невозможным его восстановление.
+        </div>
+        <div class="screenshot-pair">
+            <figure class="screenshot-item">
+                <img src="{% static 'images/instruction-screenshots/admin_meters_list.jpg' %}" alt="Счётчики - список">
+                <figcaption>Список счётчиков</figcaption>
+            </figure>
+            <div class="screenshot-arrow">↓</div>
+            <figure class="screenshot-item">
+                <img src="{% static 'images/instruction-screenshots/admin_meters_edit.jpg' %}" alt="Счётчики - редактирование">
+                <figcaption>Редактирование счётчика</figcaption>
+            </figure>
+        </div>
+        <p class="screenshot-pair-caption">Рисунки 70-71. Счётчики</p>
+
+        <p><strong>Поля для настройки:</strong></p>
+        <ul class="styled-list">
+            <li><strong>Name</strong> — имя счётчика в системе;</li>
+            <li><strong>Address</strong> — сетевой адрес;</li>
+            <li><strong>Password</strong> — пароль;</li>
+            <li><strong>Attr1</strong> — номер стояка (для водосчётчиков);</li>
+            <li><strong>Attr2</strong> — дополнительный атрибут;</li>
+            <li><strong>Attr3</strong> — дополнительный атрибут;</li>
+            <li><strong>Attr4</strong> — номер этажа (для водосчётчиков);</li>
+            <li><strong>Password type hex</strong> — использовать HEX для пароля;</li>
+            <li><strong>Factory number manual</strong> — заводской номер (вручную);</li>
+            <li><strong>Factory number readed</strong> — заводской номер (считанный);</li>
+            <li><strong>Is factory numbers equal</strong> — совпадение номеров;</li>
+            <li><strong>Dt install</strong> — дата установки;</li>
+            <li><strong>Dt last read</strong> — дата последнего чтения;</li>
+            <li><strong>Guid types meters</strong> — тип счётчика;</li>
+            <li><strong>Guid meters</strong> — родительский счётчик (для импульсных — регистратор);</li>
+            <li><strong>Time delay current</strong> — задержка текущего чтения.</li>
+        </ul>
+
+        <div class="note-block">
+            <strong>Использование атрибутов для водосчётчиков:</strong>
+            <ul style="margin: 10px 0 0 0;">
+                <li><strong>Attr1 (номер стояка)</strong> — заполняется в формате <code>«Стояк 1»</code>, <code>«Стояк 2»</code> или <code>«Стояк 3»</code>. Используется в отчётах №60 и №67, где показания поквартирно выводятся в одну строку с группировкой по стоякам;</li>
+                <li><strong>Attr4 (номер этажа)</strong> — заполняется номером этажа (например, <code>«1»</code>, <code>«2»</code>, <code>«15»</code>). Используется в отчёте №138 для отображения этажа рядом с показаниями.</li>
+            </ul>
+        </div>
+
+        <div class="note-block warning">
+            <strong>Важно:</strong> Для корректной работы отчётов №60 и №67 необходимо, чтобы у всех водосчётчиков квартиры были заполнены атрибуты <code>Attr1</code> (номер стояка). Если атрибут не заполнен, показания по такому счётчику не попадут в сгруппированный вывод.
+        </div>
+
+        <h4>2.4.18 Типы абонентов (TypesAbonents)</h4>
+        <p>Справочник типов абонентов.</p>
+
+        <div class="screenshot-pair">
+            <figure class="screenshot-item">
+                <img src="{% static 'images/instruction-screenshots/admin_types_abonents_list.jpg' %}" alt="Типы абонентов - список">
+                <figcaption>Список типов</figcaption>
+            </figure>
+            <div class="screenshot-arrow">↓</div>
+            <figure class="screenshot-item">
+                <img src="{% static 'images/instruction-screenshots/admin_types_abonents_edit.jpg' %}" alt="Типы абонентов - редактирование">
+                <figcaption>Редактирование типа</figcaption>
+            </figure>
+        </div>
+        <p class="screenshot-pair-caption">Рисунки 72-73. Типы абонентов</p>
+
+        <p><strong>Поле:</strong></p>
+        <ul class="styled-list">
+            <li><strong>Name</strong> — название типа (например, "Физическое лицо", "Юридическое лицо").</li>
+        </ul>
+
+        <h4>2.4.19 Типы считываемых параметров (TypesParams)</h4>
+        <p>Справочник типов параметров.</p>
+
+        <div class="screenshot-pair">
+            <figure class="screenshot-item">
+                <img src="{% static 'images/instruction-screenshots/admin_types_params_list.jpg' %}" alt="Типы параметров - список">
+                <figcaption>Список типов параметров</figcaption>
+            </figure>
+            <div class="screenshot-arrow">↓</div>
+            <figure class="screenshot-item">
+                <img src="{% static 'images/instruction-screenshots/admin_types_params_edit.jpg' %}" alt="Типы параметров - редактирование">
+                <figcaption>Редактирование типа параметра</figcaption>
+            </figure>
+        </div>
+        <p class="screenshot-pair-caption">Рисунки 74-75. Типы считываемых параметров</p>
+
+        <p><strong>Поля:</strong></p>
+        <ul class="styled-list">
+            <li><strong>Name</strong> — название;</li>
+            <li><strong>Period</strong> — период (для каких отчётов);</li>
+            <li><strong>Type</strong> — тип (числовой код).</li>
+        </ul>
+
+        <h4>2.4.20 Типы счётчиков (TypesMeters)</h4>
+        <p>Справочник типов приборов (Пульсар, Эльф, Карат, Текон и др.).</p>
+
+        <div class="screenshot-pair">
+            <figure class="screenshot-item">
+                <img src="{% static 'images/instruction-screenshots/admin_types_meters_list.jpg' %}" alt="Типы счётчиков - список">
+                <figcaption>Список типов счётчиков</figcaption>
+            </figure>
+            <div class="screenshot-arrow">↓</div>
+            <figure class="screenshot-item">
+                <img src="{% static 'images/instruction-screenshots/admin_types_meters_edit.jpg' %}" alt="Типы счётчиков - редактирование">
+                <figcaption>Редактирование типа счётчика</figcaption>
+            </figure>
+        </div>
+        <p class="screenshot-pair-caption">Рисунки 76-77. Типы счётчиков</p>
+
+        <p><strong>Поля:</strong></p>
+        <ul class="styled-list">
+            <li><strong>Name</strong> — название типа;</li>
+            <li><strong>Driver name</strong> — имя драйвера.</li>
+        </ul>
+
+        <h4>2.4.21 Группы (Django Auth)</h4>
+        <p>Группы пользователей для управления правами доступа.</p>
+
+        <div class="screenshot-pair">
+            <figure class="screenshot-item">
+                <img src="{% static 'images/instruction-screenshots/admin_auth_groups_list.jpg' %}" alt="Группы - список">
+                <figcaption>Список групп</figcaption>
+            </figure>
+            <div class="screenshot-arrow">↓</div>
+            <figure class="screenshot-item">
+                <img src="{% static 'images/instruction-screenshots/admin_auth_groups_edit.jpg' %}" alt="Группы - редактирование">
+                <figcaption>Редактирование группы</figcaption>
+            </figure>
+        </div>
+        <p class="screenshot-pair-caption">Рисунки 78-79. Группы пользователей</p>
+
+        <h4>2.4.22 Пользователи (Django Auth)</h4>
+        <p>Управление учётными записями пользователей.</p>
+
+        <div class="screenshot-pair">
+            <figure class="screenshot-item">
+                <img src="{% static 'images/instruction-screenshots/admin_auth_users_list.jpg' %}" alt="Пользователи - список">
+                <figcaption>Список пользователей</figcaption>
+            </figure>
+            <div class="screenshot-arrow">↓</div>
+            <figure class="screenshot-item">
+                <img src="{% static 'images/instruction-screenshots/admin_auth_users_edit.jpg' %}" alt="Пользователи - редактирование">
+                <figcaption>Редактирование пользователя</figcaption>
+            </figure>
+        </div>
+        <p class="screenshot-pair-caption">Рисунки 80-81. Пользователи</p>
+
+        <div class="note-block warning">
+            <strong>Важно:</strong> Будьте осторожны при изменении данных в панели администратора. Неправильные настройки могут привести к сбоям в работе системы. Всегда проверяйте изменения перед сохранением.
+        </div>
+    </div>
+</details>
+
+<style>
+    .instruction-section {
+        background: #fff;
+        border: 1px solid #E3F2FD;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        overflow: hidden;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+    
+    .instruction-header {
+        background: linear-gradient(135deg, #E3F2FD 0%, #BBDEFB 100%);
+        color: #1976D2;
+        padding: 16px 20px;
+        font-size: 16px;
+        font-weight: 700;
+        cursor: pointer;
+        list-style: none;
+        display: flex;
+        align-items: center;
+        transition: background 0.2s ease;
+    }
+    
+    .instruction-header:hover {
+        background: linear-gradient(135deg, #BBDEFB 0%, #90CAF9 100%);
+    }
+    
+    .instruction-header::after {
+        content: '▼';
+        margin-left: auto;
+        font-size: 12px;
+        transition: transform 0.3s ease;
+    }
+    
+    details[open] .instruction-header::after {
+        transform: rotate(180deg);
+    }
+    
+    .instruction-header::-webkit-details-marker {
+        display: none;
+    }
+
+    .instruction-content {
+        padding: 20px;
+        font-size: 11pt;
+        line-height: 1.6;
+        color: #333;
+    }
+
+    .instruction-content h4 {
+        color: #1976D2;
+        margin-top: 25px;
+        margin-bottom: 10px;
+        font-size: 13pt;
+        border-bottom: 2px solid #E3F2FD;
+        padding-bottom: 5px;
+    }
+
+    .instruction-content p {
+        margin-bottom: 15px;
+        text-align: justify;
+    }
+
+    .instruction-content code {
+        background: #f4f4f4;
+        padding: 2px 6px;
+        border-radius: 4px;
+        font-family: monospace;
+        color: #d32f2f;
+    }
+
+    /* === Парные скриншоты (вертикальные) === */
+    .instruction-content .screenshot-pair {
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 8px !important;
+        margin: 20px 0 !important;
+        padding: 0 !important;
+        page-break-inside: avoid !important;
+    }
+    
+    .instruction-content .screenshot-item {
+        flex: none !important;
+        width: auto !important;
+        max-width: 100% !important;
+        text-align: center !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+    
+    .instruction-content .screenshot-item img {
+        display: block !important;
+        width: auto !important;
+        height: auto !important;
+        max-width: 100% !important;
+        max-height: 650px !important;
+        object-fit: contain !important;
+        border: none !important;
+        border-radius: 8px !important;
+        outline: 6px solid #BBDEFB !important;
+        outline-offset: -6px !important;
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15) !important;
+        background: #fff !important;
+        margin: 0 auto !important;
+        padding: 0 !important;
+    }
+    
+    .instruction-content .screenshot-item figcaption {
+        margin-top: 10px !important;
+        margin-bottom: 0 !important;
+        font-size: 11pt !important;
+        color: #555 !important;
+        font-style: italic !important;
+        font-weight: 600 !important;
+    }
+    
+    .instruction-content .screenshot-arrow {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        font-size: 24px !important;
+        color: #1976D2 !important;
+        font-weight: bold !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        line-height: 1 !important;
+        height: 30px !important;
+    }
+    
+    .instruction-content .screenshot-pair-caption {
+        text-align: center !important;
+        font-size: 11pt !important;
+        color: #555 !important;
+        font-style: italic !important;
+        font-weight: 600 !important;
+        margin-top: 15px !important;
+        margin-bottom: 25px !important;
+        padding: 0 !important;
+    }
+
+    .styled-list {
+        margin: 10px 0 20px 20px;
+        padding: 0;
+    }
+
+    .styled-list li {
+        margin-bottom: 8px;
+    }
+
+    .note-block {
+        background: #E3F2FD;
+        border-left: 4px solid #2196F3;
+        padding: 12px 16px;
+        margin: 20px 0;
+        border-radius: 4px;
+        font-size: 10.5pt;
+        line-height: 1.5;
+    }
+    
+    .note-block.warning {
+        background: #FFF3E0;
+        border-left-color: #FF9800;
+    }
+    
+    .note-block strong {
+        color: #1565C0;
+    }
+    
+    .note-block.warning strong {
+        color: #E65100;
+    }
+
+    @media print {
+        .instruction-section {
+            border: none;
+            box-shadow: none;
+            margin-bottom: 15px;
+            page-break-inside: avoid;
+        }
+        .instruction-header {
+            display: none;
+        }
+        .instruction-content {
+            display: block !important;
+            padding: 0;
+        }
+        .instruction-section::before {
+            content: "2.4 Панель администратора";
+            display: block;
+            font-size: 14pt;
+            font-weight: bold;
+            color: #1976D2;
+            border-bottom: 2px solid #E3F2FD;
+            padding-bottom: 5px;
+            margin-bottom: 15px;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+        .screenshot-pair {
+            flex-direction: column;
+            gap: 10px;
+        }
+        .screenshot-item {
+            max-width: 100%;
+        }
+        .screenshot-item img {
+            max-height: 250px;
+            box-shadow: none;
+            border: 1px solid #ccc;
+        }
+        .screenshot-arrow {
+            display: none;
+        }
+        .note-block {
+            border: 1px solid #ccc;
+            background: #f9f9f9 !important;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+        .note-block.warning {
+            background: #fff8e1 !important;
+        }
+    }
+    
+    @media screen and (max-width: 768px) {
+        .screenshot-pair {
+            flex-direction: column;
+            gap: 10px;
+        }
+        .screenshot-item {
+            max-width: 100%;
+        }
+        .screenshot-arrow {
+            display: none;
+        }
+    }
+</style>

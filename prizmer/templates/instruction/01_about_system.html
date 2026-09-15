@@ -1,0 +1,202 @@
+{% load static %}
+
+<details class="instruction-section">
+    <summary class="instruction-header">
+        1.1 Описание структуры и возможности
+    </summary>
+    
+    <div class="instruction-content">
+        <p>ПАК «Призмер» — это автоматизированная система комплексного учёта энергоресурсов, с помощью которой осуществляется сбор, учёт и анализ данных об их потреблении.</p>
+        
+        <h4>Комплекс состоит из:</h4>
+        <ul class="styled-list">
+            <li><strong>Сервера опроса</strong> — осуществляет чтение данных с приборов учета в автоматическом и ручном regimes;</li>
+            <li><strong>СУБД PostgreSQL</strong> — является свободно-распространяемой, не имеет ограничений по максимальному размеру и количеству записей;</li>
+            <li><strong>Web-интерфейса</strong> — отображает с помощью браузера структуру объектов учета, архивы потребления энергоресурсов, а также создаёт отчёты и графики.</li>
+        </ul>
+
+        <h4>Возможности ПАК «Призмер»:</h4>
+        <ul class="styled-list">
+            <li>Чтение данных из приборов учёта и сохранение информации в базе данных;</li>
+            <li>Наглядное графическое и табличное представление информации;</li>
+            <li>Работа с различными типами приборов учёта в рамках единой системы;</li>
+            <li>Создание цифровой, импульсной или смешанной системы учёта ресурсов;</li>
+            <li>Выгрузка отчётов для бухгалтерии или служебного пользования, созданных по форме заказчика;</li>
+            <li>Отчёты для системы С-300;</li>
+            <li>Отчёты для энергосбытовых организаций по форме 80020, 80020*, 80040;</li>
+            <li>Статистика опросов счётчиков по каждому ресурсу за один день;</li>
+            <li>Настраиваемая политика делегирования прав доступа к системе;</li>
+            <li>Автоматизированный и ручной сбор информации;</li>
+            <li>Ведение архивов параметров потребления энергоресурсов;</li>
+            <li>Считывание архивных данных (при наличии архивов в памяти цифрового прибора учёта);</li>
+            <li>Гибкая настройка системы через панель администратора.</li>
+        </ul>
+
+        <h4>К преимуществам ПАК «Призмер» можно отнести:</h4>
+        <ul class="styled-list">
+            <li>Возможность резервного копирования данных;</li>
+            <li>Поддержку большинства электросчётчиков, водосчётчиков и теплосчётчиков, представленных на российском рынке, а также возможность добавления новых типов приборов учёта;</li>
+            <li>Регулярное обновление программного обеспечения.</li>
+        </ul>
+
+        <h4>Поддерживаемые приборы:</h4>
+        <!-- Сетка в 2 колонки для экрана, в 1 колонку для печати -->
+        <ul class="device-grid">
+            <li>Меркурий 2ХХ (ГК ИНКОТЕКС)</li>
+            <li>Пульсар теплосчётчик (НПП "ТЕПЛОВОДОХРАН")</li>
+            <li>Пульсар водосчётчик (НПП "ТЕПЛОВОДОХРАН")</li>
+            <li>Многоканальные счётчики импульсов Пульсар-М</li>
+            <li>СЭТ-4ТМ.03М (ННПО имени М. В. Фрунзе)</li>
+            <li>Теплосчетчик SonoSelect/SonoSafe (Danfoss A/S)</li>
+            <li>Пульс водосчётчик (ПТК «ПУЛЬС»)</li>
+            <li>Пульс теплосчётчик (ПТК «ПУЛЬС»)</li>
+            <li>Энергомера CE301</li>
+            <li>Универсальный счётчик Декаст СТК МАРС NEO</li>
+            <li>Водосчётчик Декаст ВСКМ-15(20) iWAN</li>
+            <li>Водосчётчик ЭКО НОМ с ЧИС МУР 1001.5 485 AS</li>
+            <li>Теплосчётчик ЭКО НОМ СТУ-15.2 RS485</li>
+            <li>Электросчётчик Миртек</li>
+            <li>Электросчётчик РОТЕК РТМ-01 D1 (B1)</li>
+            <li>Электросчётчик Нартис</li>
+            <li>Водосчётчик Пульс электронный</li>
+            <li>Водосчётчик Пульс с ЧИС МУР 1001.5-ADN-485</li>
+            <li>Теплосчётчик Пульс электронный</li>
+            <li>Теплосчётчик РИДАН РУТ-01</li>
+            <li>Водосчётчик РИДАН СГВ-15ЭВ RS-485</li>
+            <li>Теплосчётчик Sanext Mono CU M-Bus</li>
+            <li>Вычислитель количества теплоты ВКТ-9</li>
+            <li>Регистратор импульсов Valtec</li>
+            <li>Теплосчётчик ВИС.Т-ТС</li>
+            <li>Теплосчётчик Водомер СТ-17У-01</li>
+            <li>Теплосчётчик-регистратор ВЗЛЕТ ТСР-М ТСРВ-043</li>
+        </ul>
+    </div>
+</details>
+
+<style>
+    /* === Стили для сворачиваемых разделов === */
+    .instruction-section {
+        background: #fff;
+        border: 1px solid #E3F2FD;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        overflow: hidden;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+    
+    .instruction-header {
+        background: linear-gradient(135deg, #E3F2FD 0%, #BBDEFB 100%);
+        color: #1976D2;
+        padding: 16px 20px;
+        font-size: 16px;
+        font-weight: 700;
+        cursor: pointer;
+        list-style: none; /* Убираем стандартный треугольник */
+        display: flex;
+        align-items: center;
+        transition: background 0.2s ease;
+    }
+    
+    .instruction-header:hover {
+        background: linear-gradient(135deg, #BBDEFB 0%, #90CAF9 100%);
+    }
+    
+    /* Кастомная стрелочка */
+    .instruction-header::after {
+        content: '▼';
+        margin-left: auto;
+        font-size: 12px;
+        transition: transform 0.3s ease;
+    }
+    
+    details[open] .instruction-header::after {
+        transform: rotate(180deg);
+    }
+    
+    /* Убираем стандартный маркер в Safari/Chrome */
+    .instruction-header::-webkit-details-marker {
+        display: none;
+    }
+
+    .instruction-content {
+        padding: 20px;
+        font-size: 11pt;
+        line-height: 1.6;
+        color: #333;
+    }
+
+    .instruction-content h4 {
+        color: #1976D2;
+        margin-top: 25px;
+        margin-bottom: 10px;
+        font-size: 13pt;
+    }
+
+    .instruction-content p {
+        margin-bottom: 15px;
+        text-align: justify;
+    }
+
+    .styled-list {
+        margin: 10px 0 20px 20px;
+        padding: 0;
+    }
+
+    .styled-list li {
+        margin-bottom: 8px;
+        position: relative;
+        padding-left: 5px;
+    }
+
+    /* Сетка для списка приборов (2 колонки на экране) */
+    .device-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px 20px;
+        list-style-type: disc;
+        margin: 10px 0 20px 20px;
+        color: #444;
+    }
+
+    .device-grid li {
+        font-size: 10.5pt;
+        line-height: 1.4;
+    }
+
+    /* === АДАПТАЦИЯ ДЛЯ ПЕЧАТИ (КРИТИЧЕСКИ ВАЖНО) === */
+    @media print {
+        /* Принудительно показываем содержимое и скрываем заголовок-кнопку */
+        .instruction-section {
+            border: none;
+            box-shadow: none;
+            margin-bottom: 10px;
+            page-break-inside: avoid;
+        }
+        .instruction-header {
+            display: none; /* Скрываем сворачиваемый заголовок при печати */
+        }
+        .instruction-content {
+            display: block !important; /* Всегда показываем контент */
+            padding: 0;
+        }
+        /* Возвращаем заголовок раздела как обычный текст при печати */
+        .instruction-section::before {
+            content: "1.1 Описание структуры и возможности";
+            display: block;
+            font-size: 14pt;
+            font-weight: bold;
+            color: #1976D2;
+            border-bottom: 2px solid #E3F2FD;
+            padding-bottom: 5px;
+            margin-bottom: 15px;
+            /* Принудительная печать цвета */
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+        /* При печати список приборов в 1 колонку, чтобы не рвался некрасиво */
+        .device-grid {
+            grid-template-columns: 1fr;
+            gap: 5px;
+        }
+    }
+</style>
