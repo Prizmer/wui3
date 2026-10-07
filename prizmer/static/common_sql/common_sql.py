@@ -5179,6 +5179,7 @@ WHERE
   water_abons_report.name='%s'
   and obj_name='%s'
   group by
+  water_abons_report.type_meter,
 	daily_values.date,
   obj_name,
   abonents.name,
@@ -12747,66 +12748,45 @@ def get_electric_register():
     cursor = connection.cursor()
     data_table=[] 
     sQuery = """
-    SELECT 
-  parent_objects_for_progruz.obj_name2, 
-  parent_objects_for_progruz.obj_name1, 
-  parent_objects_for_progruz.obj_name0,  
-  abonents.name, 
-  ''::text as askue,
-  CASE When meters.name like '%М-200%' then  meters.password else ''::text end as lic_num, 
-  meters.factory_number_manual, 
-  meters.address, 
-  replace(types_meters.name, 'Меркурий ','М-'),
-  link_abonents_taken_params.coefficient, 
-  tcpip_settings.ip_address, 
-  tcpip_settings.ip_port 
+   SELECT 
+  pfp.obj_name2, 
+  pfp.obj_name1, 
+  pfp.obj_name0,  
+  ab.name AS abonent_name, 
+  ''::text AS askue,
+  CASE WHEN m.name LIKE '%М-200%' THEN m.password ELSE ''::text END AS lic_num, 
+  m.factory_number_manual, 
+  m.address, 
+  case
+  when (tm.name like '%Меркурий 2%') then replace(tm.name, 'Меркурий ','М-')
+  else tm.name
+  end AS type_meter,
+  latp.coefficient, 
+  ts.ip_address, 
+  ts.ip_port 
 FROM 
-  public.parent_objects_for_progruz, 
-  public.abonents, 
-  public.link_abonents_taken_params, 
-  public.taken_params, 
-  public.meters, 
-  public.params, 
-  public.resources, 
-  public.names_params, 
-  public.link_meters_tcpip_settings, 
-  public.tcpip_settings,
-  types_meters
+  public.meters m
+  JOIN types_meters tm ON tm.guid = m.guid_types_meters  
+  JOIN public.taken_params tp ON tp.guid_meters = m.guid
+  JOIN public.params p ON p.guid = tp.guid_params
+  JOIN public.names_params np ON np.guid = p.guid_names_params
+  JOIN public.resources r ON r.guid = np.guid_resources  
+  JOIN public.link_abonents_taken_params latp ON latp.guid_taken_params = tp.guid
+  JOIN public.abonents ab ON ab.guid = latp.guid_abonents 
+  JOIN public.parent_objects_for_progruz pfp ON pfp.ab_guid = ab.guid  
+  LEFT JOIN public.link_meters_tcpip_settings lmts ON lmts.guid_meters = m.guid
+  LEFT JOIN public.tcpip_settings ts ON ts.guid = lmts.guid_tcpip_settings
 WHERE 
-  types_meters.guid = params.guid_types_meters and
-  parent_objects_for_progruz.ab_guid = abonents.guid AND
-  link_abonents_taken_params.guid_abonents = abonents.guid AND
-  link_abonents_taken_params.guid_taken_params = taken_params.guid AND
-  taken_params.guid_meters = meters.guid AND
-  taken_params.guid_params = params.guid AND
-  params.guid_names_params = names_params.guid AND
-  names_params.guid_resources = resources.guid AND
-  link_meters_tcpip_settings.guid_meters = meters.guid AND
-  link_meters_tcpip_settings.guid_tcpip_settings = tcpip_settings.guid
-  and resources.name = 'Электричество'
-  group by 
-parent_objects_for_progruz.obj_name2, 
-  parent_objects_for_progruz.obj_name1, 
-  parent_objects_for_progruz.obj_name0, 
-  parent_objects_for_progruz.ab_name, 
-  abonents.name, 
-  abonents.account_1, 
-  meters.factory_number_manual, 
-  meters.address, 
-  resources.name, 
-  link_abonents_taken_params.coefficient,
-  tcpip_settings.ip_address, 
-  tcpip_settings.ip_port, 
-  meters.password,
-  meters.name,
-  types_meters.name
-  order by parent_objects_for_progruz.obj_name2, 
-  parent_objects_for_progruz.obj_name1, 
-  parent_objects_for_progruz.obj_name0, 
-  tcpip_settings.ip_address, 
-  tcpip_settings.ip_port, 
-    meters.address, 
-  parent_objects_for_progruz.ab_name
+  r.name = 'Электричество'
+GROUP BY 
+  pfp.obj_name2, pfp.obj_name1, pfp.obj_name0, pfp.ab_name,
+  ab.name, ab.account_1,
+  m.factory_number_manual, m.address, 
+  r.name, latp.coefficient, ts.ip_address, ts.ip_port, 
+  m.password, m.name, tm.name
+ORDER BY 
+  pfp.obj_name2, pfp.obj_name1, pfp.obj_name0,
+  ts.ip_address, ts.ip_port, m.address, pfp.ab_name;
     """
     cursor.execute(sQuery)  
     data_table = cursor.fetchall()
