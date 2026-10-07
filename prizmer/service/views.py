@@ -773,6 +773,8 @@ def LoadElectricMeters(sPath, sSheet):
                     add_meter = Meters(name = str(type_meter) + ' ' + str(meter), address = str(adr), factory_number_manual = str(meter), attr1 = str(attr1), guid_types_meters = TypesMeters.objects.get(guid = "bf98a5cd-963b-403d-80e5-d0577bf45741") )
                 elif str(type_meter) == 'CE207 СПОДЭС':
                     add_meter = Meters(name = str(type_meter) + ' ' + str(meter), address = str(adr), factory_number_manual = str(meter), attr1 = str(attr1), guid_types_meters = TypesMeters.objects.get(guid = "91d05ae9-925e-45ab-9c4e-fc9b1ad96499") )
+                elif str(type_meter) == 'CE307 СПОДЭС':
+                    add_meter = Meters(name = str(type_meter) + ' ' + str(meter), address = str(adr), factory_number_manual = str(meter), attr1 = str(attr1), guid_types_meters = TypesMeters.objects.get(guid = "a4a4fbab-5bca-4767-85cf-79cde157c006") )
                 else:
                     errors.append(f"Тип счётчика '{type_meter}' (зав. номер '{meter}') не поддерживается для автоматической загрузки.")
                     continue
@@ -3537,6 +3539,22 @@ def add_taken_param_no_signals(instance, isR, isHalfs, is_ridan_impulse=False): 
         add_param.save() 
         # "Показание". T3 A+
         add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "32c9f65b-43f9-4593-9b0d-652e490d004b"))
+        add_param.save()
+
+    elif instance.guid_types_meters.name == 'CE307 СПОДЭС':
+        #Добавляем параметры для счётчика Энергомера CE307 СПОДЭС.    
+        #-------------Суточные
+        # "Показание". T0 A+
+        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "e68dfbd3-c928-4b55-b4ec-08667920a0a5"))
+        add_param.save()
+        # # "Показание". T1 A+
+        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "cb7e38ba-de65-4acd-bc1a-12d4255bc508"))
+        add_param.save() 
+        # "Показание". T2 A+
+        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "5abe3779-455f-4952-ac33-fad07b6f7652"))
+        add_param.save() 
+        # "Показание". T3 A+
+        add_param = TakenParams(id = TakenParams.objects.aggregate(Max('id'))['id__max']+1, guid_meters = instance, guid_params = Params.objects.get(guid = "77b37554-336b-4678-97fc-63b8342bafa5"))
         add_param.save()
 
     else:

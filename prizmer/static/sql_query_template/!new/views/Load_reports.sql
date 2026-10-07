@@ -170,3 +170,11 @@ VALUES
 (gen_random_uuid(), 39, 'Потребление по воде за период с регистратора импульсов', (SELECT guid FROM resources WHERE name = 'ХВС'), false, ',', 3, false, false, false, false, 'Н/Д', '', 'asc', true)
 ON CONFLICT (number) DO NOTHING;
 
+INSERT INTO report_configs (guid, number, name, guid_resources, show_lic_num, separator, round_size, comment_to_excel, show_stoyak, show_floors, num_is_string, null_field, order_fields, order_direction, is_active)
+VALUES
+(gen_random_uuid(), 175, 'Месячный протокол учета тепловой энергии и теплоносителя', (SELECT guid FROM resources WHERE name = 'Тепло'),  false, ',', 2, false, false, false, false, 'Н/Д', '', 'asc', true),
+(gen_random_uuid(), 97, 'Потребление по теплу. Теплосчётчик Sanext/Danfoss', (SELECT guid FROM resources WHERE name = 'Тепло'),  false, ',', 2, false, false, false, false, 'Н/Д', '', 'asc', true),
+(gen_random_uuid(), 100, 'Показания по теплу. Теплосчётчик Sanext/Danfoss', (SELECT guid FROM resources WHERE name = 'Тепло'),  false, ',', 2, false, false, false, false, 'Н/Д', '', 'asc', true),
+(gen_random_uuid(), 155, 'Потребление по ТЕПЛУ(с РИ Пульсар)', (SELECT guid FROM resources WHERE name = 'ХВС'),  false, ',', 2, false, false, false, false, 'Н/Д', '', 'asc', true),
+(gen_random_uuid(), 156, 'Показания по ТЕПЛУ на дату (с РИ Пульсар)', (SELECT guid FROM resources WHERE name = 'ХВС'),  false, ',', 2, false, false, false, false, 'Н/Д', '', 'asc', true)
+ON CONFLICT (number) DO NOTHING;
