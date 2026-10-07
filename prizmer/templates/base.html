@@ -184,7 +184,9 @@
 <div id="myfooter">
 		<div class="footer-left-content">
 			<!-- <div class="col-1">{% load static %} <a target="_blank" href="../../askue/instruction_user" ><img id="user_info-ico48" src="{%static "images/user_info-ico48.png" %}" data-toggle="tooltip" data-placement="top" title="Инструкция пользователя"></a>		</div> -->
-			<a target="_blank" href="../../askue/instruction_admin" ><img src="{%static "images/info-ico64_white2.svg" %}" height="54" data-toggle="tooltip" data-placement="top" title="Инструкция администратора"></a>
+			{% comment %} <a target="_blank" href="../../askue/instruction_admin" ><img src="{%static "images/info-ico64_white2.svg" %}" height="54" data-toggle="tooltip" data-placement="top" title="Инструкция администратора"></a> {% endcomment %}
+			
+			<a target="_blank" href="../../service/config/passport" ><img src="{%static "images/info-ico64_white2.svg" %}" height="54" data-toggle="tooltip" data-placement="top" title="Инструкция администратора"></a>
 			<a target="_blank" href="../../admin" ><img src="{%static "images/admin-ico64_white2.svg" %}" height="54" data-toggle="tooltip" data-placement="top" title="Панель администратора"></a>
 			<a target="_blank" href="../../service/config" ><img src="{%static "images/config-ico64_white2.svg" %}" height="54" data-toggle="tooltip" data-placement="top" title="Панель конфигурирования"></a>
 		</div>
@@ -195,7 +197,7 @@
                 <strong><a class="text-warning footer-link" href="http://www.prizmer.ru/"> ООО "Правильные измерения"</a></strong>	
 			    <img src="{%static "images/new_ico/logo2-ico48.png" %}">
             {% endif %}		
-			<span>v.2.5.3</span>
+			<span>v.2.6.0</span>
 		</div>
 	</div>
 </div>
